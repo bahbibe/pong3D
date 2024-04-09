@@ -1,0 +1,45 @@
+version: '3.7'
+
+services:
+  app:
+    container_name: app
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - ft_transcendence
+    
+  db:
+    image: postgres
+    container_name: db
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    networks:
+      - ft_transcendence
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - ft_transcendence
+    env_file:
+      - .env
+
+volumes:
+  dbdata:
+
+networks:
+  ft_transcendence:
