@@ -1,4 +1,4 @@
-version: '3.7'
+version: '3.8'
 
 services:
   app:
@@ -17,7 +17,7 @@ services:
       - ft_transcendence
     
   db:
-    image: postgres
+    image: postgres:15.6-alpine3.19
     container_name: db
     restart: unless-stopped
     env_file:

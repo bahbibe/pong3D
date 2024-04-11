@@ -1,12 +1,10 @@
-FROM python:3.10
+FROM python:3.12.3-alpine3.19
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
 RUN set -e; \
-    apt-get update ;
-    # apt-get -y install netcat ;\
-    # apt-get -y install gettext ;
+    apk update
 
 # COPY ./entrypoint.sh /usr/bin/entrypoint.sh
 
