@@ -203,4 +203,5 @@ pip-selfcheck.json
 .ionide
 
 # End of https://www.toptal.com/developers/gitignore/api/django,visualstudiocode,venv
-avatars/
+avatars/*
+!/avatars/profile_default.jpg

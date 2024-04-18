@@ -26,16 +26,17 @@ def register_user(request):
             Profile.objects.create(
                 user=user, avatar=serializer.validated_data["avatar"]
             )
+        else:
+            Profile.objects.create(user=user)
         user.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
-def get_user(request):
+def get_user(request, id):
     try:
-        user = User.objects.get(id=4)
+        user = User.objects.get(id=id)
         return Response(UserSerializer(user).data)
-        # return Response({"username": user.username, "email": user.email, "avatar": user.profile.avatar.url})
     except User.DoesNotExist:
         return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)

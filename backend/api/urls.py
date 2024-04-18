@@ -8,5 +8,6 @@ def hello(request):
 urlpatterns = [
   path('', hello),
   path('register/', register_user, name='register'),
-  path('me/', get_user, name='current_user')
+  path('user/<int:id>/', get_user, name='user'),
+  # path('me/', get_user, name='current_user')
 ]

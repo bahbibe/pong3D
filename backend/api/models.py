@@ -4,5 +4,5 @@ import uuid
 
 class Profile(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True, default='avatars/profile_default.jpg')
     user = models.OneToOneField(User, on_delete=models.CASCADE)
