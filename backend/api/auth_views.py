@@ -1,15 +1,17 @@
 from rest_framework.decorators import api_view
-from .serializers import RegisterUserSerializer, UserSerializer
+from .serializers import RegisterUserSerializer, UserSerializer, SetupProfileSerializer
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from django.contrib.auth.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Profile
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
 
 
 class RegisterUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
-    serializer_class = RegisterUserSerializer
+    serializer_class = SetupProfileSerializer
     parser_classes = [MultiPartParser, FormParser]
 
 
@@ -22,21 +24,36 @@ def register_user(request):
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
         )
-        if "avatar" in serializer.validated_data:
-            Profile.objects.create(
-                user=user, avatar=serializer.validated_data["avatar"]
-            )
-        else:
-            Profile.objects.create(user=user)
+        #! create another endpoint to setup the profile
+        # if "avatar" in serializer.validated_data:
+        #     Profile.objects.create(
+        #         user=user, avatar=serializer.validated_data["avatar"]
+        #     )
+        # else:
+        Profile.objects.create(user=user)
         user.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["POST"])
+def login_user(request):
+    pass
+
+
+@api_view(["POST"])
+def logout_user(request):
+    pass
+
+
+@api_view(["POST"])
+def setup_profile(request):
+    pass
+
+
 @api_view(["GET"])
-def get_user(request, id):
-    try:
-        user = User.objects.get(id=id)
-        return Response(UserSerializer(user).data)
-    except User.DoesNotExist:
-        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+@permission_classes([IsAuthenticated])
+def get_user(request):
+    user = request.user
+    serializer = UserSerializer(user)
+    return Response(serializer.data, status=status.HTTP_200_OK)
