@@ -24,12 +24,6 @@ def register_user(request):
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
         )
-        #! create another endpoint to setup the profile
-        # if "avatar" in serializer.validated_data:
-        #     Profile.objects.create(
-        #         user=user, avatar=serializer.validated_data["avatar"]
-        #     )
-        # else:
         Profile.objects.create(user=user)
         user.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
