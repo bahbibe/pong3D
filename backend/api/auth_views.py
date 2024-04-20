@@ -31,17 +31,7 @@ def register_user(request):
 
 
 @api_view(["POST"])
-def login_user(request):
-    pass
-
-
-@api_view(["POST"])
 def logout_user(request):
-    pass
-
-
-@api_view(["POST"])
-def setup_profile(request):
     pass
 
 

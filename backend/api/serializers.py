@@ -1,4 +1,4 @@
-from .models import User, Profile
+from .models import User, Profile, Freindship
 from rest_framework import serializers
 
 
@@ -26,9 +26,26 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    profile = ProfileSerializer(read_only=True)   
+    profile = ProfileSerializer(read_only=True)
 
     class Meta:
         model = User
         depth = 1
         fields = ["id", "username", "email", "profile"]
+
+
+class SentFriendRequestSerializer(serializers.ModelSerializer):
+    target_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
+
+    class Meta:
+        model = Freindship
+        fields = ["target_user"]
+
+
+class FriendshipSerializer(serializers.ModelSerializer):
+    source_user = UserSerializer(read_only=True)
+    target_user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Freindship
+        fields = ["source_user", "target_user", "status", "created_at"]
