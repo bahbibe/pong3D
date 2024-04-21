@@ -1,10 +1,10 @@
-from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes, api_view
 from .serializers import (
     SetupProfileSerializer,
     UserSerializer,
     SentFriendRequestSerializer,
+    AcceptFriendRequestSerializer,
     FriendshipSerializer,
 )
 from rest_framework.response import Response
@@ -36,11 +36,14 @@ def send_friend_request(request):
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     target_user = serializer.validated_data["target_user"]
-    is_freindship_exists = Freindship.objects.filter(
-        source_user=source_user, target_user=target_user
-    ).exists() or Freindship.objects.filter(
-        source_user=target_user, target_user=source_user
-    ).exists()
+    is_freindship_exists = (
+        Freindship.objects.filter(
+            source_user=source_user, target_user=target_user
+        ).exists()
+        or Freindship.objects.filter(
+            source_user=target_user, target_user=source_user
+        ).exists()
+    )
     if source_user == target_user:
         return JsonResponse(
             {
@@ -63,3 +66,27 @@ def send_friend_request(request):
     return Response(
         FriendshipSerializer(friendship).data, status=status.HTTP_201_CREATED
     )
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def accept_friend_request(request):
+    user = request.user
+    serializer = AcceptFriendRequestSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    source_user = serializer.validated_data["source_user"]
+    friendship = Freindship.objects.filter(
+        source_user=source_user, target_user=user
+    ).first()
+    if not friendship:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Friend request does not exist",
+            },
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+    friendship.status = "accepted"
+    friendship.save()
+    return Response(FriendshipSerializer(friendship).data, status=status.HTTP_200_OK)

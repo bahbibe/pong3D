@@ -41,6 +41,13 @@ class SentFriendRequestSerializer(serializers.ModelSerializer):
         model = Freindship
         fields = ["target_user"]
 
+class AcceptFriendRequestSerializer(serializers.ModelSerializer):
+    source_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
+
+    class Meta:
+        model = Freindship
+        fields = ["source_user"]
+
 
 class FriendshipSerializer(serializers.ModelSerializer):
     source_user = UserSerializer(read_only=True)
