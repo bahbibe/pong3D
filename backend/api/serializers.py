@@ -35,14 +35,19 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class SentFriendRequestSerializer(serializers.ModelSerializer):
-    target_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
+    target_user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), required=True
+    )
 
     class Meta:
         model = Freindship
         fields = ["target_user"]
 
+
 class AcceptFriendRequestSerializer(serializers.ModelSerializer):
-    source_user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=True)
+    source_user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), required=True
+    )
 
     class Meta:
         model = Freindship
@@ -55,4 +60,4 @@ class FriendshipSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Freindship
-        fields = ["source_user", "target_user", "status", "created_at"]
+        fields = ["source_user", "target_user", "status"]

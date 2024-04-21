@@ -11,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Freindship
 from django.http import JsonResponse
+from django.db.models import Q
 
 
 @api_view(["PUT"])
@@ -26,6 +27,28 @@ def setup_profile(request):
         return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_friends(request):
+    user = request.user
+    friends = Freindship.objects.filter(
+        (Q(source_user=user) | Q(target_user=user)) & Q(status="accepted")
+    )
+    friends = [FriendshipSerializer(friendship).data for friendship in friends]
+    return Response(friends, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_friends_request(request):
+    user = request.user
+    friends_request = Freindship.objects.filter(target_user=user, status="pending")
+    friends_request = [
+        FriendshipSerializer(friendship).data for friendship in friends_request
+    ]
+    return Response(friends_request, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
