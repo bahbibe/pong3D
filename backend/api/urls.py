@@ -19,6 +19,7 @@ urlpatterns = [
     path("", hello),
     path("register/", register_user, name="register"),
     path("login/", TokenObtainPairView.as_view(), name="login"),
+    path("refresh/", TokenObtainPairView.as_view(), name="refresh"),
     path("me/", get_user, name="user"),
     path("setup/", setup_profile, name="setup-profile"),
     # friends api ulrpatterns
