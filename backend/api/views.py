@@ -6,6 +6,7 @@ from .serializers import (
     SentFriendRequestSerializer,
     AcceptFriendRequestSerializer,
     FriendshipSerializer,
+    ViewFriendshipSerializer,
 )
 from rest_framework.response import Response
 from rest_framework import status
@@ -36,7 +37,14 @@ def get_friends(request):
     friends = Freindship.objects.filter(
         (Q(source_user=user) | Q(target_user=user)) & Q(status="accepted")
     )
-    friends = [FriendshipSerializer(friendship).data for friendship in friends]
+    for friendship in friends:
+        if friendship.source_user == user:
+            friendship.user = friendship.source_user
+            friendship.friend = friendship.target_user
+        else:
+            friendship.user = friendship.target_user
+            friendship.friend = friendship.source_user
+    friends = [ViewFriendshipSerializer(friendship).data for friendship in friends]
     return Response(friends, status=status.HTTP_200_OK)
 
 
@@ -45,8 +53,15 @@ def get_friends(request):
 def get_friends_request(request):
     user = request.user
     friends_request = Freindship.objects.filter(target_user=user, status="pending")
+    for friendship in friends_request:
+        if friendship.source_user == user:
+            friendship.user = friendship.source_user
+            friendship.friend = friendship.target_user
+        else:
+            friendship.user = friendship.target_user
+            friendship.friend = friendship.source_user
     friends_request = [
-        FriendshipSerializer(friendship).data for friendship in friends_request
+        ViewFriendshipSerializer(friendship).data for friendship in friends_request
     ]
     return Response(friends_request, status=status.HTTP_200_OK)
 

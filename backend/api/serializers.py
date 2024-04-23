@@ -61,3 +61,12 @@ class FriendshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Freindship
         fields = ["source_user", "target_user", "status"]
+
+
+class ViewFriendshipSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    friend = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Freindship
+        fields = ["user", "friend", "status"]
