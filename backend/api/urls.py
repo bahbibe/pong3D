@@ -8,10 +8,10 @@ from .views import (
     get_friends,
     get_friends_request,
 )
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView, TokenRefreshView
 
 
-def hello(request):
+def hello():
     return JsonResponse({"status": "success", "message": "Hello World!"})
 
 
@@ -19,7 +19,8 @@ urlpatterns = [
     path("", hello),
     path("register/", register_user, name="register"),
     path("login/", TokenObtainPairView.as_view(), name="login"),
-    path("refresh/", TokenObtainPairView.as_view(), name="refresh"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="refresh"),
+    path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path("me/", get_user, name="user"),
     path("setup/", setup_profile, name="setup-profile"),
     # friends api ulrpatterns
