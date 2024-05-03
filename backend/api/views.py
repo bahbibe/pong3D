@@ -87,7 +87,7 @@ def get_profile(request, uuid):
 def get_friends(request):
     user = request.user
     friends = Freindship.objects.filter(
-        (Q(source_user=user) | Q(target_user=user)) & Q(status="accepted")
+        (Q(source_user=user) | Q(target_user=user)) & (Q(status="accepted") | Q(status="blocked"))
     )
     for friendship in friends:
         if friendship.source_user == user:
@@ -178,5 +178,35 @@ def accept_friend_request(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
     friendship.status = "accepted"
+    friendship.save()
+    return Response(FriendshipSerializer(friendship).data, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def block_user(request):
+    user = request.user
+    target_user = User.objects.filter(id=request.data.get("friend_id")).first()
+    if not target_user:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "User does not exist",
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+    friendship = Freindship.objects.filter(
+        Q(source_user=user, target_user=target_user)
+        | Q(source_user=target_user, target_user=user)
+    ).first()
+    if not friendship:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": "Friendship does not exist",
+            },
+            status=status.HTTP_404_NOT_FOUND,
+        )
+    friendship.status = "blocked"
     friendship.save()
     return Response(FriendshipSerializer(friendship).data, status=status.HTTP_200_OK)

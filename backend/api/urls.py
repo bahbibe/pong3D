@@ -8,7 +8,8 @@ from .views import (
     get_friends,
     get_friends_request,
     update_settings,
-    get_profile
+    get_profile,
+    block_user,
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView, TokenRefreshView
 
@@ -32,4 +33,5 @@ urlpatterns = [
     path("friends-requests/", get_friends_request, name="get-friends-request"),
     path("send-friend-request/", send_friend_request, name="send-friend-request"),
     path("accept-friend-request/", accept_friend_request, name="accept-friend-request"),
+    path("block-user/", block_user, name="block-user"),
 ]

@@ -22,7 +22,7 @@ class SetupProfileSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ["avatar", "is_setup", "total_wins", "total_losses"]
+        fields = ["avatar", "is_setup", "total_wins", "total_losses", "uuid"]
 
 
 class UserSerializer(serializers.ModelSerializer):
