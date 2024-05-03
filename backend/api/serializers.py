@@ -33,6 +33,13 @@ class UserSerializer(serializers.ModelSerializer):
         depth = 1
         fields = ["id", "username", "email", "profile"]
 
+class UpdateSettingsSerializer(serializers.ModelSerializer):
+    avatar = serializers.ImageField(required=False)
+    username = serializers.CharField(required=False)
+    class Meta:
+        model = Profile
+        fields = ["avatar", "username"]
+
 
 class SentFriendRequestSerializer(serializers.ModelSerializer):
     target_user = serializers.PrimaryKeyRelatedField(

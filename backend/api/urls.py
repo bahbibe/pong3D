@@ -7,6 +7,8 @@ from .views import (
     accept_friend_request,
     get_friends,
     get_friends_request,
+    update_settings,
+    get_profile
 )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView, TokenRefreshView
 
@@ -23,6 +25,8 @@ urlpatterns = [
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path("me/", get_user, name="user"),
     path("setup/", setup_profile, name="setup-profile"),
+    path("settings/update/", update_settings, name="update-settings"),
+    path("profile/<str:uuid>/", get_profile, name="get-profile"),
     # friends api ulrpatterns
     path("friends/", get_friends, name="get-friends"),
     path("friends-requests/", get_friends_request, name="get-friends-request"),
