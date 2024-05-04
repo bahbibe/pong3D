@@ -8,6 +8,7 @@ from .serializers import (
     FriendshipSerializer,
     ViewFriendshipSerializer,
     UpdateSettingsSerializer,
+    UpdateFrienshipSerializer,
 )
 from rest_framework.response import Response
 from rest_framework import status
@@ -87,7 +88,8 @@ def get_profile(request, uuid):
 def get_friends(request):
     user = request.user
     friends = Freindship.objects.filter(
-        (Q(source_user=user) | Q(target_user=user)) & (Q(status="accepted") | Q(status="blocked"))
+        (Q(source_user=user) | Q(target_user=user))
+        & (Q(status="accepted") | Q(status="blocked"))
     )
     for friendship in friends:
         if friendship.source_user == user:
@@ -96,7 +98,16 @@ def get_friends(request):
         else:
             friendship.user = friendship.target_user
             friendship.friend = friendship.source_user
-    friends = [ViewFriendshipSerializer(friendship).data for friendship in friends]
+    friends_filtered = []
+    for friendship in friends:
+        if friendship.status == "blocked" and friendship.blocked_by != user:
+            continue
+        friends_filtered.append(friendship)
+    friends = [
+        ViewFriendshipSerializer(friendship).data for friendship in friends_filtered
+    ]
+    for friend in friends:
+        print(friend)
     return Response(friends, status=status.HTTP_200_OK)
 
 
@@ -184,20 +195,15 @@ def accept_friend_request(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-def block_user(request):
+def update_friendship_status(request):
     user = request.user
-    target_user = User.objects.filter(id=request.data.get("friend_id")).first()
-    if not target_user:
-        return JsonResponse(
-            {
-                "success": False,
-                "message": "User does not exist",
-            },
-            status=status.HTTP_404_NOT_FOUND,
-        )
+    serializer = UpdateFrienshipSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    friend_id = serializer.validated_data["friend_id"]
     friendship = Freindship.objects.filter(
-        Q(source_user=user, target_user=target_user)
-        | Q(source_user=target_user, target_user=user)
+        Q(source_user=user, target_user=friend_id)
+        | Q(source_user=friend_id, target_user=user)
     ).first()
     if not friendship:
         return JsonResponse(
@@ -207,6 +213,13 @@ def block_user(request):
             },
             status=status.HTTP_404_NOT_FOUND,
         )
-    friendship.status = "blocked"
+    if serializer.validated_data["status"] == "blocked":
+        friendship.status = "blocked"
+        friendship.blocked_by = user
+        friendship.save()
+        return Response(
+            FriendshipSerializer(friendship).data, status=status.HTTP_200_OK
+        )
+    friendship.status = serializer.validated_data["status"]
     friendship.save()
     return Response(FriendshipSerializer(friendship).data, status=status.HTTP_200_OK)

@@ -38,6 +38,9 @@ class Freindship(models.Model):
         User, on_delete=models.CASCADE, related_name="target_user"
     )
     status = models.CharField(max_length=50, choices=STATUSES, default=PENDING)
+    blocked_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, null=True, blank=True, related_name="blocked_by"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -33,9 +33,11 @@ class UserSerializer(serializers.ModelSerializer):
         depth = 1
         fields = ["id", "username", "email", "profile"]
 
+
 class UpdateSettingsSerializer(serializers.ModelSerializer):
     avatar = serializers.ImageField(required=False)
     username = serializers.CharField(required=False)
+
     class Meta:
         model = Profile
         fields = ["avatar", "username"]
@@ -77,3 +79,16 @@ class ViewFriendshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Freindship
         fields = ["user", "friend", "status"]
+
+
+class UpdateFrienshipSerializer(serializers.ModelSerializer):
+    # STATUS_CHOICES = ["blocked", "unblocked"]
+
+    friend_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), required=True
+    )
+    status = serializers.ChoiceField(choices=Freindship.STATUSES, required=True)
+
+    class Meta:
+        model = Freindship
+        fields = ["status", "friend_id"]
