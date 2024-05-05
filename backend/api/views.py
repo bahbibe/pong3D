@@ -106,8 +106,6 @@ def get_friends(request):
     friends = [
         ViewFriendshipSerializer(friendship).data for friendship in friends_filtered
     ]
-    for friend in friends:
-        print(friend)
     return Response(friends, status=status.HTTP_200_OK)
 
 

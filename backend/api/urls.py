@@ -38,5 +38,4 @@ urlpatterns = [
     path("friends/accept/", accept_friend_request, name="accept-friend-request"),
     path("friends/update/", update_friendship_status, name="update-friendship-status"),
     path("send-friend-request/", send_friend_request, name="send-friend-request"),
-    # path("unblock-user/", unblock_user, name="unblock-user"),
 ]

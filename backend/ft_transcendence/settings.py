@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "api",
     "rest_framework",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -77,6 +79,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "ft_transcendence.wsgi.application"
+ASGI_APPLICATION = "ft_transcendence.asgi.application"
+
+CHANNEL_LAYERS = {
+    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
+}
 
 
 # Database
