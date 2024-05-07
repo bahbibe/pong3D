@@ -1,4 +1,4 @@
-from .models import User, Profile, Freindship
+from .models import User, Profile
 from rest_framework import serializers
 
 
@@ -41,54 +41,3 @@ class UpdateSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ["avatar", "username"]
-
-
-class SentFriendRequestSerializer(serializers.ModelSerializer):
-    target_user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=True
-    )
-
-    class Meta:
-        model = Freindship
-        fields = ["target_user"]
-
-
-class AcceptFriendRequestSerializer(serializers.ModelSerializer):
-    source_user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=True
-    )
-
-    class Meta:
-        model = Freindship
-        fields = ["source_user"]
-
-
-class FriendshipSerializer(serializers.ModelSerializer):
-    source_user = UserSerializer(read_only=True)
-    target_user = UserSerializer(read_only=True)
-
-    class Meta:
-        model = Freindship
-        fields = ["source_user", "target_user", "status"]
-
-
-class ViewFriendshipSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    friend = UserSerializer(read_only=True)
-
-    class Meta:
-        model = Freindship
-        fields = ["user", "friend", "status"]
-
-
-class UpdateFrienshipSerializer(serializers.ModelSerializer):
-    # STATUS_CHOICES = ["blocked", "unblocked"]
-
-    friend_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=True
-    )
-    status = serializers.ChoiceField(choices=Freindship.STATUSES, required=True)
-
-    class Meta:
-        model = Freindship
-        fields = ["status", "friend_id"]
