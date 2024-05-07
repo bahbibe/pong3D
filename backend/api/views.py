@@ -76,3 +76,16 @@ def get_profile(request, uuid):
             },
             status=status.HTTP_404_NOT_FOUND,
         )
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_users(request):
+    query = request.GET.get("q")
+    if query:
+        users = User.objects.filter(
+            Q(username__icontains=query) | Q(email__icontains=query)
+        )
+        return Response(UserSerializer(users, many=True).data, status=status.HTTP_200_OK)
+    users = User.objects.all()
+    return Response(UserSerializer(users, many=True).data, status=status.HTTP_200_OK)

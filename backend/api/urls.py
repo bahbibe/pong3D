@@ -5,6 +5,7 @@ from .views import (
     setup_profile,
     update_settings,
     get_profile,
+    get_users,
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -27,4 +28,5 @@ urlpatterns = [
     path("setup/", setup_profile, name="setup-profile"),
     path("settings/update/", update_settings, name="update-settings"),
     path("profile/<str:uuid>/", get_profile, name="get-profile"),
+    path("users/", get_users, name="get-users"),
 ]

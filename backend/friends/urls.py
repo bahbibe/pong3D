@@ -9,9 +9,9 @@ from .views import (
 
 
 urlpatterns = [
-    path("friends/", get_friends, name="get-friends"),
-    path("friends/requests/", get_friends_request, name="get-friends-request"),
-    path("friends/accept/", accept_friend_request, name="accept-friend-request"),
-    path("friends/update/", update_friendship_status, name="update-friendship-status"),
+    path("", get_friends, name="get-friends"),
+    path("requests/", get_friends_request, name="get-friends-request"),
+    path("accept/", accept_friend_request, name="accept-friend-request"),
+    path("update/", update_friendship_status, name="update-friendship-status"),
     path("send-friend-request/", send_friend_request, name="send-friend-request"),
 ]
