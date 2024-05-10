@@ -1,5 +1,5 @@
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes, api_view
+from rest_framework.decorators import api_view
 from .serializers import (
     SetupProfileSerializer,
     UserSerializer,
@@ -10,10 +10,11 @@ from rest_framework import status
 from .models import User, Profile
 from django.http import JsonResponse
 from django.db.models import Q
+from api.auth_utils import is_authenticated
 
 
 @api_view(["PUT"])
-@permission_classes([IsAuthenticated])
+@is_authenticated
 def setup_profile(request):
     user = request.user
     serializer = SetupProfileSerializer(data=request.data)
@@ -28,7 +29,7 @@ def setup_profile(request):
 
 
 @api_view(["PUT"])
-@permission_classes([IsAuthenticated])
+@is_authenticated
 def update_settings(request):
     user = request.user
     serializer = UpdateSettingsSerializer(data=request.data)
@@ -54,7 +55,7 @@ def update_settings(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@is_authenticated
 def get_profile(request, uuid):
     try:
         profile = Profile.objects.filter(uuid=uuid).first()
@@ -79,7 +80,7 @@ def get_profile(request, uuid):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@is_authenticated
 def get_users(request):
     query = request.GET.get("q")
     if query:

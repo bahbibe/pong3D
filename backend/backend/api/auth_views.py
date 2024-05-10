@@ -1,13 +1,14 @@
 from rest_framework.decorators import api_view
 from .serializers import RegisterUserSerializer, UserSerializer, SetupProfileSerializer, LoginUserSerializer
 from rest_framework.response import Response
+from django.http import JsonResponse
 from rest_framework import status, viewsets
 from django.contrib.auth.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Profile
 from django.shortcuts import redirect
 from django.contrib.auth.hashers import check_password
-from .utils import generate_token, is_authenticated
+from .auth_utils import generate_token, is_authenticated
 from django.conf import settings
 from datetime import datetime
 import urllib.parse

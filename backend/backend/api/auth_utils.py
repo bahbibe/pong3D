@@ -11,18 +11,6 @@ def generate_token(payload):
     return encoded_jwt
 
 
-def decode_token(token):
-    try:
-        decoded = jwt.decode(token, os.getenv("JWT_SECRET"), algorithms=["HS256"])
-        return decoded
-    except jwt.ExpiredSignatureError:
-        print("=====> Token expired")
-    except jwt.InvalidTokenError:
-        print("=====> Invalid token")
-    except:
-        return None
-
-
 def is_authenticated(view):
     def _decorator(request: HttpRequest, *args, **kwargs):
         if "access_token" not in request.COOKIES:

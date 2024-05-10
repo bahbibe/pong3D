@@ -1,5 +1,5 @@
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes, api_view
+from rest_framework.decorators import api_view
 from .models import Friendship
 from rest_framework.response import Response
 from rest_framework import status
@@ -12,11 +12,12 @@ from .serializers import (
     FriendshipSerializer,
     UpdateFriendshipSerializer,
 )
+from api.auth_utils import is_authenticated
 
 
 # Create your views here.
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@is_authenticated
 def get_friends(request):
     user = request.user
     friends = Friendship.objects.filter(
@@ -42,7 +43,7 @@ def get_friends(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@is_authenticated
 def get_friends_request(request):
     user = request.user
     friends_request = Friendship.objects.filter(target_user=user, status="pending")
@@ -60,7 +61,7 @@ def get_friends_request(request):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@is_authenticated
 def send_friend_request(request):
     source_user = request.user
     serializer = SentFriendRequestSerializer(data=request.data)
@@ -100,7 +101,7 @@ def send_friend_request(request):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@is_authenticated
 def accept_friend_request(request):
     user = request.user
     serializer = AcceptFriendRequestSerializer(data=request.data)
@@ -124,7 +125,7 @@ def accept_friend_request(request):
 
 
 @api_view(["POST"])
-@permission_classes([IsAuthenticated])
+@is_authenticated
 def update_friendship_status(request):
     user = request.user
     serializer = UpdateFriendshipSerializer(data=request.data)

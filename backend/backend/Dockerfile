@@ -8,7 +8,7 @@ RUN set -e; \
 
 # COPY ./entrypoint.sh /usr/bin/entrypoint.sh
 
-WORKDIR /app
+WORKDIR /backend
 
 COPY ./requirements.txt ./requirements.txt
 

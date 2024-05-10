@@ -1,15 +1,15 @@
 version: '3.8'
 
 services:
-  app:
-    container_name: app
-    build: .
+  backend:
+    container_name: backend
+    build: ./backend
     ports:
       - "8000:8000"
     volumes:
-      - .:/app
+      - ./backend:/backend
     env_file:
-      - .env
+      - ./backend/.env
     depends_on:
       - db
     restart: unless-stopped
@@ -21,7 +21,7 @@ services:
     container_name: db
     restart: unless-stopped
     env_file:
-      - .env
+      - ./backend/.env
     volumes:
       - dbdata:/var/lib/postgresql/data
     networks:
@@ -36,7 +36,7 @@ services:
     networks:
       - ft_transcendence
     env_file:
-      - .env
+      - ./backend/.env
 
 volumes:
   dbdata:
