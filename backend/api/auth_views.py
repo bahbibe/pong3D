@@ -1,16 +1,18 @@
 from rest_framework.decorators import api_view
-from .serializers import RegisterUserSerializer, UserSerializer, SetupProfileSerializer
+from .serializers import RegisterUserSerializer, UserSerializer, SetupProfileSerializer, LoginUserSerializer
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from django.contrib.auth.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Profile
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import permission_classes
 from django.shortcuts import redirect
+from django.contrib.auth.hashers import check_password
+from .utils import generate_token, is_authenticated
+from django.conf import settings
+from datetime import datetime
 import urllib.parse
-import os
 import requests
+import os
 
 class RegisterUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -19,8 +21,36 @@ class RegisterUserViewSet(viewsets.ModelViewSet):
 
 
 @api_view(["POST"])
+def login_user(request):
+    serailizer = LoginUserSerializer(data=request.data)
+    
+    if serailizer.is_valid():
+        custom_validataion = serailizer.validated_data.get("email") is not None or serailizer.validated_data.get("username") is not None
+        if not custom_validataion:
+            return Response({"error": ["An email or username is required to log in."]}, status=status.HTTP_400_BAD_REQUEST)
+        
+        auth_field = "email" if serailizer.validated_data.get("email") is not None else "username"
+        user = User.objects.filter(**{auth_field: serailizer.validated_data.get(auth_field)}).first()
+        if user is None:
+            return Response({"error": ["These credentials does not match any records"]}, status=status.HTTP_404_NOT_FOUND)
+        
+        is_password_valid = check_password(serailizer.validated_data.get("password"), user.password)
+        if not is_password_valid:
+            return Response({"error": ["These credentials does not match any records"]}, status=status.HTTP_404_NOT_FOUND)
+        
+        access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
+        access_token = generate_token({"id": user.id, "exp": access_token_liftime})
+        response = Response({"access_token": access_token}, status=status.HTTP_200_OK)
+        response.set_cookie("access_token", access_token, httponly=True, expires=access_token_liftime)
+        return response
+    
+    return Response(serailizer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
 def register_user(request):
     serializer = RegisterUserSerializer(data=request.data)
+    
     if serializer.is_valid():
         user = User.objects.create_user(
             username=serializer.validated_data["username"],
@@ -30,6 +60,7 @@ def register_user(request):
         Profile.objects.create(user=user)
         user.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -39,7 +70,7 @@ def logout_user(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@is_authenticated
 def get_user(request):
     user = request.user
     serializer = UserSerializer(user)
@@ -52,7 +83,6 @@ def login_intra(request):
     callback_uri = urllib.parse.quote(f"{os.getenv("API_URL")}/auth/intra/callback/", safe="")
     auth_url = f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={callback_uri}&response_type=code"
     return Response({"url": auth_url}, status=status.HTTP_200_OK)
-    # return redirect(auth_url)
 
 
 @api_view(["GET"])

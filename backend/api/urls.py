@@ -1,6 +1,12 @@
 from django.urls import path
 from django.http import JsonResponse
-from .auth_views import register_user, get_user, login_intra, login_intra_callback
+from .auth_views import (
+    login_user,
+    register_user,
+    get_user,
+    login_intra,
+    login_intra_callback,
+)
 from .views import (
     setup_profile,
     update_settings,
@@ -21,7 +27,7 @@ def hello():
 urlpatterns = [
     path("", hello),
     path("register/", register_user, name="register"),
-    path("login/", TokenObtainPairView.as_view(), name="login"),
+    path("login/", login_user, name="login"),
     path("intra/", login_intra, name="intra-login"),
     path("intra/callback/", login_intra_callback, name="intra-callback"),
     path("token/refresh/", TokenRefreshView.as_view(), name="refresh"),
