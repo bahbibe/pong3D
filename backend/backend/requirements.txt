@@ -8,6 +8,8 @@ psycopg==3.1.18
 psycopg-binary==3.1.18
 PyJWT==2.8.0
 pyOpenSSL==24.1.0
+pyotp==2.9.0
+qrcode==7.4.2
 requests==2.31.0
 service-identity==24.1.0
 wheel==0.43.0

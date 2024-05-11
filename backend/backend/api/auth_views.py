@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from .serializers import RegisterUserSerializer, UserSerializer, SetupProfileSerializer, LoginUserSerializer
 from rest_framework.response import Response
-from django.http import JsonResponse
+from django.http import HttpResponse
 from rest_framework import status, viewsets
 from django.contrib.auth.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -16,6 +16,8 @@ import requests
 import os
 import random
 import string
+import pyotp.totp
+import qrcode
 
 class RegisterUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -155,3 +157,47 @@ def login_intra_callback(request):
     response = redirect("http://localhost:3000/")
     response.set_cookie("access_token", access_token, httponly=True, expires=access_token_liftime)
     return response
+
+
+@api_view(["GET"])
+@is_authenticated
+def enable_twofa(request):
+    user = request.user
+    if user.profile.is_tfa_enabled:
+        return Response({"error": "2FA is already enabled"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    secret = pyotp.random_base32()
+    user.profile.is_tfa_enabled = True
+    user.profile.tfa_secret = secret
+    user.profile.save()
+    tfa_code = pyotp.totp.TOTP(secret).provisioning_uri(user.username, issuer_name="ft_transcendence")
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+        )
+    qr.add_data(tfa_code)
+    qr.make(fit=True)
+    tfa_image = qr.make_image(fill_color="black", back_color="white")
+    # TODO: find a solution to show the user the qrcode one time only
+    tfa_image.save(f"avatars/tfa/{user.username}.png")
+    
+    return Response({"message": "2FA enabled", "image": f"{os.getenv('API_URL')}/avatars/tfa/{user.username}.png"}, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+@is_authenticated
+def verify_twofa(request):
+    user = request.user
+    if not user.profile.is_tfa_enabled:
+        return Response({"error": "2FA is not enabled"}, status=status.HTTP_400_BAD_REQUEST)
+
+    code = request.data.get("code")
+    if not code:
+        return Response({"error": "No code found"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    is_code_valid = pyotp.TOTP(user.profile.tfa_secret).verify(code)
+    if not is_code_valid:
+        return Response({"error": "Invalid code"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response({"message": "Code is valid"}, status=status.HTTP_200_OK)
