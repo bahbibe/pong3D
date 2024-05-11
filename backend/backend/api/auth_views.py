@@ -90,7 +90,7 @@ def get_user(request):
 @api_view(["GET"])
 def login_intra(request):
     client_id = os.getenv("INTRA_CLIENT_ID")
-    callback_uri = urllib.parse.quote(f"{os.getenv("API_URL")}/auth/intra/callback/", safe="")
+    callback_uri = urllib.parse.quote(f"{os.getenv("API_URL")}/api/auth/intra/callback/", safe="")
     auth_url = f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={callback_uri}&response_type=code"
     return Response({"url": auth_url}, status=status.HTTP_200_OK)
 
@@ -110,7 +110,7 @@ def login_intra_callback(request):
         "client_id": os.getenv("INTRA_CLIENT_ID"),
         "client_secret": os.getenv("INTRA_CLIENT_SECRET"),
         "code": code,
-        "redirect_uri": f"{os.getenv('API_URL')}/auth/intra/callback/"
+        "redirect_uri": f"{os.getenv('API_URL')}/api/auth/intra/callback/"
         })
     
     if intra_response.status_code != 200:
@@ -146,7 +146,7 @@ def login_intra_callback(request):
                 first_name=user_data["first_name"],
                 last_name=user_data["last_name"],
             )
-        Profile.objects.create(user=user,avatar=user_data["avatar"], auth_method=Profile.INTRA)
+        Profile.objects.create(user=user, avatar=user_data["avatar"], auth_method=Profile.INTRA)
         user.set_unusable_password()
         user.save()
     

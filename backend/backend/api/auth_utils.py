@@ -23,7 +23,7 @@ def is_authenticated(view):
             decoded = jwt.decode(
                 access_token, os.getenv("JWT_SECRET"), algorithms=["HS256"]
             )
-            # user = User.objects.get(id=decoded["id"])
+            
             user = User.objects.filter(id=decoded["id"]).first()
             if not user:
                 return Response(
