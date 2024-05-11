@@ -4,6 +4,14 @@ import uuid
 
 
 class Profile(models.Model):
+    EMAIL = "email"
+    INTRA = "intra"
+
+    AUTH_CHOICES = [
+        (EMAIL, "email"),
+        (INTRA, "intra"),
+    ]
+    
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     avatar = models.ImageField(
         upload_to="avatars/",
@@ -11,6 +19,7 @@ class Profile(models.Model):
         blank=True,
         default="avatars/profile_default.jpg",
     )
+    auth_method = models.CharField(max_length=50, default=EMAIL, choices=AUTH_CHOICES)
     is_setup = models.BooleanField(default=False)
     total_wins = models.IntegerField(default=0)
     total_losses = models.IntegerField(default=0)

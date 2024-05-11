@@ -14,6 +14,8 @@ from datetime import datetime
 import urllib.parse
 import requests
 import os
+import random
+import string
 
 class RegisterUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
@@ -32,7 +34,7 @@ def login_user(request):
         
         auth_field = "email" if serailizer.validated_data.get("email") is not None else "username"
         user = User.objects.filter(**{auth_field: serailizer.validated_data.get(auth_field)}).first()
-        if user is None:
+        if user is None or user.profile.auth_method == Profile.INTRA:
             return Response({"error": ["These credentials does not match any records"]}, status=status.HTTP_404_NOT_FOUND)
         
         is_password_valid = check_password(serailizer.validated_data.get("password"), user.password)
@@ -53,6 +55,10 @@ def register_user(request):
     serializer = RegisterUserSerializer(data=request.data)
     
     if serializer.is_valid():
+        user = User.objects.filter(email=serializer.validated_data["email"]).first()
+        if user:
+            return Response({"error": ["A user with this email already exists"]}, status=status.HTTP_400_BAD_REQUEST)
+        
         user = User.objects.create_user(
             username=serializer.validated_data["username"],
             email=serializer.validated_data["email"],
@@ -66,8 +72,11 @@ def register_user(request):
 
 
 @api_view(["POST"])
+@is_authenticated
 def logout_user(request):
-    pass
+    response = Response({"message": "User logged out"}, status=status.HTTP_200_OK)
+    response.delete_cookie("access_token")
+    return response
 
 
 @api_view(["GET"])
@@ -90,19 +99,12 @@ def login_intra(request):
 def login_intra_callback(request):
     code = request.GET.get("code")
     error = request.GET.get("error")
+    
     if error:
         return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
     if not code:
         return Response({"error": "No code found"}, status=status.HTTP_400_BAD_REQUEST)
-    """
-        TODO: Get the user data
-        - post request to https://api.intra.42.fr/oauth/token with the following data:
-            - grant_type : authorization_code
-            - client_id : your client id
-            - client_secret : your client secret
-            - code : the code you got from the previous request
-        - then get the access token and get the user information
-    """
+    
     intra_response = requests.post("https://api.intra.42.fr/oauth/token", data={
         "grant_type": "authorization_code",
         "client_id": os.getenv("INTRA_CLIENT_ID"),
@@ -110,27 +112,46 @@ def login_intra_callback(request):
         "code": code,
         "redirect_uri": f"{os.getenv('API_URL')}/auth/intra/callback/"
         })
+    
     if intra_response.status_code != 200:
         return Response({"error": "Failed to get access token"}, status=status.HTTP_401_UNAUTHORIZED)
+    
     json_response = intra_response.json()
     access_token = json_response["access_token"]
     if not access_token:
         return Response({"error": "No access token found"}, status=status.HTTP_401_UNAUTHORIZED)
-    """
-        get user data and create a user in the database if it doesn't exist
-        then generate the tokens and return them
-        TODO: check if user is already authenticated
-    """
+    
     intra_response = requests.get("https://api.intra.42.fr/v2/me", headers={"Authorization": f"Bearer {access_token}"})
     if intra_response.status_code != 200:
         return Response({"error": "Failed to get user data"}, status=status.HTTP_401_UNAUTHORIZED)
+    
     json_response = intra_response.json()
     user_data = {
         "username": json_response["login"],
         "email": json_response["email"],
         "first_name": json_response["first_name"],
         "last_name": json_response["last_name"],
-        "image": json_response["image"]["link"]
+        "avatar": json_response["image"]["link"]
     }
-    print("user data =====> ", user_data)
-    return redirect("http://localhost:3000/login")
+    
+    user = User.objects.filter(username=user_data["username"]).first()
+    if user.profile.auth_method != Profile.INTRA:
+        user_data["username"] = f"{user_data['username']}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
+        user = None
+    
+    if user is None:
+        user = User.objects.create_user(
+                username=user_data["username"],
+                email=user_data["email"],
+                first_name=user_data["first_name"],
+                last_name=user_data["last_name"],
+            )
+        Profile.objects.create(user=user,avatar=user_data["avatar"], auth_method=Profile.INTRA)
+        user.set_unusable_password()
+        user.save()
+    
+    access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
+    access_token = generate_token({"id": user.id, "exp": access_token_liftime})
+    response = redirect("http://localhost:3000/")
+    response.set_cookie("access_token", access_token, httponly=True, expires=access_token_liftime)
+    return response

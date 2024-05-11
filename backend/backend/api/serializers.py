@@ -47,7 +47,7 @@ class SetupProfileSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ["avatar", "is_setup", "total_wins", "total_losses", "uuid"]
+        fields = ["avatar", "is_setup", "total_wins", "total_losses", "uuid", "auth_method"]
 
 
 class UserSerializer(serializers.ModelSerializer):

@@ -1,4 +1,3 @@
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view
 from .models import Friendship
 from rest_framework.response import Response
@@ -15,7 +14,6 @@ from .serializers import (
 from api.auth_utils import is_authenticated
 
 
-# Create your views here.
 @api_view(["GET"])
 @is_authenticated
 def get_friends(request):

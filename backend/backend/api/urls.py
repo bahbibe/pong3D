@@ -6,6 +6,7 @@ from .auth_views import (
     get_user,
     login_intra,
     login_intra_callback,
+    logout_user
 )
 from .views import (
     setup_profile,
@@ -25,6 +26,7 @@ urlpatterns = [
     path("login/", login_user, name="login"),
     path("intra/", login_intra, name="intra-login"),
     path("intra/callback/", login_intra_callback, name="intra-callback"),
+    path("logout/", logout_user, name="logout"),
     path("me/", get_user, name="user"),
     path("setup/", setup_profile, name="setup-profile"),
     path("settings/update/", update_settings, name="update-settings"),
