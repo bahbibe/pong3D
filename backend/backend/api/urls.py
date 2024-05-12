@@ -8,6 +8,7 @@ from .auth_views import (
     login_intra_callback,
     logout_user,
     enable_twofa,
+    confirm_twofa,
     verify_twofa
 )
 from .views import (
@@ -29,8 +30,9 @@ urlpatterns = [
     path("intra/", login_intra, name="intra-login"),
     path("intra/callback/", login_intra_callback, name="intra-callback"),
     path("logout/", logout_user, name="logout"),
-    path("enable/twofa/", enable_twofa, name="enable-towfa"),
-    path("verify/twofa/", verify_twofa, name="verify-towfa"),
+    path("twofa/enable/", enable_twofa, name="enable-towfa"),
+    path("twofa/confirm/", confirm_twofa, name="confirm-towfa"),
+    path("twofa/verify/", verify_twofa, name="verify-towfa"),
     path("me/", get_user, name="user"),
     path("setup/", setup_profile, name="setup-profile"),
     path("settings/update/", update_settings, name="update-settings"),

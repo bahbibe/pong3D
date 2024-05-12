@@ -167,7 +167,6 @@ def enable_twofa(request):
         return Response({"error": "2FA is already enabled"}, status=status.HTTP_400_BAD_REQUEST)
     
     secret = pyotp.random_base32()
-    user.profile.is_tfa_enabled = True
     user.profile.tfa_secret = secret
     user.profile.save()
     tfa_code = pyotp.totp.TOTP(secret).provisioning_uri(user.username, issuer_name="ft_transcendence")
@@ -184,6 +183,28 @@ def enable_twofa(request):
     tfa_image.save(f"avatars/tfa/{user.username}.png")
     
     return Response({"message": "2FA enabled", "image": f"{os.getenv('API_URL')}/avatars/tfa/{user.username}.png"}, status=status.HTTP_200_OK)
+
+
+@api_view(["POST"])
+@is_authenticated
+def confirm_twofa(request):
+    user = request.user
+    code = request.data.get("code")
+    if not code:
+        return Response({"error": "No code found"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    if not user.profile.tfa_secret:
+        return Response({"error": "2FA is not enabled"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    secret = user.profile.tfa_secret
+    is_code_valid = pyotp.TOTP(secret).verify(code)
+    if not is_code_valid:
+        return Response({"error": "Invalid code"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    user.profile.is_tfa_enabled = True
+    user.profile.save()
+    return Response({"message": "2FA confirmed"}, status=status.HTTP_200_OK)
+
 
 @api_view(["POST"])
 @is_authenticated

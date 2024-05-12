@@ -48,17 +48,24 @@ class SetupProfileSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     avatar = serializers.CharField()
-    
+
     class Meta:
         model = Profile
-        fields = ["avatar", "is_setup", "total_wins", "total_losses", "uuid", "auth_method"]
-        
+        fields = [
+            "avatar",
+            "is_setup",
+            "total_wins",
+            "total_losses",
+            "uuid",
+            "auth_method",
+        ]
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         avatar_url = data["avatar"]
         if data["auth_method"] == Profile.EMAIL:
-            data['avatar'] = f"{os.getenv('API_URL')}/{avatar_url}"
-        return data    
+            data["avatar"] = f"{os.getenv('API_URL')}/{avatar_url}"
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):

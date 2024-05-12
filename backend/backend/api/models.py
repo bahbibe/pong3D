@@ -11,7 +11,7 @@ class Profile(models.Model):
         (EMAIL, "email"),
         (INTRA, "intra"),
     ]
-    
+
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     avatar = models.ImageField(
         upload_to="avatars/",
