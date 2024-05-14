@@ -1,9 +1,9 @@
 import jwt
 import os
 from django.http.request import HttpRequest
-from rest_framework.response import Response
 from rest_framework import status
 from .models import User
+from utils.responses import ErrorResponse
 
 
 def generate_token(payload):
@@ -14,8 +14,9 @@ def generate_token(payload):
 def is_authenticated(view):
     def _decorator(request: HttpRequest, *args, **kwargs):
         if "access_token" not in request.COOKIES:
-            return Response(
-                {"error": "No access token found"}, status=status.HTTP_401_UNAUTHORIZED
+            return ErrorResponse(
+                message="No access token found",
+                status_code=status.HTTP_401_UNAUTHORIZED,
             )
 
         access_token = request.COOKIES["access_token"]
@@ -26,21 +27,21 @@ def is_authenticated(view):
 
             user = User.objects.filter(id=decoded["id"]).first()
             if not user:
-                return Response(
-                    {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+                return ErrorResponse(
+                    message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
                 )
+
             request.user = user
             return view(request, *args, **kwargs)
 
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-            return Response(
-                {"error": "Invalid or expired token"},
-                status=status.HTTP_401_UNAUTHORIZED,
+            return ErrorResponse(
+                message="Invalid access token", status_code=status.HTTP_401_UNAUTHORIZED
             )
+
         except Exception as e:
-            return Response(
-                {"error": f"An error occurred: {e}"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            return ErrorResponse(
+                message=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     return _decorator

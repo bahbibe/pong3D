@@ -1,16 +1,14 @@
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view
 from .serializers import (
     SetupProfileSerializer,
     UserSerializer,
     UpdateSettingsSerializer,
 )
-from rest_framework.response import Response
 from rest_framework import status
 from .models import User, Profile
-from django.http import JsonResponse
 from django.db.models import Q
 from api.auth_utils import is_authenticated
+from utils.responses import SuccessResponse, ErrorResponse
 
 
 @api_view(["PUT"])
@@ -18,14 +16,15 @@ from api.auth_utils import is_authenticated
 def setup_profile(request):
     user = request.user
     serializer = SetupProfileSerializer(data=request.data)
+
     if serializer.is_valid():
         profile = user.profile
         profile.avatar = serializer.validated_data.get("avatar", profile.avatar)
         profile.is_setup = True
         profile.save()
-        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return SuccessResponse(data=UserSerializer(user).data)
+
+    return ErrorResponse(serializer_errors=serializer.errors)
 
 
 @api_view(["PUT"])
@@ -38,20 +37,15 @@ def update_settings(request):
         if User.objects.filter(
             username=serializer.validated_data.get("username")
         ).exists():
-            return JsonResponse(
-                {
-                    "success": False,
-                    "message": "Username already exists",
-                },
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return ErrorResponse(message="Username already exists")
+
         profile.avatar = serializer.validated_data.get("avatar", profile.avatar)
         user.username = serializer.validated_data.get("username", user.username)
         profile.save()
         user.save()
-        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
-    else:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return SuccessResponse(data=UserSerializer(user).data)
+
+    return ErrorResponse(serializer_errors=serializer.errors)
 
 
 @api_view(["GET"])
@@ -60,22 +54,16 @@ def get_profile(request, uuid):
     try:
         profile = Profile.objects.filter(uuid=uuid).first()
         if not profile:
-            return JsonResponse(
-                {
-                    "success": False,
-                    "message": "User does not exist",
-                },
-                status=status.HTTP_404_NOT_FOUND,
+            return ErrorResponse(
+                message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
             )
+
         user = profile.user
-        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+        return SuccessResponse(data=UserSerializer(user).data)
+
     except Exception as e:
-        return JsonResponse(
-            {
-                "success": False,
-                "message": "User does not exist",
-            },
-            status=status.HTTP_404_NOT_FOUND,
+        return ErrorResponse(
+            message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
         )
 
 
@@ -87,6 +75,7 @@ def get_users(request):
         users = User.objects.filter(
             Q(username__icontains=query) | Q(email__icontains=query)
         )
-        return Response(UserSerializer(users, many=True).data, status=status.HTTP_200_OK)
+        return SuccessResponse(data=UserSerializer(users, many=True).data)
+
     users = User.objects.all()
-    return Response(UserSerializer(users, many=True).data, status=status.HTTP_200_OK)
+    return SuccessResponse(data=UserSerializer(users, many=True).data)

@@ -1,7 +1,5 @@
 from rest_framework.decorators import api_view
 from .serializers import RegisterUserSerializer, UserSerializer, SetupProfileSerializer, LoginUserSerializer
-from rest_framework.response import Response
-from django.http import HttpResponse
 from rest_framework import status, viewsets
 from django.contrib.auth.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -11,6 +9,7 @@ from django.contrib.auth.hashers import check_password
 from .auth_utils import generate_token, is_authenticated
 from django.conf import settings
 from datetime import datetime
+from utils.responses import ErrorResponse, SuccessResponse
 import urllib.parse
 import requests
 import os
@@ -32,24 +31,24 @@ def login_user(request):
     if serailizer.is_valid():
         custom_validataion = serailizer.validated_data.get("email") is not None or serailizer.validated_data.get("username") is not None
         if not custom_validataion:
-            return Response({"error": ["An email or username is required to log in."]}, status=status.HTTP_400_BAD_REQUEST)
+            return ErrorResponse(message="An email or username is required to log in.")
         
         auth_field = "email" if serailizer.validated_data.get("email") is not None else "username"
         user = User.objects.filter(**{auth_field: serailizer.validated_data.get(auth_field)}).first()
         if user is None or user.profile.auth_method == Profile.INTRA:
-            return Response({"error": ["These credentials does not match any records"]}, status=status.HTTP_404_NOT_FOUND)
+            return ErrorResponse(message="These credentials does not match any records.", status=status.HTTP_404_NOT_FOUND)
         
         is_password_valid = check_password(serailizer.validated_data.get("password"), user.password)
         if not is_password_valid:
-            return Response({"error": ["These credentials does not match any records"]}, status=status.HTTP_404_NOT_FOUND)
+            return ErrorResponse(message="These credentials does not match any records.", status=status.HTTP_404_NOT_FOUND)
         
         access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
         access_token = generate_token({"id": user.id, "exp": access_token_liftime})
-        response = Response({"access_token": access_token}, status=status.HTTP_200_OK)
+        response = SuccessResponse({"access_token": access_token})
         response.set_cookie("access_token", access_token, httponly=True, expires=access_token_liftime)
         return response
     
-    return Response(serailizer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return ErrorResponse(message="An error occurred", status=status.HTTP_400_BAD_REQUEST, serializer_errors=serailizer.errors)
 
 
 @api_view(["POST"])
@@ -59,7 +58,7 @@ def register_user(request):
     if serializer.is_valid():
         user = User.objects.filter(email=serializer.validated_data["email"]).first()
         if user:
-            return Response({"error": ["A user with this email already exists"]}, status=status.HTTP_400_BAD_REQUEST)
+            return ErrorResponse(message="A user with this email already exists")
         
         user = User.objects.create_user(
             username=serializer.validated_data["username"],
@@ -68,15 +67,15 @@ def register_user(request):
         )
         Profile.objects.create(user=user)
         user.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return SuccessResponse(data=UserSerializer(user).data, message="User Created")
     
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    return ErrorResponse("An error occurred", status.HTTP_400_BAD_REQUEST, serializer.errors)
 
 
 @api_view(["POST"])
 @is_authenticated
-def logout_user(request):
-    response = Response({"message": "User logged out"}, status=status.HTTP_200_OK)
+def logout_user(_):
+    response = SuccessResponse(message="User logged out")
     response.delete_cookie("access_token")
     return response
 
@@ -86,7 +85,7 @@ def logout_user(request):
 def get_user(request):
     user = request.user
     serializer = UserSerializer(user)
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return SuccessResponse(data=serializer.data)
 
 
 @api_view(["GET"])
@@ -94,7 +93,7 @@ def login_intra(request):
     client_id = os.getenv("INTRA_CLIENT_ID")
     callback_uri = urllib.parse.quote(f"{os.getenv("API_URL")}/api/auth/intra/callback/", safe="")
     auth_url = f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={callback_uri}&response_type=code"
-    return Response({"url": auth_url}, status=status.HTTP_200_OK)
+    return SuccessResponse(data={"url": auth_url})
 
 
 @api_view(["GET"])
@@ -103,9 +102,9 @@ def login_intra_callback(request):
     error = request.GET.get("error")
     
     if error:
-        return Response({"error": error}, status=status.HTTP_400_BAD_REQUEST)
+        return ErrorResponse(message=error)
     if not code:
-        return Response({"error": "No code found"}, status=status.HTTP_400_BAD_REQUEST)
+        return ErrorResponse(message="No code found")
     
     intra_response = requests.post("https://api.intra.42.fr/oauth/token", data={
         "grant_type": "authorization_code",
@@ -116,16 +115,16 @@ def login_intra_callback(request):
         })
     
     if intra_response.status_code != 200:
-        return Response({"error": "Failed to get access token"}, status=status.HTTP_401_UNAUTHORIZED)
+        return ErrorResponse(message="Failed to get access token", status_code=status.HTTP_401_UNAUTHORIZED)
     
     json_response = intra_response.json()
     access_token = json_response["access_token"]
     if not access_token:
-        return Response({"error": "No access token found"}, status=status.HTTP_401_UNAUTHORIZED)
+        return ErrorResponse(message="Failed to get access token", status_code=status.HTTP_401_UNAUTHORIZED)
     
     intra_response = requests.get("https://api.intra.42.fr/v2/me", headers={"Authorization": f"Bearer {access_token}"})
     if intra_response.status_code != 200:
-        return Response({"error": "Failed to get user data"}, status=status.HTTP_401_UNAUTHORIZED)
+        return ErrorResponse(message="Failed to get user data", status_code=status.HTTP_401_UNAUTHORIZED)
     
     json_response = intra_response.json()
     user_data = {
@@ -164,7 +163,7 @@ def login_intra_callback(request):
 def enable_twofa(request):
     user = request.user
     if user.profile.is_tfa_enabled:
-        return Response({"error": "2FA is already enabled"}, status=status.HTTP_400_BAD_REQUEST)
+        return ErrorResponse(message="2FA is already enabled")
     
     secret = pyotp.random_base32()
     user.profile.tfa_secret = secret
@@ -182,7 +181,7 @@ def enable_twofa(request):
     # TODO: find a solution to show the user the qrcode one time only
     tfa_image.save(f"avatars/tfa/{user.username}.png")
     
-    return Response({"message": "2FA enabled", "image": f"{os.getenv('API_URL')}/avatars/tfa/{user.username}.png"}, status=status.HTTP_200_OK)
+    return SuccessResponse(message="2FA enables", data={"image": f"{os.getenv('API_URL')}/avatars/tfa/{user.username}.png"})
 
 
 @api_view(["POST"])
@@ -191,19 +190,19 @@ def confirm_twofa(request):
     user = request.user
     code = request.data.get("code")
     if not code:
-        return Response({"error": "No code found"}, status=status.HTTP_400_BAD_REQUEST)
+        return ErrorResponse(message="No code found")
     
     if not user.profile.tfa_secret:
-        return Response({"error": "2FA is not enabled"}, status=status.HTTP_400_BAD_REQUEST)
+        return ErrorResponse(message="2FA is not enabled")
     
     secret = user.profile.tfa_secret
     is_code_valid = pyotp.TOTP(secret).verify(code)
     if not is_code_valid:
-        return Response({"error": "Invalid code"}, status=status.HTTP_400_BAD_REQUEST)
+        return ErrorResponse(message="Invalid code")
     
     user.profile.is_tfa_enabled = True
     user.profile.save()
-    return Response({"message": "2FA confirmed"}, status=status.HTTP_200_OK)
+    return SuccessResponse(message="2FA confirmed")
 
 
 @api_view(["POST"])
@@ -211,14 +210,14 @@ def confirm_twofa(request):
 def verify_twofa(request):
     user = request.user
     if not user.profile.is_tfa_enabled:
-        return Response({"error": "2FA is not enabled"}, status=status.HTTP_400_BAD_REQUEST)
+        return ErrorResponse(message="2FA is not enabled")
 
     code = request.data.get("code")
     if not code:
-        return Response({"error": "No code found"}, status=status.HTTP_400_BAD_REQUEST)
+        return ErrorResponse(message="No code found")
     
     is_code_valid = pyotp.TOTP(user.profile.tfa_secret).verify(code)
     if not is_code_valid:
-        return Response({"error": "Invalid code"}, status=status.HTTP_400_BAD_REQUEST)
+        return ErrorResponse(message="Invalid code")
     
-    return Response({"message": "Code is valid"}, status=status.HTTP_200_OK)
+    return SuccessResponse(message="Code is valid")
