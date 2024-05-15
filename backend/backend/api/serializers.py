@@ -40,10 +40,11 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 class SetupProfileSerializer(serializers.ModelSerializer):
     avatar = serializers.ImageField(required=False)
+    username = serializers.CharField(required=False)
 
     class Meta:
         model = Profile
-        fields = ["avatar"]
+        fields = ["avatar", "username"]
 
 
 class ProfileSerializer(serializers.ModelSerializer):

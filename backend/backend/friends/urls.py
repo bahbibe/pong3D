@@ -13,5 +13,5 @@ urlpatterns = [
     path("requests/", get_friends_request, name="get-friends-request"),
     path("accept/", accept_friend_request, name="accept-friend-request"),
     path("update/", update_friendship_status, name="update-friendship-status"),
-    path("send-friend-request/", send_friend_request, name="send-friend-request"),
+    path("send/", send_friend_request, name="send-friend-request"),
 ]

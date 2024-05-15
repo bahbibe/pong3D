@@ -158,7 +158,7 @@ def login_intra_callback(request):
     return response
 
 
-@api_view(["GET"])
+@api_view(["POST"])
 @is_authenticated
 def enable_twofa(request):
     user = request.user

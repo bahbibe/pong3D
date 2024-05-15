@@ -12,6 +12,9 @@ def generate_token(payload):
 
 
 def is_authenticated(view):
+    """
+    Decorator to check if the user is authenticated.
+    """
     def _decorator(request: HttpRequest, *args, **kwargs):
         if "access_token" not in request.COOKIES:
             return ErrorResponse(

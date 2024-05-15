@@ -122,7 +122,7 @@ def accept_friend_request(request):
     return SuccessResponse(data=FriendshipSerializer(friendship).data)
 
 
-@api_view(["POST"])
+@api_view(["PUT"])
 @is_authenticated
 def update_friendship_status(request):
     user = request.user
