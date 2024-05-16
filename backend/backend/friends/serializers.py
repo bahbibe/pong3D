@@ -53,3 +53,13 @@ class UpdateFriendshipSerializer(serializers.ModelSerializer):
     class Meta:
         model = Friendship
         fields = ["status", "friend_id"]
+
+
+class BlockUserSerializer(serializers.ModelSerializer):
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(), required=True
+    )
+
+    class Meta:
+        model = Friendship
+        fields = ["user_id"]

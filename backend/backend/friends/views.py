@@ -8,6 +8,7 @@ from .serializers import (
     AcceptFriendRequestSerializer,
     FriendshipSerializer,
     UpdateFriendshipSerializer,
+    BlockUserSerializer,
 )
 from api.auth_utils import is_authenticated
 from utils.responses import ErrorResponse, SuccessResponse
@@ -153,3 +154,73 @@ def update_friendship_status(request):
     friendship.save()
 
     return SuccessResponse(data=FriendshipSerializer(friendship).data)
+
+
+@api_view(["POST"])
+@is_authenticated
+def block_user(request):
+    user = request.user
+    serializer = BlockUserSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return ErrorResponse(serializer_errors=serializer.errors)
+
+    if user == serializer.validated_data["user_id"]:
+        return ErrorResponse(
+            message="You cannot block yourself",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user_id = serializer.validated_data["user_id"]
+    friendship = Friendship.objects.filter(
+        Q(source_user=user, target_user=user_id)
+        | Q(source_user=user_id, target_user=user)
+    ).first()
+
+    if not friendship:
+        Friendship.objects.create(
+            source_user=user, target_user=user_id, status="blocked", blocked_by=user
+        )
+        return SuccessResponse(message="User blocked successfully")
+
+    friendship.status = "blocked"
+    friendship.blocked_by = user
+    friendship.save()
+    return SuccessResponse(message="User blocked successfully")
+
+
+@api_view(["POST"])
+@is_authenticated
+def unblock_user(request):
+    user = request.user
+    serializer = BlockUserSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return ErrorResponse(serializer_errors=serializer.errors)
+
+    user_id = serializer.validated_data["user_id"]
+    friendship = Friendship.objects.filter(
+        Q(source_user=user, target_user=user_id)
+        | Q(source_user=user_id, target_user=user)
+    ).first()
+
+    if not friendship:
+        return ErrorResponse(
+            message="Friendship does not exist",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+
+    if friendship.blocked_by != user:
+        return ErrorResponse(
+            message="User is not blocked by you",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if friendship.status != "blocked":
+        return ErrorResponse(
+            message="User is not blocked",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    friendship.delete()
+    return SuccessResponse(message="User unblocked successfully")

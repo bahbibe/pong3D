@@ -406,7 +406,7 @@
 							"urlencoded": [
 								{
 									"key": "target_user",
-									"value": "1",
+									"value": "2",
 									"type": "text"
 								}
 							]
@@ -455,6 +455,66 @@
 								"api",
 								"friends",
 								"update",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Block User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "user_id",
+									"value": "2",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/friends/block/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"friends",
+								"block",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unblock a user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "user_id",
+									"value": "2",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/friends/unblock/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"friends",
+								"unblock",
 								""
 							]
 						}

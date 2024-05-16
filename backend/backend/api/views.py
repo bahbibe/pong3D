@@ -50,7 +50,7 @@ def update_settings(request):
 
 @api_view(["GET"])
 @is_authenticated
-def get_profile(request, uuid):
+def get_profile(_, uuid):
     try:
         profile = Profile.objects.filter(uuid=uuid).first()
         if not profile:
