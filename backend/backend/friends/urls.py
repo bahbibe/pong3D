@@ -18,5 +18,4 @@ urlpatterns = [
     path("update/", update_friendship_status, name="update-friendship-status"),
     path("block/", block_user, name="block-user"),
     path("unblock/", unblock_user, name="unblock-user"),
-    # TODO: block user and unblock user endpoints
 ]

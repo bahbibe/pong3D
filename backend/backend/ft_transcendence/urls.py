@@ -13,6 +13,7 @@ urlpatterns = [
     path("", redirect_to_api),
     path("api/auth/", include("api.urls")),
     path("api/friends/", include("friends.urls")),
+    path("api/tournaments/", include("tournaments.urls")),
     path("admin/", admin.site.urls),
 ]
 

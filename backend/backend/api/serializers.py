@@ -1,6 +1,5 @@
 from .models import User, Profile
 from rest_framework import serializers
-import urllib.parse
 import os
 
 
