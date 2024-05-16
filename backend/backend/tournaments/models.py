@@ -73,7 +73,7 @@ class Match(models.Model):
         (FINISHED, "finished"),
     )
 
-    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     # created_by = models.ForeignKey(
     #     User,
     #     on_delete=models.CASCADE,
