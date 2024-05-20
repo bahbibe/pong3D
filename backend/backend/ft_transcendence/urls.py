@@ -15,6 +15,7 @@ urlpatterns = [
     path("api/friends/", include("friends.urls")),
     path("api/tournaments/", include("tournaments.urls")),
     path("admin/", admin.site.urls),
+    path("game/", include("game.urls")),
 ]
 
 urlpatterns += static("/avatars/", document_root=settings.BASE_DIR / "avatars/")
