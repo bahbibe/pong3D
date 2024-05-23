@@ -1,5 +1,10 @@
+volumes:
+  dbdata:
+networks:
+  ft_transcendence:
 services:
   backend:
+    image: backend
     container_name: backend
     build: ./backend
     ports:
@@ -11,13 +16,15 @@ services:
     depends_on:
       - db
     restart: unless-stopped
+    init: true
     networks:
       - ft_transcendence
-    
+
   db:
     image: postgres:15.6-alpine3.19
     container_name: db
     restart: unless-stopped
+    init: true
     env_file:
       - ./backend/.env
     volumes:
@@ -29,13 +36,18 @@ services:
     image: adminer
     container_name: adminer
     restart: unless-stopped
+    init: true
     ports:
       - "8080:8080"
     networks:
       - ft_transcendence
     env_file:
       - ./backend/.env
-volumes:
-  dbdata:
-networks:
-  ft_transcendence:
+
+  # frontend:
+  #   image: node:16.13.0-alpine3.14
+  #   container_name: frontend
+  #   build: ./frontend
+  #   ports:
+  #     - "3000:3000"
+    

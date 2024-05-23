@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "tournaments",
     "rest_framework",
     "channels",
+    "chat",
 ]
 
 MIDDLEWARE = [
