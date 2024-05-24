@@ -1,3 +1,12 @@
-# FROM alpine3.18
+FROM node:20-alpine
 
-# COPY . /APP/
+RUN apk add --no-cache yarn
+
+WORKDIR /frontend
+
+COPY package.json /frontend
+COPY yarn.lock /frontend
+
+RUN yarn install
+
+CMD [ "yarn", "dev" ]
