@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  frontend:
+    container_name: frontend
+    build: ./
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/frontend
+    restart: unless-stopped
+    networks:
+      - front_ft_transcendence
+
+networks:
+  front_ft_transcendence:
