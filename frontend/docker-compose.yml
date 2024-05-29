@@ -8,9 +8,13 @@ services:
       - "3000:3000"
     volumes:
       - ./:/frontend
+      - node_modules:/frontend/node_modules
     restart: unless-stopped
     networks:
       - front_ft_transcendence
 
+volumes:
+  node_modules:
+  
 networks:
   front_ft_transcendence:

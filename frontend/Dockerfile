@@ -7,6 +7,6 @@ WORKDIR /frontend
 COPY package.json /frontend
 COPY yarn.lock /frontend
 
-RUN yarn install
+RUN yarn install --production=false
 
 CMD [ "yarn", "dev" ]
