@@ -11,10 +11,10 @@ def redirect_to_api(request):
 
 urlpatterns = [
     path("", redirect_to_api),
+    path("chat/", include("chat.urls")),
     path("api/auth/", include("api.urls")),
     path("api/friends/", include("friends.urls")),
     path("api/tournaments/", include("tournaments.urls")),
-    path("api/chat/", include("chat.urls")),
     path("admin/", admin.site.urls),
 ]
 

@@ -44,6 +44,3 @@ services:
       - ft_transcendence
     restart: always
     init: true
-
-
-    
