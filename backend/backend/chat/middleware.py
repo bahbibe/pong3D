@@ -1,5 +1,4 @@
 from channels.middleware import BaseMiddleware
-# from api.auth_utils import is_authenticated
 
 class ChatMiddleware(BaseMiddleware):
     def __init__(self, inner):

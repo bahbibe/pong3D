@@ -1,19 +1,21 @@
 from django.db import models
-from api.models import Profile as User
+from api.models import User
 
 class Message(models.Model):
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField(max_length=1000)
+    body = models.TextField()
+    sender = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=100, default='unread')
+    class Meta:
+        ordering = ['timestamp']
     def __str__(self):
-        return self.author + '=>' + self.content
+        return f'{self.sender} - {self.body}'
+    
+
 
 class Conversation(models.Model):
     ConversationID = models.AutoField(primary_key=True)
-    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user1')
-    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user2')
-    messages = models.ManyToManyField(Message, blank=True)
+    participants = models.ManyToManyField(User, related_name='participants' ,blank=True, null=True)
+    messages = models.ManyToManyField(Message, blank=True, null=True)
+    # url = models.URLField(blank=True, null=True)
     def __str__(self):
-        return self.user1 + '=>' + self.user2
-
+        return f'{self.ConversationID} - {self.participants}'
