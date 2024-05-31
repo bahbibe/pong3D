@@ -1,0 +1,27 @@
+<!-- game/templates/game/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Game Games</title>
+</head>
+<body>
+    What game game would you like to enter?<br>
+    <input id="game-name-input" type="text" size="100"><br>
+    <input id="game-name-submit" type="button" value="Enter">
+
+    <script>
+        document.querySelector('#game-name-input').focus();
+        document.querySelector('#game-name-input').onkeyup = function(e) {
+            if (e.key === 'Enter') {  // enter, return
+                document.querySelector('#game-name-submit').click();
+            }
+        };
+
+        document.querySelector('#game-name-submit').onclick = function(e) {
+            var gameName = document.querySelector('#game-name-input').value;
+            window.location.pathname = '/game/' + gameName + '/';
+        };
+    </script>
+</body>
+</html>
