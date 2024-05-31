@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     "tournaments",
     "channels",
     "game",
-    "chat",
+    # "chat",
 ]
 
 
