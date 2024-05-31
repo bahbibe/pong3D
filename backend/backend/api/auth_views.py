@@ -44,7 +44,7 @@ def login_user(request):
         
         access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
         access_token = generate_token({"id": user.id, "exp": access_token_liftime})
-        response = SuccessResponse({"access_token": access_token})
+        response = SuccessResponse({"user": UserSerializer(user).data})
         response.set_cookie("access_token", access_token, httponly=True, expires=access_token_liftime)
         return response
     

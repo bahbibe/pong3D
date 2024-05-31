@@ -5,7 +5,6 @@ networks:
 
 services:
   backend:
-    image: backend
     container_name: backend
     build: ./backend
     ports:
