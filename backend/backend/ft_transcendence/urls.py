@@ -11,6 +11,7 @@ def redirect_to_api(request):
 
 urlpatterns = [
     path("", redirect_to_api),
+    path("chat/", include("chat.urls")),
     path("api/auth/", include("api.urls")),
     path("api/friends/", include("friends.urls")),
     path("api/tournaments/", include("tournaments.urls")),
@@ -19,5 +20,6 @@ urlpatterns = [
 ]
 
 urlpatterns += static("/avatars/", document_root=settings.BASE_DIR / "avatars/")
-
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
