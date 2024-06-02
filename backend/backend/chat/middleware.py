@@ -1,5 +1,4 @@
-from channels.middleware import BaseMiddleware
-from channels.sessions import CookieMiddleware
+
 import jwt
 import os
 from django.contrib.auth.models import User
@@ -13,28 +12,23 @@ def get_user(id):
     return user
 
 
-class ChatMiddleware(BaseMiddleware):
-    def __init__(self, inner):
-        super().__init__(inner)
-
+class WSAuthMiddleware:
+    def __init__(self, app):
+        self.app = app
     async def __call__(self, scope, receive, send):
-        # print cookies and headers
-        print("Middleware called")
         access_token = scope.get("cookies", {}).get("access_token")
         if not access_token:
             print("No access token found")
-            return await self.inner(scope, receive, send)
+            return await self.app(scope, receive, send)
 
         try:
             decoded = jwt.decode(
                 access_token, os.getenv("JWT_SECRET"), algorithms=["HS256"]
             )
-
             user = await get_user(decoded["id"])
             if not user:
                 print("User does not exist")
                 return None
-
             scope['user'] = user
 
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
@@ -44,5 +38,4 @@ class ChatMiddleware(BaseMiddleware):
         except Exception as e:
             print(str(e))
             return None
-
-        return await self.inner(scope, receive, send)
+        return await self.app(scope, receive, send)

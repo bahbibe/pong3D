@@ -14,8 +14,8 @@ class Message(models.Model):
 
 class Conversation(models.Model):
     ConversationID = models.AutoField(primary_key=True)
-    participants = models.ManyToManyField(User, related_name='participants' ,blank=True, null=True)
-    messages = models.ManyToManyField(Message, blank=True, null=True)
+    participants = models.ManyToManyField(User, related_name='participants' ,blank=True)
+    messages = models.ManyToManyField(Message, blank=True)
     # url = models.URLField(blank=True, null=True)
     def __str__(self):
         return f'{self.ConversationID} - {self.participants}'

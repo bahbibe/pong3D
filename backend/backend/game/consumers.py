@@ -5,7 +5,7 @@ import math
 import redis
 
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .game_1v1_manager import Game
+#from .game_1v1_manager import Game
 
 r = redis.Redis(host="redis")
 
@@ -26,8 +26,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             "type": "send_game_id",
             "game_id": self.game,
             })
-        game = Game(self.game)
-        print(game)
+        # game = Game(self.game)
+        # print(game)
         
 
     async def disconnect(self, close_code):
