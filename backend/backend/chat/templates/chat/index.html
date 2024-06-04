@@ -11,8 +11,16 @@
 </head>
 
 <body>
-    <h1>Channels</h1>
+    <h1>login</h1>
 
+        <form id="login-form">
+            <input type="text" name="username" id="username">
+            <input type="password" name="password" id="password">
+            <button id="login" type="submit">Login</button>
+        </form>
+    
+
+    <h1>message</h1>
     <form id="chat-form">
         <input type="text" name="message" id="message">
         <button type="submit">Send</button>
@@ -31,36 +39,5 @@
         </button>
     </div>
 </body>
-
-
-<script>
-    let url = `ws://${window.location.host}/ws/chat/`
-    const socket = new WebSocket(url)
-
-    socket.onopen = (e) => {
-        console.log('Connection established')
-    }
-    socket.onmessage = (e) => {
-        let data = JSON.parse(e.data)
-        if (data.type === 'chat-message') {
-            let message = document.querySelector('#chat-messages')
-            message.insertAdjacentHTML('beforeend', `<p>${data.message}</p>`)
-        }
-    }
-    let form = document.querySelector('#chat-form')
-    form.addEventListener('submit', (e) => {
-        e.preventDefault()
-        let message = e.target.message.value
-        socket.send(JSON.stringify({
-            message: message
-        }))
-        form.reset()
-    })
-    const chatMessages = document.querySelector('#chat-messages')
-    const chatButton = document.querySelector('#chat-button')
-
-
-</script>
-
-{% include 'chat/chat.html' %}
+<script src="{% static '/js/chat.js' %}"></script>
 </html>

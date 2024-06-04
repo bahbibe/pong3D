@@ -53,7 +53,6 @@ MIDDLEWARE = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000/",
 ]
@@ -83,7 +82,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('redis', 6379)],
+            'hosts': [('redis', os.getenv("REDIS_PORT"))],
         },
     },
 }
@@ -99,6 +98,7 @@ DATABASES = {
         "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
         "HOST": os.getenv("POSTGRES_HOST"),
         "PORT": os.getenv("POSTGRES_PORT"),
+        "URI": os.getenv("DATABASE_URL"),
     }
 }
 
@@ -154,9 +154,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 ACCESS_TOKEN_LIFETIME = timedelta(days=1)  # 1 day
 
-
-
-LOGIN_URL = "/chat/login/"
-LOGIN_REDIRECT_URL = "/chat/"
-LOGOUT_REDIRECT_URL = "/chat/logout/"
-
+        

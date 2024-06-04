@@ -3,7 +3,8 @@ from django.urls import path, include
 from django.shortcuts import redirect
 from django.conf.urls.static import static
 from django.conf import settings
-
+from django.views.generic import RedirectView
+# from django.conf.urls import url
 
 def redirect_to_api(request):
     return redirect("api/")

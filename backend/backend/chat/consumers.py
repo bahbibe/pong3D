@@ -6,15 +6,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_name =  "default"
         self.room_group_name = "chat_%s" % self.room_name
 
-        print("----------------------- User: ", self.scope["user"])
         
         # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
-
+        # check if user is authenticated
+        # if not authenticated, redirect to login page
         await self.accept()
+        if  self.scope['user'].is_anonymous:
+            await self.send(text_data=json.dumps({
+                'type': 'redirect',
+                'url': '/api/auth/login'
+            }))
+            self.close()
+            return
     
     async def disconnect(self, close_code):
         # Leave room group
@@ -27,12 +34,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
 
+
         # Send message to room group
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': message
+                'message': message,
             }
         )
 
@@ -42,7 +50,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'chat-message', # 'chat_message' is the type of message 
-            'message': message
+            'message': message,
         }))
        
        

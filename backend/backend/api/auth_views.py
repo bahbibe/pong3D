@@ -36,11 +36,11 @@ def login_user(request):
         auth_field = "email" if serailizer.validated_data.get("email") is not None else "username"
         user = User.objects.filter(**{auth_field: serailizer.validated_data.get(auth_field)}).first()
         if user is None or user.profile.auth_method == Profile.INTRA:
-            return ErrorResponse(message="These credentials does not match any records.", status=status.HTTP_404_NOT_FOUND)
+            return ErrorResponse(message="These credentials does not match any records.", status_code=status.HTTP_404_NOT_FOUND)
         
         is_password_valid = check_password(serailizer.validated_data.get("password"), user.password)
         if not is_password_valid:
-            return ErrorResponse(message="These credentials does not match any records.", status=status.HTTP_404_NOT_FOUND)
+            return ErrorResponse(message="These credentials does not match any records.", status_code=status.HTTP_404_NOT_FOUND)
         
         access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
         access_token = generate_token({"id": user.id, "exp": access_token_liftime})
@@ -48,7 +48,7 @@ def login_user(request):
         response.set_cookie("access_token", access_token, httponly=True, expires=access_token_liftime)
         return response
     
-    return ErrorResponse(message="An error occurred", status=status.HTTP_400_BAD_REQUEST, serializer_errors=serailizer.errors)
+    return ErrorResponse(message="An error occurred", status_code=status.HTTP_400_BAD_REQUEST, serializer_errors=serailizer.errors)
 
 
 @api_view(["POST"])
