@@ -74,6 +74,7 @@ img {
   display: none;
 }
 
+/*! Responsive Table and desktop */
 @media screen and (min-width: 960px) {
   h1.title {
     font-size: 10vw;
