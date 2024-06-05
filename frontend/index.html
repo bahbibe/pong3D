@@ -12,94 +12,76 @@
     />
     <link rel="stylesheet" href="/static/css/index.css" />
     <!-- google font link -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&display=swap" rel="stylesheet">
-
-
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div id="app"></div>
 
-  <template id="chat-page">
-    <h1>login</h1>
+    <template id="chat-page">
+      <h1>login</h1>
 
-        <form id="login-form">
-            <input type="text" name="username" id="username">
-            <input type="password" name="password" id="password">
-            <button id="login" type="submit">Login</button>
-        </form>
-    <h1>Logout</h1>
-    <button id="logout">Logout</button>
+      <form id="login-form">
+        <input type="text" name="username" id="username" />
+        <input type="password" name="password" id="password" />
+        <button id="login" type="submit">Login</button>
+      </form>
+      <h1>Logout</h1>
+      <button id="logout">Logout</button>
 
-    <h1>message</h1>
-    <form id="chat-send">
-        <input type="text" name="message" id="message">
+      <h1>message</h1>
+      <form id="chat-send">
+        <input type="text" name="message" id="message" />
         <button type="submit">Send</button>
-    </form>
-    <div id="chat-messages">
-
-    </div>
-    <div id="chat-messages">
-        <button id="chat-button">Chat
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" class="feather feather-message-circle">
-                <path
-                    d="M12 2C6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10 5.52 0 10-4.48 10-10 0-5.52-4.48-10-10-10zm-1 7H7v2h4v2l3-3-3-3v2z">
-                </path>
-            </svg>
+      </form>
+      <div id="chat-messages"></div>
+      <div id="chat-messages">
+        <button id="chat-button">
+          Chat
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="feather feather-message-circle"
+          >
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12c0 5.52 4.48 10 10 10 5.52 0 10-4.48 10-10 0-5.52-4.48-10-10-10zm-1 7H7v2h4v2l3-3-3-3v2z"
+            ></path>
+          </svg>
         </button>
-    </div>
-  </template>
+      </div>
+    </template>
 
-  <template id="home-page">
-    <div class="home">
-      <section>
-        <h1 class="title">PONG</h1>
-        <img src="./asset/images/Rectangle4.jpg/" class="racket r1" alt=""/>
-        <img src="/asset/images/Rectangle4.jpg" class="racket r2" alt="" />
-        <div class="pong-group">
-          <a href="/" class="button">
-            login
-          </a>
-          <a href="/" class="button">
-            register
-          </a>
-          <a href="/" class="button">
-            login with 42
-          </a>
-        </div>
-      </section>
-    </div>
-  </template>
+    <!--! Home page -->
+    <template id="home-page">
+      <div class="home">
+        <section>
+          <h1 class="title">PONG</h1>
+          <img src="./asset/images/Rectangle4.jpg/" class="racket r1" alt="" />
+          <img src="/asset/images/Rectangle4.jpg" class="racket r2" alt="" />
+          <div class="pong-group">
+            <a href="/login" class="button"> login </a>
+            <a href="/" class="button"> register </a>
+            <a href="/" class="button"> login with 42 </a>
+          </div>
+        </section>
+      </div>
+    </template>
 
-  <script type="module" src="/static/js/index.js"></script>
-</body>
-
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    <!--! Login page -->
+    <template id="login-page">
+      <div class="container">
+        <h1 class="text-primary">LOGIN</h1>
+      </div>
+    </template>
 
     <template id="not-found-page">
       <h1>404 Not Found</h1>

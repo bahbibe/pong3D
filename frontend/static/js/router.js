@@ -9,6 +9,7 @@ const routes = [
     page: "not-found-page",
   },
   { path: "/", view: HomePage, isProtected: false, page: "home-page" },
+  { path: "/login", view: HomePage, isProtected: false, page: "login-page" },
   { path: '/chat', view: ChatPage, isProtected: false, page: "chat-page", },
 ];
 
