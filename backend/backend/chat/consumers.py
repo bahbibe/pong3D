@@ -1,30 +1,25 @@
 import json
+import pprint
 from channels.generic.websocket import AsyncWebsocketConsumer
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name =  "default"
-        self.room_group_name = "chat_%s" % self.room_name
-
-        
-        # Join room group
+        # pprint.pprint(self.scope)
+        print(self.scope['url_route']['kwargs']['room_name'])
+        self.room_name = "def"
+        self.room_group_name = f'chat_{self.room_name}'
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
-        # check if user is authenticated
-        # if not authenticated, redirect to login page
         await self.accept()
         if  self.scope['user'].is_anonymous:
             await self.send(text_data=json.dumps({
                 'type': 'redirect',
                 'url': '/api/auth/login'
             }))
-            self.close()
             return
-    
     async def disconnect(self, close_code):
-        # Leave room group
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -32,25 +27,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-
-
-        # Send message to room group
+        print(json.dumps(text_data_json, indent=4))
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': message,
+                'data' : text_data_json
             }
         )
 
     async def chat_message(self, event):
-        message = event['message']
-
-        # Send message to WebSocket
+        data = event['data']
         await self.send(text_data=json.dumps({
-            'type': 'chat-message', # 'chat_message' is the type of message 
-            'message': message,
+            'data': data
         }))
        
        
