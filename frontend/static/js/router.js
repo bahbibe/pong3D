@@ -1,5 +1,5 @@
 // Pages Import
-import { ChatPage, HomePage, NotFoundPage } from "./pages/index.js";
+import { ChatPage, HomePage, NotFoundPage, LoginPage } from "./pages/index.js";
 
 const routes = [
   {
@@ -11,6 +11,8 @@ const routes = [
   { path: "/", view: HomePage, isProtected: false, page: "home-page" },
   { path: "/login", view: HomePage, isProtected: false, page: "login-page" },
   { path: '/chat', view: ChatPage, isProtected: false, page: "chat-page", },
+  { path: '/chat/:roomId', view: ChatPage, isProtected: false, page: "chat-page", },
+  { path: '/login', view: LoginPage, isProtected: false, page: "login-page", },
 ];
 
 const navigateTo = (url) => {

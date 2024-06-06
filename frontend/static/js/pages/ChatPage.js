@@ -1,65 +1,60 @@
-
+import { WebSockets } from "../ws/ws.js"
 
 class ChatPage extends HTMLElement {
-    
-    constructor() {
-        super()
+
+  constructor() {
+    super()
+    // get url from the window object
+    const url = new URL(window.location.href);
+    console.log('==============');
+    console.log(url);
+    console.log('==============');
+    // this.ws = new WebSockets();
+  }
+  connectedCallback() {
+    const template = document.getElementById("chat-page");
+    const clone = template.content.cloneNode(true);
+    this.appendChild(clone);
+    const send = this.querySelector("#chat-send");
+    send.addEventListener("submit", this.handleSend.bind(this));
+    // this.ws.connect();
+  }
+  async handleSend(e) {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:8000/api/friends/", {
+        method: "GET",
+        headers: {
+          'content-type': 'application/json',
+        },
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`API request failed with status: ${response.status}`);
+      }
+      const res = await response.json();
+      const friend = res.data[0].friend;
+      const message = this.querySelector("#chat-input").value.trim();
+      if (!message) {
+        return;
+      }
+      await this.ws.send({
+        message: message,
+        friend: friend.username,
+      });
+      let recivedMessage = await this.ws.receive();
+      // append message to chat box
+      const chatBox = this.querySelector("#chat-container");
+      const messageDiv = document.createElement("div");
+      messageDiv.textContent = recivedMessage;
+      chatBox.appendChild(messageDiv);
+      e.target.reset();
+    } catch (error) {
+      console.error("Error fetching profile data:", error);
     }
 
-    connectedCallback() {
-
-        const template = document.getElementById("chat-page");
-        const clone = template.content.cloneNode(true);
-        this.appendChild(clone);
-        const chatForm = this.querySelector("#login-form");
-        chatForm.addEventListener("submit", this.handleSubmit);
-        const logOut = this.querySelector("#logout");
-        const send = this.querySelector("#chat-send");
-        send.addEventListener("click", this.handleSend);
-        logOut.addEventListener("click", this.handleLogout);
-    }
-
- 
-    async handleSubmit(e) {
-        e.preventDefault()
-        let username = e.target.username.value
-        let password = e.target.password.value
-        await fetch('http://localhost:8000/api/auth/login/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password
-            }),
-            credentials: 'include'
-        })
-        const socket = new WebSocket('ws://localhost:8000/ws/chat/')
-
-        socket.onmessage = (e) => {
-            let data = JSON.parse(e.data)
-            if (data.type === 'redirect') {
-                alert("You are not logged in reedirecting to login page")
-                window.location.href = `http://localhost:8000${data.url}`
-            }
-
-        }
-        e.target.reset()
-    }
-
-    async handleLogout(e) {
-        e.preventDefault()
-        let response = await fetch('http://localhost:8000/api/auth/logout/', {
-            method: 'POST',
-            credentials: 'include'
-        })
-        let data = await response.json()
-        console.log(data)
-    }
+  }
 }
-
-
 window.customElements.define("chat-page", ChatPage);
 
 export { ChatPage }
