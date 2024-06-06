@@ -17,7 +17,7 @@ class ChatPage extends HTMLElement {
     this.appendChild(clone);
     const send = this.querySelector("#chat-send");
     send.addEventListener("submit", this.handleSend.bind(this));
-    // this.ws.connect();
+    // this.ws.connect();test
   }
   async handleSend(e) {
     e.preventDefault();
