@@ -64,11 +64,23 @@ img {
   justify-content: center; */
   /* gap: .25rem; */
 }
+.login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
 
+}
 .button:hover {
+  transform: scale(1.1);
   box-shadow: rgba(136, 165, 191, 0.48) 6px 2px 16px 0px, rgba(255, 255, 255, 0.8) -6px -2px 16px 0px;
 }
 
+.button:hover ,.button:not(:hover) {
+  transform:  scale(.8);
+  filter: blur(5px);
+
+}
 
 
 .racket {

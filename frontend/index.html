@@ -11,29 +11,21 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="/static/css/index.css" />
-    <!-- google font link -->
+    <!-- !google font link -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&display=swap"
       rel="stylesheet"
     />
+    <!-- !frontend awesome icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   </head>
   <body>
     <div id="app"></div>
 
-    <template id="chat-page">
-      <h1>login</h1>
+    
 
-      <form id="login-form">
-        <input type="text" name="username" id="username" />
-        <input type="password" name="password" id="password" />
-        <button id="login" type="submit">Login</button>
-      </form>
-      <h1>Logout</h1>
-      <button id="logout">Logout</button>
-
-<div id="app"></div>
 
   <template id="login-page">
     <h1>ft_transcendence</h1>
@@ -42,9 +34,6 @@
       <input type="password" name="password" id="password" placeholder="Password" value="me123">
       <button type="submit">Login</button>
     </form>
-  </template>
-  <template id="home-page">
-    <h1>Welcome to the ft_transcendence home page.</h1>
   </template>
 
   <template id="chat-page">
@@ -61,10 +50,34 @@
     </div>
   </template>
 
+  <!--! Home page -->
+  <template id="home-page">
+    <div class="home">
+      <section>
+        <h1 class="title">PONG</h1>
+        <img src="./asset/images/Rectangle4.jpg/" class="racket r1" alt="" />
+        <img src="/asset/images/Rectangle4.jpg" class="racket r2" alt="" />
+        <div class="pong-group">
+          <a href="/login" class="button login"> login <i class="fa-solid fa-user fa-xs"></i> </a>
+          <a href="/" class="button register"> register </a>
+          <a href="/" class="button login-42"> login with 42</a>
+        </div>
+      </section>
+    </div>
+  </template>
+  <!--! Login page -->
+
+
   <template id="not-found-page">
     <h1>404 Not Found</h1>
     <p>Sorry, the page you are looking for does not exist.</p>
   </template>
-  <script type="module" src="/static/js/index.js"></script>
-</body>
+
+    <script type="module" src="/static/js/index.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+  </body>
 </html>
