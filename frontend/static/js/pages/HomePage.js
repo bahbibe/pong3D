@@ -1,4 +1,6 @@
-class HomePage extends HTMLElement {
+import { AbstractPage } from "./AbstarctPage.js";
+
+class HomePage extends AbstractPage {
   constructor() {
     super()
   }

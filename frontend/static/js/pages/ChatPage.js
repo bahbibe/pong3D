@@ -1,6 +1,7 @@
 import { WebSockets } from "../ws/ws.js"
+import { AbstractPage } from "./AbstarctPage.js";
 
-class ChatPage extends HTMLElement {
+class ChatPage extends AbstractPage {
 
   constructor() {
     super()
@@ -12,6 +13,7 @@ class ChatPage extends HTMLElement {
     // this.ws = new WebSockets();
   }
   connectedCallback() {
+    console.log("Room Id: ", this.params.roomId);
     const template = document.getElementById("chat-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
