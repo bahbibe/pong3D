@@ -4,21 +4,20 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # pprint.pprint(self.scope)
-        print(self.scope['url_route']['kwargs']['room_name'])
-        self.room_name = "def"
+        pprint.pprint(self.scope)
+        self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = f'chat_{self.room_name}'
+
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
+
         await self.accept()
         if  self.scope['user'].is_anonymous:
-            await self.send(text_data=json.dumps({
-                'type': 'redirect',
-                'url': '/api/auth/login'
-            }))
+            await self.close(code=4001)
             return
+
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.room_group_name,

@@ -20,7 +20,7 @@ urlpatterns = [
     path("game/", include("game.urls")),
 ]
 
-urlpatterns += static("/avatars/", document_root=settings.BASE_DIR / "avatars/")
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# urlpatterns += static("/avatars/", document_root=settings.BASE_DIR / "avatars/")
+# urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 
