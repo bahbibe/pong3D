@@ -118,7 +118,33 @@ img {
     flex: 1;
     min-width: fit-content;
   }
-  
+  ul {
+    list-style: none;
+    
+  }
 }
 
 
+#alert-box {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  padding: 20px;
+  text-align: center;
+  z-index: 10; /* Make sure the alert is above other elements */
+}
+
+.alert-message {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.close-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
