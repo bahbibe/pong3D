@@ -1,21 +1,23 @@
 from django.db import models
 from api.models import User
-
-class Message(models.Model):
-    body = models.TextField()
-    sender = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    class Meta:
-        ordering = ['timestamp']
-    def __str__(self):
-        return f'{self.sender} - {self.body}'
-    
+from uuid import uuid4
 
 
 class Conversation(models.Model):
-    ConversationID = models.AutoField(primary_key=True)
-    participants = models.ManyToManyField(User, related_name='participants' ,blank=True)
-    messages = models.ManyToManyField(Message, blank=True)
-    # url = models.URLField(blank=True, null=True)
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    name = models.CharField(max_length=128)
+    paties = models.ManyToManyField(to=User, related_name="conversations")
     def __str__(self):
-        return f'{self.ConversationID} - {self.participants}'
+        return self.name
+    
+class Message(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    author = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    conversation = models.ForeignKey(to=Conversation, on_delete=models.CASCADE)
+    read = models.BooleanField(default=False)
+    class Meta:
+        ordering = ["timestamp"]
+    def __str__(self):
+        return f"{self.author}: {self.content}"

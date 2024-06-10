@@ -1,5 +1,6 @@
 from django.urls import path
-from .consumers import ChatConsumer
+from .views import get_messages
 
 urlpatterns = [
+    path('<str:conversation_name>/', get_messages, name='get_messages'),
 ]
