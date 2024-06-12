@@ -1,20 +1,9 @@
-class WebSockets {
-    constructor() {
-        this.socket = new WebSocket(`ws://localhost:8000/ws/chat/room_id/`);
+class WebSock {
+    constructor(id) {
+        this.socket = new WebSocket(`ws://localhost:8000/ws/chat/${id}/`);
     }
-    showAlert(message) {
-        // Get references to alert box elements (from previous example)
-        const alertBox = document.getElementById('alert-box');
-        const alertMessage = document.querySelector('.alert-message');
-      
-        // Update message content
-        alertMessage.textContent = message;
-      
-        // Show alert box using existing logic
-        alertBox.style.display = 'block';
-      }
-    async connect() {
 
+    async connect() {
         this.socket.onopen = () => {
             console.log("ws connected")
         }
@@ -24,8 +13,7 @@ class WebSockets {
         this.socket.onclose = (event) => {
             console.log("ws closed")
             if (event.code === 4001) {
-                // alert("Unauthorized access. Please login.")
-                showAlert("Unauthorized access. Please login.")
+                alert("Unauthorized access. Please login.")
                 window.location.href = "/login"
             }
         }
@@ -34,7 +22,9 @@ class WebSockets {
         return new Promise((resolve, reject) => {
             this.socket.onmessage = (event) => {
                 resolve(event.data);
-                reject("Error receiving message");
+            }
+            this.socket.onerror = (error) => {
+                reject(error);
             }
         });
     }
@@ -54,5 +44,4 @@ class WebSockets {
     }
 }
 
-
-export { WebSockets }
+export { WebSock }
