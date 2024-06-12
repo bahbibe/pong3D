@@ -1,14 +1,9 @@
 from rest_framework import serializers
-from chat.models import Message, Conversation
+from chat.models import Message
 
-
-class ConversationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Conversation
-        fields = ["name", "messages"]
 
 class MessageSerializer(serializers.ModelSerializer):
+    author = serializers.StringRelatedField(source="author.username")
     class Meta:
         model = Message
-        fields = ["author", "content", "timestamp", "conversation", "read"]
-    
+        fields = ["author", "content", "timestamp" , "read"]

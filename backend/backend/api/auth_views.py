@@ -91,7 +91,7 @@ def get_user(request):
 @api_view(["GET"])
 def login_intra(request):
     client_id = os.getenv("INTRA_CLIENT_ID")
-    callback_uri = urllib.parse.quote(f"{os.getenv("API_URL")}/api/auth/intra/callback/", safe="")
+    callback_uri = urllib.parse.quote(f'{os.getenv("API_URL")}/api/auth/intra/callback/', safe="")
     auth_url = f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={callback_uri}&response_type=code"
     return SuccessResponse(data={"url": auth_url})
 
