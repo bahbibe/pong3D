@@ -39,7 +39,7 @@ class ViewFriendshipSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Friendship
-        fields = ["user", "friend", "status"]
+        fields = ["user", "friend", "status", "uuid"]
 
 
 class UpdateFriendshipSerializer(serializers.ModelSerializer):

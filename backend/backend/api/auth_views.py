@@ -31,7 +31,7 @@ def login_user(request):
     if serailizer.is_valid():
         custom_validataion = serailizer.validated_data.get("email") is not None or serailizer.validated_data.get("username") is not None
         if not custom_validataion:
-            return ErrorResponse(message="An email or username is required to log in.")
+            return ErrorResponse(message="An email or username is required to log in.", status_code=status.HTTP_400_BAD_REQUEST)
         
         auth_field = "email" if serailizer.validated_data.get("email") is not None else "username"
         user = User.objects.filter(**{auth_field: serailizer.validated_data.get(auth_field)}).first()
