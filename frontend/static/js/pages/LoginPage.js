@@ -1,37 +1,38 @@
 class LoginPage extends HTMLElement {
-    
-    constructor() {
-        super()
-    }
+  constructor() {
+    super();
+  }
 
-    connectedCallback() {
-
-        const template = document.getElementById("login-page");
-        const clone = template.content.cloneNode(true);
-        this.appendChild(clone);
-        const loginForm = this.querySelector("#login-form");
-        loginForm.addEventListener("submit", this.handleSubmit);
+  connectedCallback() {
+    const template = document.getElementById("login-page");
+    const clone = template.content.cloneNode(true);
+    this.appendChild(clone);
+    const loginForm = this.querySelector("#login-form");
+    loginForm.addEventListener("submit", this.handleSubmit);
+  }
+  async handleSubmit(e) {
+    e.preventDefault();
+    try {
+      const username = e.target.querySelector("#username").value;
+      const password = e.target.querySelector("#password").value;
+      const response = await fetch("http://localhost:8000/api/auth/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+        credentials: "include",
+      });
+      e.target.reset();
+      if (!response.ok) {
+        throw new Error(`Login failed : ${response.status}`);
+      }
+    } catch (error) {
+      alert(`${error.message}`);
     }
-
-    async handleSubmit(e) {
-        e.preventDefault()
-        let username = e.target.username.value
-        let password = e.target.password.value
-        await fetch('http://localhost:8000/api/auth/login/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password
-            }),
-            credentials: 'include'
-        })
-        e.target.reset()
-    }
+  }
 }
 
 window.customElements.define("login-page", LoginPage);
 
-export { LoginPage }
+export { LoginPage };

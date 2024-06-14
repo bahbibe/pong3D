@@ -1,6 +1,7 @@
 import { WebSock } from "../ws/ws.js";
 import { AbstractPage } from "./AbstarctPage.js";
-import { friends } from "../API/friends.js";
+import { Friendships } from "../API/Friends.js";
+import { User } from "../API/User.js";
 
 class ChatPage extends AbstractPage {
   constructor() {
@@ -10,24 +11,26 @@ class ChatPage extends AbstractPage {
     const template = document.getElementById("chat-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
-    this.friends = new friends();
+    this.friendships = new Friendships();
+    this.user = new User();
+    this.renderProfile();
     this.renderFriends().then(() => {
       this.querySelectorAll(".DM").forEach((DM) => {
-        DM.addEventListener("click", this.renderDM.bind(this));
+        DM.addEventListener("click", this.renderMessages.bind(this));
       });
     });
   }
 
   async renderFriends() {
     try {
-      const friends = await this.friends.getFriends();
-      for (const user of friends) {
+      this.friends = await this.friendships.getFriends();
+      for (const user of this.friends) {
         const userElement = document.createElement("div");
         userElement.setAttribute("class", "DM");
         userElement.setAttribute("id", user.friend.username);
         userElement.innerHTML = `
             <li>
-              <img class="avatar "src="${user.friend.profile.avatar}" alt="avatar"/>  
+              <img class="avatar" src="${user.friend.profile.avatar}" alt="avatar"/>  
               <span>${user.friend.username}</span>
             </li>
         `;
@@ -38,46 +41,54 @@ class ChatPage extends AbstractPage {
     }
   }
 
-  async renderDM(e) {
+  async renderMessages(e) {
     e.preventDefault();
+    //! CSS
+    this.querySelector(".messages-container").style.display = "block";
+    this.querySelector("#chat-messages-list").innerHTML = "";
+    //! CSS
     try {
-      const ws = new WebSock(e.currentTarget.id);
-      await ws.connect();
-      this.querySelector(".messages-container").style.display = "block";
-      this.querySelector("#chat-messages-list").innerHTML = "";
-      const DMs = await this.friends.getDMs(e.currentTarget.id);
-      console.log(DMs);
-      if (DMs.length === 0) {
-        const DMElement = document.createElement("div");
-        DMElement.setAttribute("class", "msg");
-        DMElement.innerHTML = `
-          <li>
-            <span>No messages yet.</span>
-          </li>
-        `;
-        this.querySelector("#chat-messages-list").appendChild(DMElement);
-      } else {
-        for (const DM of DMs) {
+      if (this.ws) {
+        this.ws.close();
+      }
+      const uuid = this.friends.find(
+        (friend) => friend.friend.username === e.currentTarget.id
+      ).uuid;
+      await this.friendships.getMessages(uuid).then((DMs) => {
+        if (DMs.length === 0) {
           const DMElement = document.createElement("div");
           DMElement.setAttribute("class", "msg");
           DMElement.innerHTML = `
-          <li>
-            <span>${DM.content}</span>
-            <span>${new Date(DM.timestamp).toLocaleString()}</span>
-          </li>
-        `;
+            <li>
+              <span>No messages yet.</span>
+            </li>
+          `;
           this.querySelector("#chat-messages-list").appendChild(DMElement);
+        } else {
+          for (const DM of DMs) {
+            const DMElement = document.createElement("div");
+            DMElement.setAttribute("class", "msg");
+            DMElement.innerHTML = `
+            <li>
+              <span>${DM.content}</span>
+              <span>${new Date(DM.timestamp).toLocaleString()}</span>
+            </li>
+          `;
+            this.querySelector("#chat-messages-list").appendChild(DMElement);
+          }
         }
-      }
+      });
+      this.ws = new WebSock(uuid);
+      await this.ws.connect();
       this.querySelector("#chat-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const message = e.target.querySelector("input").value;
         if (message) {
-          ws.send({ message });
+          this.ws.send({ message });
         }
         e.target.reset();
       });
-      await ws.receive().then((data) => {
+      await this.ws.receive().then((data) => {
         const message = JSON.parse(data);
         const DMElement = document.createElement("div");
         DMElement.setAttribute("class", "msg");
@@ -89,9 +100,19 @@ class ChatPage extends AbstractPage {
         `;
         this.querySelector("#chat-messages-list").appendChild(DMElement);
       });
+      // await ws.close();
     } catch (error) {
       console.error("Error rendering DMs:", error);
-      // ws.close();
+    }
+  }
+  async renderProfile() {
+    try {
+      const profile = await this.user.getUser();
+      this.user = profile;
+      this.querySelector("#profile-username").textContent = profile.username;
+      this.querySelector("#profile-avatar").src = profile.profile.avatar;
+    } catch (error) {
+      console.error("Error rendering profile:", error);
     }
   }
 }
