@@ -34,32 +34,32 @@
 
   <!--! Chat page -->
   <template id="chat-page">
-    <div class="chat-container">
-      <div class="users-container">
-        <div class="profile-container">
-          <h1>Profile</h1>
-          <div class="profile">
-            <img class="avatar" id="profile-avatar" src="" alt="Avatar" />
-            <span id="profile-username"></span>
-          </div>
+    <div class="profile-container">
+      <template id="profile">
+        <h1>Profile</h1>
+        <div class="profile">
+          <img class="avatar" id="profile-avatar" src="" alt="Avatar" />
+          <span id="profile-username"></span>
         </div>
-        <h2>Friends</h2>
-        <ul id="chat-users-list">
+      </template>
+    </div>
+    <div class="friends-container">
+      <template id="friends">
+        <h1>Friends</h1>
+        <ul id="friends-list">
         </ul>
-      </div>
-      <div class="messages-container">
-        <h1>Messages</h1>
-        <div class="chat-messages">
-          <ul id="chat-messages-list">
-          </ul>
+      </template>
+    </div>
+    <div class="chat-container">
+      <template id="chat">
+        <h1>Chat</h1>
+        <div id="chat-messages">
         </div>
         <form id="chat-form">
-          <input type="text" id="chat-input" placeholder="Type a message..." />
+          <input id="chat-input" type="text" placeholder="Type a message..." required>
           <button type="submit">Send</button>
         </form>
-      </div>
-
-    </div>
+      </template>
   </template>
 
   <!--! Home page -->
