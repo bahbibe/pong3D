@@ -3,12 +3,12 @@ import API from "../API/API.js";
 class Profile extends HTMLElement {
   constructor() {
     super();
+    this.API = new API();
   }
   connectedCallback() {
     const template = document.getElementById("profile");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
-    this.API = new API();
     this.render();
   }
   async render() {
@@ -22,6 +22,6 @@ class Profile extends HTMLElement {
   }
 }
 
-customElements.define("profile-page", Profile);
+customElements.define("profile-element", Profile);
 
 export default Profile;

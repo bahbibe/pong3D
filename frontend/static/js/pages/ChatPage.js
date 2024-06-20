@@ -1,7 +1,8 @@
 import { AbstractPage } from "./AbstarctPage.js";
-import Profile from "./Profile.js";
-import FriendsList from "./FriendsList.js";
-import ChatBox from "./ChatBox.js";
+import Profile from "../components/Profile.js";
+import Friends from "../components/Friends.js";
+import ChatBox from "../components/ChatBox.js";
+import WebSock from "../ws/ws.js";
 
 class ChatPage extends AbstractPage {
   constructor() {
@@ -12,27 +13,25 @@ class ChatPage extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
     this.querySelector(".profile-container").appendChild(new Profile());
-    this.querySelector(".friends-container").appendChild(new FriendsList());
-    this.querySelector(".friends-container").addEventListener("click", (event) => {
+    this.querySelector(".friends-container").appendChild(new Friends());
+    this.querySelector("#friends-list").addEventListener("click", (event) => {
       if (event.target.closest(".contact")) {
-        this.renderChatBox(event);
+        const chatBox = document.querySelector("chat-box");
+        if (chatBox) {
+          chatBox.parentNode.removeChild(chatBox);
+        }
+        const uuid = event.target.closest(".contact").id;
+        const ChatBoxElm = new ChatBox(uuid);
+        this.querySelector(".chat-container").appendChild(ChatBoxElm);
+
       }
     });
-
-  }
-  async renderChatBox(event) {
-
-    this.querySelector(".chat-container").appendChild(new ChatBox());
-    
-
-    // const chatBox = this.querySelector("#chat-box");
-    // if (chatBox) {
-    //   chatBox.parentNode.removeChild(chatBox);
-    // }
-    // const chatBoxElement = document.createElement("chat-box");
-    // chatBoxElement.setAttribute("id", "chat-box");
-    // chatBoxElement.setAttribute("friend", event.target.closest(".contact").id);
-    // this.querySelector(".chat-container").appendChild(chatBoxElement);
+    this.querySelector(".chat-container").addEventListener("click", (event) => {
+      if (event.target.id === "close-chat") {
+        const chatBox = document.querySelector("chat-box");
+        chatBox.parentNode.removeChild(chatBox);
+      }
+    });
   }
 }
 
