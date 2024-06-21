@@ -2,11 +2,11 @@ import { AbstractPage } from "./AbstarctPage.js";
 import Profile from "../components/Profile.js";
 import Friends from "../components/Friends.js";
 import ChatBox from "../components/ChatBox.js";
-import WebSock from "../ws/ws.js";
 
 class ChatPage extends AbstractPage {
   constructor() {
     super();
+    this.uuid = null;
   }
   connectedCallback() {
     const template = document.getElementById("chat-page");
@@ -18,12 +18,14 @@ class ChatPage extends AbstractPage {
       if (event.target.closest(".contact")) {
         const chatBox = document.querySelector("chat-box");
         if (chatBox) {
+          if (this.uuid === event.target.closest(".contact").id) {
+            return;
+          }
           chatBox.parentNode.removeChild(chatBox);
         }
-        const uuid = event.target.closest(".contact").id;
-        const ChatBoxElm = new ChatBox(uuid);
+        this.uuid = event.target.closest(".contact").id;
+        const ChatBoxElm = new ChatBox(this.uuid);
         this.querySelector(".chat-container").appendChild(ChatBoxElm);
-
       }
     });
     this.querySelector(".chat-container").addEventListener("click", (event) => {

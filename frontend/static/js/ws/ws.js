@@ -1,47 +1,51 @@
 class WebSock {
-    constructor(uuid) {
-        this.socket = new WebSocket(`ws://localhost:8000/ws/chat/${uuid}/`);
-    }
+  constructor(uuid) {
+    this.uuid = uuid;
+    this.socket = new WebSocket(`ws://localhost:8000/ws/chat/${uuid}/`);
+  }
 
-    async connect() {
-        this.socket.onopen = () => {
-            console.log("ws connected")
-        }
-        this.socket.onerror = (error) => {
-            console.log("error", error)
-        }
-        this.socket.onclose = (event) => {
-            console.log("ws closed")
-            if (event.code === 4001) {
-                alert("Unauthorized access. Please login.")
-                window.location.href = "/login"
-            }
-        }
+  async connect() {
+    this.socket.onopen = () => {
+      console.log(this.uuid + " ===> connected");
+    };
+    this.socket.onerror = (error) => {
+      console.log("error", error);
+    };
+    this.socket.onclose = (event) => {
+      console.log(this.uuid + " ====> disconnected");
+      if (event.code === 4001) {
+        alert("Unauthorized access. Please login.");
+        window.location.href = "/login";
+      }
+    };
+  }
+  async receive() {
+    return new Promise((resolve, reject) => {
+      this.socket.onmessage = (event) => {
+        resolve(event.data);
+      };
+      this.socket.onerror = (error) => {
+        reject(error);
+      };
+    });
+  }
+  async send(data) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify(data));
+    } else {
+      console.error(
+        "WebSocket is not open. ReadyState:",
+        this.socket ? this.socket.readyState : "Socket is null"
+      );
     }
-    async receive() {
-        return new Promise((resolve, reject) => {
-            this.socket.onmessage = (event) => {
-                resolve(event.data);
-            }
-            this.socket.onerror = (error) => {
-                reject(error);
-            }
-        });
+  }
+  async close() {
+    if (this.socket) {
+      this.socket.close();
+    } else {
+      console.error("WebSocket is not initialized.");
     }
-    async send(data) {
-        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-            this.socket.send(JSON.stringify(data));
-        } else {
-            console.error("WebSocket is not open. ReadyState:", this.socket ? this.socket.readyState : "Socket is null");
-        }
-    }
-    async close() {
-        if (this.socket) {
-            this.socket.close();
-        } else {
-            console.error("WebSocket is not initialized.");
-        }
-    }
+  }
 }
 
 export default WebSock;
