@@ -1,4 +1,6 @@
-class LoginPage extends HTMLElement {
+import { AbstractPage } from "./AbstarctPage.js";
+
+class LoginPage extends AbstractPage {
   constructor() {
     super();
   }
@@ -7,8 +9,10 @@ class LoginPage extends HTMLElement {
     const template = document.getElementById("login-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
-    const loginForm = this.querySelector("#login-form");
-    loginForm.addEventListener("submit", this.handleSubmit);
+    this.querySelector("#login-form").addEventListener(
+      "submit",
+      this.handleSubmit
+    );
   }
   async handleSubmit(e) {
     e.preventDefault();
@@ -32,7 +36,6 @@ class LoginPage extends HTMLElement {
     }
   }
 }
-
-window.customElements.define("login-page", LoginPage);
+customElements.define("login-page", LoginPage);
 
 export { LoginPage };

@@ -54,7 +54,7 @@
         <div id="chat-messages">
         </div>
         <form id="chat-form">
-          <input id="chat-input" type="text" placeholder="Type a message..." >
+          <input id="chat-input" type="text" placeholder="Type a message...">
           <button type="submit">Send</button>
         </form>
       </template>
@@ -83,6 +83,14 @@
     <p>Sorry, the page you are looking for does not exist.</p>
   </template>
 
+  <div id="notification-container">
+    <template id="notification">
+      <div class="notification">
+        <span id="notification-message"></span>
+        <button id="notification-close">X</button>
+      </div>
+    </template>
+  </div>
 
 
   <script type="module" src="/static/js/index.js"></script>

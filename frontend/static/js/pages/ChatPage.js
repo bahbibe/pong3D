@@ -6,6 +6,7 @@ import ChatBox from "../components/ChatBox.js";
 class ChatPage extends AbstractPage {
   constructor() {
     super();
+    this.ws.connect();
     this.uuid = null;
   }
   connectedCallback() {
@@ -14,6 +15,7 @@ class ChatPage extends AbstractPage {
     this.appendChild(clone);
     this.querySelector(".profile-container").appendChild(new Profile());
     this.querySelector(".friends-container").appendChild(new Friends());
+    // this.notify();
     this.querySelector("#friends-list").addEventListener("click", (event) => {
       if (event.target.closest(".contact")) {
         const chatBox = document.querySelector("chat-box");
