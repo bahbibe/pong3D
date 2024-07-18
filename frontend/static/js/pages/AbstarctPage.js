@@ -4,7 +4,7 @@ import Notification from "../components/Notification.js";
 class AbstractPage extends HTMLElement {
   constructor() {
     super();
-    this.ws = new WebSock("notify");
+    // this.ws = new WebSock("notify");
   }
 
   get params() {

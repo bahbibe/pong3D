@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,9 +8,11 @@
     integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
   <link rel="stylesheet" href="/static/css/index.css" />
   <!-- !google font link -->
+   
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&display=swap" rel="stylesheet" />
+
   <!-- !frontend awesome icon library -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
@@ -21,7 +22,7 @@
 <body>
   <div id="app"></div>
   <!--! Login page -->
-  <template id="login-page">
+  <!-- <template id="login-page">
     <form id="login-form">
       <h1>Login</h1>
       <div class="form-group">
@@ -30,7 +31,7 @@
         <button type="submit">Submit</button>
       </div>
     </form>
-  </template>
+  </template> -->
 
   <!--! Chat page -->
   <template id="chat-page">
@@ -71,28 +72,257 @@
         <div class="pong-group">
           <a href="/login" class="button login"> login <i class="fa-solid fa-user fa-xs"></i> </a>
           <a href="/" class="button register"> register </a>
-          <a href="/" class="button login-42"> login with 42</a>
+          <a href="/" class="button login-42"> 
+            login with
+            <img src="/static/asset/images/42.svg" alt="" class="logo-42">
+          </a>
         </div>
       </section>
     </div>
   </template>
+  <!--! Login page -->
+  <template id="login-page">
+    <section>
+     <div class="container-lg d-flex justify-content-center align-items-center min-vh-100">
+    <!-- <div class="col-lg-8 col-md-6 flex-column pe-xxl-5">
+      <h1 class="title">PONG</h1>
+      <p class="fs-1 text-light fw-medium">
+        pong help you to enjoy the moment with your friend
+      </p>
+    </div>  -->
+    <div class="col-lg-8 col-md-6 flex-column pe-5 left-box">
+        <h1 class="title">PONG</h1>
+        <p class="fs-1 text-light  pe-xxl-5 fw-medium" style="font-family: monospace;">
+          pong help you to enjoy the moment with your friend
+        </p>
+    </div>
+       <div class="col-lg-4 col-md-6 col-sm-8 bg-white box-padding rounded right-box">
+         <ul class="nav nav-pills nav-justified mb-3" id="ex1" role="tablist">
+           <li class="nav-item" role="presentation">
+             <a class="nav-link active" id="tab-login" data-mdb-pill-init href="" role="tab"
+               aria-controls="pills-login" aria-selected="false">Login</a>
+              </li>
+               <li class="nav-item" role="presentation">
+                 <a class="nav-link " id="tab-register" data-mdb-pill-init href="#" role="tab"
+                   aria-controls="pills-register" aria-selected="true">Register</a>
+               </li>
+          </ul>
+         <div class="row align-items-center" id="login">
+                <div class="header-text mb-4">
+                     <h2>Welcome Back</h2>
+                </div>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control form-control-lg bg-light fs-6" placeholder="Email address">
+                </div>
+                <div class="input-group mb-1">
+                    <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password">
+                </div>
+                <div class="input-group mb-5 d-flex justify-content-between">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="formCheck">
+                        <label for="formCheck" class="form-check-label text-secondary"><small>Remember Me</small></label>
+                    </div>
+                    <div class="forgot">
+                        <small><a href="#">Forgot Password?</a></small>
+                    </div>
+                </div>
+                <div class="input-group mb-3">
+                    <button class="btn btn-lg btn-primary w-100 fs-6 fw-bold">Login</button>
+                </div>
+                <div class="input-group mb-3">
+                    <button class="btn btn-lg btn-dark w-100 fs-6 fw-bold"><small class="me-2">Sign In with </small><img src="/static/asset/images/42.svg" style="width:20px" ></button>
+                </div>
+         </div>
+          <div class="row align-items-center hidden" id="register">
+              <div class="input-group mb-3">
+                  <input type="text" id="form3Example1m" class="form-control form-control-lg"  placeholder="First name"/>
+              </div>
+              <div class="input-group mb-3">
+                  <input type="text" id="form3Example1n" class="form-control form-control-lg" placeholder="last name"/>
+              </div>
+              <div class="input-group mb-3">
+                  <input type="text" class="form-control form-control-lg bg-light fs-6" placeholder="Email address">
+              </div>
+              <div class="input-group mb-3">
+                  <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password">
+              </div>
+              <div class="input-group mb-3">
+                  <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password">
+              </div>
+              <div class="input-group mb-5 d-flex justify-content-between">
+                    <h6 class="mb-0 me-4">Gender: </h6>
 
+                    <div class="form-check form-check-inline mb-0 me-4">
+                      <input class="form-check-input" type="radio" name="inlineRadioOptions" id="femaleGender"
+                        value="option1" />
+                      <label class="form-check-label" for="femaleGender">Female</label>
+                    </div>
+  
+                    <div class="form-check form-check-inline mb-0 me-4">
+                      <input class="form-check-input" type="radio" name="inlineRadioOptions" id="maleGender"
+                        value="option2" />
+                      <label class="form-check-label" for="maleGender">Male</label>
+                    </div>
+              </div>
+              <div class="input-group mb-3">
+                  <button class="btn btn-lg btn-primary w-100 fs-6 fw-bold">Login</button>
+              </div>
+          </div>
+       </div> 
+      </div>
+    </div>
+    </section>
+  </template>
+  <!--! USER PROFILE  -->
+  <template id="user-profile">
+    <main-nav></main-nav>
+    <section class="my-5">
+      <div class="container-xl ">
+        <div class="d-grid gap-3 row p-3 rounded box-sh-1" style="background-color: #181920;">
+          <div class="col-12 text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <img src="/static/asset/images/profile.svg" class="img-fluid"width="200" alt="user profile image">
+                <div class="ps-2">
+                  <h4 class="m-0 fw-bold text-capitalize">bilal makhloufi </h4>
+                  <sapn>@bmakhlou</sapn>
+                </div>
+              </div>
+              <div class="d-flex text-center font-monospace">
+                <div class="total-match ms-md-2 me-4">
+                  <sapan class="d-block mb-1 ">
+                    Total Maches
+                  </sapan>
+                  <sapan class="fw-bold">100</sapan>
+                </div> 
+                <div class="match-wins me-4">
+                  <sapan class="d-block mb-1">
+                     wins
+                  </sapan>
+                  <sapan class="fw-bold">100</sapan>
+                </div>   
+                <div class="match-loses  me-4">
+                  <sapan class="d-block mb-1">
+                     Loses
+                  </sapan>
+                  <sapan class="fw-bold">100</sapan>
+                </div>  
+                <div class="match-ratio me-4">
+                  <sapan class="d-block mb-1">
+                    Ratio
+                  </sapan>
+                  <sapan class="fw-bold">100%</sapan>
+                </div>  
+              </div>
+              <div class="rank text-center">
+                <span class="d-block mb-1">
+                  <i class="fa-solid fa-ranking-star fa-xl text-secondary"></i>
+                </span>
+                <span class="fw-bold">100</span>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row my-5">
+          <div class="col-8 rounded p-3 me-auto box-sh-1"  style="background-color: #181920; height: 30rem;">
+            <h2 class="text-white">Game History</h2>
+          </div>
 
+          <div class="col-3 rounded p-3 box-sh-1"  style="background-color: #181920;">
+            <h2 class="text-white">Friends</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+    </section>
+  </template>
+  <!-- !not found page -->
   <template id="not-found-page">
     <h1>404 Not Found</h1>
     <p>Sorry, the page you are looking for does not exist.</p>
   </template>
-
-  <div id="notification-container">
-    <template id="notification">
+  
+  <template id="notification">
+    <div id="notification-container">
       <div class="notification">
         <span id="notification-message"></span>
         <button id="notification-close">X</button>
       </div>
-    </template>
-  </div>
+    </div>
+  </template>
+  
+  <!-- !Nav componant -->
+   <template id="main-nav">
+    <nav class="navbar navbar-expand-lg navbar-dark box-sh-2" style="background-color: #0E1015;">
+      <div class="container-xl">
+        <!-- Left elements -->
+        <div class="d-flex">
+          <!-- Brand -->
+          <a class="navbar-brand" href="#">
+            <img
+              src="/static/asset/images/transistor-ping-pong.gif"
+              height="40"
+              alt="logo image"
+              loading="lazy"
+            />
+          </a>
+        </div>
+        <!-- Left elements -->
+        
+        <!-- Center elements -->
+        <!-- Search form -->
+        <form class="navbar-nav flex-row d-none d-md-flex input-group w-auto my-auto d-none d-sm-flex">
+          <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+          <!-- <button class="btn btn-outline-success" type="submit">Search</button> -->
+          <span class="input-group-text border-0  d-lg-flex">
+            <i class="fas fa-search"></i>
+          </span>
+        </form>
+        <!-- Center elements -->
 
-
+        <!-- Right elements -->
+        <ul class="navbar-nav flex-row">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-sm-flex align-items-sm-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"href="#">
+              <img
+                src="/static/asset/images/profile.svg"
+                class="rounded-circle"
+                height="40"
+                alt="user profile image"
+                loading="lazy"
+              />
+              <strong class="d-none d-sm-block ms-1">bmakhlou</strong>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
+              <li>
+                <a class="dropdown-item" href="/profile">
+                  <i class="fa-solid fa-user me-1"></i>  
+                  Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <i class="fa-solid fa-gear me-1"></i>
+                  settings
+                </a>
+              </li>
+              <li>
+                <hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
+                  Exit
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <!-- Right elements -->
+      </div>
+    </nav>
+   </template>
+  
   <script type="module" src="/static/js/index.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
