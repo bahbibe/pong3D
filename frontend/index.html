@@ -177,61 +177,61 @@
   <template id="user-profile">
     <main-nav></main-nav>
     <section class="my-5">
-      <div class="container-xl ">
-        <div class="d-grid gap-3 row p-3 rounded box-sh-1" style="background-color: #181920;">
-          <div class="col-12 text-white">
-            <div class="d-flex justify-content-between align-items-center">
-              <div class="d-flex align-items-center">
-                <img src="/static/asset/images/profile.svg" class="img-fluid"width="200" alt="user profile image">
+      <div class="container-md">
+        <div class="row p-3 rounded text-white box-sh-1" style="background-color: #181920; margin: 0 auto;">
+          <div class="col-12 col-md-5">
+              <div class="d-lg-flex align-items-center  text-center text-lg-start pb-3 pb-lg-0">
+                <img src="/static/asset/images/profile.svg" class="img-fluid" width="200" alt="user profile image">
                 <div class="ps-2">
-                  <h4 class="m-0 fw-bold text-capitalize">bilal makhloufi </h4>
+                  <h4 class="m-0 fw-bold text-capitalize">bilal makhloufi</h4>
                   <sapn>@bmakhlou</sapn>
                 </div>
-              </div>
-              <div class="d-flex text-center font-monospace">
-                <div class="total-match ms-md-2 me-4">
-                  <sapan class="d-block mb-1 ">
-                    Total Maches
-                  </sapan>
-                  <sapan class="fw-bold">100</sapan>
-                </div> 
-                <div class="match-wins me-4">
-                  <sapan class="d-block mb-1">
-                     wins
-                  </sapan>
-                  <sapan class="fw-bold">100</sapan>
-                </div>   
-                <div class="match-loses  me-4">
-                  <sapan class="d-block mb-1">
-                     Loses
-                  </sapan>
-                  <sapan class="fw-bold">100</sapan>
-                </div>  
-                <div class="match-ratio me-4">
-                  <sapan class="d-block mb-1">
-                    Ratio
-                  </sapan>
-                  <sapan class="fw-bold">100%</sapan>
-                </div>  
-              </div>
-              <div class="rank text-center">
-                <span class="d-block mb-1">
-                  <i class="fa-solid fa-ranking-star fa-xl text-secondary"></i>
-                </span>
-                <span class="fw-bold">100</span>
-                </ul>
-              </div>
             </div>
           </div>
-        </div>
-        <div class="row my-5">
-          <div class="col-8 rounded p-3 me-auto box-sh-1"  style="background-color: #181920; height: 30rem;">
-            <h2 class="text-white">Game History</h2>
+
+          <div class="col-12 col-md-7 col-lg-5 d-flex flex-wrap font-monospace align-items-center  justify-content-center text-center">
+            <div class="total-match me-4 d-none d-sm-block">
+              <sapan class="d-block mb-1">
+                Total Maches
+              </sapan>
+              <sapan class="fw-bold">100</sapan>
+            </div> 
+            <div class="match-wins me-4">
+              <sapan class="d-block mb-1">
+                 wins
+              </sapan>
+              <sapan class="fw-bold">100</sapan>
+            </div>   
+            <div class="match-loses  me-4">
+              <sapan class="d-block mb-1">
+                 Loses
+              </sapan>
+              <sapan class="fw-bold">100</sapan>
+            </div>  
+            <div class="match-ratio me-4">
+              <sapan class="d-block mb-1">
+                Ratio
+              </sapan>
+              <sapan class="fw-bold">100%</sapan>
+            </div>  
           </div>
 
-          <div class="col-3 rounded p-3 box-sh-1"  style="background-color: #181920;">
-            <h2 class="text-white">Friends</h2>
-          </div>
+          <div class="rank col-2  d-lg-flex d-none align-items-center justify-content-end">
+            <div class="match-ratio me-4">
+              <span class="d-block mb-1">
+                <i class="fa-solid fa-ranking-star fa-xl text-secondary"></i>
+              </span>
+              <span class="fw-bold">100</span>
+            </div>  
+        </div>
+      </div>
+      <div class="row my-5">
+        <div class="col-12 col-md-8 rounded p-3 me-auto box-sh-1"  style="background-color: #181920; height: 30rem;">
+          <h2 class="text-white">Game History</h2>
+        </div>
+
+        <div class="col-12 col-md-3 rounded p-3 box-sh-1"  style="background-color: #181920;">
+          <h2 class="text-white">Friends</h2>
         </div>
       </div>
     </div>
@@ -255,7 +255,7 @@
   <!-- !Nav componant -->
    <template id="main-nav">
     <nav class="navbar navbar-expand-lg navbar-dark box-sh-2" style="background-color: #0E1015;">
-      <div class="container-xl">
+      <div class="container-md">
         <!-- Left elements -->
         <div class="d-flex">
           <!-- Brand -->
