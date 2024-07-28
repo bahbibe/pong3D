@@ -22,6 +22,7 @@ const routes = [
   { path: "/", view: HomePage, isProtected: false, page: "home-page" },
   { path: "/login", view: LoginPage, isProtected: false, page: "login-page" },
   { path: "/profile", view: ProfilePage, isProtected: false, page: "user-profile" },
+  { path: "/ranking", view: ProfilePage, isProtected: false, page: "ranking-page" },
   { path: "/chat", view: ChatPage, isProtected: false, page: "chat-page" },
   {
     path: "/chat/:roomId",

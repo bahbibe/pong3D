@@ -9,13 +9,23 @@
 
 :root {
   --primary: #0E1015;
-  --secendary: #272a30;
+  --secondary: #272a30;
   --white: #f1f1f1;
+}
+
+
+.primary-bg {
+  background-color: var(--primary);
+}
+
+.secondary-bg {
+  background-color: var(--secondary);
 }
 
 body{
     font-family: 'Poppins', sans-serif;
     background: var(--primary);
+    color: var(--white)
 }
 
 
