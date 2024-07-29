@@ -181,12 +181,12 @@
         <div class="row p-3 rounded text-white box-sh-1 secondary-bg">
           <div class="col-12 col-md-5">
               <div class="d-lg-flex align-items-center  text-center text-lg-start pb-3 pb-lg-0">
-                <img src="/static/asset/images/profile.svg" class="img-fluid" width="200" alt="user profile image">
+                <img src="/static/asset/images/profile.svg" class="img-fluid" width="120" alt="user profile image">
                 <div class="ps-2">
                   <h4 class="m-0 fw-bold text-capitalize">bilal makhloufi</h4>
                   <sapn>@bmakhlou</sapn>
                 </div>
-            </div>
+              </div>
           </div>
 
           <div class="col-12 col-md-7 col-lg-5 d-flex flex-wrap font-monospace align-items-center  justify-content-center text-center">
@@ -225,35 +225,79 @@
             </div>  
         </div>
       </div>
-      <div class="row my-5">
-        <div class="col-12 col-md-8 rounded p-3 me-auto box-sh-1 secondary-bg">
+      <div class="row my-5 justify-content-evenly">
+        <div class="col-12 col-lg-7 rounded p-3 box-sh-1 secondary-bg">
           <h2 class="text-white">Game History</h2>
+          <div class="row bg-info mt-3 p-1 mb-1">
+            <div class="col-4 col-md-3 ">
+             <div class="d-flex align-items-center">
+                <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
+                <div class="ps-2">
+                  <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
+                </div>
+              </div>
+            </div>
+            <div class="col-2 my-auto order-1 order-md-0 d-none d-md-block text-center">
+              <img src="/static/asset/images/icons8-vs-50.png" class="img-fluid" width="30" alt="icon batlle">
+            </div>
+            <div class="col-4 col-md-3 order-3 order-md-0">
+              <div class="d-md-flex align-items-center">
+                <div class="pe-2">
+                  <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
+                </div>
+                <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
+              </div>
+            </div>
+            <div class="col-4 col-md-2 my-auto order-2 order-md-0 text-center">
+              <span class="result fw-bolder ">10:7</span>
+            </div>
+            <div class="col-2 my-auto text-center d-none d-md-block">
+              <span class="result fw-bolder">WIN 🏆</span>
+            </div>
+          </div>
         </div>
 
-        <div class="col-12 col-md-3 rounded p-3 box-sh-1 secondary-bg" style=" height: 30rem">
+        <div class="col-12 col-lg-4 rounded p-3 box-sh-1 secondary-bg" style=" height: 30rem">
           <h2 class="text-white">Friends</h2>
+
+          <div class="row p-1 rounded-1 justify-content-around" style="background-color: rgb(0, 81, 255);">
+
+            <div class="col-4">
+              <div class="d-flex align-items-center">
+                <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle" width="35" alt="user profile image">
+                <div class="ps-2">
+                  <sapn class="fw-bold text-capitalize" style="font-size: 14px;">bmakhlou</sapn>
+                </div>
+              </div>
+            </div>
+            <div class="col-3">
+
+            </div>
+            <div class="col-2  my-auto  text-center">
+              <a href="#" role="button" class="p-1 bg-success font-glitch text-white text-decoration-none">PLAY</a>
+            </div>
+            
+          </div>
         </div>
       </div>
-    </div>
+      </div>
     </section>
   </template>
   <!-- !Ranking page -->
    <template id="ranking-page">
     <main-nav></main-nav>
-    <section>
-    <div class="container mt-5 p-1">
+    <section class="mx-1">
+    <div class="container mt-5">
       <h1 class="display-1 mb-5">LeaderBeard</h1>
-      <div class="row bg-secondary  p-2 rounded mb-4" style="box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset;">
-          <div class="rank col-1 my-auto">
-            <h2>#1</h3>
-          </div>
-         <div class="col-2 col-md-4 d-flex align-items-center me-auto">
+      <div class="row bg-secondary rounded mb-4 p-2" style="box-shadow: rgba(6, 24, 44, 0.4) 0px 0px 0px 2px, rgba(6, 24, 44, 0.65) 0px 4px 6px -1px, rgba(255, 255, 255, 0.08) 0px 1px 0px inset;">
+          
+         <div class="col-2 col-md-4 d-flex align-items-center  me-auto">
            <img src="/static/asset/images/profile.svg" alt="player image" class="img-fluid rounded-circle" width="80">
            <div class="ps-2">
-            <h6 class="fs-6 text-uppercase">bmakhlou</h6>
+            <span class="text-uppercase">bmakhlou</span>
           </div>
          </div>
-         <div class="col-5  my-auto">
+         <div class="col-md-5  my-auto d-none d-md-inline-block">
           <div class="row text-center">
             <div class="total-match col-3">
               <sapan class="d-block">
@@ -280,6 +324,9 @@
               <sapan class="fw-bold">100%</sapan>
             </div>  
           </div>
+        </div>
+        <div class="rank col-2 my-auto text-end">
+          <span class="fw-bolder">#1</span>
         </div>
       </div>
     </div>
@@ -347,6 +394,12 @@
                 <a class="dropdown-item" href="/profile">
                   <i class="fa-solid fa-user me-1"></i>  
                   Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="/ranking">
+                  <i class="fa-solid fa-user me-1"></i>  
+                  Leader Board
                 </a>
               </li>
               <li>
