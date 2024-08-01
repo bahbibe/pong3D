@@ -21,18 +21,6 @@
 
 <body>
   <div id="app"></div>
-  <!--! Login page -->
-  <!-- <template id="login-page">
-    <form id="login-form">
-      <h1>Login</h1>
-      <div class="form-group">
-        <input id="username" class="form-control" name="user" type="text" placeholder="Username" required>
-        <input id="password" type="password" class="form-control" name="pass" placeholder="Password" required>
-        <button type="submit">Submit</button>
-      </div>
-    </form>
-  </template> -->
-
   <!--! Chat page -->
   <template id="chat-page">
     <div class="profile-container">
@@ -61,7 +49,6 @@
       </template>
     </div>
   </template>
-
   <!--! Home page -->
   <template id="home-page">
     <div class="home">
@@ -260,8 +247,7 @@
         <div class="col-12 col-lg-4 rounded p-3 box-sh-1 secondary-bg" style=" height: 30rem">
           <h2 class="text-white">Friends</h2>
 
-          <div class="row p-1 rounded-1 justify-content-around" style="background-color: rgb(0, 81, 255);">
-
+          <div class="row p-1 rounded-1 justify-content-between align-items-center border border-info">
             <div class="col-4">
               <div class="d-flex align-items-center">
                 <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle" width="35" alt="user profile image">
@@ -270,13 +256,12 @@
                 </div>
               </div>
             </div>
-            <div class="col-3">
-
-            </div>
-            <div class="col-2  my-auto  text-center">
-              <a href="#" role="button" class="p-1 bg-success font-glitch text-white text-decoration-none">PLAY</a>
-            </div>
-            
+            <div class="col-4  p-1  text-end">
+              <a href="#" role="button" class= "me-2 text-decoration-none d-none d-md-inline-block">
+                <i class="fa-sharp fa-solid fa-message text-white"></i>
+              </a>
+              <a href="#" role="button" class=" bg-success font-glitch text-white text-decoration-none px-1">PLAY</a>
+            </div> 
           </div>
         </div>
       </div>
@@ -332,12 +317,30 @@
     </div>
     </section>
    </template>
+   <template id="settings-page">
+     <main-nav></main-nav>
+     <section class="mt-5">
+    <div class="">
+      <form action="POST">
+        <div class="d-flex justify-content-center mb-2">
+            <img id="selectedAvatar" src="/static/asset/images/profile.svg"
+            class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;" alt="profile image" />
+        </div>
+        <div class="d-flex justify-content-center">
+            <div data-mdb-ripple-init class="btn btn-primary btn-rounded">
+                <label class="form-label text-white m-1" for="userImg">Choose</label>
+                <input type="file" class="form-control d-none" id="userImg" onchange="displaySelectedImage(event, 'selectedAvatar')" />
+            </div>
+        </div>
+      </form>
+    </div>
+     </section>
+   </template>
   <!-- !not found page -->
   <template id="not-found-page">
     <h1>404 Not Found</h1>
     <p>Sorry, the page you are looking for does not exist.</p>
   </template>
-  
   <template id="notification">
     <div id="notification-container">
       <div class="notification">
