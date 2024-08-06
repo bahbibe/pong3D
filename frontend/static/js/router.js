@@ -1,5 +1,5 @@
 // Pages Import
-import { ChatPage, HomePage, NotFoundPage, LoginPage, ProfilePage, RankingPage, SettingsPage } from "./pages/index.js";
+import { ChatPage, HomePage, NotFoundPage, LoginPage, ProfilePage, RankingPage, SettingsPage, Home } from "./pages/index.js";
 
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
@@ -24,6 +24,7 @@ const routes = [
   { path: "/profile", view: ProfilePage, isProtected: false, page: "user-profile" },
   { path: "/ranking", view: RankingPage, isProtected: false, page: "ranking-page" },
   { path: "/settings", view: SettingsPage, isProtected: false, page: "settings-page" },
+  { path: "/home", view: Home, isProtected: false, page: "user-home" },
   { path: "/chat", view: ChatPage, isProtected: false, page: "chat-page" },
   {
     path: "/chat/:roomId",
