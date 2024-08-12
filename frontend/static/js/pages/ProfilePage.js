@@ -21,6 +21,11 @@ class mainNav extends AbstractPage {
     const template = document.getElementById("main-nav");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
+    const toggler = this.querySelector(".toggler-btn");
+    toggler.addEventListener("click", function () {
+    document.querySelector("#sidebar").classList.toggle("collapsed");
+    });
+
   }
 }
 
