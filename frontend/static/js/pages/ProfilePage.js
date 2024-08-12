@@ -9,6 +9,20 @@ class ProfilePage extends AbstractPage {
     const template = document.getElementById("user-profile");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
+    const ctn = this.querySelector(".profile-content");
+    // ctn.textContent = "HISTORY";
+    const btns = this.querySelectorAll("input.switcher");
+    btns.forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        if(e.target.id === "friends")
+          ctn.classList.add("d-none");
+        else
+        {
+          ctn.classList.remove("d-none");
+        }
+      })
+      
+    }) 
   }
 }
 
