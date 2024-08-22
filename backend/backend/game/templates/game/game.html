@@ -9,15 +9,15 @@
     <textarea id="game-log" cols="100" rows="20"></textarea><br>
     <input id="game-message-input" type="text" size="100"><br>
     <input id="game-message-submit" type="button" value="Send">
-    {{ game_name|json_script:"game-name" }}
+    {{ game_id|json_script:"game-id" }}
     <script>
-        const gameName = JSON.parse(document.getElementById('game-name').textContent);
+        const gameId = JSON.parse(document.getElementById('game-id').textContent);
 
         const gameSocket = new WebSocket(
             'ws://'
             + window.location.host
             + '/ws/game/'
-            + gameName
+            + gameId
             + '/'
         );
 
