@@ -110,20 +110,21 @@
                 </div>
          </div>
           <div class="row align-items-center hidden" id="register">
+            <form action="POST">
               <div class="input-group mb-3">
-                  <input type="text" id="form3Example1m" class="form-control form-control-lg"  placeholder="First name"/>
+                  <input type="text"  class="form-control form-control-lg"  placeholder="First name"  id="firstName"/>
               </div>
               <div class="input-group mb-3">
-                  <input type="text" id="form3Example1n" class="form-control form-control-lg" placeholder="last name"/>
+                  <input type="text" class="form-control form-control-lg" placeholder="last name" id="lastName" />
               </div>
               <div class="input-group mb-3">
-                  <input type="text" class="form-control form-control-lg bg-light fs-6" placeholder="Email address">
+                  <input type="text" class="form-control form-control-lg bg-light fs-6" placeholder="Email address" id="email">
               </div>
               <div class="input-group mb-3">
-                  <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password">
+                  <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password" id="password">
               </div>
               <div class="input-group mb-3">
-                  <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password">
+                  <input type="password"  class="form-control form-control-lg bg-light fs-6" placeholder="Password" id="confirm-password">
               </div>
               <div class="input-group mb-5 d-flex justify-content-between">
                     <h6 class="mb-0 me-4">Gender: </h6>
@@ -141,8 +142,9 @@
                     </div>
               </div>
               <div class="input-group mb-3">
-                  <button class="btn btn-lg btn-primary w-100 fs-6 fw-bold">Login</button>
+                  <button class="btn btn-lg btn-primary w-100 fs-6 fw-bold" data-login >Login</button>
               </div>
+            </form>
           </div>
        </div> 
       </div>
@@ -236,12 +238,12 @@
                   </div>  
               </div>
             </div>
-            <div class="row mt-4">
-              <div class="col-12 p-3 secondary-bg" style="min-height: 65vh;">
-                <div class="radio-input">
-                  <input checked="" class="input green switcher" type="radio" name="radio"  id="history"/>
-                  <input class="input green switcher" type="radio" name="radio"  id="friends"/>
-                </div>
+            <div class="row mt-4 secondary-bg">
+              <div class="radio-input">
+                <input checked="" class="input green switcher" type="radio" name="radio"  id="history"/>
+                <input class="input green switcher" type="radio" name="radio"  id="friends"/>
+              </div>
+              <!-- <div class="col-12 p-3 secondary-bg" style="min-height: 65vh;">
                 <div class="profile-content">
                   <h2 class="text-white">Game History</h2>
                   <div class="row bg-info mt-3 p-1 mb-1">
@@ -272,11 +274,71 @@
                     </div>
                   </div>
                 </div>
-              </div>      
-              <!-- <div class="col-12 col-lg-4 rounded p-3 box-sh-1 secondary-bg" style=" height: 30rem">
-                <h2 class="text-white">Friends</h2>
-      
-                <div class="row p-1 rounded-1 justify-content-between align-items-center border border-info">
+              </div>       -->
+              <div class="col-12  text-center" style=" height: 65rem">
+                <h2 class="text-white mb-4">Request Friends</h2>
+                <div class="d-flex gap-4 flex-wrap p-3">
+                  <div class="crad bg-primary box-sh-1 p-2 text-center rounded mx-auto mx-md-0" style="width: 160px; height: 190px;">
+                    <div class="img ">
+                      <img class="img-fluid" src="/static/asset/images/profile.svg" alt="" width="100" height="100" style="transform: scale();">
+                    </div>
+                    <div class="longin">
+                      <span class="font-monospace fw-bold">Bmakhlou</span>
+                    </div>
+                    <div class="footer mt-2 d-flex flex-row justify-content-center align-items-center" style="gap: 10px;">
+                      <a href="#" class="text-black text-bg-success d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"> <i class="fa-solid fa-check"></i></a>
+                      <a href="#" class="text-black text-bg-danger d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"><i class="fa-solid fa-xmark"></i></a>
+                    </div>
+                  </div>
+                  <div class="crad bg-primary box-sh-1 p-2 text-center rounded mx-auto mx-md-0" style="width: 160px; height: 190px;">
+                    <div class="img ">
+                      <img class="img-fluid" src="/static/asset/images/profile.svg" alt="" width="100" height="100" style="transform: scale();">
+                    </div>
+                    <div class="longin">
+                      <span class="font-monospace fw-bold">Bmakhlou</span>
+                    </div>
+                    <div class="footer mt-2 d-flex flex-row justify-content-center align-items-center" style="gap: 10px;">
+                      <a href="#" class="text-black text-bg-success d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"> <i class="fa-solid fa-check"></i></a>
+                      <a href="#" class="text-black text-bg-danger d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"><i class="fa-solid fa-xmark"></i></a>
+                    </div>
+                  </div>
+                  <div class="crad bg-primary box-sh-1 p-2 text-center rounded mx-auto mx-md-0" style="width: 160px; height: 190px;">
+                    <div class="img ">
+                      <img class="img-fluid" src="/static/asset/images/profile.svg" alt="" width="100" height="100" style="transform: scale();">
+                    </div>
+                    <div class="longin">
+                      <span class="font-monospace fw-bold">Bmakhlou</span>
+                    </div>
+                    <div class="footer mt-2 d-flex flex-row justify-content-center align-items-center" style="gap: 10px;">
+                      <a href="#" class="text-black text-bg-success d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"> <i class="fa-solid fa-check"></i></a>
+                      <a href="#" class="text-black text-bg-danger d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"><i class="fa-solid fa-xmark"></i></a>
+                    </div>
+                  </div>
+                  <div class="crad bg-primary box-sh-1 p-2 text-center rounded mx-auto mx-md-0" style="width: 160px; height: 190px;">
+                    <div class="img ">
+                      <img class="img-fluid" src="/static/asset/images/profile.svg" alt="" width="100" height="100" style="transform: scale();">
+                    </div>
+                    <div class="longin">
+                      <span class="font-monospace fw-bold">Bmakhlou</span>
+                    </div>
+                    <div class="footer mt-2 d-flex flex-row justify-content-center align-items-center" style="gap: 10px;">
+                      <a href="#" class="text-black text-bg-success d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"> <i class="fa-solid fa-check"></i></a>
+                      <a href="#" class="text-black text-bg-danger d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"><i class="fa-solid fa-xmark"></i></a>
+                    </div>
+                  </div>
+                  <div class="crad bg-primary box-sh-1 p-2 text-center rounded mx-auto mx-md-0" style="width: 160px; height: 190px;">
+                    <div class="img ">
+                      <img class="img-fluid" src="/static/asset/images/profile.svg" alt="" width="100" height="100" style="transform: scale();">
+                    </div>
+                    <div class="longin">
+                      <span class="font-monospace fw-bold">Bmakhlou</span>
+                    </div>
+                    <div class="footer mt-2 d-flex flex-row justify-content-center align-items-center" style="gap: 10px;">
+                      <a href="#" class="text-black text-bg-success d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"> <i class="fa-solid fa-check"></i></a>
+                      <a href="#" class="text-black text-bg-danger d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"><i class="fa-solid fa-xmark"></i></a>
+                    </div>
+                  </div>
+                <!-- <div class="row p-1 rounded-1 justify-content-between align-items-center border border-info">
                   <div class="col-4">
                     <div class="d-flex align-items-center">
                       <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle" width="35" alt="user profile image">
@@ -291,9 +353,9 @@
                     </a>
                     <a href="#" role="button" class=" bg-success font-glitch text-white text-decoration-none px-1">PLAY</a>
                   </div> 
-                </div>
-              </div> -->
-            </div>
+                </div> -->
+              </div>
+              </div>
             </div>
         </main>
       </div>

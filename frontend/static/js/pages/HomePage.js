@@ -23,15 +23,27 @@ class AsideNav extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
 
-    this.addEventListener("click" ,function(e){
-      e.preventDefault();
-      const activeLink = this.querySelector(".active");
-      activeLink.classList.remove("active");
-      console.log("========>", activeLink);
-      e.target.classList.add("active");
-      console.log(e.target);
+    const NavLinks = this.querySelectorAll("a.sidebar-link");
 
-    })
+    // console.log(NavLinks);
+    let activeLink = this.querySelector("a.sidebar-link.active");
+    NavLinks.forEach(function(link) {
+      link.addEventListener("click" ,function(e) {
+        // e.preventDefault();
+        console.log("Active Link: " , activeLink);
+        activeLink.classList.remove("active");
+        console.log(activeLink);
+        link.classList.add("active");
+        activeLink = link;
+        console.log("test===>", activeLink);
+        
+        console.log("clicked link");
+      })
+      
+    });
+      // console.log("========>", activeLink);
+      // console.log(e.target);
+
   }
 }
 class SearchBar extends AbstractPage {
