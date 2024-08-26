@@ -9,10 +9,10 @@ class GameInstance:
             'ball_position': [0, 0],
             'player1': 0,
             'player2': 0,
-            'score': [0, 0]
+            'score': [0, 0] # [0] for player1 ; [1] for player2
         }
         self.vel = [1, 1]
-        self.speed = 0.04
+        self.speed = 0.02
         self.limit = [1.83, 2.7]
         self.channel_layer = channel_layer
         self.running = True
@@ -60,13 +60,31 @@ class GameInstance:
         #     })
 
     def update_ball_position(self):
+        self.padding = 0.25
         self.game_state['ball_position'][0] += self.vel[0] * self.speed
         self.game_state['ball_position'][1] += self.vel[1] * self.speed
 
-        if self.game_state['ball_position'][0] > self.limit[0] or self.game_state['ball_position'][0] < -self.limit[0]:
+        if self.game_state['ball_position'][0] > self.limit[0]: # player 1 lost
             self.vel[0] *= -1
+            self.game_state['score'][1] += 1 # add point to player 2
+        if self.game_state['ball_position'][0] < -self.limit[0]: # player 2 lost
+            self.vel[0] *= -1
+            self.game_state['score'][0] += 1 # add point to player 1
+
         if self.game_state['ball_position'][1] > self.limit[1] or self.game_state['ball_position'][1] < -self.limit[1]:
             self.vel[1] *= -1
+        
+        if self.game_state['ball_position'][1] > 2.35 \
+        and self.game_state['ball_position'][1] < 2.4:
+            if self.game_state['ball_position'][0] < self.game_state['player1'] + self.padding \
+            and self.game_state['ball_position'][0] > self.game_state['player1'] - self.padding:
+                self.vel[1] = -1
+        
+        if self.game_state['ball_position'][1] < -2.35 \
+        and self.game_state['ball_position'][1] > -2.4:
+            if self.game_state['ball_position'][0] < self.game_state['player2'] + self.padding \
+            and self.game_state['ball_position'][0] > self.game_state['player2'] - self.padding:
+                self.vel[1] = 1
         
 class GameManager:
     def __init__(self):

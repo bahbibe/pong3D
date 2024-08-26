@@ -51,12 +51,12 @@ class GameConsumer(AsyncWebsocketConsumer):
         if not self.game_instance:
             return
         if message_type == 'right':
-            self.game_instance.game_state[self.player] -= 0.1
+            self.game_instance.game_state[self.player] -= 5 * self.game_instance.speed
             if self.game_instance.game_state[self.player] < -1.6:
                 self.game_instance.game_state[self.player] = -1.6
 
         if message_type == 'left':
-            self.game_instance.game_state[self.player] += 0.1
+            self.game_instance.game_state[self.player] += 5 * self.game_instance.speed
             if self.game_instance.game_state[self.player] > 1.6:
                 self.game_instance.game_state[self.player] = 1.6
         
