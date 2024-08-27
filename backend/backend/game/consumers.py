@@ -17,6 +17,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.player = 'player2'
         self.game_instance = None
         await self.accept()
+        print(self.scope["user"])
         
         player2 = r.lpop(f'queue:1v1')
         if player2 is None:
@@ -32,7 +33,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.game_instance = await game_manager.get_game_instance(self.game_id)
         if not self.game_instance:
             # Create a new game instance
-            await game_manager.create_game_instance(self.game_id)
+            await game_manager.create_game_instance(self.game_id, self.scope['user'])
             self.game_instance = await game_manager.get_game_instance(self.game_id)
         
 
@@ -87,5 +88,13 @@ class GameConsumer(AsyncWebsocketConsumer):
         game_id = event['game_id']
         self.game_id = game_id
         self.game_instance = await game_manager.get_game_instance(self.game_id)
-        print("sending game id")
+        print(self.player, "sending game id")
+        await self.join_game()
         await self.send(text_data=json.dumps(game_id))
+
+    async def join_game(self):
+        self.game_instance = await game_manager.get_game_instance(self.game_id)
+        if self.player == 'player1':
+            self.game_instance.setPlayer1(self.scope['user'])
+        if self.player == 'player2':
+            self.game_instance.setPlayer2(self.scope['user'])
