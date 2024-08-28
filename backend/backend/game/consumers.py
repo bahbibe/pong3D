@@ -33,7 +33,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.game_instance = await game_manager.get_game_instance(self.game_id)
         if not self.game_instance:
             # Create a new game instance
-            await game_manager.create_game_instance(self.game_id, self.scope['user'])
+            await game_manager.create_game_instance(self.game_id)
             self.game_instance = await game_manager.get_game_instance(self.game_id)
         
 
@@ -51,15 +51,19 @@ class GameConsumer(AsyncWebsocketConsumer):
 
         if not self.game_instance:
             return
-        if message_type == 'right':
-            self.game_instance.game_state[self.player] -= 5 * self.game_instance.speed
-            if self.game_instance.game_state[self.player] < -1.6:
-                self.game_instance.game_state[self.player] = -1.6
 
+        side = 1
+        if self.player == 'player2':
+            side = -1
+        if message_type == 'right':
+            self.game_instance.game_state[self.player] -= 5 * self.game_instance.speed * side
         if message_type == 'left':
-            self.game_instance.game_state[self.player] += 5 * self.game_instance.speed
-            if self.game_instance.game_state[self.player] > 1.6:
-                self.game_instance.game_state[self.player] = 1.6
+            self.game_instance.game_state[self.player] += 5 * self.game_instance.speed * side
+
+        if self.game_instance.game_state[self.player] < -3:
+            self.game_instance.game_state[self.player] = -3
+        if self.game_instance.game_state[self.player] > 3:
+            self.game_instance.game_state[self.player] = 3
         
         if message_type == 'game_update':
             # Update the game state based on the received data
@@ -82,6 +86,8 @@ class GameConsumer(AsyncWebsocketConsumer):
     # Broadcast game updates to all players in the game
     async def game_update_message(self, event):
         game_state = event['game_state']
+        side = self.player
+        game_state['side'] = side
         await self.send(text_data=json.dumps(game_state))
 
     async def send_game_id(self, event):
