@@ -21,11 +21,11 @@ const routes = [
   },
   { path: "/", view: HomePage, isProtected: false, page: "home-page" },
   { path: "/login", view: LoginPage, isProtected: false, page: "login-page" },
-  { path: "/profile", view: ProfilePage, isProtected: false, page: "user-profile" },
-  { path: "/ranking", view: RankingPage, isProtected: false, page: "ranking-page" },
-  { path: "/settings", view: SettingsPage, isProtected: false, page: "settings-page" },
-  { path: "/home", view: Home, isProtected: false, page: "user-home" },
-  { path: "/chat", view: ChatPage, isProtected: false, page: "chat-page" },
+  { path: "/profile", view: ProfilePage, isProtected: true, page: "user-profile" },
+  { path: "/ranking", view: RankingPage, isProtected: true, page: "ranking-page" },
+  { path: "/settings", view: SettingsPage, isProtected: true, page: "settings-page" },
+  { path: "/home", view: Home, isProtected: true, page: "user-home" },
+  { path: "/chat", view: ChatPage, isProtected: true, page: "chat-page" },
   {
     path: "/chat/:roomId",
     view: ChatPage,
@@ -39,8 +39,23 @@ const navigateTo = (url) => {
   router();
 };
 
+const getUser = async () => {
+  const data = await fetch("http://localhost:8000/api/auth/me/", {
+    credentials: "include",
+  });
+  const user = await data.json();
+  if (user && user.success === true) {
+    window.user = user;
+    return true;
+  }
+  return false;
+}
+
 const router = async () => {
   // check potential matching routes
+  let isLoggedIn = await getUser();
+  console.log("User: ", isLoggedIn);
+  console.log("from routing User: ", window.user);
   const matches = routes.map((route) => {
     return {
       route: route,
@@ -58,8 +73,12 @@ const router = async () => {
     match = { route: routes[0], isMatched: true, result: [location.pathname] };
 
   // check if the route is protected
-  if (match.route.isProtected) {
+  if (match.route.isProtected && !isLoggedIn) {
     navigateTo("/login");
+    return;
+  }
+  else if (!match.route.isProtected && isLoggedIn) {
+    navigateTo("/home");
     return;
   }
 

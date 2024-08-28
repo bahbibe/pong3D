@@ -36,6 +36,7 @@ li {
 
 a {
   text-decoration: none;
+  color: var(--text);
 }
 
 .text-color 
@@ -323,4 +324,120 @@ a.sidebar-link:hover, a.sidebar-link.active {
 .input:checked ~ .input,
 .input:checked ~ .input:active {
   background-position: -24px 0;
+}
+
+
+
+
+/* ===================notification============================ */
+
+
+
+/* CSS used here will be applied after bootstrap.css */
+
+
+
+
+.notifications {
+ min-width: 340px;
+}
+
+.notifications-wrapper {
+   overflow:auto;
+    max-height:250px;
+  }
+  
+.menu-title {
+   color:#ff7788;
+   font-size:1.5rem;
+    display:inline-block;
+    }
+
+.glyphicon-circle-arrow-right {
+    margin-left:10px;     
+ }
+
+ 
+.notification-heading, .notification-footer  {
+ padding:2px 10px;
+     }
+    
+      
+.dropdown-menu.divider {
+margin:5px 0;          
+}
+
+.item-title {
+
+font-size:1.3rem;
+color:#000;
+  
+}
+
+.notifications a.content {
+text-decoration:none;
+background:#ccc;
+
+}
+  
+.notification-item {
+padding:10px;
+margin:5px;
+background:#ccc;
+border-radius:4px;
+}
+
+
+
+.dropdown-toggle.hide-arrow::after {
+  display: none;
+}
+
+
+.dropdown-menu[data-bs-popper] {
+  left: -250% !important;
+}
+
+
+
+
+
+
+.info {
+ margin: 0 auto;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  width: 320px;
+  padding: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  background: #D7F1FD;
+  border-radius: 8px;
+  border: 1px solid #509AF8;
+  box-shadow: 0px 0px 5px -3px #111;
+}
+
+.info__icon {
+  width: 20px;
+  height: 20px;
+  transform: translateY(-2px);
+  margin-right: 8px;
+}
+
+.info__icon path {
+  fill: #509AF8;
+}
+
+.info__title {
+  font-weight: 500;
+  font-size: 14px;
+  color: #0C2A75;
+}
+
+.info__close {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  margin-inline-end: 15px;
 }
