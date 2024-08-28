@@ -25,15 +25,14 @@ class GameInstance:
 
     def setPlayer2(self, user):
         self.player2 = user
-
     async def game_loop(self):
         await self.channel_layer.group_send(self.game_id, {
             "type": "send_game_id",
             "game_id": self.game_id,
             })
         while self.running:
-            # if self.game_state['score'][0] >= 3 or self.game_state['score'][1] >= 3:
-            #     break
+            if self.game_state['score'][0] >= 3 or self.game_state['score'][1] >= 3:
+                break
             self.update_ball_position()
             await self.channel_layer.group_send(self.game_id, {
                 "type": "game_update_message",
