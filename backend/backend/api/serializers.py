@@ -31,10 +31,12 @@ class LoginUserSerializer(serializers.ModelSerializer):
 class RegisterUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
 
     class Meta:
         model = User
-        fields = ["id", "username", "email", "password"]
+        fields = ["id", "username", "email", "password", "first_name", "last_name"]
 
 
 class SetupProfileSerializer(serializers.ModelSerializer):
@@ -74,7 +76,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         depth = 1
-        fields = ["id", "username", "email", "profile"]
+        fields = ["id", "username", "email", "first_name", "last_name", "profile"]
 
 
 class UpdateSettingsSerializer(serializers.ModelSerializer):
