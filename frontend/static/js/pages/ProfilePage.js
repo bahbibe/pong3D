@@ -44,10 +44,10 @@ class mainNav extends AbstractPage {
     toggler.addEventListener("click", function () {
     document.querySelector("#sidebar").classList.toggle("collapsed");
   });
-  this.getFrirends();
+  this.RequestFrirends();
 
   }
-  getFrirends() {
+  RequestFrirends() {
     fetch("http://localhost:8000/api/friends/requests/", {
       method: "GET",
       credentials: "include",
@@ -56,7 +56,6 @@ class mainNav extends AbstractPage {
       .then((data) => {
         const friends = data.data;
         this.notificationCounter.textContent = friends.length;
-        console.log(friends);
         friends.forEach(element => {
           console.log();
           this.notification.innerHTML += `
@@ -73,7 +72,6 @@ class mainNav extends AbstractPage {
           `
           
         });
-        // console.log("frisnds: ", friends);
       }).catch((error) => {
         console.log(error);
       });

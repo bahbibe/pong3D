@@ -1,3 +1,4 @@
+import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
 class Home extends AbstractPage {
@@ -10,7 +11,6 @@ class Home extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
     window.active = this.querySelector("a#profile");
-    console.log("------", window.active );
   }
 }
 
@@ -25,7 +25,8 @@ class AsideNav extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
 
-    console.log("Nav Active",window.active);
+    this.activeLink = this.querySelector(`a[href="${window.path}"].sidebar-link`);
+    this.activeLink.classList.add("active");
     this.addEventListener("click", this.handleevent);
     
     
@@ -36,21 +37,21 @@ class AsideNav extends AbstractPage {
   }
   onclick(e) {
     e.preventDefault();
-    this.linkActive(e);
+    // this.linkActive(e);
     this.logout(e);
 
   }
-  linkActive(e) {
-    if (!(e.target.classList.contains("sidebar-link"))) return
+  // linkActive(e) {
+  //   if (!(e.target.classList.contains("sidebar-link"))) return
 
-    // if (e.target.classList.contains("active")) return;
-    // console.log(this.activeLink);
-    // console.log(e.target);
-    // this.activeLink.classList.remove("active");
-    this.active = e.target;
-    e.target.classList.add("active");
-    console.log("Target classList",e.target.classList);
-  }
+  //   // if (e.target.classList.contains("active")) return;
+  //   // console.log(this.activeLink);
+  //   // console.log(e.target);
+  //   // this.activeLink.classList.remove("active");
+  //   this.active = e.target;
+  //   e.target.classList.add("active");
+  //   console.log("Target classList",e.target.classList);
+  // }
   logout(e) {
     e.preventDefault();
     if (!(e.target.id === "logout")) return;
@@ -60,7 +61,6 @@ class AsideNav extends AbstractPage {
     })
     .then((res) => {
       if (res.status === 200) {
-        console.log(res);
         navigateTo("/login");
       }
     })

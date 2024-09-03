@@ -29,7 +29,7 @@ const routes = [
   {
     path: "/chat/:roomId",
     view: ChatPage,
-    isProtected: false,
+    isProtected: true,
     page: "chat-page",
   },
 ];
@@ -53,26 +53,26 @@ const getUser = async () => {
 
 const router = async () => {
   // check potential matching routes
-  let isLoggedIn = await getUser();
-  console.log("User: ", isLoggedIn);
-  console.log("from routing User: ", window.user);
   const matches = routes.map((route) => {
     return {
       route: route,
       result: location.pathname.match(pathToRegex(route.path)),
       isMatched: location.pathname.match(pathToRegex(route.path))
-        ? true
-        : false,
+      ? true
+      : false,
     };
   });
-
   let match = matches.find((match) => match.isMatched);
-
+  
   // Check if the match is undefined (404)
   if (!match)
     match = { route: routes[0], isMatched: true, result: [location.pathname] };
-
+  window.path = match.route.path;
+  
   // check if the route is protected
+  let isLoggedIn = await getUser();
+  console.log("User: ", isLoggedIn);
+  console.log("from routing User: ", window.user);
   if (match.route.isProtected && !isLoggedIn) {
     navigateTo("/login");
     return;

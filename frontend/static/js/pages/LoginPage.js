@@ -83,23 +83,20 @@ class LoginPage extends AbstractPage {
       'email': this.email.value,
       'password': this.password.value,
     }
-    const url = `http://127.0.0.1:8000/api/auth/login/`
+    const url = `http://localhost:8000/api/auth/login/`
     fetch(url, {
       method: "POST",
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-type': 'application/json',
       },
       credentials: "include",
       body: JSON.stringify(this.user),
     }).then(rep => rep.json())
       .then(data => {
         console.log(data);
-        if (data.success)
-        {
-          window.user = data.data.user;
+        if (data.success) {
           navigateTo("/home");
-          // location.href = `http://127.0.0.1:3000/home`;
         }
       })
       .catch(error => console.log("error"));
@@ -123,12 +120,12 @@ class LoginPage extends AbstractPage {
       'password': this.password.value,
     }
 
-    const url = `http://127.0.0.1:8000/api/auth/register/`
+    const url = `http://localhost:8000/api/auth/register/`
     fetch(url, {
       method: "POST",
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-type': 'application/json',
       },
       credentials: "include",
       body: JSON.stringify(this.user),
@@ -136,25 +133,19 @@ class LoginPage extends AbstractPage {
       .then(data => {
         console.log(data);
         if (data.success)
-        {
-          console.log(`good`);
-          // history.pushState(null, null, `/home`);
           navigateTo("/login");
-          // history.replaceState(null, null, `http://127.0.0.1:3000/home`);
-          // window.location.replace(`http://127.0.0.1:3000/home`);
-          // location.href = `./home`;
-        }
       })
       .catch(error => console.log("error"));
   }
   onclick(e) {
     e.preventDefault();
 
-    const url = `http://127.0.0.1:8000/api/auth/intra/`
+    const url = `http://localhost:8000/api/auth/intra/`
     fetch(url, {
       method: "GET",
       headers: {
         'Accept': 'application/json',
+        'Content-type': 'application/json',
       },
       credentials: "include",
     }).then(rep => rep.json())

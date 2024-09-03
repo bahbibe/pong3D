@@ -89,7 +89,7 @@
             </div>
             <form action="" method="post" id="login-form">
               <div class="input-group mb-3">
-                  <input type="text" class="form-control form-control-lg bg-light fs-6" placeholder="Email address" data-email>
+                  <input type="email" class="form-control form-control-lg bg-light fs-6" placeholder="Email address" data-email>
               </div>
               <div class="input-group mb-1">
                   <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password" data-password>
@@ -162,22 +162,26 @@
         <main class="p-3">
           <div class="container-fluid">
             <div class="row">
-              <div class=" col-12 p-5  mt-4 bg-primary-subtle  rounded-1 font-monospace" style="background-image: url(/static/asset/images/robots_welcome.svg);background-repeat: no-repeat;background-position: right; background-size: contain;">
-                <h1 class="m-0" id="firstName">Welcome Back,MR.Bilal</h1>
+              <div class=" col-12 p-5  mt-4 bg-primary-subtle  text-black-50 rounded-1 font-monospace" style="background-image: url(/static/asset/images/robots_welcome.svg);background-repeat: no-repeat;background-position: right; background-size: contain;">
+                <h1 class="m-0" id="firstName">Welcome Back, Bilal</h1>
                 <p class="text-muted">feel free to be part of our world, and enjoy the momnent.</p>
               </div>  
             </div>
-            <div class="row justify-content-between mt-5 " style="height: 50vh;">
-              <div class="col-5 " style="background: url(/static/asset/images/4317829.jpg); background-repeat: no-repeat; background-size: cover; position: relative;">
-                <!-- <a href="#"> -->
-                  <div class="mask" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; background-color: rgba(0, 0, 0, 0.2)"></div>
-                  <p></p>
-                  <!-- <a href="">Play</a> -->
-                <!-- </a> -->
+            <div class="row mt-5 mx-auto">
+            <div class="col-12">
+
+              <div class="mycard">
+                <div class="content">
+                  <h5 class="heading">Play With Bot</h5>
+                  <p class="details">Flex it up as you wish, but you can't break it.</p>
+                  <button class="play mt-5">Play Now</button> 
+                </div>
+                <div class="image">
+                  <img src="/static/asset/images/bot-img-Photoroom.png" class="bot" alt="">
+                </div>
               </div>
-              <div class="col-5 p-5 bg-primary font-monospace">
-                
-              </div>
+              
+            </div>
             </div>
           </div>
         </main>
@@ -641,15 +645,15 @@
           <ul class="dropdown-menu notifications" role="menu" >
 
           </ul>
-      </div>
-        <img
-          src="/static/asset/images/profile.svg"
-          class="rounded-circle"
-          height="40"
-          alt="user profile image"
-          loading="lazy"
-          id="nav-user-img"
-        />
+          <img
+            src="/static/asset/images/profile.svg"
+            class="rounded-circle"
+            height="40"
+            alt="user profile image"
+            loading="lazy"
+            id="nav-user-img"
+          />
+        </div>
         <strong class="d-none d-sm-block ms-2" id="nav-username">bmakhlou</strong>
       </div>
     </nav>
