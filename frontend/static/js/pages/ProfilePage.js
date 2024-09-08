@@ -1,3 +1,4 @@
+import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
 class ProfilePage extends AbstractPage {
@@ -12,11 +13,12 @@ class ProfilePage extends AbstractPage {
     const ctn = this.querySelector(".profile-content");
     const fullName = this.querySelector("#fullName");
     const username = this.querySelector("#username");
-    const userImg = this.querySelector("#user-img"); 
+    const userImg = this.querySelector("#user-img");
 
     const user = window.user.data;
+    console.log(user);
     fullName.textContent = `${user.first_name} ${user.last_name}`;
-    username.textContent =  `${user.username}`;
+    username.textContent =  `@${user.username}`;
     userImg.src = `${user.profile.avatar}`
 
   }

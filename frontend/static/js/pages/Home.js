@@ -24,9 +24,11 @@ class AsideNav extends AbstractPage {
     const template = document.getElementById("aside-nav");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
+    if (window.path !== "/search") {
+      this.activeLink = this.querySelector(`a[href="${window.path}"].sidebar-link`);
+      this.activeLink.classList.add("active");
+    }
 
-    this.activeLink = this.querySelector(`a[href="${window.path}"].sidebar-link`);
-    this.activeLink.classList.add("active");
     this.addEventListener("click", this.handleevent);
     
     

@@ -75,8 +75,9 @@ class LoginPage extends AbstractPage {
   }
 
   getData(event) {
-    event.preventDefault();
+
     if(!(event.target.id === "login-form")) return;
+
     this.email = this.querySelector("[data-email]");
     this.password = this.querySelector("[data-password]");
     this.user = { 
@@ -103,21 +104,24 @@ class LoginPage extends AbstractPage {
   }
 
   postDats(event) {
-    event.preventDefault();
+
     if(!(event.target.id === "register-form")) return;
+    
     console.log("register form", event.target.id);
         
     this.firstName = this.querySelector("#firstName");
     this.lastName = this.querySelector("#lastName");
     this.password = this.querySelector("#password");
     this.email = this.querySelector("#email");
-    
+    this.avatar = this.querySelector("#data-upload-image");
+    console.log(this.avatar.value);
     this.user = {
       'first_name': this.firstName.value,
       'last_name': this.lastName.value,
       'username': this.firstName.value[0] + this.lastName.value,
       'email': this.email.value,
       'password': this.password.value,
+      "avatar": this.avatar.value,
     }
 
     const url = `http://localhost:8000/api/auth/register/`

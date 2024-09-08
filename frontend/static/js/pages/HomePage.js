@@ -13,17 +13,8 @@ class HomePage extends AbstractPage {
   }
 }
 
-class SearchBar extends AbstractPage {
-  constructor() {
-    super();
-  }
 
-  connectedCallback() {
-    const template = document.getElementById("search-bar");
-    const clone = template.content.cloneNode(true);
-    this.appendChild(clone);
-  }
-}class User extends AbstractPage {
+class User extends AbstractPage {
   constructor() {
     super();
   }
@@ -36,7 +27,6 @@ class SearchBar extends AbstractPage {
 }
 
 window.customElements.define("home-page", HomePage);
-window.customElements.define("search-bar", SearchBar);
 window.customElements.define("user-info", User);
 
 export { HomePage }
