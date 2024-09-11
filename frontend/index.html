@@ -23,31 +23,14 @@
   <div id="app"></div>
   <!--! Chat page -->
   <template id="chat-page">
-    <div class="profile-container">
-      <template id="profile">
-        <h1>Profile</h1>
-        <img class="avatar" id="profile-avatar" src="" alt="Avatar" />
-        <span id="profile-username"></span>
-      </template>
-    </div>
-    <div class="friends-container">
-      <template id="friends">
-        <h1>Friends</h1>
-        <ul id="friends-list">
-        </ul>
-      </template>
-    </div>
-    <div class="chat-container">
-      <template id="chat">
-        <h1>Chat</h1>
-        <div id="chat-messages">
-        </div>
-        <form id="chat-form">
-          <input id="chat-input" type="text" placeholder="Type a message...">
-          <button type="submit">Send</button>
-        </form>
-      </template>
-    </div>
+    <section class="d-flex">
+      <aside-nav></aside-nav>
+      <div class="main">
+        <main-nav></main-nav>
+         <main class="p-3">
+          </main>
+      </div>
+    </section>
   </template>
   <!--! Home page -->
   <template id="home-page">
@@ -712,7 +695,7 @@
           </a>
         </li>
         <li>
-          <a class="sidebar-link" href="#" id="chat">
+          <a class="sidebar-link" href="/chat" id="chat" data-link>
             <i class="fa-regular fa-comment-dots me-1"></i>
             Chat
           </a>
