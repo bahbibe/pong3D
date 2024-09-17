@@ -134,11 +134,36 @@ box-shadow: rgba(0, 0, 0, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px
      .right-box{
         padding: 20px;
      }
-
+     .profile-image::after {
+      bottom: 0%;
+      right: 0%;
+      top: 80%;
+      left: 60%;
+    }
 }
 
 
 
+
+
+
+
+.profile-image {
+  position: relative;
+  z-index: 2;
+}
+
+.profile-image::after {
+  content: "";
+  position: absolute;
+  bottom: 5%;
+  right: 8%;
+  width: 20px;
+  height: 20px;
+  background: green;
+  border-radius: 100%;
+  z-index: 1;
+} 
 
 
 /* ============================================================= */

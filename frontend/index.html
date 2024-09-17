@@ -111,13 +111,7 @@
               <div class="input-group mb-3">
                   <input type="password"  class="form-control form-control-lg bg-light fs-6" placeholder="Password" id="confirm-password" required />
               </div>
-              <!-- <div class="input-group mb-5 d-flex justify-content-between">
-                  
-              </div> -->
-              <div class="input-group mb-3">
-                <input type="file" class="form-control" id="data-upload-image"  required />
-                <!-- <label class="input-group-text" for="inputGroupFile02">Upload</label> -->
-              </div>
+
               <div class="input-group mb-3">
                   <button class="btn btn-lg btn-primary w-100 fs-6 fw-bold" data-register >Login</button>
               </div>
@@ -175,7 +169,9 @@
               <div class="row p-3  text-white box-sh-1 secondary-bg">
                 <div class="col-12 col-md-6">
                     <div class="d-lg-flex align-items-center  text-center text-lg-start pb-3 pb-lg-0">
-                      <img  src="/static/asset/images/profile.svg" class="img-fluid rounded rounded-2" width="120" alt="user profile image" id="user-img">
+                      <div class="profile-image">
+                        <img  src="/static/asset/images/profile.svg" class="img-fluid rounded rounded-circle" width="120" alt="user profile image" id="user-img">
+                      </div>
                       <div class="ps-0 ps-md-4 pt-4 pb-md-0">
                         <h4 class="m-0 fw-bold text-capitalize" id="fullName">bilal makhloufi</h4>
                         <sapn class="fw-medium text-capitalize" id="username">@bmakhlou</sapn>
@@ -366,19 +362,7 @@
                 </ul>
                 <h2 class="text-white mb-4">Request Friends</h2>
                 <div class="d-flex gap-4 flex-wrap p-3">
-                  <div class="crad bg-primary box-sh-1 p-2 text-center rounded mx-auto mx-md-0" style="width: 160px; height: 190px;">
-                    <div class="img ">
-                      <img class="img-fluid" src="/static/asset/images/profile.svg" alt="" width="100" height="100" style="transform: scale();">
-                    </div>
-                    <div class="longin">
-                      <span class="font-monospace fw-bold">Bmakhlou</span>
-                    </div>
-                    <div class="footer mt-2 d-flex flex-row justify-content-center align-items-center" style="gap: 10px;">
-                      <a href="#" class="text-black text-bg-success d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"> <i class="fa-solid fa-check"></i></a>
-                      <a href="#" class="text-black text-bg-danger d-block rounded-circle d-flex justify-content-center align-items-center" style="width: 2em; height: 2em;"><i class="fa-solid fa-xmark"></i></a>
-                    </div>
-                  </div>
-                  <div class="crad bg-primary box-sh-1 p-2 text-center rounded mx-auto mx-md-0" style="width: 160px; height: 190px;">
+                  <div class=" bg-primary box-sh-1 p-2 text-center rounded mx-auto mx-md-0" style="width: 160px; height: 190px;">
                     <div class="img ">
                       <img class="img-fluid" src="/static/asset/images/profile.svg" alt="" width="100" height="100" style="transform: scale();">
                     </div>
@@ -563,7 +547,7 @@
     <div class="main">
       <main-nav></main-nav>
       <main class="p-3">
-        <div class="container">
+        <div class="container mt-4" id="search-container">
         </div>
       </main>
     </div>

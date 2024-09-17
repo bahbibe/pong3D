@@ -113,15 +113,13 @@ class LoginPage extends AbstractPage {
     this.lastName = this.querySelector("#lastName");
     this.password = this.querySelector("#password");
     this.email = this.querySelector("#email");
-    this.avatar = this.querySelector("#data-upload-image");
-    console.log(this.avatar.value);
+
     this.user = {
       'first_name': this.firstName.value,
       'last_name': this.lastName.value,
       'username': this.firstName.value[0] + this.lastName.value,
       'email': this.email.value,
       'password': this.password.value,
-      "avatar": this.avatar.value,
     }
 
     const url = `http://localhost:8000/api/auth/register/`

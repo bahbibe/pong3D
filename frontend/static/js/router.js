@@ -73,7 +73,6 @@ const router = async () => {
   // check if the route is protected
   let isLoggedIn = await getUser();
   console.log("User: ", isLoggedIn);
-  console.log("from routing User: ", window.user);
   if (match.route.isProtected && !isLoggedIn) {
     navigateTo("/login");
     return;
