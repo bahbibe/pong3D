@@ -1,7 +1,9 @@
 volumes:
   dbdata:
+    name: dbdata
 networks:
   ft_transcendence:
+    name: ft_transcendence
 
 services:
   backend:
@@ -21,7 +23,7 @@ services:
     init: true
 
   db:
-    image: postgres:15.6-alpine3.19
+    image: postgres:alpine
     container_name: db
     volumes:
       - dbdata:/var/lib/postgresql/data
@@ -45,12 +47,13 @@ services:
     init: true
 
   redis:
-    image: redis
+    image: redis:alpine
     container_name: redis
-    restart: unless-stopped
     ports:
       - "6380:6379"
     networks:
       - ft_transcendence
     env_file:
       - ./backend/.env
+    restart: always
+    init: true

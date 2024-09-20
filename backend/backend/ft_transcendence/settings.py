@@ -3,7 +3,6 @@ from pathlib import Path
 from datetime import timedelta
 
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -80,10 +79,10 @@ WSGI_APPLICATION = "ft_transcendence.wsgi.application"
 ASGI_APPLICATION = "ft_transcendence.asgi.application"
 
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            'hosts': [('redis', os.getenv("REDIS_PORT"))],
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("redis", os.getenv("REDIS_PORT"))],
         },
     },
 }
@@ -146,7 +145,6 @@ STATICFILES_DIRS = [
 ]
 
 
-
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
@@ -154,5 +152,3 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 ACCESS_TOKEN_LIFETIME = timedelta(days=1)  # 1 day
-
-        

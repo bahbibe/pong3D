@@ -1,20 +1,17 @@
-FROM python:3.12.3-alpine3.19 AS builder
+FROM python:alpine
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHON_DISABLE_PIP_VERSION_CHECK 1
 
 WORKDIR /backend
 
 COPY ./entrypoint.sh ./entrypoint.sh
 COPY ./requirements.txt ./requirements.txt
 
-RUN  python -m pip install -r ./requirements.txt 
+RUN  pip3 install --disable-pip-version-check --no-cache-dir -r ./requirements.txt 
 
-FROM builder AS dev
-
-COPY --from=builder /backend /backend
+COPY . .
 
 ENTRYPOINT [ "./entrypoint.sh" ]
 
-CMD [ "python", "manage.py", "runserver", "0.0.0.0:8000" ]
+CMD [ "python3", "manage.py", "runserver", "0.0.0.0:8000" ]
