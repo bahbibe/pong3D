@@ -6,94 +6,86 @@ class ChatBox extends HTMLElement {
     super();
     this.API = new API();
     this.uuid = uuid;
-    this.WebSock = null;
+    // this.WebSock = null;
   }
   connectedCallback() {
-    const template = document.getElementById("chat");
-    const clone = template.content.cloneNode(true);
-    this.appendChild(clone);
+    // const template = document.getElementById("chat");
+    // const clone = template.content.cloneNode(true);
+    // this.appendChild(clone);
     this.render();
-    this.WebSock = new WebSock(this.uuid);
-    this.WebSock.connect();
-    this.receiveMessage();
-    this.querySelector("#chat-form").addEventListener("submit", (event) => {
-      event.preventDefault();
-      this.sendMessage(event);
-    });
+    // this.WebSock = new WebSock(this.uuid);
+    // this.WebSock.connect();
+    // this.receiveMessage();
+    // this.querySelector("#chat-form").addEventListener("submit", (event) => {
+    //   event.preventDefault();
+    //   this.sendMessage(event);
+    // });
   }
-  async receiveMessage() {
-    try {
-      const message = await this.WebSock.receive();
-      if (!message) {
-        return;
-      }
-      this.querySelector("#chat-messages").appendChild(
-        this.createMessageElement(JSON.parse(message))
-      );
-      await this.receiveMessage();
-    } catch (error) {
-      console.error("Error receiving message:", error);
-    }
-  }
+  // async receiveMessage() {
+  //   try {
+  //     const message = await this.WebSock.receive();
+  //     if (!message) {
+  //       return;
+  //     }
+  //     this.querySelector("#chat-messages").appendChild(
+  //       this.createMessageElement(JSON.parse(message))
+  //     );
+  //     await this.receiveMessage();
+  //   } catch (error) {
+  //     console.error("Error receiving message:", error);
+  //   }
+  // }
 
-  disconnectedCallback() {
-    if (this.WebSock) {
-      this.WebSock.close();
-    }
-  }
+  // disconnectedCallback() {
+  //   if (this.WebSock) {
+  //     this.WebSock.close();
+  //   }
+  // }
 
   async render() {
     try {
-      const closeChat = document.createElement("button");
-      closeChat.setAttribute("id", "close-chat");
-      closeChat.innerText = "Close X";
-      this.querySelector("#chat-messages").appendChild(closeChat);
-      const chat = await this.API.getMessages(this.uuid);
-      chat.forEach((item) => {
-        this.querySelector("#chat-messages").appendChild(
-          this.createMessageElement(item)
-        );
+      this.messages = await this.API.getMessages(this.uuid);
+      this.messages.forEach((item) => {
+        this.appendChild(this.createMessageElement(item));
       });
-      if (chat.length === 0) {
-        const noMessages = document.createElement("p");
-        noMessages.innerText = "No messages found";
-        this.querySelector("#chat-messages").appendChild(noMessages);
-      }
+      if (this.messages.length === 0) {
+        this.appendChild(document.createTextNode("No messages yet"));
+      } 
     } catch (error) {
       console.error("Error rendering chat list:", error);
-      this.querySelector("#chat-list").innerHTML = "Error loading chat";
+      this.appendChild(document.createTextNode("Error loading messages"));
     }
   }
 
   createMessageElement(item) {
     const messageElement = document.createElement("div");
-    messageElement.classList.add("message");
+    messageElement.classList.add("message-box");
     messageElement.innerHTML = `
-      <li>
+      <div class="message-item">
         <span>${item.content}</span>
         <span>${new Date(item.timestamp).toLocaleString()}</span>
-      </li>
+      </div>
     `;
     return messageElement;
   }
 
-  async sendMessage(event) {
-    const message = event.target.querySelector("#chat-input").value;
-    if (message) {
-      try {
-        await this.WebSock.send({
-          content: message,
-          timestamp: new Date(), //.toLocaltring(), if needed
-          conversation: this.uuid,
-        });
-        event.target.reset();
-      } catch (error) {
-        console.error("Error sending message:", error);
-      }
-    }
-  }
+  // async sendMessage(event) {
+  //   const message = event.target.querySelector("#chat-input").value;
+  //   if (message) {
+  //     try {
+  //       await this.WebSock.send({
+  //         content: message,
+  //         timestamp: new Date(), //.toLocaltring(), if needed
+  //         conversation: this.uuid,
+  //       });
+  //       event.target.reset();
+  //     } catch (error) {
+  //       console.error("Error sending message:", error);
+  //     }
+  //   }
+  // }
 }
 
-customElements.define("chat-box", ChatBox);
+window.customElements.define("chat-box", ChatBox);
 
-export default ChatBox;
+export { ChatBox };

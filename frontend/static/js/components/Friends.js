@@ -6,44 +6,40 @@ class Friends extends HTMLElement {
     this.API = new API();
   }
   connectedCallback() {
-    const template = document.getElementById("friends");
-    const clone = template.content.cloneNode(true);
-    this.appendChild(clone);
     this.render();
   }
   async render() {
     try {
       this.friends = await this.API.getFriends();
       this.friends.forEach((item) => {
-        this.querySelector("#friends-list").appendChild(
-          this.createFriendElement(item)
-        );
+        this.appendChild(this.FriendElement(item));
       });
-      if (friends.length === 0) {
-        const noFriends = document.createElement("p");
-        noFriends.innerText = "No friends found";
-        this.querySelector("#friends-list").appendChild(noFriends);
+      if (this.friends.length === 0) {
+        this.appendChild(document.createTextNode("No friends yet"));
       }
     } catch (error) {
       console.error("Error rendering friends list:", error);
-      this.querySelector("#friends-list").innerHTML = "Error loading friends";
+      this.appendChild(document.createTextNode("Error loading friends list"));
     }
   }
-  createFriendElement(item) {
+  FriendElement(item) {
     const friendElement = document.createElement("div");
-    friendElement.classList.add("contact");
-    friendElement.setAttribute("id", item.uuid);
+    friendElement.classList.add("friends-item");
     friendElement.innerHTML = `
-       <li>
-          <img class="avatar" src="${item.friend.profile.avatar}" alt="avatar"/>  
-          <span>${item.friend.username}</span>
-          <br>
-          <span>${item.uuid}</span>
-        </li>
+          <div class="avatar">
+          <img src="${item.friend.profile.avatar}" alt="avatar"/>
+          </div>
+          <div class="message">
+          <h5>${item.friend.username}</h5>
+          <p> lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          lorem ipsum dolor sit amet, consectetur adipiscing elit. </p>
+          <span class="time"> 13:37 </span>
+          </div>
     `;
     return friendElement;
   }
 }
 
-customElements.define("friends-list", Friends);
-export default Friends;
+window.customElements.define("friends-list", Friends);
+
+export { Friends };
