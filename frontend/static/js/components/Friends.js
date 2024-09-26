@@ -4,13 +4,18 @@ class Friends extends HTMLElement {
   constructor() {
     super();
     this.API = new API();
+    this.friends = [];
   }
   connectedCallback() {
-    this.render();
+    this.API.getFriends().then((res) => {
+      this.friends = res;
+      this.render();
+    }
+    );
   }
+
   async render() {
     try {
-      this.friends = await this.API.getFriends();
       this.friends.forEach((item) => {
         this.appendChild(this.FriendElement(item));
       });
@@ -36,6 +41,9 @@ class Friends extends HTMLElement {
           <span class="time"> 13:37 </span>
           </div>
     `;
+    friendElement.addEventListener("click", () => {
+      console.log("clicked on friend:", item.friend);
+    });
     return friendElement;
   }
 }
