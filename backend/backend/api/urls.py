@@ -16,6 +16,7 @@ from .views import (
     update_settings,
     get_profile,
     get_users,
+    get_profile_with_id,
 )
 
 
@@ -37,5 +38,6 @@ urlpatterns = [
     path("setup/", setup_profile, name="setup-profile"),
     path("settings/update/", update_settings, name="update-settings"),
     path("profile/<str:uuid>/", get_profile, name="get-profile"),
+    path("user/<str:id>/", get_profile_with_id, name="get-profile-with-id"),
     path("users/", get_users, name="get-users"),
 ]

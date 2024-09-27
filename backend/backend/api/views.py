@@ -66,6 +66,24 @@ def get_profile(_, uuid):
             message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
         )
 
+@api_view(["GET"])
+@is_authenticated
+def get_profile_with_id(_, id):
+    try:
+        profile = Profile.objects.filter(id=id).first()
+        if not profile:
+            return ErrorResponse(
+                message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
+            )
+
+        user = profile.user
+        return SuccessResponse(data=UserSerializer(user).data)
+
+    except Exception as e:
+        return ErrorResponse(
+            message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
+        )
+
 
 @api_view(["GET"])
 @is_authenticated
