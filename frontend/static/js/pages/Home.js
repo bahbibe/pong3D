@@ -40,7 +40,7 @@ class AsideNav extends AbstractPage {
     
 
   }
-  handleevent(e) {
+  handleEvent(e) {
     this[`on${e.type}`](e)   
   }
   onclick(e) {
