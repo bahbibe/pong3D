@@ -1,13 +1,13 @@
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
-class UserPage extends AbstractPage {
+class FriendPage extends AbstractPage {
   constructor() {
     super();
   }
 
   connectedCallback() {
-    const template = document.getElementById("user-page");
+    const template = document.getElementById("friend-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
     this.userId = JSON.parse(this.getAttribute("params"));
@@ -18,8 +18,8 @@ class UserPage extends AbstractPage {
     this.addFriend = this.querySelector("#add-friend");
     this.isSent = false;
     
-    this.CheckIsFriend();
     this.getUser();
+    this.CheckIsFriend();
     if (!this.isSent)
         this.checkIsSent();
     if (!this.isSent)
@@ -50,7 +50,13 @@ class UserPage extends AbstractPage {
       });
 
       const res = await response.json();
-      if (response.ok)
+      if (!response.ok) {
+        if (response.status === 404) {
+          navigateTo("/home");
+        }
+        throw new Error(res.error);
+      }
+      else
       {
         const user = res.data;
         this.fullName.textContent = `${user.first_name} ${user.last_name}`;
@@ -81,6 +87,26 @@ class UserPage extends AbstractPage {
       console.error("Error Sending Request:", error);
     }
   }
+  async acceptRequest() {
+    try {
+      const response = await fetch(`http://localhost:8000/api/friends/update/`, {
+        method: "PUT",
+        headers: {
+          "content-type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ friend_id: this.userId.id , status: "accepted"}),
+      });
+
+      if (response.ok) {
+        this.addFriend.innerHTML = `<i class="fa-solid fa-user-check me-2"></i> friends`;
+        this.addFriend.disabled = true;
+        window.isSent = true;
+      }
+    } catch (error) {
+      console.error("Error Accepting Request:", error);
+    }
+  }
   async CheckIsFriend() {
     const response = await fetch("http://localhost:8000/api/friends/", {
       method: "GET",
@@ -89,7 +115,10 @@ class UserPage extends AbstractPage {
     const data = await response.json();
     for (const friend of data.data) {
         if (friend.friend.id === +this.userId.id) {
-            navigateTo(`/friend${this.userId.id}`);
+            // navigateTo(`/friend${this.userId.id}`);
+            this.addFriend.innerHTML = `<i class="fa-solid fa-user-check me-2"></i> friends`;
+            this.addFriend.disabled = true;
+            window.isSent = true;
             break;
         }
     }
@@ -134,7 +163,7 @@ class UserPage extends AbstractPage {
 }
 
 
-window.customElements.define("user-page", UserPage);
+window.customElements.define("friend-page", FriendPage);
 
 
-export { UserPage }
+export { FriendPage }

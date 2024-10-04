@@ -35,7 +35,7 @@ class AsideNav extends AbstractPage {
     });
 
 
-    this.addEventListener("click", this.handleevent);
+    this.addEventListener("click", this);
     
     
 

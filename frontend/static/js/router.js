@@ -28,7 +28,6 @@ const routes = [
   { path: "/home", view: Home, isProtected: true, page: "user-home" },
   { path: "/chat", view: ChatPage, isProtected: true, page: "chat-page" },
   { path: "/friend:id", view: FriendPage, isProtected: true, page: "friend-page" },
-  { path: "/user:id", view: FriendPage, isProtected: true, page: "user-page" },
   {
     path: "/chat/:roomId",
     view: ChatPage,
