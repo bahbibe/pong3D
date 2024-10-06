@@ -83,7 +83,7 @@ class mainNav extends AbstractPage {
 
     const navUsername = this.querySelector("#nav-username");
     const navUserImg = this.querySelector("#nav-user-img");
-    this.notification = this.querySelector(".notifications");
+    this.notification = this.querySelector("div.content");
     this.notificationCounter = this.querySelector("[data-count]");
     const user = window.user.data;
     navUsername.textContent = `${user.username}`;
@@ -108,18 +108,15 @@ class mainNav extends AbstractPage {
         friends.forEach(element => {
           console.log();
           this.notification.innerHTML += `
-          <div class="info d-flex justify-content-between mb-2">
-              <div class="info__title">
-              <img src="${element.friend.profile.avatar}" class="rounded rounded-2" height="40" alt="friend image" loading="lazy"/>
-                <span id="">${element.friend.username}</span>
-              </div>
-              <div class="info__close d-flex">
-                <a><i class="fa-solid fa-xmark me-2"></i></a> 
-                <a><i class="fa-solid fa-check"></i></a>
-              </div>
-          </div>
+          <div class="notification">
+                        <img src="${element.friend.profile.avatar}" alt="" />
+                        <div class="text">
+                            <p>
+                                <a href="friend${element.friend.id}"><span class="name">${element.friend.username}</span> </a> has send a friend request
+                            </p>
+                        </div>
+                    </div>
           `
-          
         });
       }).catch((error) => {
         console.log(error);

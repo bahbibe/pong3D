@@ -721,18 +721,32 @@
       <search-bar class="d-none d-lg-flex"></search-bar>
 
       <div class="d-flex align-items-center justify-content-end">
-
-        <div class="dropdown">
-          <a class="me-3 dropdown-toggle hide-arrow" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-bell"></i>
-            <span class="badge rounded-pill badge-notification bg-danger" data-count>0</span>
-          </a>
-          <ul class="dropdown-menu notifications" role="menu">
-
-          </ul>
-          <img src="/static/asset/images/profile.svg" class="rounded-circle" height="40" alt="user profile image"
-            loading="lazy" id="nav-user-img" />
+        <div class="ctn">
+              <input type="checkbox" name="" class="the-btn" />
+              <span class="counter" data-count>0</span>
+            <div class="box">
+                <div class="header">
+                    <p>Notifications</p>
+                    <!-- <a href="#">See all</a> -->
+                </div>
+                <div class="content">
+                    <!-- <div class="notification">
+                        <img src="harry.jpg" alt="" />
+                        <div class="text">
+                            <p>
+                                <span class="name">Harry Potter</span> left a
+                                comment.
+                            </p>
+                            <p class="time">1 hour age</p>
+                        </div>
+                    </div> -->
+                    
+                </div>
+            </div>
         </div>
+
+        <img src="/static/asset/images/profile.svg" class="rounded-circle" height="40" alt="user profile image"
+          loading="lazy" id="nav-user-img" />
         <strong class="d-none d-sm-block ms-2" id="nav-username">bmakhlou</strong>
       </div>
     </nav>

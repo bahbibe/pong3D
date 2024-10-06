@@ -623,3 +623,109 @@ border-radius:4px;
   line-height: 0;
   font-size: 0.8em;
  }
+
+
+
+
+
+ /* notification */
+
+ .ctn {
+  position: relative;
+ }
+
+ .the-btn {
+  margin-inline-end: 10px;
+  position: relative;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  /* transform: translateY(-150px); */
+}
+
+.the-btn::before{
+  content: "\f0f3";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-family: "Font Awesome 5 Free";
+  font-weight: 700;
+  font-size: 1.3em;
+  color: #fff;
+  transform: translate(-50%, -50%);
+}
+
+.counter {
+  position: absolute;
+  top: -38%;
+  left: -14%;
+  background-color: red;
+  width: 17px;
+  height: 17px;
+  /* margin: 1px auto; */
+  color: #fff;
+  border-radius: 100%;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.the-btn:checked ~ .box {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+}
+
+.box {
+    width: 350px;
+    margin-top: 3em;
+    position: absolute;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.137);
+    transition: all 0.4s;
+    top: 0;
+    right: -130px;
+    color: #000;
+    background-color: #fff;
+    clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+  z-index: 1;
+
+}
+.header {
+    width: 100%;
+    /* display: flex; */
+    /* justify-content: space-between; */
+    padding: 0.6em 1em;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.082);
+}
+.header a {
+    text-decoration: none;
+}
+.content {
+    width: 100%;
+}
+.notification {
+    width: 350px;
+    padding: 0.6em 1em;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ececec ;
+}
+.notification img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50px;
+    margin-right: 0.5em;
+}
+.notification .text p {
+    font-size: 0.8em;
+    margin: auto 0;
+}
+.notification .text p span {
+    font-weight: 700;
+}
+.notification .text .time {
+    font-size: 0.7em;
+    color: rgba(0, 0, 0, 0.61);
+}
