@@ -161,21 +161,63 @@
               <div class=" col-12 p-5  mt-4 bg-primary-subtle  text-black-50 rounded-1 font-monospace"
                 style="background-image: url(/static/asset/images/robots_welcome.svg);background-repeat: no-repeat;background-position: right; background-size: contain;">
                 <h1 class="m-0" id="firstName">Welcome Back, Bilal</h1>
-                <p class="text-muted">feel free to be part of our world, and enjoy the momnent.</p>
+                <p class="text-muted">Feel free to be part of our world, and enjoy the moment.</p>
               </div>
             </div>
-            <div class="row mt-5 mx-auto">
-              <div class="col-12">
-                <div class="mycard">
-                  <div class="content">
-                    <h5 class="heading">Play With Bot</h5>
-                    <p class="details">Flex it up as you wish, but you can't break it.</p>
-                    <button class="play mt-5">Play Now</button>
+            <div class="row mt-5 justify-content-between" style="height: 70dvh;">
+              <div class="col-8 border">
+                <div class="row p-3 justify-content-between">
+                  
+                  <div class="newCard d-flex align-items-center justify-content-between" style="width: 270px; height: 150px;
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 10px;
+                    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+                    backdrop-filter: blur(5px);
+                    -webkit-backdrop-filter: blur(5px);
+                    border: 1px solid rgba(255, 255, 255, 0.3);">
+                    
+                    <div class="content__ me-2" style="width: 50%;">
+                      <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Classic</h6>
+                      <p  style="font-size: 13px;">Find you a rival </p>
+                      <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+                      border-radius: 5px;
+                      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
+                        Play
+                      </a>
+                    </div>
+                    <div class="image " style="width: 50%;" >
+                      <img src="/static/asset/images/racket-ball.png" class="img-fluid" alt="">
+                    </div>
                   </div>
-                  <div class="image">
-                    <img src="/static/asset/images/bot-img-Photoroom.png" class="bot" alt="">
+
+
+                  <div class="newCard d-flex align-items-center justify-content-between" style="width: 270px; height: 150px;
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 10px;
+                    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+                    backdrop-filter: blur(5px);
+                    -webkit-backdrop-filter: blur(5px);
+                    border: 1px solid rgba(255, 255, 255, 0.3);">
+                    
+                    <div class="content__ me-2" style="width: 50%;">
+                      <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Friend</h6>
+                      <p  style="font-size: 13px;">Challenge your friend </p>
+                      <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+                      border-radius: 5px;
+                      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
+                        Play
+                      </a>
+                    </div>
+                    <div class="image " style="width: 50%;" >
+                      <img src="/static/asset/images/ping-pong-rackets-ball-isolated(1).png" class="img-fluid" alt="">
+                    </div>
                   </div>
                 </div>
+                
+
+              </div>
+              <div class="col-3 border">
+                <h2>Recent Activities</h2>
               </div>
             </div>
           </div>
@@ -395,14 +437,14 @@
       </div>
     </section>
   </template>
-  <!-- !_____Friend page -->
-   <!-- <template id="_friend-page">
+  <!-- !Friend PAGE -->
+  <template id="friend-page">
     <section class="d-flex">
       <aside-nav></aside-nav>
       <div class="main">
         <main-nav></main-nav>
-         <main class="p-3">
-           <div class="container-md">
+        <main class="p-3">
+          <div class="container-md">
             <div class="row p-3  text-white box-sh-1 secondary-bg">
               <div class="col-12 col-md-6 col-lg-6 mx-auto">
                 <div class="d-md-flex align-items-center  text-center text-md-start pb-3 pb-lg-0">
@@ -416,47 +458,17 @@
                   </div>
                 </div>
               </div>
+
+
               <div class="col-12 col-md-6  d-flex align-items-center justify-content-center  justify-content-md-end mb-2 mb-md-0">
-                <button class="d-flex align-items-center btn btn-block bg-primary  me-2 text-truncate text-white" > <i class="fa-solid fa-plus me-2"></i> Friend</button>
+                <button class="d-flex align-items-center btn btn-block bg-primary  me-2 text-truncate text-white" id="add-friend"> <i class="fa-solid fa-plus me-2"></i> Friend</button>
                 <button class="d-flex align-items-center btn btn-block text-white" style=" background-color: #BE8CE4;"><i class="fa-solid fa-message me-2"></i> Message</button>
               </div>
             </div>
-           </div>
-          </main>
+          </div>
+        </main>
     </section>
-   </template> -->
-   <!-- !Friend PAGE -->
-    <template id="friend-page">
-      <section class="d-flex">
-        <aside-nav></aside-nav>
-        <div class="main">
-          <main-nav></main-nav>
-          <main class="p-3">
-            <div class="container-md">
-              <div class="row p-3  text-white box-sh-1 secondary-bg">
-                <div class="col-12 col-md-6 col-lg-6 mx-auto">
-                  <div class="d-md-flex align-items-center  text-center text-md-start pb-3 pb-lg-0">
-                    <div class="profile-image">
-                      <img src="/static/asset/images/profile.svg" class="img-fluid rounded rounded-circle" width="120"
-                        alt="user profile image" id="user-img">
-                    </div>
-                    <div class="ps-0 ps-md-4 pt-3 pb-md-0">
-                      <h4 class="m-0 fw-bold text-capitalize" id="fullName">bilal makhloufi</h4>
-                      <sapn class="fw-medium text-capitalize" id="username">@bmakhlou</sapn>
-                    </div>
-                  </div>
-                </div>
-  
-  
-                <div class="col-12 col-md-6  d-flex align-items-center justify-content-center  justify-content-md-end mb-2 mb-md-0">
-                  <button class="d-flex align-items-center btn btn-block bg-primary  me-2 text-truncate text-white" id="add-friend"> <i class="fa-solid fa-plus me-2"></i> Friend</button>
-                  <button class="d-flex align-items-center btn btn-block text-white" style=" background-color: #BE8CE4;"><i class="fa-solid fa-message me-2"></i> Message</button>
-                </div>
-              </div>
-            </div>
-          </main>
-      </section>
-    </template>
+  </template>
   <!-- !Ranking page -->
   <template id="ranking-page">
     <section class="d-flex">
@@ -582,7 +594,7 @@
 
 
   
-  <!-- !  componants -->
+  <!-- !  components -->
   <template id="nav">
     <nav class="navbar navbar-expand-lg navbar-dark primary-bg border-bottom">
       <div class="container-md">
