@@ -164,11 +164,13 @@
                 <p class="text-muted">Feel free to be part of our world, and enjoy the moment.</p>
               </div>
             </div>
-            <div class="row mt-5 justify-content-between" style="height: 70dvh;">
-              <div class="col-8 border">
-                <div class="row p-3 justify-content-between">
+            <div class="row mt-5 justify-content-between" style="height: 60vh;">
+              <div class="col-8">
+                <h2 class="font-monospace">Games Modes</h2>
+
+                <div class="row p-5 justify-content-between Cards">
                   
-                  <div class="newCard d-flex align-items-center justify-content-between" style="width: 270px; height: 150px;
+                  <div class="newCard d-flex align-items-center justify-content-between" style="width: 300px; height: 200px;
                     background: rgba(255, 255, 255, 0.2);
                     border-radius: 10px;
                     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -190,8 +192,30 @@
                     </div>
                   </div>
 
+                  <div class="newCard d-flex align-items-center justify-content-between" style="width: 300px; height: 200px;
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 10px;
+                    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+                    backdrop-filter: blur(5px);
+                    -webkit-backdrop-filter: blur(5px);
+                    border: 1px solid rgba(255, 255, 255, 0.3);">
+                    
+                    <div class="content__ me-2" style="width: 50%;">
+                      <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Tournament</h6>
+                      <p  style="font-size: 13px;">Grind & win the trophy</p>
+                      <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+                      border-radius: 5px;
+                      box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
+                        Play
+                      </a>
+                    </div>
+                    <div class="image " style="width: 50%;" >
+                      <img src="/static/asset/images/throphy.png" class="img-fluid" alt="">
+                    </div>
+                  </div>
 
-                  <div class="newCard d-flex align-items-center justify-content-between" style="width: 270px; height: 150px;
+
+                  <div class="newCard d-flex align-items-center justify-content-between" style="width: 300px; height: 200px;
                     background: rgba(255, 255, 255, 0.2);
                     border-radius: 10px;
                     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -213,11 +237,51 @@
                     </div>
                   </div>
                 </div>
-                
 
+                <h2 class="font-monospace">Best Players</h2>
+
+                <div class="row p-3" style="   background: rgba(255, 255, 255, 0.2);
+                border-radius: 10px;
+                box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+                backdrop-filter: blur(5px);
+                -webkit-backdrop-filter: blur(5px);
+                border: 1px solid rgba(255, 255, 255, 0.3);">
+
+                <div class="col-12">
+                    <div class="row p-3 rounded-1 justify-content-between align-items-center mb-1">
+                      <div class="col-2"><strong>Ranks</strong></div>
+                      <div class="col-4"><strong>Username</strong> </div>
+                      <div class="col-2"><strong>Total</strong></div>
+                      <div class="col-2"><strong>Wins</strong></div>
+                      <div class="col-2"><strong>Ratio</strong></div>
+                    </div>
+                    
+                    <div class="row rounded-1 p-2 align-items-center" style="box-shadow: 0 4px 30px rgba(0, 0, 0, 1);">
+                      <div class="col-2"><img src="/static/asset/images/rank1.png" alt="badge Rank number one" width="30"></div>
+                      <div class="col-4">
+                        <div class="d-flex align-items-center">
+                          <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle" width="35" alt="user profile image">
+                          <div class="ps-2">
+                            <span class="fw-bold text-capitalize" style="font-size: 14px;">Bmakhlou</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-2"><strong>04</strong></div>
+                      <div class="col-2"><strong>10</strong></div>
+                      <div class="col-2"><strong>1%</strong></div>
+                    </div>
+                  </div>
+
+                </div>
               </div>
-              <div class="col-3 border">
-                <h2>Recent Activities</h2>
+
+
+
+              <div class="col-3">
+                <h2 class="font-monospace">Recent Activities</h2>
+                <div class="row">
+
+                </div>
               </div>
             </div>
           </div>
@@ -490,28 +554,28 @@
                 <div class="col-md-5  my-auto d-none d-md-inline-block">
                   <div class="row text-center">
                     <div class="total-match col-3">
-                      <sapan class="d-block">
+                      <span class="d-block">
                         Total
-                      </sapan>
-                      <sapan class="fw-bold">100</sapan>
+                      </span>
+                      <span class="fw-bold">100</span>
                     </div>
                     <div class="match-wins  col-3">
-                      <sapan class="d-block">
+                      <span class="d-block">
                         wins
-                      </sapan>
-                      <sapan class="fw-bold">100</sapan>
+                      </span>
+                      <span class="fw-bold">100</span>
                     </div>
                     <div class="match-loses col-3">
-                      <sapan class="d-block">
+                      <span class="d-block">
                         Loses
-                      </sapan>
-                      <sapan class="fw-bold">100</sapan>
+                      </span>
+                      <span class="fw-bold">100</span>
                     </div>
                     <div class="match-ratio col-3">
-                      <sapan class="d-block">
+                      <span class="d-block">
                         Ratio
-                      </sapan>
-                      <sapan class="fw-bold">100%</sapan>
+                      </span>
+                      <span class="fw-bold">100%</span>
                     </div>
                   </div>
                 </div>

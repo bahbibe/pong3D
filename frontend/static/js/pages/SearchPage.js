@@ -16,9 +16,9 @@ class SearchPage extends AbstractPage {
     this.SearchedUser = localStorage.getItem("SearchedUser");
     this.found = false;
     if (this.SearchedUser)
-      this.randerUser();
+      this.renderUser();
   }
-  async randerUser() {
+  async renderUser() {
     try {
       const response = await fetch('http://localhost:8000/api/auth/users/', { credentials: "include",});
       const data = await response.json();

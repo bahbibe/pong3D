@@ -668,3 +668,16 @@ a.sidebar-link.active {
   font-size: 0.7em;
   color: rgba(0, 0, 0, 0.61);
 }
+
+
+
+/* hover */
+
+.Cards .newCard:hover {
+  transform: scale(1.2, 1.2);
+}
+
+.Cards:hover > .newCard:not(:hover) {
+  filter: blur(10px);
+  transform: scale(0.9, 0.9);
+}

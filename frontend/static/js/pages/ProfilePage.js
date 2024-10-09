@@ -45,7 +45,7 @@ class ProfilePage extends AbstractPage {
                         <div class="d-flex align-items-center">
                         <img src="${friend.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" alt="user profile image">
                           <div class="ps-2">
-                            <a href="user${friend.friend.id}"><sapn class="fw-bold text-capitalize" style="font-size: 14px;">${friend.friend.username}</sapn></a>
+                            <a href="friend${friend.friend.id}"><span class="fw-bold text-capitalize" style="font-size: 14px;">${friend.friend.username}</span></a>
                           </div>
                         </div>
                       </div>
