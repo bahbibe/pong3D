@@ -35,7 +35,7 @@ class SearchPage extends AbstractPage {
                         <img class="img-fluid rounded rounded-circle" src="${user.profile.avatar}" alt="" width="100" height="100">
                       </div>
                       <div class="my-2">
-                        <a class="font-monospace fw-bold" href='/friend${user.id}'>${user.username} </a>
+                        <a class="font-monospace fw-bold" href='/friend/${user.profile.uuid}'>${user.username} </a>
                       </div>
             </div>
             `

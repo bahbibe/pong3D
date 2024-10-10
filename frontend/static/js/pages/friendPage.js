@@ -11,6 +11,7 @@ class FriendPage extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
     this.userId = JSON.parse(this.getAttribute("params"));
+    console.log("UUID: " , this.userId.uuid);
 
     this.fullName = this.querySelector("#fullName");
     this.username = this.querySelector("#username");
@@ -41,7 +42,7 @@ class FriendPage extends AbstractPage {
 
   async getUser() {
     try {
-      const response = await fetch(`http://localhost:8000/api/auth/user/${this.userId.id}`, {
+      const response = await fetch(`http://localhost:8000/api/auth/profile/${this.userId.uuid}/`, {
         method: "GET",
         headers: {
           "content-type": "application/json",
@@ -58,10 +59,10 @@ class FriendPage extends AbstractPage {
       }
       else
       {
-        const user = res.data;
-        this.fullName.textContent = `${user.first_name} ${user.last_name}`;
-        this.username.textContent = `@${user.username}`;
-        this.userImg.src = `${user.profile.avatar}`;
+        this.friend = res.data;
+        this.fullName.textContent = `${this.friend.first_name} ${this.friend.last_name}`;
+        this.username.textContent = `@${this.friend.username}`;
+        this.userImg.src = `${this.friend.profile.avatar}`;
       }
     } catch (error) {
       console.error("Error Loading profile:", error);
@@ -75,7 +76,7 @@ class FriendPage extends AbstractPage {
           "content-type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ target_user: this.userId.id }),
+        body: JSON.stringify({ target_user: this.friend.id }),
       });
 
       if (response.ok) {
@@ -95,7 +96,7 @@ class FriendPage extends AbstractPage {
           "content-type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ friend_id: this.userId.id , status: "accepted"}),
+        body: JSON.stringify({ friend_id: this.friend.id , status: "accepted"}),
       });
 
       if (response.ok) {
@@ -114,7 +115,7 @@ class FriendPage extends AbstractPage {
     });
     const data = await response.json();
     for (const friend of data.data) {
-        if (friend.friend.id === +this.userId.id) {
+        if (friend.friend.profile.uuid === this.userId.uuid) {
             // navigateTo(`/friend${this.userId.id}`);
             this.addFriend.innerHTML = `<i class="fa-solid fa-user-check me-2"></i> friends`;
             this.addFriend.disabled = true;
@@ -133,8 +134,8 @@ class FriendPage extends AbstractPage {
     });
     const data = await response.json();
     for (const friend of data.data) {
-      console.log(friend.friend.id , +this.userId.id);
-        if (friend.friend.id === +this.userId.id) {
+      console.log(friend.friend.profile.uuid , this.userId.uuid);
+        if (friend.friend.profile.uuid === this.userId.uuid) {
             this.isSent = true;
             this.addFriend.innerHTML = `<i class="fa-solid fa-user-clock me-2"></i> pending`;
             this.addFriend.disabled = true;
@@ -152,8 +153,8 @@ class FriendPage extends AbstractPage {
     const data = await response.json();
     const  rqts = data.data
     for (const rqt of rqts) {
-      console.log(rqt.friend.id , +this.userId.id);
-        if (rqt.friend.id === +this.userId.id) {
+      console.log(rqt.friend.profile.uuid , this.userId.uuid);
+        if (rqt.friend.profile.uuid === this.userId.uuid) {
             this.addFriend.innerHTML = `<i class="fa-solid fa-user-plus fa-sm me-2"></i> accept`;
             this.addFriend.setAttribute("data-accept", true);
             break;

@@ -45,7 +45,7 @@ class ProfilePage extends AbstractPage {
                         <div class="d-flex align-items-center">
                         <img src="${friend.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" alt="user profile image">
                           <div class="ps-2">
-                            <a href="friend${friend.friend.id}"><span class="fw-bold text-capitalize" style="font-size: 14px;">${friend.friend.username}</span></a>
+                            <a href="friend/${friend.friend.profile.uuid}"><span class="fw-bold text-capitalize" style="font-size: 14px;">${friend.friend.username}</span></a>
                           </div>
                         </div>
                       </div>
@@ -93,10 +93,10 @@ class mainNav extends AbstractPage {
     toggler.addEventListener("click", function () {
     document.querySelector("#sidebar").classList.toggle("collapsed");
   });
-  this.RequestFrirends();
+  this.RequestFriends();
 
   }
-  RequestFrirends() {
+  RequestFriends() {
     fetch("http://localhost:8000/api/friends/requests/", {
       method: "GET",
       credentials: "include",
@@ -112,7 +112,7 @@ class mainNav extends AbstractPage {
                         <img src="${element.friend.profile.avatar}" alt="" />
                         <div class="text">
                             <p>
-                                <a href="friend${element.friend.id}"><span class="name">${element.friend.username}</span> </a> has send a friend request
+                                <a href="friend/${element.friend.profile.uuid}"><span class="name">${element.friend.username}</span> </a> has send a friend request
                             </p>
                         </div>
                     </div>
