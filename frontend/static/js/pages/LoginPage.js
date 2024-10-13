@@ -7,12 +7,12 @@ function switcher(btn, btn2, box, box1)
   btn.addEventListener(
     "click", function(e){
       e.preventDefault();
-      if(!e.target.classList.contains('active'))
+      if(!e.target.classList.contains('activeBtn'))
         {
           box.classList.remove("hidden");
           box1.classList.add("hidden");
-        btn.classList.add("active");
-        btn2.classList.remove("active");
+        btn.classList.add("activeBtn");
+        btn2.classList.remove("activeBtn");
       }
       
     }
@@ -48,14 +48,14 @@ class LoginPage extends AbstractPage {
     registerBtn.addEventListener(
       "click", function(e){
         e.preventDefault();
-        if(!e.target.classList.contains('active'))
+        if(!e.target.classList.contains('activeBtn'))
         {
           // box.style.display = "none";
           registerBox.classList.remove("hidden");
           loginBox.classList.add("hidden");
           
-          registerBtn.classList.add("active");
-          loginBtn.classList.remove("active");
+          registerBtn.classList.add("activeBtn");
+          loginBtn.classList.remove("activeBtn");
         }
         
       }

@@ -43,6 +43,9 @@ a {
   color: var(--text);
 }
 
+.activeBtn {
+  background-color:  var(--backgroud);
+}
 .text-color {
   color: var(--text) !important;
 }
@@ -69,23 +72,47 @@ a {
 }
 
 body {
+  
   font-family: 'Poppins', sans-serif;
   background: var(--backgroud);
   color: var(--text)
 }
 
 
-.font-glitch {
+.rubik-glitch-regular {
   font-family: "Rubik Glitch", system-ui;
+  font-weight: 400;
+  font-style: normal;
 }
 
+.vt323-regular {
+  font-family: "VT323", monospace;
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+
 .title {
-  font-family: "Rubik Glitch", system-ui;
+  /* font-family: "Rubik Glitch", system-ui; */
   font-size: 8rem;
 }
 
 .login-padding {
   padding-left: 9rem;
+}
+
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 5px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+button[data-login]:hover, button#intra:hover {
+  background: rgba(255, 255, 255, 0.7) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8) !important;
 }
 
 /*-------------------switcher------------------------ */
