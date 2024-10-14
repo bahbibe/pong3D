@@ -1,11 +1,11 @@
+import { hideToast, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
 
-function switcher(btn, btn2, box, box1)
-{
+function switcher(btn, btn2, box, box1) {
   btn.addEventListener(
-    "click", function(e){
+    "click", function (e) {
       e.preventDefault();
       if(!e.target.classList.contains('activeBtn'))
         {
@@ -14,7 +14,7 @@ function switcher(btn, btn2, box, box1)
         btn.classList.add("activeBtn");
         btn2.classList.remove("activeBtn");
       }
-      
+
     }
   );
 }
@@ -27,26 +27,26 @@ class LoginPage extends AbstractPage {
     const template = document.getElementById("login-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
-    
+
     const logninBtn = this.querySelector("[data-login]");
     this.loginForm = this.querySelector("#login-form");
     this.registerForm = this.querySelector("#register-form");
     this.intra = this.querySelector("#intra");
-    
-    
+
+
     // console.log(form);
-    this.loginForm.addEventListener('submit',this);
-    this.registerForm.addEventListener('submit',this);
-    this.intra.addEventListener('click',this);
+    this.loginForm.addEventListener('submit', this);
+    this.registerForm.addEventListener('submit', this);
+    this.intra.addEventListener('click', this);
 
     const registerBtn = this.querySelector("#tab-register");
     const loginBtn = this.querySelector("#tab-login");
     const boxLogin = this.querySelector("#login");
     const boxRegister = this.querySelector("#register");
     switcher(registerBtn, loginBtn, boxRegister, boxLogin);
-    switcher(loginBtn, registerBtn, boxLogin, boxRegister); 
+    switcher(loginBtn, registerBtn, boxLogin, boxRegister);
     registerBtn.addEventListener(
-      "click", function(e){
+      "click", function (e) {
         e.preventDefault();
         if(!e.target.classList.contains('activeBtn'))
         {
@@ -57,11 +57,11 @@ class LoginPage extends AbstractPage {
           registerBtn.classList.add("activeBtn");
           loginBtn.classList.remove("activeBtn");
         }
-        
+
       }
     );
   }
-  
+
   handleEvent(event) {
     this[`on${event.type}`](event)
   }
@@ -71,16 +71,16 @@ class LoginPage extends AbstractPage {
     this.getData(e);
     this.postDats(e);
     // this.intraAutehnticate(e)
-    
+
   }
 
   getData(event) {
-
-    if(!(event.target.id === "login-form")) return;
+    hideToast("login-errors");
+    if (!(event.target.id === "login-form")) return;
 
     this.email = this.querySelector("[data-email]");
     this.password = this.querySelector("[data-password]");
-    this.user = { 
+    this.user = {
       'email': this.email.value,
       'password': this.password.value,
     }
@@ -98,17 +98,22 @@ class LoginPage extends AbstractPage {
         console.log(data);
         if (data.success) {
           navigateTo("/home");
+        } else {
+          showToast("login-errors", data.message, data.errors);
         }
       })
-      .catch(error => console.log("error"));
+      .catch(_ => {
+        showToast("login-errors");
+      });
   }
 
   postDats(event) {
+    hideToast("register-errors");
 
-    if(!(event.target.id === "register-form")) return;
-    
+    if (!(event.target.id === "register-form")) return;
+
     console.log("register form", event.target.id);
-        
+
     this.firstName = this.querySelector("#firstName");
     this.lastName = this.querySelector("#lastName");
     this.password = this.querySelector("#password");
@@ -136,8 +141,10 @@ class LoginPage extends AbstractPage {
         console.log(data);
         if (data.success)
           navigateTo("/login");
+        else
+          showToast("register-errors", data.message, data.errors);
       })
-      .catch(error => console.log("error"));
+      .catch(_ => showToast("register-errors"));
   }
   onclick(e) {
     e.preventDefault();
@@ -152,13 +159,12 @@ class LoginPage extends AbstractPage {
       credentials: "include",
     }).then(rep => rep.json())
       .then(data => {
-        if (data.success)
-        {
+        if (data.success) {
           // history.pushState(null, null, data.data.url);
           window.location.replace(data.data.url);
         }
       })
-      .catch(error => console.log("error: ", error));
+      .catch(_ => showToast("login-errors"));
   }
 }
 

@@ -83,10 +83,11 @@
       </div>
     </section>
   </template>
+
   <!--! Login page -->
   <template id="login-page">
     <section>
-      <div class="container-lg d-flex justify-content-center align-items-center min-vh-100 font-monospace">
+      <div class="container-lg d-flex justify-content-center align-items-center text-black min-vh-100 font-monospace position-relative">
         <div class="col-lg-8 col-md-6 flex-column pe-5 left-box text-color ">
           <h1 class="rubik-glitch-regular title">PONG</h1>
           <p class="fs-1 text-light  pe-xxl-5 fw-medium">
@@ -130,6 +131,9 @@
                 <button class="btn btn-lg w-100 fw-bold text-uppercase glass-effect" type="button" id="intra" style="color: var(--darker)"><span class="me-2">Sign
                     In with </span><img src="/static/asset/images/42.svg" style="width:20px "></button>
               </div>
+              <div id="login-errors">
+                <error-toast></error-toast>
+              </div>
             </form>
           </div>
           <div class="row align-items-center hidden" id="register">
@@ -156,7 +160,10 @@
               </div>
 
               <div class="input-group mb-3">
-                <button class="btn btn-lg btn-primary w-100 fs-6 fw-bold" data-register>Login</button>
+                <button class="btn btn-lg btn-primary w-100 fs-6 fw-bold" data-register>Register</button>
+              </div>
+              <div id="register-errors">
+                <error-toast></error-toast>
               </div>
             </form>
           </div>
@@ -846,6 +853,20 @@
         <strong class="d-none d-sm-block ms-2" id="nav-username">bmakhlou</strong>
       </div>
     </nav>
+  </template>
+
+  <!--! Error Toast -->
+  <template id="error-toast">
+    <div class="position-fixed bottom-0 end-0 p-3">
+      <div class="toast text-bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto">Error</strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+        </div>
+      </div>
+    </div>
   </template>
 
 
