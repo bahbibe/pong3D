@@ -93,6 +93,25 @@ body {
 
 
 
+
+
+.divider {
+  display: flex;
+  align-items: center;
+}
+
+.divider::before, .divider::after {
+  flex: 1;
+  content: '';
+  padding: .5px;
+  background-color: #fefefe;
+  margin: 10px;
+}
+
+
+
+
+
 .title {
   /* font-family: "Rubik Glitch", system-ui; */
   font-size: 8rem;
@@ -707,6 +726,7 @@ a.sidebar-link.active {
 .Cards:hover > .newCard:not(:hover) {
   filter: blur(10px);
   transform: scale(0.9, 0.9);
+<<<<<<< Updated upstream
     font-size: 0.7em;
     color: rgba(0, 0, 0, 0.61);
 }
@@ -753,3 +773,6 @@ a.sidebar-link.active {
   animation-fill-mode: both;
   animation-timing-function: linear;
 }
+=======
+}
+>>>>>>> Stashed changes
