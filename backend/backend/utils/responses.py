@@ -3,7 +3,7 @@ from rest_framework import status
 
 
 def ErrorResponse(
-    message: str = "Error",
+    message: str = "Something went wrong!, Please try again later.",
     status_code: int = status.HTTP_400_BAD_REQUEST,
     serializer_errors=None,
 ) -> JsonResponse:
