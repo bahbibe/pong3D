@@ -16,7 +16,7 @@ class ProfilePage extends AbstractPage {
     const username = this.querySelector("#username");
     const userImg = this.querySelector("#user-img");
 
-    const user = window.user.data;
+    const user = window.user;
 
     this.container = this.querySelector("#friend-container");
     // console.log(user);
@@ -85,7 +85,7 @@ class mainNav extends AbstractPage {
     const navUserImg = this.querySelector("#nav-user-img");
     this.notification = this.querySelector("div.content");
     this.notificationCounter = this.querySelector("[data-count]");
-    const user = window.user.data;
+    const user = window.user;
     navUsername.textContent = `${user.username}`;
     navUserImg.src = `${user.profile.avatar}`
 

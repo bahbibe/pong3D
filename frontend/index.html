@@ -701,6 +701,39 @@
       </div>
     </section>
   </template>
+
+  <!-- ! Setup page -->
+  <template id="setup-page">
+    <section class="d-flex">
+      <div class="main">
+        <main class="p-3">
+          <div class="container">
+            <div class="d-flex flex-column align-items-center justify-content-center row" style="height: 80vh;">
+              <h1 class="mb-5 text-center">Just a few more steps!</h1>
+              <form action="POST" class="col-10 col-md-5">
+                <div class="avatar-wrapper">
+                  <img class="profile-pic" src="" />
+                  <div class="upload-button">
+                    <i class="fa fa-arrow-circle-up" aria-hidden="true"></i>
+                  </div>
+                  <input class="file-upload" name="avatar" type="file" accept="image/*"/>
+                </div>
+                <div class="input-group mb-3">
+                  <input type="text" name="username" id="username" class="form-control form-control-lg " placeholder="username" value="" />
+                </div>
+                <!--! ability to enable 2fa from here  -->
+                  <div class="input-group mt-3">
+                    <button type="submit" class="btn btn-lg btn-primary w-100 fs-6 fw-bold">Finish</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </main>
+      </div>
+    </section>
+  </template>
+  
   <!-- ! Search page -->
   <template id="search-page">
     <section class="d-flex">
@@ -894,7 +927,7 @@
             </div>
         </div>
 
-        <img src="/static/asset/images/profile.svg" class="rounded-circle" height="40" alt="user profile image"
+        <img src="/static/asset/images/profile.svg" class="rounded-circle" height="40" width="40" alt="user profile image"
           loading="lazy" id="nav-user-img" />
         <strong class="d-none d-sm-block ms-2" id="nav-username">bmakhlou</strong>
       </div>
