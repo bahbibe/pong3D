@@ -92,9 +92,6 @@ body {
 }
 
 
-
-
-
 .divider {
   display: flex;
   align-items: center;
@@ -107,10 +104,6 @@ body {
   background-color: #fefefe;
   margin: 10px;
 }
-
-
-
-
 
 .title {
   /* font-family: "Rubik Glitch", system-ui; */
@@ -132,6 +125,15 @@ body {
 button[data-login]:hover, button#intra:hover {
   background: rgba(255, 255, 255, 0.7) !important;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8) !important;
+}
+
+.join-btn {
+  box-shadow: rgba(255, 255, 255, 0.3) 0px 1px 2px 0px, rgba(255, 255, 255, 0.15) 0px 2px 6px 2px;
+}
+
+.join-btn:hover {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  box-shadow: rgba(255, 255, 255, 0.2) 0px 1px 2px 0px, rgba(255, 255, 255, 0.1) 0px 1px 3px 1px;
 }
 
 /*-------------------switcher------------------------ */
@@ -720,13 +722,12 @@ a.sidebar-link.active {
 /* hover */
 
 .Cards .newCard:hover {
-  transform: scale(1.2, 1.2);
+  transform: scale(1.1, 1.1);
 }
 
 .Cards:hover > .newCard:not(:hover) {
   filter: blur(10px);
   transform: scale(0.9, 0.9);
-<<<<<<< Updated upstream
     font-size: 0.7em;
     color: rgba(0, 0, 0, 0.61);
 }
@@ -773,6 +774,3 @@ a.sidebar-link.active {
   animation-fill-mode: both;
   animation-timing-function: linear;
 }
-=======
-}
->>>>>>> Stashed changes
