@@ -95,7 +95,6 @@ const router = async () => {
     navigateTo("/home");
     return;
   } else if (match.route.isProtected && isLoggedIn) {
-    console.log("is setup: ", window.user.profile.is_setup);
     if (match.route.path === "/setup") {
       if (window.user.profile.is_setup) {
         navigateTo("/home");

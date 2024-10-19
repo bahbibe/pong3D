@@ -1,3 +1,4 @@
+import { hideToast, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
@@ -46,6 +47,7 @@ export class SetupPage extends AbstractPage {
 
   async submitForm(form) {
     try {
+      hideToast("setup-errors");
       const formData = new FormData(form);
       if (this.file)
         formData.append("avatar", this.file);
@@ -61,9 +63,11 @@ export class SetupPage extends AbstractPage {
       if (data && data.success) {
         window.user = data.data;
         navigateTo("/home");
+      } else {
+        showToast("setup-errors", data.message, data.errors);
       }
     } catch (err) {
-      console.error("Error: ", err);
+      showToast("setup-errors");
     }
   }
 
