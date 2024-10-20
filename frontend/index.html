@@ -25,6 +25,9 @@
 
 <body>
   <div id="app"></div>
+  <div id="toast-wrapper" class="position-absolute bottom-0 end-0">
+    <error-toast></error-toast>
+  </div>
   <!--! Chat page -->
   <template id="chat-page">
     <section class="d-flex">
@@ -133,7 +136,7 @@
   <!--! Login page -->
   <template id="login-page">
     <section>
-      <div class="container-lg d-flex justify-content-center align-items-center text-black min-vh-100 font-monospace position-relative">
+      <div class="container-lg d-flex justify-content-center align-items-center text-black min-vh-100 font-monospace">
         <div class="col-lg-8 col-md-6 flex-column pe-5 left-box text-color ">
           <h1 class="rubik-glitch-regular title">PONG</h1>
           <p class="fs-1 text-light  pe-xxl-5 fw-medium">
@@ -177,9 +180,6 @@
                 <button class="btn btn-lg w-100 fw-bold text-uppercase glass-effect" type="button" id="intra" style="color: var(--darker)"><span class="me-2">Sign
                     In with </span><img src="/static/asset/images/42.svg" style="width:20px "></button>
               </div>
-              <div id="login-errors">
-                <error-toast></error-toast>
-              </div>
             </form>
           </div>
           <div class="row align-items-center hidden" id="register">
@@ -193,27 +193,31 @@
                   required />
               </div>
               <div class="input-group mb-3">
+                <input type="text" class="form-control form-control-lg" placeholder="username" id="username"
+                  required name="username" />
+              </div>
+              <div class="input-group mb-3">
                 <input type="email" class="form-control form-control-lg bg-light fs-6" placeholder="Email address"
-                  id="email" required />
+                  id="email" required name="email" />
               </div>
               <div class="input-group mb-3">
                 <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password"
                   id="password" required />
               </div>
               <div class="input-group mb-3">
-                <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password"
+                <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Confirm Password"
                   id="confirm-password" required />
               </div>
 
               <div class="input-group mb-3">
                 <button class="btn btn-lg btn-primary w-100 fs-6 fw-bold" data-register>Register</button>
               </div>
-              <div id="register-errors">
-                <error-toast></error-toast>
-              </div>
             </form>
           </div>
         </div>
+        <!-- <div id="login-errors" class="position-absolute bottom-0 end-0">
+          <error-toast></error-toast>
+        </div> -->
       </div>
       </div>
     </section>
@@ -713,16 +717,19 @@
               <form action="POST" class="col-10 col-md-5">
                 <div class="avatar-wrapper">
                   <img class="profile-pic" src="" />
-                  <div class="upload-button">
+                  <!-- <div class="upload-button">
                     <i class="fa fa-arrow-circle-up" aria-hidden="true"></i>
-                  </div>
-                  <input class="file-upload" name="avatar" type="file" accept="image/*"/>
+                  </div> -->
+                  <input class="file-upload d-none" name="avatar" type="file" accept="image/*"/>
+                </div>
+                <div class="w-100 d-flex align-items-center mb-4">
+                  <button type="button" class="mx-auto upload-button btn btn-light">Upload</button>
                 </div>
                 <div class="input-group mb-3">
                   <input type="text" name="username" id="username" class="form-control form-control-lg " placeholder="username" value="" />
                 </div>
                 <!--! ability to enable 2fa from here  -->
-                  <div class="input-group mt-3">
+                  <div class="input-group mt-5">
                     <button type="submit" class="btn btn-lg btn-primary w-100 fs-6 fw-bold">Finish</button>
                   </div>
                 </div>
@@ -939,10 +946,10 @@
 
   <!--! Error Toast -->
   <template id="error-toast">
-    <div class="position-fixed bottom-0 end-0 p-3">
-      <div class="toast text-bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="position-absolute bottom-0 end-0 p-3" style="z-index: 1000;">
+      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
-          <strong class="me-auto">Error</strong>
+          <strong class="me-auto"></strong>
           <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">

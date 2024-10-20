@@ -62,12 +62,13 @@ export class SetupPage extends AbstractPage {
 
       if (data && data.success) {
         window.user = data.data;
+        showToast(false, "Profile setup successfully");
         navigateTo("/home");
       } else {
-        showToast("setup-errors", data.message, data.errors);
+        showToast(true, data.message, data.errors);
       }
     } catch (err) {
-      showToast("setup-errors");
+      showToast(true);
     }
   }
 

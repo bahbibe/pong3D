@@ -778,18 +778,19 @@ a.sidebar-link.active {
   height: 200px;
   width: 200px;
   margin: 50px auto;
+  margin-bottom: 10px !important;
   border-radius: 50%;
   overflow: hidden;
   box-shadow: 1px 1px 15px -5px black;
   transition: all 0.3s ease;
 }
-.avatar-wrapper:hover {
+/* .avatar-wrapper:hover {
   transform: scale(1.05);
   cursor: pointer;
 }
 .avatar-wrapper:hover .profile-pic {
   opacity: 0.5;
-}
+} */
 .avatar-wrapper .profile-pic {
   height: 100%;
   width: 100%;
@@ -808,14 +809,14 @@ a.sidebar-link.active {
   color: #34495e;
   text-align: center;
 }
-.avatar-wrapper .upload-button {
+/* .avatar-wrapper .upload-button {
   position: absolute;
   top: 0;
   left: 0;
   height: 100%;
   width: 100%;
-}
-.avatar-wrapper .upload-button .fa-arrow-circle-up {
+} */
+/* .avatar-wrapper .upload-button .fa-arrow-circle-up {
   position: absolute;
   font-size: 234px;
   top: -17px;
@@ -827,4 +828,4 @@ a.sidebar-link.active {
 }
 .avatar-wrapper .upload-button:hover .fa-arrow-circle-up {
   opacity: 0.9;
-}
+} */

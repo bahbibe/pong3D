@@ -1,10 +1,19 @@
-export const hideToast = (wrapperId) => {
-  document.getElementById(wrapperId).classList.remove("show");
-  document.getElementById(wrapperId).classList.add("hide");
+export const hideToast = () => {
+  document.querySelector(`#toast-wrapper .toast`).classList.remove("show");
+  document.querySelector(`#toast-wrapper .toast`).classList.add("hide");
 }
 
-export const showToast = (wrapperId, message, errors) => {
-  const errorsEl = document.querySelector(`#${wrapperId} .toast`);
+export const showToast = (isError, message, errors) => {
+  const errorsEl = document.querySelector(`#toast-wrapper .toast`);
+  if (isError) {
+    errorsEl.classList.add("text-bg-danger");
+    errorsEl.classList.remove("text-bg-success");
+    document.querySelector(`#toast-wrapper .toast-header .me-auto`).innerHTML = "Error";
+  } else {
+    errorsEl.classList.remove("text-bg-danger");
+    errorsEl.classList.add("text-bg-success");
+    document.querySelector(`#toast-wrapper .toast-header .me-auto`).innerHTML = "Success";
+  }
   const errorsContentEl = errorsEl.querySelector(".toast-body");
   if (errors && Object.keys(errors).length > 0) {
     message = Object.keys(errors).map(error => `<p>${error}: ${errors[error]}</p>`).join("");

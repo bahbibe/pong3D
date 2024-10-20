@@ -99,32 +99,34 @@ class LoginPage extends AbstractPage {
         if (data.success) {
           navigateTo("/home");
         } else {
-          showToast("login-errors", data.message, data.errors);
+          showToast(false, data.message, data.errors);
         }
       })
       .catch(_ => {
-        showToast("login-errors");
+        showToast(true);
       });
   }
 
   postDats(event) {
-    hideToast("register-errors");
+    hideToast("login-errors");
 
     if (!(event.target.id === "register-form")) return;
 
-    console.log("register form", event.target.id);
 
     this.firstName = this.querySelector("#firstName");
     this.lastName = this.querySelector("#lastName");
     this.password = this.querySelector("#password");
+    this.confirmpassword = this.querySelector("#confirm-password");
     this.email = this.querySelector("#email");
+    this.username = this.querySelector("#username");
 
     this.user = {
       'first_name': this.firstName.value,
       'last_name': this.lastName.value,
-      'username': this.firstName.value[0] + this.lastName.value,
+      'username': this.username.value,
       'email': this.email.value,
       'password': this.password.value,
+      'confirm_password': this.confirmpassword.value,
     }
 
     const url = `http://localhost:8000/api/auth/register/`
@@ -138,13 +140,14 @@ class LoginPage extends AbstractPage {
       body: JSON.stringify(this.user),
     }).then(rep => rep.json())
       .then(data => {
-        console.log(data);
-        if (data.success)
+        if (data.success) {
           navigateTo("/login");
+          showToast(false, data.message);
+        }
         else
-          showToast("register-errors", data.message, data.errors);
+          showToast(true, data.message, data.errors);
       })
-      .catch(_ => showToast("register-errors"));
+      .catch(_ => showToast(true));
   }
   onclick(e) {
     e.preventDefault();
@@ -164,7 +167,7 @@ class LoginPage extends AbstractPage {
           window.location.replace(data.data.url);
         }
       })
-      .catch(_ => showToast("login-errors"));
+      .catch(_ => showToast("login-errors", true));
   }
 }
 
