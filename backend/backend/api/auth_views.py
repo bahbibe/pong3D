@@ -87,9 +87,24 @@ def register_user(request):
     serializer = RegisterUserSerializer(data=request.data)
 
     if serializer.is_valid():
-        user = User.objects.filter(email=serializer.validated_data["email"]).first()
-        if user:
+        is_user_exists = User.objects.filter(
+            username=serializer.validated_data["username"]
+        ).exists()
+        if is_user_exists:
+            return ErrorResponse(message="A user with this username already exists")
+
+        is_user_exists = User.objects.filter(
+            email=serializer.validated_data["email"]
+        ).exists()
+
+        if is_user_exists:
             return ErrorResponse(message="A user with this email already exists")
+
+        if (
+            serializer.validated_data["password"]
+            != serializer.validated_data["confirm_password"]
+        ):
+            return ErrorResponse(message="Passwords do not match")
 
         user = User.objects.create_user(
             username=serializer.validated_data["username"],
@@ -100,7 +115,10 @@ def register_user(request):
         )
         Profile.objects.create(user=user)
         user.save()
-        return SuccessResponse(data=UserSerializer(user).data, message="User Created")
+        return SuccessResponse(
+            data=UserSerializer(user).data,
+            message="You have been registered successfully. Please login to continue.",
+        )
 
     return ErrorResponse(
         status_code=status.HTTP_400_BAD_REQUEST, serializer_errors=serializer.errors
@@ -179,6 +197,7 @@ def login_intra_callback(request):
 
     json_response = intra_response.json()
     user_data = {
+        "id": json_response["id"],
         "username": json_response["login"],
         "email": json_response["email"],
         "first_name": json_response["first_name"],
@@ -187,10 +206,14 @@ def login_intra_callback(request):
     }
     user = User.objects.filter(username=user_data["username"]).first()
     if user and user.profile.auth_method != Profile.INTRA:
-        user_data["username"] = (
-            f"{user_data['username']}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
-        )
-        user = None
+        profile = Profile.objects.filter(intra_id=user_data["id"]).first()
+        if profile and profile.intra_id == user_data["id"]:
+            user = profile.user
+        else:
+            user_data["username"] = (
+                f"{user_data['username']}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
+            )
+            user = None
 
     if user is None:
         user = User.objects.create_user(
@@ -200,7 +223,10 @@ def login_intra_callback(request):
             last_name=user_data["last_name"],
         )
         Profile.objects.create(
-            user=user, avatar=user_data["avatar"], auth_method=Profile.INTRA
+            user=user,
+            avatar=user_data["avatar"],
+            auth_method=Profile.INTRA,
+            intra_id=user_data["id"],
         )
         user.set_unusable_password()
         user.save()

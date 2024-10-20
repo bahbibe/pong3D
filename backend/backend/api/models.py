@@ -20,6 +20,7 @@ class Profile(models.Model):
         default="avatars/profile_default.jpg",
     )
     auth_method = models.CharField(max_length=50, default=EMAIL, choices=AUTH_CHOICES)
+    intra_id = models.IntegerField(null=True, blank=True)
     is_setup = models.BooleanField(default=False)
     total_wins = models.IntegerField(default=0)
     total_losses = models.IntegerField(default=0)

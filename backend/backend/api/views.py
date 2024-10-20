@@ -11,17 +11,27 @@ from api.auth_utils import is_authenticated
 from utils.responses import SuccessResponse, ErrorResponse
 
 
-@api_view(["PUT"])
+@api_view(["POST"])
 @is_authenticated
 def setup_profile(request):
     user = request.user
     serializer = SetupProfileSerializer(data=request.data)
 
     if serializer.is_valid():
+        is_username_exists = User.objects.exclude(id=user.id).filter(
+            username=serializer.validated_data.get("username")
+        ).exists()
+        if is_username_exists:
+            return ErrorResponse(
+                message="Username already exists, Please try another one."
+            )
+
         profile = user.profile
         profile.avatar = serializer.validated_data.get("avatar", profile.avatar)
         profile.is_setup = True
+        user.username = serializer.validated_data.get("username", user.username)
         profile.save()
+        user.save()
         return SuccessResponse(data=UserSerializer(user).data)
 
     return ErrorResponse(serializer_errors=serializer.errors)
@@ -65,6 +75,7 @@ def get_profile(_, uuid):
         return ErrorResponse(
             message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
         )
+
 
 @api_view(["GET"])
 @is_authenticated

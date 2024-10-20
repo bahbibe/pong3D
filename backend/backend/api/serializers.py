@@ -29,14 +29,16 @@ class LoginUserSerializer(serializers.ModelSerializer):
 
 
 class RegisterUserSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True, required=True)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(write_only=True, required=True)
 
     class Meta:
         model = User
-        fields = ["id", "username", "email", "password", "first_name", "last_name"]
+        fields = ["id", "username", "email", "password", "first_name", "last_name", "confirm_password"]
 
 
 class SetupProfileSerializer(serializers.ModelSerializer):
