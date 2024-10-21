@@ -33,6 +33,14 @@ export class SetupPage extends AbstractPage {
       fileUpload.click();
     });
 
+    // const twoFaModal = this.querySelector("#twoFaModal");
+    // twoFaModal.addEventListener("show.bs.modal", () => {
+    //   this.enable2FA();
+    // });
+    this.querySelector("#enable-2fa").addEventListener("click", () => {
+      this.enable2FA();
+    });
+
     const form = this.querySelector("form");
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -47,7 +55,7 @@ export class SetupPage extends AbstractPage {
 
   async submitForm(form) {
     try {
-      hideToast("setup-errors");
+      hideToast();
       const formData = new FormData(form);
       if (this.file)
         formData.append("avatar", this.file);
@@ -64,6 +72,66 @@ export class SetupPage extends AbstractPage {
         window.user = data.data;
         showToast(false, "Profile setup successfully");
         navigateTo("/home");
+      } else {
+        showToast(true, data.message, data.errors);
+      }
+    } catch (err) {
+      showToast(true);
+    }
+  }
+
+  async enable2FA() {
+    try {
+      const response = await fetch("http://localhost:8000/api/auth/twofa/enable/", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+      if (data && data.success) {
+        const twoFaModal = this.querySelector("#twoFaModal");
+        const modal = new bootstrap.Modal(twoFaModal);
+        modal.show();
+        const qrCode = this.querySelector("#qr-code"); 
+        qrCode.src = data.data.image;
+        qrCode.parentElement.classList.remove("d-none");
+        this.querySelector("#confirm-2fa").addEventListener("click", () => this.confirm2FA());
+      } else {
+        showToast(true, data.message, data.errors);
+      }
+    } catch (err) {
+      showToast(true);
+    }
+  }
+
+  async confirm2FA() {
+    const error = this.querySelector(".form-text");
+    error.classList.add("d-none");
+    const code = this.querySelector("#twofa-code").value;
+    if (code.trim() === "") {
+      error.innerHTML = "Please enter the two factor code";
+      error.classList.remove("d-none");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:8000/api/auth/twofa/confirm/", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await response.json();
+      if (data && data.success) {
+        showToast(false, "2FA enabled successfully");
+        const twoFaModal = this.querySelector("#twoFaModal");
+        const modal = bootstrap.Modal.getInstance(twoFaModal);
+        modal.hide();
+        this.querySelector("#enable-2fa").classList.add("d-none");
+        this.querySelector("#disable-2fa").classList.remove("d-none");
       } else {
         showToast(true, data.message, data.errors);
       }

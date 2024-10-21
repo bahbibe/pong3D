@@ -75,7 +75,7 @@ class LoginPage extends AbstractPage {
   }
 
   getData(event) {
-    hideToast("login-errors");
+    hideToast();
     if (!(event.target.id === "login-form")) return;
 
     this.email = this.querySelector("[data-email]");
@@ -108,7 +108,7 @@ class LoginPage extends AbstractPage {
   }
 
   postDats(event) {
-    hideToast("login-errors");
+    hideToast();
 
     if (!(event.target.id === "register-form")) return;
 
