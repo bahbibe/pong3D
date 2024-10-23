@@ -251,8 +251,8 @@ button[data-login]:hover, button#intra:hover {
   contain: paint;
   min-height: 100vh;
   height: 100%;
-  max-width: 264px;
-  min-width: 264px;
+  max-width: 230px;
+  min-width: 230px;
   transition: all 0.35s ease-in-out;
   background-color: var(--darker);
   display: flex;
@@ -260,7 +260,7 @@ button[data-login]:hover, button#intra:hover {
 }
 
 #sidebar.collapsed {
-  margin-left: -264px;
+  margin-left: -230px;
 }
 
 .toggler-btn {
@@ -338,7 +338,7 @@ a.sidebar-link.active {
 @media (max-width:768px) {
 
   .sidebar-toggle {
-    margin-left: -264px;
+    margin-left: -230px;
   }
 
   #sidebar.collapsed {
