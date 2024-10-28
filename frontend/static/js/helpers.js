@@ -17,3 +17,14 @@ export const showToast = (wrapperId, message, errors) => {
   //   errorsEl.classList.add("hide");
   // }, 5000);
 }
+
+
+export const showOverlay = () =>{
+  const showOverlay = document.querySelector("#overlay");
+  showOverlay.style.display = "block";
+}
+
+export const hideOverlay = ()  =>{
+  const showOverlay = document.querySelector("#overlay");
+  setInterval(() => showOverlay.style.display = "none", 1000);
+}

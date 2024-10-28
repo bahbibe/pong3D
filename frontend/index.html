@@ -53,6 +53,7 @@
       </div>
     </section>
   </template>
+
   <!--! Home page -->
   <template id="home-page">
     <section class="m-2">
@@ -130,6 +131,9 @@
 
   <!--! Login page -->
   <template id="login-page">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
     <section>
       <div class="container-lg d-flex justify-content-center align-items-center text-black min-vh-100 font-monospace position-relative">
         <div class="col-lg-8 d-none d-lg-block flex-column pe-5 left-box text-color ">
@@ -155,12 +159,8 @@
             </div>
             <form action="" method="post" id="login-form">
               <div class="input-group mb-3">
-                <!-- <input type="email" class="form-control form-control-lg bg-light fs-6" placeholder="Email address"
-                  data-email>
-              </div> -->
-              <div class="input-group mb-3">
                 <input type="email" class="form-control form-control-lg bg-light fs-6" placeholder="Email address"
-                  id="email" data-email required />
+                  data-email required />
               </div>
               <div class="input-group mb-5">
                 <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password"
@@ -221,8 +221,12 @@
       </div>
     </section>
   </template>
+
   <!--! user Home page -->
   <template id="user-home">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
     <section class="d-flex">
       <aside-nav></aside-nav>
       <div class="main">
@@ -246,18 +250,12 @@
 
                 <div class="row p-3 Cards">
                   
-                  <div class="newCard d-flex align-items-center justify mb-4 me-4" style="width: 300px; max-width: 100%; height: 200px;
-                    background: rgba(255, 255, 255, 0.2);
-                    border-radius: 10px;
-                    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-                    backdrop-filter: blur(5px);
-                    -webkit-backdrop-filter: blur(5px);
-                    border: 1px solid rgba(255, 255, 255, 0.3);">
+                  <div class="newCard d-flex align-items-center justify mb-4 me-4">
                     
                     <div class="content__ me-2" style="width: 50%;">
                       <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Classic</h6>
                       <p  style="font-size: 13px;">Find you a rival </p>
-                      <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+                      <a href="" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
                       border-radius: 5px;
                       box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
                         Play
@@ -268,18 +266,12 @@
                     </div>
                   </div>
 
-                  <div class="newCard d-flex align-items-center justify-content-between mb-4 me-4" style="width: 300px; max-width: 100%; height: 200px;
-                    background: rgba(255, 255, 255, 0.2);
-                    border-radius: 10px;
-                    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-                    backdrop-filter: blur(5px);
-                    -webkit-backdrop-filter: blur(5px);
-                    border: 1px solid rgba(255, 255, 255, 0.3);">
+                  <div class="newCard d-flex align-items-center justify-content-between mb-4 me-4">
                     
                     <div class="content__ me-2" style="width: 50%;">
                       <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Tournament</h6>
                       <p  style="font-size: 13px;">Grind & win the trophy</p>
-                      <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+                      <a class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
                       border-radius: 5px;
                       box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
                         Play
@@ -291,18 +283,12 @@
                   </div>
 
 
-                  <div class="newCard d-flex align-items-center justify-content-between mb-4" style="width: 300px; height: 200px;
-                    background: rgba(255, 255, 255, 0.2);
-                    border-radius: 10px;
-                    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-                    backdrop-filter: blur(5px);
-                    -webkit-backdrop-filter: blur(5px);
-                    border: 1px solid rgba(255, 255, 255, 0.3);">
+                  <div class="newCard d-flex align-items-center justify-content-between mb-4">
                     
                     <div class="content__ me-2" style="width: 50%;">
                       <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Friend</h6>
                       <p  style="font-size: 13px;">Challenge your friend </p>
-                      <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+                      <a class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
                       border-radius: 5px;
                       box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
                         Play
@@ -366,8 +352,12 @@
     </section>
     </div>
   </template>
+
   <!--! USER PROFILE  -->
   <template id="user-profile">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
     <section class="d-flex">
       <aside-nav></aside-nav>
       <div class="main">
@@ -579,6 +569,9 @@
   </template>
   <!-- !Friend PAGE -->
   <template id="friend-page">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
     <section class="d-flex">
       <aside-nav></aside-nav>
       <div class="main">
@@ -611,6 +604,9 @@
   </template>
   <!-- !Ranking page -->
   <template id="ranking-page">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
     <section class="d-flex">
       <aside-nav></aside-nav>
       <div class="main">
@@ -667,6 +663,9 @@
   </template>
   <!-- ! Settings page -->
   <template id="settings-page">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
     <section class="d-flex">
       <aside-nav></aside-nav>
       <div class="main">

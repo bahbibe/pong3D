@@ -1,4 +1,4 @@
-import { hideToast, showToast } from "../helpers.js";
+import { hideToast, showOverlay , hideOverlay, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
@@ -16,6 +16,7 @@ class LoginPage extends AbstractPage {
     this.firstName = this.querySelector("#firstName");
     this.lastName = this.querySelector("#lastName");
     this.password = this.querySelector("#password");
+    this.confirmPassword = this.querySelector("#confirm-password");
     this.email = this.querySelector("#email");
 
     this.lengthPassword = this.querySelector(".lengthPassword");
@@ -27,30 +28,33 @@ class LoginPage extends AbstractPage {
     // console.log(form);
     this.loginForm.addEventListener('submit', this);
     this.registerForm.addEventListener('submit', this);
-    this.intra.addEventListener('click', this);
-
+    
     const registerBtn = this.querySelector("#tab-register");
     const loginBtn = this.querySelector("#tab-login");
     const boxLogin = this.querySelector("#login");
     const boxRegister = this.querySelector("#register");
-
+    
     this.switcher(registerBtn, loginBtn, boxRegister, boxLogin);
     this.switcher(loginBtn, registerBtn, boxLogin, boxRegister);
-    registerBtn.addEventListener(
-      "click", function (e) {
-        e.preventDefault();
-        if(!e.target.classList.contains('activeBtn'))
-        {
-          // box.style.display = "none";
-          registerBox.classList.remove("hidden");
-          loginBox.classList.add("hidden");
+    
+    
+    this.addEventListener('click', this);
+    
+    // registerBtn.addEventListener(
+    //   "click", function (e) {
+    //     e.preventDefault();
+    //     if(!e.target.classList.contains('activeBtn'))
+    //     {
+    //       // box.style.display = "none";
+    //       registerBox.classList.remove("hidden");
+    //       loginBox.classList.add("hidden");
           
-          registerBtn.classList.add("activeBtn");
-          loginBtn.classList.remove("activeBtn");
-        }
+    //       registerBtn.classList.add("activeBtn");
+    //       loginBtn.classList.remove("activeBtn");
+    //     }
 
-      }
-    );
+    //   }
+    // );
 
 
 
@@ -62,22 +66,22 @@ let validationRegex = [
   { regex: /[^A-Za-z0-9]/} // special characters
 ]
 
-this.password.addEventListener('keydown', () => {
-  let count = 0;
-  validationRegex.forEach((item, i) => {
-    console.log(password.value);
-    let isValid = item.regex.test(password.value);
-    if(isValid)
-    {
-      count++;
-      console.log("count", count);
-    }
-    if(count === 5)
-      this.lengthPassword.style.color = "green";
-    else
-      this.lengthPassword.style.color = "red";
-  })
-});
+// this.password.addEventListener('keydown', () => {
+//   let count = 0;
+//   validationRegex.forEach((item, i) => {
+//     console.log(password.value);
+//     let isValid = item.regex.test(password.value);
+//     if(isValid)
+//     {
+//       count++;
+//       console.log("count", count);
+//     }
+//     if(count === 5)
+//       this.lengthPassword.style.color = "green";
+//     else
+//       this.lengthPassword.style.color = "red";
+//   })
+// });
 
 
 }
@@ -100,6 +104,7 @@ this.password.addEventListener('keydown', () => {
     hideToast("login-errors");
     if (!(event.target.id === "login-form")) return;
 
+    showOverlay();
     this.email = this.querySelector("[data-email]");
     this.password = this.querySelector("[data-password]");
     this.user = {
@@ -119,8 +124,10 @@ this.password.addEventListener('keydown', () => {
       .then(data => {
         console.log(data);
         if (data.success) {
+          hideOverlay();
           navigateTo("/home");
         } else {
+          hideOverlay();
           showToast("login-errors", data.message, data.errors);
         }
       })
@@ -143,9 +150,17 @@ this.password.addEventListener('keydown', () => {
       'username': this.firstName.value[0] + this.lastName.value,
       'email': this.email.value,
       'password': this.password.value,
+      'confirm_password': this.confirmPassword.value,
     }
 
     const url = `http://localhost:8000/api/auth/register/`
+    if (this.password.value !== this.confirmPassword.value) {
+      console.log("passwords do not match");
+      showToast("register-errors", "passwords do not match");
+      this.password.value = "";
+      this.confirmPassword.value = "";
+      return;
+    }
     fetch(url, {
       method: "POST",
       headers: {
@@ -165,24 +180,53 @@ this.password.addEventListener('keydown', () => {
       .catch(_ => showToast("register-errors"));
   }
   onclick(e) {
-    e.preventDefault();
+    
+    if (e.target.id !== "intra") return;
+    console.log("onclick");
+    this.authenticationLogin();
 
+    // const url = `http://localhost:8000/api/auth/intra/`
+    // fetch(url, {
+    //   method: "GET",
+    //   headers: {
+    //     'Accept': 'application/json',
+    //     'Content-type': 'application/json',
+    //   },
+    //   credentials: "include",
+    // }).then(rep => rep.json())
+    //   .then(data => {
+    //     if (data.success) {
+    //       // history.pushState(null, null, data.data.url);
+    //       window.location.replace(data.data.url);
+    //     }
+    //   })
+    //   .catch(_ => showToast("login-errors"));
+  }
+
+  async authenticationLogin() {
+    showOverlay();
     const url = `http://localhost:8000/api/auth/intra/`
-    fetch(url, {
-      method: "GET",
-      headers: {
-        'Accept': 'application/json',
-        'Content-type': 'application/json',
-      },
-      credentials: "include",
-    }).then(rep => rep.json())
-      .then(data => {
-        if (data.success) {
-          // history.pushState(null, null, data.data.url);
-          window.location.replace(data.data.url);
-        }
-      })
-      .catch(_ => showToast("login-errors"));
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          'Accept': 'application/json',
+          'Content-type': 'application/json',
+        },
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (data.success) {
+        hideOverlay();
+        window.location.replace(data.data.url);
+      } else {
+        hideOverlay();
+      }
+    } catch (error) {
+      hideOverlay();
+      console.log(error);
+    }
+
   }
 
   switcher(btn, btn2, box, box1) {
