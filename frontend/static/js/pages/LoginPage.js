@@ -25,9 +25,13 @@ class LoginPage extends AbstractPage {
     this.registerForm = this.querySelector("#register-form");
     this.intra = this.querySelector("#intra");
 
+
     // console.log(form);
     this.loginForm.addEventListener('submit', this);
     this.registerForm.addEventListener('submit', this);
+
+    this.isValidPassword = false;
+
     
     const registerBtn = this.querySelector("#tab-register");
     const loginBtn = this.querySelector("#tab-login");
@@ -37,8 +41,8 @@ class LoginPage extends AbstractPage {
     this.switcher(registerBtn, loginBtn, boxRegister, boxLogin);
     this.switcher(loginBtn, registerBtn, boxLogin, boxRegister);
     
-    
     this.addEventListener('click', this);
+    // this.addEventListener('focus', this);
     
     // registerBtn.addEventListener(
     //   "click", function (e) {
@@ -58,30 +62,18 @@ class LoginPage extends AbstractPage {
 
 
 
-let validationRegex = [
-  { regex: /.{8,}/ }, // min 8 letters,
-  { regex: /[0-9]/ }, // numbers from 0 - 9
-  { regex: /[a-z]/ }, // letters from a - z (lowercase)
-  { regex: /[A-Z]/}, // letters from A-Z (uppercase),
-  { regex: /[^A-Za-z0-9]/} // special characters
-]
+// let validationRegex = [
+//   { regex: /.{8,}/ }, // min 8 letters,
+//   { regex: /[0-9]/ }, // numbers from 0 - 9
+//   { regex: /[a-z]/ }, // letters from a - z (lowercase)
+//   // { regex: /[A-Z]/}, // letters from A-Z (uppercase),
+//   // { regex: /[^A-Za-z0-9]/} // special characters
+// ]
 
-// this.password.addEventListener('keydown', () => {
-//   let count = 0;
-//   validationRegex.forEach((item, i) => {
-//     console.log(password.value);
-//     let isValid = item.regex.test(password.value);
-//     if(isValid)
-//     {
-//       count++;
-//       console.log("count", count);
-//     }
-//     if(count === 5)
-//       this.lengthPassword.style.color = "green";
-//     else
-//       this.lengthPassword.style.color = "red";
-//   })
-// });
+
+// this.password.addEventListener('keydown', this)
+
+this.addEventListener('keydown', this);
 
 
 }
@@ -89,6 +81,7 @@ let validationRegex = [
 
   handleEvent(event) {
     this[`on${event.type}`](event)
+
   }
 
   onsubmit(e) {
@@ -96,9 +89,33 @@ let validationRegex = [
     this.getData(e);
     this.postDats(e);
   }
-  // onkeydown(e) { 
-  //   this.isValidPassword(e.key);
-  // }
+  onkeydown(e) { 
+    if (e.target.id !== "password"){
+      console.log("not password", e.target.id);
+      return;
+    }
+    console.log("key down", e.target.id);
+    let regex = /^(?=.*[a-z])(?=.*\d).{8,15}$/;
+    console.log("password", e.target.value);
+    if (regex.test(e.target.value))
+    {
+      this.lengthPassword.style.color = "green";
+      this.isValidPassword = true;
+    }
+    else
+      this.lengthPassword.style.color = "red";
+
+  }
+
+  onclick(e) {
+    
+    if (e.target.id === "intra")
+      this.authenticationLogin();
+    else if (e.target.id === "password" ||  e.target.id  === 'confirm-password')
+      this.lengthPassword.classList.remove("d-none");
+    else
+      this.lengthPassword.classList.add("d-none");
+  }
 
   getData(event) {
     hideToast("login-errors");
@@ -154,9 +171,9 @@ let validationRegex = [
     }
 
     const url = `http://localhost:8000/api/auth/register/`
-    if (this.password.value !== this.confirmPassword.value) {
+    if (this.password.value !== this.confirmPassword.value || !this.isValidPassword) {
       console.log("passwords do not match");
-      showToast("register-errors", "passwords do not match");
+      showToast("register-errors", "passwords do not match or password is not valid");
       this.password.value = "";
       this.confirmPassword.value = "";
       return;
@@ -178,29 +195,6 @@ let validationRegex = [
           showToast("register-errors", data.message, data.errors);
       })
       .catch(_ => showToast("register-errors"));
-  }
-  onclick(e) {
-    
-    if (e.target.id !== "intra") return;
-    console.log("onclick");
-    this.authenticationLogin();
-
-    // const url = `http://localhost:8000/api/auth/intra/`
-    // fetch(url, {
-    //   method: "GET",
-    //   headers: {
-    //     'Accept': 'application/json',
-    //     'Content-type': 'application/json',
-    //   },
-    //   credentials: "include",
-    // }).then(rep => rep.json())
-    //   .then(data => {
-    //     if (data.success) {
-    //       // history.pushState(null, null, data.data.url);
-    //       window.location.replace(data.data.url);
-    //     }
-    //   })
-    //   .catch(_ => showToast("login-errors"));
   }
 
   async authenticationLogin() {
