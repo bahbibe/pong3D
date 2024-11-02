@@ -1,3 +1,4 @@
+import { hideToast, showOverlay , hideOverlay, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
@@ -30,6 +31,7 @@ class ProfilePage extends AbstractPage {
   async getFriend(){
     try
     {
+      showOverlay();
       const response = await fetch("http://localhost:8000/api/friends/", { credentials: "include"});
       const data = await response.json();
       if (response.ok)
@@ -64,6 +66,7 @@ class ProfilePage extends AbstractPage {
                     </div>
                     `;
         }
+        hideOverlay();
       }
 
     }

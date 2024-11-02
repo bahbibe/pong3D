@@ -42,6 +42,12 @@ a {
   text-decoration: none;
   color: var(--text);
 }
+img {
+  position: relative;
+  left: 0px;
+  top: 0px;
+  z-index: 1;
+}
 
 .activeBtn {
   background-color:  var(--backgroud);
@@ -79,6 +85,75 @@ body {
 }
 
 
+
+
+#overlay {
+
+  position: fixed; /* Sit on top of the page content */
+  display: none; /*Hidden by default*/
+  width: 100%; /*Full width (cover the whole page) */
+  height: 100%; /*Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.8); /* Black background with opacity */
+  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+  cursor: pointer; /* Add a pointer on hover */
+  z-index: 9999;
+}
+
+/* loader */
+.custom-loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  --d:22px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  color: #766DF4;
+  box-shadow: 
+    calc(1*var(--d))      calc(0*var(--d))     0 0,
+    calc(0.707*var(--d))  calc(0.707*var(--d)) 0 1px,
+    calc(0*var(--d))      calc(1*var(--d))     0 2px,
+    calc(-0.707*var(--d)) calc(0.707*var(--d)) 0 3px,
+    calc(-1*var(--d))     calc(0*var(--d))     0 4px,
+    calc(-0.707*var(--d)) calc(-0.707*var(--d))0 5px,
+    calc(0*var(--d))      calc(-1*var(--d))    0 6px;
+  animation: s7 1s infinite steps(8);
+}
+
+@keyframes s7 {
+  100% {transform: rotate(1turn)}
+}
+
+.profile-image {
+  position: relative;
+  z-index: 2;
+}
+
+.profile-image::after {
+  content: "";
+  position: absolute;
+  bottom: 5%;
+  right: 8%;
+  width: 20px;
+  height: 20px;
+  background: green;
+  border-radius: 100%;
+  z-index: 1;
+}
+
+
+
+
+
+
+/*-------------------fonts------------------------ */
+
+
+
 .rubik-glitch-regular {
   font-family: "Rubik Glitch", system-ui;
   font-weight: 400;
@@ -90,9 +165,6 @@ body {
   font-weight: 400;
   font-style: normal;
 }
-
-
-
 
 
 .divider {
@@ -107,10 +179,6 @@ body {
   background-color: #fefefe;
   margin: 10px;
 }
-
-
-
-
 
 .title {
   /* font-family: "Rubik Glitch", system-ui; */
@@ -129,9 +197,19 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-button[data-login]:hover, button#intra:hover {
+button[data-login]:hover, button#intra:hover, [data-play]:hover {
   background: rgba(255, 255, 255, 0.7) !important;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8) !important;
+  cursor: pointer;
+}
+
+.join-btn {
+  box-shadow: rgba(255, 255, 255, 0.3) 0px 1px 2px 0px, rgba(255, 255, 255, 0.15) 0px 2px 6px 2px;
+}
+
+.join-btn:hover {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  box-shadow: rgba(255, 255, 255, 0.2) 0px 1px 2px 0px, rgba(255, 255, 255, 0.1) 0px 1px 3px 1px;
 }
 
 /*-------------------switcher------------------------ */
@@ -249,8 +327,8 @@ button[data-login]:hover, button#intra:hover {
   contain: paint;
   min-height: 100vh;
   height: 100%;
-  max-width: 264px;
-  min-width: 264px;
+  max-width: 230px;
+  min-width: 230px;
   transition: all 0.35s ease-in-out;
   background-color: var(--darker);
   display: flex;
@@ -258,7 +336,7 @@ button[data-login]:hover, button#intra:hover {
 }
 
 #sidebar.collapsed {
-  margin-left: -264px;
+  margin-left: -230px;
 }
 
 .toggler-btn {
@@ -336,7 +414,7 @@ a.sidebar-link.active {
 @media (max-width:768px) {
 
   .sidebar-toggle {
-    margin-left: -264px;
+    margin-left: -230px;
   }
 
   #sidebar.collapsed {
@@ -400,6 +478,18 @@ a.sidebar-link.active {
   background-position: -24px 0;
 }
 
+/* !user home */
+
+
+.newCard {
+  width: 300px; max-width: 100%; height: 200px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
 
 
 
@@ -720,7 +810,7 @@ a.sidebar-link.active {
 /* hover */
 
 .Cards .newCard:hover {
-  transform: scale(1.2, 1.2);
+  transform: scale(1.1, 1.1);
 }
 
 .Cards:hover > .newCard:not(:hover) {

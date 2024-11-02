@@ -1,3 +1,4 @@
+import { showOverlay, hideOverlay } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
@@ -19,12 +20,20 @@ class FriendPage extends AbstractPage {
     this.addFriend = this.querySelector("#add-friend");
     this.isSent = false;
     
+    showOverlay();
+    console.log("Friend Page");
     this.getUser();
     this.CheckIsFriend();
     if (!this.isSent)
-        this.checkIsSent();
+    {
+      this.checkIsSent();
+      hideOverlay();
+    }
     if (!this.isSent)
+    {
       this.checkIsSend();
+      hideOverlay();
+    }
 
     this.addFriend.addEventListener("click", this);
 
