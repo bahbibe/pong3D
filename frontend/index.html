@@ -232,11 +232,11 @@
     <section>
       <main-nav></main-nav>
       <div class="container-md">
-          <div class="row">
-            <div class="d-flex  p-4  mt-4 bg-primary-subtle   rounded-1 font-monospace justify-content-between align-content-center">
+          <div class="row" style="color: var(--darker);">
+            <div class="d-flex  p-4  mt-4  rounded-1 font-monospace justify-content-between align-items-center" style="background-color: #624E88;">
               <div class="welcome" style="font-size: 1rem;">
-                <h1 class="m-0 text-black-50" id="firstName">Welcome Back, Bilal</h1>
-                <p class="text-muted" style="font-size: 14px;">Feel free to be part of our world, and enjoy the moment.</p>
+                <h1 class="m-0 text-capitalize">Welcome Back,<span id="firstName">Bilal</span></h1>
+                <p class="text-capitalize vt323-regular" style="font-size: 24px;">Embrace the opportunity to join our world and savor every moment.</p>
               </div>
               <div class="welcome-img d-none d-md-block">
                 <img src="/static/asset/images/robots_welcome.svg" class="img-fluid" width="120" alt="a robots waving" style="max-width: 100%;">
@@ -247,9 +247,9 @@
             <div class="col-md-8 col-12">
               <h2 class="font-monospace">Games Modes</h2>
 
-              <div class="row p-3 Cards">
+              <div class="row p-1 Cards justify-content-between">
                 
-                <div class="newCard d-flex align-items-center justify mb-4 me-4">
+                <div class="newCard d-flex align-items-center justify mb-4">
                   
                   <div class="content__ me-2" style="width: 50%;">
                     <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Classic</h6>
@@ -265,7 +265,7 @@
                   </div>
                 </div>
 
-                <div class="newCard d-flex align-items-center justify-content-between mb-4 me-4">
+                <div class="newCard d-flex align-items-center justify-content-between mb-4">
                   
                   <div class="content__ me-2" style="width: 50%;">
                     <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Tournament</h6>
@@ -282,7 +282,7 @@
                 </div>
 
 
-                <div class="newCard d-flex align-items-center justify-content-between mb-4">
+                <div class="newCard d-flex align-items-center justify-content-between">
                   
                   <div class="content__ me-2" style="width: 50%;">
                     <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Friend</h6>
@@ -358,7 +358,7 @@
     <section class="">
       <main-nav></main-nav>
       <div class="container-md mt-4">
-        <div class="row p-3  text-white box-sh-1 secondary-bg">
+        <div class="row p-3  text-white  glass-effect">
           <div class="col-12 col-md-6 col-lg-6 mx-auto">
             <div class="d-lg-flex align-items-center  text-center text-lg-start pb-3 pb-lg-0">
               <div class="profile-image">
@@ -486,9 +486,9 @@
           </div>
         </div>
         
-        <div class="row mt-4 justify-content-between">
+        <div class="row mt-4 mb-2 justify-content-between">
   
-          <div class="col-12 col-lg-6 p-3 secondary-bg mb-3 mb-lg-0" style="min-height: 47vh;">
+          <div class="col-12 col-lg-6 p-3 glass-effect mb-3 mb-lg-0" style="min-height: 47vh;">
             <h2 class="text-white">Game History</h2>
             <div class="profile-content p-1">
               <div class="row mt-3 p-1 mb-1" style="background: linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85));">
@@ -522,7 +522,7 @@
           </div>      
   
   
-          <div class="col-12 col-lg-5 p-3 secondary-bg" style="height: 47vh; max-height: 47vh;">
+          <div class="col-12 col-lg-5 p-3 glass-effect" style="height: 47vh; max-height: 47vh;">
             <h2 class="text-white">Friends</h2>
             <div id="friend-container" class="p-1">
               <div class="row p-1 rounded-1 justify-content-between align-items-center">
@@ -975,37 +975,37 @@
             <li>
               <a class="" href="/home" id="home" data-link>
                 <i class="fa-solid fa-house me-1"></i>
-                <span> Home</span>
-              </a>
-            </li>
-            <li class="">
-              <a class="" href="/profile" id="profile" data-link>
-                <i class="fa-solid fa-user me-1"></i>
-                <span>Profile</span>
+                Home
               </a>
             </li>
             <li>
-              <a class="" href="/ranking" id="ranking" data-link>
+              <a href="/profile" id="profile" data-link>
+                <i class="fa-solid fa-user me-1"></i>
+                Profile
+              </a>
+            </li>
+            <li>
+              <a href="/ranking" id="ranking" data-link>
                 <i class="fa-solid fa-ranking-star me-1"></i>
-                <span>Leaderboard</span>
+                Leaderboard
               </a>
             </li>
             <li>
               <a class="" href="/chat" id="chat" data-link>
                 <i class="fa-regular fa-comment-dots me-1"></i>
-                <span>Chat</span>
+                Chat
               </a>
             </li>
             <li>
               <a class="" href="/settings" id="settings" data-link>
                 <i class="fa-solid fa-gear me-1"></i>
-                <span>Settings</span>
+                Settings
               </a>
             </li>
             <li>
               <a class="" href="#" id="logout">
                 <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
-                <span>Exit</span>
+                Exit
               </a>
             </li>
         </ul>

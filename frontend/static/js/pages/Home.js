@@ -9,7 +9,13 @@ class Home extends AbstractPage {
     const template = document.getElementById("user-home");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
-    window.active = this.querySelector("a#profile");
+
+    const first_name = this.querySelector("#firstName");
+
+    const user = window.user;
+    first_name.textContent = `${user.first_name}`;
+
+
   }
 }
 

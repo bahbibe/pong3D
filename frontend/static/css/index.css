@@ -544,7 +544,7 @@ a.sidebar-link.active {
 
 
 .newCard {
-  width: 300px; max-width: 100%; height: 200px;
+  width: 270px; max-width: 100%; height: 170px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
@@ -872,15 +872,16 @@ a.sidebar-link.active {
 /* hover */
 
 .Cards .newCard:hover {
-  transform: scale(1.1, 1.1);
+  transform: scale(1.1);
 }
 
-.Cards:hover > .newCard:not(:hover) {
+
+/* .Cards:hover > .newCard:not(:hover) {
   filter: blur(10px);
   transform: scale(0.9, 0.9);
     font-size: 0.7em;
     color: rgba(0, 0, 0, 0.61);
-}
+} */
 
 /* ============TOASTS===================== */
 

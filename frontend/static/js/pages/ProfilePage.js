@@ -39,7 +39,7 @@ class ProfilePage extends AbstractPage {
         const friends = data.data;
         for (const friend of friends) {
           this.container.innerHTML += `
-                    <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2" style="background: linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85)); cursor: pointer;">
+                    <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
                       <div class="col-3 col-md-4">
                         <div class="d-flex align-items-center">
                         <img src="${friend.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" alt="user profile image">
