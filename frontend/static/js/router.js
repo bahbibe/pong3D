@@ -11,6 +11,7 @@ import {
   SearchPage,
   FriendPage,
   SetupPage,
+  TwoFaPage,
 } from "./pages/index.js";
 
 const pathToRegex = (path) =>
@@ -31,6 +32,7 @@ const routes = [
   },
   { path: "/", view: HomePage, isProtected: false, page: "home-page" },
   { path: "/login", view: LoginPage, isProtected: false, page: "login-page" },
+  { path: "/twofa", view: TwoFaPage, isProtected: true, page: "two-fa-page" },
   { path: "/profile", view: ProfilePage, isProtected: true, page: "user-profile" },
   { path: "/ranking", view: RankingPage, isProtected: true, page: "ranking-page" },
   { path: "/settings", view: SettingsPage, isProtected: true, page: "settings-page" },
@@ -63,7 +65,11 @@ const getUser = async () => {
   });
   const response = await data.json();
   if (response && response.success === true) {
-    window.user = response.data;
+    window.user = response.data.user;
+    if (response.data.is_tfa_verified === false && window.path !== "/twofa") {
+      navigateTo("/twofa");
+      return true;
+    }
     return true;
   }
   return false;
@@ -86,7 +92,6 @@ const router = async () => {
 
   // check if the route is protected
   let isLoggedIn = await getUser();
-  console.log("User: ", isLoggedIn);
   if (match.route.isProtected && !isLoggedIn) {
     navigateTo("/login");
     return;

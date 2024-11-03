@@ -9,6 +9,7 @@ export { SettingsPage } from "./Settings.js"
 export { SearchPage } from "./SearchPage.js"
 export { FriendPage } from "./friendPage.js"
 export { SetupPage } from "./SetupPage.js"
+export { TwoFaPage } from "./TwoFaPage.js"
 import { ErrorToast } from "../components/ErrorToast.js"
 
 window.customElements.define("error-toast", ErrorToast);

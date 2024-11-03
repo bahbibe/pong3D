@@ -33,12 +33,12 @@ export class SetupPage extends AbstractPage {
       fileUpload.click();
     });
 
-    // const twoFaModal = this.querySelector("#twoFaModal");
-    // twoFaModal.addEventListener("show.bs.modal", () => {
-    //   this.enable2FA();
-    // });
     this.querySelector("#enable-2fa").addEventListener("click", () => {
       this.enable2FA();
+    });
+
+    this.querySelector("#disable-2fa").addEventListener("click", () => {
+      this.disable2FA();
     });
 
     const form = this.querySelector("form");
@@ -46,6 +46,16 @@ export class SetupPage extends AbstractPage {
       e.preventDefault();
       this.submitForm(form);
     });
+
+    if (window.user.profile.is_tfa_enabled) {
+      this.querySelector("#enable-2fa").classList.add("d-none");
+      this.querySelector("#disable-2fa").classList.remove("d-none");
+    } else {
+      this.querySelector("#enable-2fa").classList.remove("d-none");
+      this.querySelector("#disable-2fa").classList.add("d-none");
+    }
+
+    this.querySelector("#towfamodalform").addEventListener("submit", (e) => { e.preventDefault(); });
   }
 
   fillDefaultValues() {
@@ -92,7 +102,7 @@ export class SetupPage extends AbstractPage {
         const twoFaModal = this.querySelector("#twoFaModal");
         const modal = new bootstrap.Modal(twoFaModal);
         modal.show();
-        const qrCode = this.querySelector("#qr-code"); 
+        const qrCode = this.querySelector("#qr-code");
         qrCode.src = data.data.image;
         qrCode.parentElement.classList.remove("d-none");
         this.querySelector("#confirm-2fa").addEventListener("click", () => this.confirm2FA());
@@ -125,13 +135,29 @@ export class SetupPage extends AbstractPage {
       });
 
       const data = await response.json();
-      if (data && data.success) {
-        showToast(false, "2FA enabled successfully");
-        const twoFaModal = this.querySelector("#twoFaModal");
-        const modal = bootstrap.Modal.getInstance(twoFaModal);
-        modal.hide();
+      if (data && data.success) {console.log("Verifying 2FA");
         this.querySelector("#enable-2fa").classList.add("d-none");
         this.querySelector("#disable-2fa").classList.remove("d-none");
+      } else {
+        showToast(true, data.message, data.errors);
+      }
+    } catch (err) {
+      showToast(true);
+    }
+  }
+
+  async disable2FA() {
+    try {
+      const response = await fetch("http://localhost:8000/api/auth/twofa/disable/", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+      if (data && data.success) {
+        showToast(false, "2FA disabled successfully");
+        this.querySelector("#enable-2fa").classList.remove("d-none");
+        this.querySelector("#disable-2fa").classList.add("d-none");
       } else {
         showToast(true, data.message, data.errors);
       }
