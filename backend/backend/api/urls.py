@@ -9,7 +9,8 @@ from .auth_views import (
     logout_user,
     enable_twofa,
     confirm_twofa,
-    verify_twofa
+    verify_twofa,
+    disable_twofa,
 )
 from .views import (
     setup_profile,
@@ -34,6 +35,7 @@ urlpatterns = [
     path("twofa/enable/", enable_twofa, name="enable-towfa"),
     path("twofa/confirm/", confirm_twofa, name="confirm-towfa"),
     path("twofa/verify/", verify_twofa, name="verify-towfa"),
+    path("twofa/disable/", disable_twofa, name="disable-towfa"),
     path("me/", get_user, name="user"),
     path("setup/", setup_profile, name="setup-profile"),
     path("settings/update/", update_settings, name="update-settings"),

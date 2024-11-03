@@ -62,6 +62,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "total_losses",
             "uuid",
             "auth_method",
+            "is_tfa_enabled",
         ]
 
     def to_representation(self, instance):

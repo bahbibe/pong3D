@@ -22,6 +22,8 @@ import random
 import string
 import pyotp.totp
 import qrcode
+import base64
+import io
 
 
 class RegisterUserViewSet(viewsets.ModelViewSet):
@@ -69,7 +71,9 @@ def login_user(request):
             )
 
         access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
-        access_token = generate_token({"id": user.id, "exp": access_token_liftime})
+        access_token = generate_token(
+            {"id": user.id, "is_tfa_verified": False, "exp": access_token_liftime}
+        )
         response = SuccessResponse({"user": UserSerializer(user).data})
         response.set_cookie(
             "access_token", access_token, httponly=True, expires=access_token_liftime
@@ -138,7 +142,7 @@ def logout_user(_):
 def get_user(request):
     user = request.user
     serializer = UserSerializer(user)
-    return SuccessResponse(data=serializer.data)
+    return SuccessResponse(data={"user": serializer.data})
 
 
 @api_view(["GET"])
@@ -232,7 +236,10 @@ def login_intra_callback(request):
         user.save()
 
     access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
-    access_token = generate_token({"id": user.id, "exp": access_token_liftime})
+    access_token = generate_token(
+        {"id": user.id, "is_tfa_verified": False, "exp": access_token_liftime}
+    )
+
     response = redirect("http://localhost:3000/")
     response.set_cookie(
         "access_token", access_token, httponly=True, expires=access_token_liftime
@@ -262,12 +269,13 @@ def enable_twofa(request):
     qr.add_data(tfa_code)
     qr.make(fit=True)
     tfa_image = qr.make_image(fill_color="black", back_color="white")
-    # TODO: find a solution to show the user the qrcode one time only
-    tfa_image.save(f"avatars/tfa/{user.username}.png")
+    bufferd = io.BytesIO()
+    tfa_image.save(bufferd, format="PNG")
+    image = base64.b64encode(bufferd.getvalue())
 
     return SuccessResponse(
         message="2FA enables",
-        data={"image": f"{os.getenv('API_URL')}/avatars/tfa/{user.username}.png"},
+        data={"image": f'data:image/png;base64,{image.decode("utf-8")}'},
     )
 
 
@@ -306,5 +314,26 @@ def verify_twofa(request):
     is_code_valid = pyotp.TOTP(user.profile.tfa_secret).verify(code)
     if not is_code_valid:
         return ErrorResponse(message="Invalid code")
+    
+    access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
+    access_token = generate_token(
+        {"id": user.id, "is_tfa_verified": True, "exp": access_token_liftime}
+    )
+    response = SuccessResponse(message="Code is valid")
+    response.set_cookie(
+        "access_token", access_token, httponly=True, expires=access_token_liftime
+    )
+    return response
 
-    return SuccessResponse(message="Code is valid")
+
+@api_view(["POST"])
+@is_authenticated
+def disable_twofa(request):
+    user = request.user
+    if not user.profile.is_tfa_enabled:
+        return ErrorResponse(message="2FA is not enabled")
+
+    user.profile.is_tfa_enabled = False
+    user.profile.tfa_secret = None
+    user.profile.save()
+    return SuccessResponse(message="2FA disabled successfully")

@@ -3,7 +3,8 @@ import os
 from django.http.request import HttpRequest
 from rest_framework import status
 from .models import User
-from utils.responses import ErrorResponse
+from utils.responses import ErrorResponse, SuccessResponse
+from .serializers import UserSerializer
 
 
 def generate_token(payload):
@@ -15,6 +16,7 @@ def is_authenticated(view):
     """
     Decorator to check if the user is authenticated.
     """
+
     def _decorator(request: HttpRequest, *args, **kwargs):
         if "access_token" not in request.COOKIES:
             return ErrorResponse(
@@ -35,6 +37,16 @@ def is_authenticated(view):
                 )
 
             request.user = user
+            is_tfa_verified = decoded["is_tfa_verified"]
+            if (
+                user.profile.is_tfa_enabled
+                and is_tfa_verified == False
+                and not request.path.startswith("/api/auth/twofa/verify/")
+            ):
+                return SuccessResponse(
+                    data={"user": UserSerializer(user).data, "is_tfa_verified": False},
+                    message="Two factor authentication is enabled",
+                )
             return view(request, *args, **kwargs)
 
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
