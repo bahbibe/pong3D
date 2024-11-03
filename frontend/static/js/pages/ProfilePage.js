@@ -37,9 +37,6 @@ class ProfilePage extends AbstractPage {
       if (response.ok)
       {
         const friends = data.data;
-        console.log(friends);
-        console.log(this.container);
-        console.log();
         for (const friend of friends) {
           this.container.innerHTML += `
                     <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2" style="background: linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85)); cursor: pointer;">
@@ -91,13 +88,23 @@ class mainNav extends AbstractPage {
     const user = window.user;
     navUsername.textContent = `${user.username}`;
     navUserImg.src = `${user.profile.avatar}`
+    
+    this.RequestFriends();
 
-    const toggler = this.querySelector(".toggler-btn");
-    toggler.addEventListener("click", function () {
-    document.querySelector("#sidebar").classList.toggle("collapsed");
-  });
-  this.RequestFriends();
+    this.addEventListener("click", this);
 
+  }
+
+
+  handleEvent(event) {
+    this[`on${event.type}`](event)
+  }
+
+  onclick(e) {
+    e.preventDefault();
+    console.log("clicked");
+    if (e.target.id === "logout")
+      this.logout();
   }
   RequestFriends() {
     fetch("http://localhost:8000/api/friends/requests/", {
@@ -125,6 +132,23 @@ class mainNav extends AbstractPage {
         console.log(error);
       });
   }
+  
+  async logout(e) {
+    try{
+      
+      const url = "http://localhost:8000/api/auth/logout/";  
+      const response = await  fetch(url, { method: "POST", credentials: "include"})
+      const data = await response.json();
+      if (response.status === 200)
+        navigateTo("/login");
+    }
+    catch(e)
+    {
+      console.log(e);
+    }
+}
+
+
 }
 
 window.customElements.define("user-profile", ProfilePage);

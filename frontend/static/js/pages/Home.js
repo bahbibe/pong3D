@@ -45,21 +45,11 @@ class AsideNav extends AbstractPage {
   }
   onclick(e) {
     e.preventDefault();
-    // this.linkActive(e);
     this.logout(e);
 
   }
-  // linkActive(e) {
-  //   if (!(e.target.classList.contains("sidebar-link"))) return
 
-  //   // if (e.target.classList.contains("active")) return;
-  //   // console.log(this.activeLink);
-  //   // console.log(e.target);
-  //   // this.activeLink.classList.remove("active");
-  //   this.active = e.target;
-  //   e.target.classList.add("active");
-  //   console.log("Target classList",e.target.classList);
-  // }
+
   logout(e) {
     e.preventDefault();
     if (!(e.target.id === "logout")) return;

@@ -26,7 +26,6 @@ class LoginPage extends AbstractPage {
     this.intra = this.querySelector("#intra");
 
 
-    // console.log(form);
     this.loginForm.addEventListener('submit', this);
     this.registerForm.addEventListener('submit', this);
 
@@ -41,48 +40,14 @@ class LoginPage extends AbstractPage {
     this.switcher(registerBtn, loginBtn, boxRegister, boxLogin);
     this.switcher(loginBtn, registerBtn, boxLogin, boxRegister);
 
-    this.intra.addEventListener('click', () => this.authenticationLogin());
-    // this.addEventListener('click', this);
-    // this.addEventListener('focus', this);
-
-    // registerBtn.addEventListener(
-    //   "click", function (e) {
-    //     e.preventDefault();
-    //     if(!e.target.classList.contains('activeBtn'))
-    //     {
-    //       // box.style.display = "none";
-    //       registerBox.classList.remove("hidden");
-    //       loginBox.classList.add("hidden");
-
-    //       registerBtn.classList.add("activeBtn");
-    //       loginBtn.classList.remove("activeBtn");
-    //     }
-
-    //   }
-    // );
-
-
-
-    // let validationRegex = [
-    //   { regex: /.{8,}/ }, // min 8 letters,
-    //   { regex: /[0-9]/ }, // numbers from 0 - 9
-    //   { regex: /[a-z]/ }, // letters from a - z (lowercase)
-    //   // { regex: /[A-Z]/}, // letters from A-Z (uppercase),
-    //   // { regex: /[^A-Za-z0-9]/} // special characters
-    // ]
-
-
-    // this.password.addEventListener('keydown', this)
-
+    this.addEventListener('click', this);
     this.addEventListener('keydown', this);
 
 
-  }
-
+}
 
   handleEvent(event) {
     this[`on${event.type}`](event)
-
   }
 
   onsubmit(e) {
