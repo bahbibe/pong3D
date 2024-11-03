@@ -41,7 +41,8 @@ def is_authenticated(view):
             if (
                 user.profile.is_tfa_enabled
                 and is_tfa_verified == False
-                and not request.path.startswith("/api/auth/twofa/verify/")
+                and not request.path.startswith("/api/auth/twofa/")
+                and not request.path.startswith("/api/auth/setup/")
             ):
                 return SuccessResponse(
                     data={"user": UserSerializer(user).data, "is_tfa_verified": False},
