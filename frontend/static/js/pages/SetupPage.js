@@ -135,7 +135,11 @@ export class SetupPage extends AbstractPage {
       });
 
       const data = await response.json();
-      if (data && data.success) {console.log("Verifying 2FA");
+      if (data && data.success) {
+        showToast(false, "2FA enabled successfully");
+        const twoFaModal = this.querySelector("#twoFaModal");
+        const modal = bootstrap.Modal.getInstance(twoFaModal);
+        modal.hide();
         this.querySelector("#enable-2fa").classList.add("d-none");
         this.querySelector("#disable-2fa").classList.remove("d-none");
       } else {

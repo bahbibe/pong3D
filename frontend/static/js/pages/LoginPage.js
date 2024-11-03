@@ -41,7 +41,8 @@ class LoginPage extends AbstractPage {
     this.switcher(registerBtn, loginBtn, boxRegister, boxLogin);
     this.switcher(loginBtn, registerBtn, boxLogin, boxRegister);
 
-    this.addEventListener('click', this);
+    this.intra.addEventListener('click', () => this.authenticationLogin());
+    // this.addEventListener('click', this);
     // this.addEventListener('focus', this);
 
     // registerBtn.addEventListener(
@@ -108,9 +109,10 @@ class LoginPage extends AbstractPage {
 
   onclick(e) {
 
-    if (e.target.id === "intra")
-      this.authenticationLogin();
-    else if (e.target.id === "password" || e.target.id === 'confirm-password')
+    // if (e.target.id === "intra")
+    //   this.authenticationLogin();
+    // else 
+    if (e.target.id === "password" || e.target.id === 'confirm-password')
       this.lengthPassword.classList.remove("d-none");
     else
       this.lengthPassword.classList.add("d-none");
