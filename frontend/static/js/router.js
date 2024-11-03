@@ -1,14 +1,25 @@
 // Pages Import
-import { ChatPage, HomePage, NotFoundPage, LoginPage, ProfilePage, RankingPage, SettingsPage, Home , SearchPage, FriendPage } from "./pages/index.js";
+import {
+  ChatPage,
+  HomePage,
+  NotFoundPage,
+  LoginPage,
+  ProfilePage,
+  RankingPage,
+  SettingsPage,
+  Home,
+  SearchPage,
+  FriendPage,
+  SetupPage,
+  TwoFaPage,
+} from "./pages/index.js";
 
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
 const getParams = (match) => {
   const values = match.result.slice(1);
-  const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
-    (result) => result[1]
-  );
+  const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map((result) => result[1]);
   return Object.fromEntries(keys.map((key, i) => [key, values[i]]));
 };
 
@@ -21,6 +32,7 @@ const routes = [
   },
   { path: "/", view: HomePage, isProtected: false, page: "home-page" },
   { path: "/login", view: LoginPage, isProtected: false, page: "login-page" },
+  { path: "/twofa", view: TwoFaPage, isProtected: true, page: "two-fa-page" },
   { path: "/profile", view: ProfilePage, isProtected: true, page: "user-profile" },
   { path: "/ranking", view: RankingPage, isProtected: true, page: "ranking-page" },
   { path: "/settings", view: SettingsPage, isProtected: true, page: "settings-page" },
@@ -34,6 +46,12 @@ const routes = [
     isProtected: true,
     page: "chat-page",
   },
+  {
+    path: "/setup",
+    view: SetupPage,
+    isProtected: true,
+    page: "setup-page",
+  },
 ];
 
 const navigateTo = (url) => {
@@ -45,13 +63,17 @@ const getUser = async () => {
   const data = await fetch("http://localhost:8000/api/auth/me/", {
     credentials: "include",
   });
-  const user = await data.json();
-  if (user && user.success === true) {
-    window.user = user;
+  const response = await data.json();
+  if (response && response.success === true) {
+    window.user = response.data.user;
+    if (response.data.is_tfa_verified === false && window.path !== "/twofa") {
+      navigateTo("/twofa");
+      return true;
+    }
     return true;
   }
   return false;
-}
+};
 
 const router = async () => {
   // check potential matching routes
@@ -59,21 +81,17 @@ const router = async () => {
     return {
       route: route,
       result: location.pathname.match(pathToRegex(route.path)),
-      isMatched: location.pathname.match(pathToRegex(route.path))
-      ? true
-      : false,
+      isMatched: location.pathname.match(pathToRegex(route.path)) ? true : false,
     };
   });
   let match = matches.find((match) => match.isMatched);
-  
+
   // Check if the match is undefined (404)
-  if (!match)
-    match = { route: routes[0], isMatched: true, result: [location.pathname] };
+  if (!match) match = { route: routes[0], isMatched: true, result: [location.pathname] };
   window.path = match.route.path;
-  
+
   // check if the route is protected
   let isLoggedIn = await getUser();
-  console.log("User: ", isLoggedIn);
   if (match.route.isProtected && !isLoggedIn) {
     navigateTo("/login");
     return;
@@ -81,6 +99,18 @@ const router = async () => {
   else if (!match.route.isProtected && isLoggedIn) {
     navigateTo("/home");
     return;
+  } else if (match.route.isProtected && isLoggedIn) {
+    if (match.route.path === "/setup") {
+      if (window.user.profile.is_setup) {
+        navigateTo("/home");
+        return;
+      }
+    }
+
+    if (!window.user.profile.is_setup && match.route.path !== "/setup") {
+      navigateTo("/setup");
+      return;
+    }
   }
 
   const appEl = document.getElementById("app");

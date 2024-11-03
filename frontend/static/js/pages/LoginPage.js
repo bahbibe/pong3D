@@ -1,4 +1,4 @@
-import { hideToast, showOverlay , hideOverlay, showToast } from "../helpers.js";
+import { hideToast, showOverlay, hideOverlay, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
@@ -32,18 +32,18 @@ class LoginPage extends AbstractPage {
 
     this.isValidPassword = false;
 
-    
+
     const registerBtn = this.querySelector("#tab-register");
     const loginBtn = this.querySelector("#tab-login");
     const boxLogin = this.querySelector("#login");
     const boxRegister = this.querySelector("#register");
-    
+
     this.switcher(registerBtn, loginBtn, boxRegister, boxLogin);
     this.switcher(loginBtn, registerBtn, boxLogin, boxRegister);
-    
+
     this.addEventListener('click', this);
     // this.addEventListener('focus', this);
-    
+
     // registerBtn.addEventListener(
     //   "click", function (e) {
     //     e.preventDefault();
@@ -52,7 +52,7 @@ class LoginPage extends AbstractPage {
     //       // box.style.display = "none";
     //       registerBox.classList.remove("hidden");
     //       loginBox.classList.add("hidden");
-          
+
     //       registerBtn.classList.add("activeBtn");
     //       loginBtn.classList.remove("activeBtn");
     //     }
@@ -62,21 +62,21 @@ class LoginPage extends AbstractPage {
 
 
 
-// let validationRegex = [
-//   { regex: /.{8,}/ }, // min 8 letters,
-//   { regex: /[0-9]/ }, // numbers from 0 - 9
-//   { regex: /[a-z]/ }, // letters from a - z (lowercase)
-//   // { regex: /[A-Z]/}, // letters from A-Z (uppercase),
-//   // { regex: /[^A-Za-z0-9]/} // special characters
-// ]
+    // let validationRegex = [
+    //   { regex: /.{8,}/ }, // min 8 letters,
+    //   { regex: /[0-9]/ }, // numbers from 0 - 9
+    //   { regex: /[a-z]/ }, // letters from a - z (lowercase)
+    //   // { regex: /[A-Z]/}, // letters from A-Z (uppercase),
+    //   // { regex: /[^A-Za-z0-9]/} // special characters
+    // ]
 
 
-// this.password.addEventListener('keydown', this)
+    // this.password.addEventListener('keydown', this)
 
-this.addEventListener('keydown', this);
+    this.addEventListener('keydown', this);
 
 
-}
+  }
 
 
   handleEvent(event) {
@@ -89,16 +89,15 @@ this.addEventListener('keydown', this);
     this.getData(e);
     this.postDats(e);
   }
-  onkeydown(e) { 
-    if (e.target.id !== "password"){
+  onkeydown(e) {
+    if (e.target.id !== "password") {
       console.log("not password", e.target.id);
       return;
     }
     console.log("key down", e.target.id);
     let regex = /^(?=.*[a-z])(?=.*\d).{8,15}$/;
     console.log("password", e.target.value);
-    if (regex.test(e.target.value))
-    {
+    if (regex.test(e.target.value)) {
       this.lengthPassword.style.color = "green";
       this.isValidPassword = true;
     }
@@ -108,17 +107,17 @@ this.addEventListener('keydown', this);
   }
 
   onclick(e) {
-    
+
     if (e.target.id === "intra")
       this.authenticationLogin();
-    else if (e.target.id === "password" ||  e.target.id  === 'confirm-password')
+    else if (e.target.id === "password" || e.target.id === 'confirm-password')
       this.lengthPassword.classList.remove("d-none");
     else
       this.lengthPassword.classList.add("d-none");
   }
 
   getData(event) {
-    hideToast("login-errors");
+    hideToast();
     if (!(event.target.id === "login-form")) return;
 
     showOverlay();
@@ -142,32 +141,40 @@ this.addEventListener('keydown', this);
         console.log(data);
         if (data.success) {
           hideOverlay();
-          navigateTo("/home");
+          if (data.data.user.profile.is_tfa_enabled)
+            navigateTo("/twofa");
+          else
+            navigateTo("/home");
         } else {
+          showToast(true, data.message, data.errors);
           hideOverlay();
-          showToast("login-errors", data.message, data.errors);
         }
       })
       .catch(_ => {
-        showToast("login-errors");
+        showToast(true);
       });
   }
 
   postDats(event) {
-    hideToast("register-errors");
+    hideToast();
 
     if (!(event.target.id === "register-form")) return;
 
-    console.log("register form", event.target.id);
 
+    this.firstName = this.querySelector("#firstName");
+    this.lastName = this.querySelector("#lastName");
+    this.password = this.querySelector("#password");
+    this.confirmpassword = this.querySelector("#confirm-password");
+    this.email = this.querySelector("#email");
+    this.username = this.querySelector("#username");
 
     this.user = {
       'first_name': this.firstName.value,
       'last_name': this.lastName.value,
-      'username': this.firstName.value[0] + this.lastName.value,
+      'username': this.username.value,
       'email': this.email.value,
       'password': this.password.value,
-      'confirm_password': this.confirmPassword.value,
+      'confirm_password': this.confirmpassword.value,
     }
 
     const url = `http://localhost:8000/api/auth/register/`
@@ -188,13 +195,14 @@ this.addEventListener('keydown', this);
       body: JSON.stringify(this.user),
     }).then(rep => rep.json())
       .then(data => {
-        console.log(data);
-        if (data.success)
+        if (data.success) {
           navigateTo("/login");
+          showToast(false, data.message);
+        }
         else
-          showToast("register-errors", data.message, data.errors);
+          showToast(true, data.message, data.errors);
       })
-      .catch(_ => showToast("register-errors"));
+      .catch(_ => showToast(true));
   }
 
   async authenticationLogin() {
@@ -227,14 +235,13 @@ this.addEventListener('keydown', this);
     btn.addEventListener(
       "click", function (e) {
         e.preventDefault();
-        if(!e.target.classList.contains('activeBtn'))
-          {
-            box.classList.remove("hidden");
-            box1.classList.add("hidden");
+        if (!e.target.classList.contains('activeBtn')) {
+          box.classList.remove("hidden");
+          box1.classList.add("hidden");
           btn.classList.add("activeBtn");
           btn2.classList.remove("activeBtn");
         }
-  
+
       }
     );
   }

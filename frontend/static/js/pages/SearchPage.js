@@ -26,7 +26,7 @@ class SearchPage extends AbstractPage {
 
       for (const user of users) {
 
-        if (this.SearchedUser !== window.user.data.username &&  user.username === this.SearchedUser)
+        if (this.SearchedUser !== window.user.username &&  user.username === this.SearchedUser)
           {
             this.found = true;
             this.container.innerHTML = `
