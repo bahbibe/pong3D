@@ -64,6 +64,11 @@ class AsideNav extends AbstractPage {
       credentials: "include",
     })
     .then((res) => {
+      console.log("socket closed -> ", window.socket);
+      if (window.socket) {
+        window.socket.close();
+      }
+      window.user = null;
       if (res.status === 200) {
         navigateTo("/login");
       }

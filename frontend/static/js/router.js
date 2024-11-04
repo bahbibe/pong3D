@@ -14,6 +14,7 @@ import {
   TwoFaPage,
   GamePage,
 } from "./pages/index.js";
+import { FriendsStatus } from "./ws/FriendsStatus.js";
 
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
@@ -68,9 +69,8 @@ const getUser = async () => {
   const response = await data.json();
   if (response && response.success === true) {
     window.user = response.data.user;
-    console.log("user profile -> ", window.user.profile);
+    FriendsStatus();
     if (response.data.is_tfa_verified === false && window.path !== "/twofa" && window.path !== "/setup") {
-      console.log("Navigating to /twofa");
       navigateTo("/twofa");
       return true;
     }
@@ -105,7 +105,6 @@ const router = async () => {
     return;
   } else if (match.route.isProtected && isLoggedIn) {
     if (match.route.path === "/setup") {
-      console.log("is_setup", window.user.profile.is_setup);
       if (window.user.profile.is_setup) {
         navigateTo("/home");
         return;
