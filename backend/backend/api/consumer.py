@@ -1,32 +1,66 @@
-import json
+import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
-
-connected_users = []
+from channels.layers import get_channel_layer
+import json
+import redis
 
 
 class FriendsStatusConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        self.user_id = self.scope["user"].id
         await self.accept()
-        # TODO: send the status to all the connected users
-        # for user in connected_users:
-        #     data = {
-        #         "type": "friends_status",
-        #         "status": "online",
-        #         "user": self.scope["user"].id,
-        #     }
-        #     await self.send(text_data=json.dumps(data))
-        connected_users.append(self)
+
+        # Connect to Redis
+        self.redis = redis.Redis(host="redis", port=6379, db=0)
+
+        # Join the global user status channel
+        await self.channel_layer.group_add("user_status", self.channel_name)
+
+        # Add user to online users set in Redis
+        self.redis.sadd("online_users", self.user_id)
+
+        # Send an initial online status update, including all online users
+        online_users = self.redis.smembers("online_users")
+        online_users_list = [user_id.decode("utf-8") for user_id in online_users]
+        await self.channel_layer.group_send(
+            "user_status",
+            {
+                "type": "user_status_update",
+                "user_id": self.user_id,
+                "status": "online",
+                "online_users": online_users_list,
+            },
+        )
 
     async def disconnect(self, close_code):
-        connected_users.remove(self)
-        # TODO: send the status to all the connected users
-        pass
+        # Remove user from online users set in Redis
+        self.redis.srem("online_users", self.user_id)
+        print("disconnected user -> ", self.user_id)
 
-    async def receive(self, text_data):
-        data = json.loads(text_data)
-        data["type"] = "friends_status"
-        # TODO: send the status to all the connected users
-        for user in connected_users:
-            if user == self:
-                continue
-            await user.send(text_data=json.dumps(data))
+        # Send an offline status update, including all remaining online users
+        online_users = self.redis.smembers("online_users")
+        online_users_list = [user_id.decode("utf-8") for user_id in online_users]
+        await self.channel_layer.group_send(
+            "user_status",
+            {
+                "type": "user_status_update",
+                "user_id": self.user_id,
+                "status": "offline",
+                "online_users": online_users_list,
+            },
+        )
+
+        # Leave the global user status channel
+        await self.channel_layer.group_discard("user_status", self.channel_name)
+
+    async def user_status_update(self, event):
+        user_id = event["user_id"]
+        status = event["status"]
+        online_users = event["online_users"]
+
+        # Update the UI based on the received user status and online user list
+        await self.send(
+            text_data=json.dumps(
+                {"user_id": user_id, "status": status, "online_users": online_users}
+            )
+        )
