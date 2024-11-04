@@ -20,6 +20,15 @@
 
   <link rel="stylesheet" href="/static/css/index.css" />
   <link rel="stylesheet" href="/static/css/style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@v0.170.0/build/three.module.js",
+        "three/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/examples/jsm/"
+      }
+    }
+  </script>
 
 </head>
 
@@ -808,6 +817,14 @@
         <button id="notification-close">X</button>
       </div>
     </div>
+  </template>
+
+  <!-- Game page -->
+  <template id="game-page">
+
+    <canvas id="game-canvas"></canvas>
+    hello game
+    <script type="module" src="./static/js/game.js"></script>
   </template>
 
 
