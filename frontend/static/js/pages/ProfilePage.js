@@ -138,8 +138,14 @@ class mainNav extends AbstractPage {
       const url = "http://localhost:8000/api/auth/logout/";
       const response = await  fetch(url, { method: "POST", credentials: "include"})
       const data = await response.json();
-      if (response.status === 200)
+      if (response.status === 200) {
+        console.log("socket closed -> ", window.socket);
+        if (window.socket) {
+          window.socket.close();
+        }
+        window.user = null;
         navigateTo("/login");
+      }
     }
     catch(e)
     {
