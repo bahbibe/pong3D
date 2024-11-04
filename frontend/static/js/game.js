@@ -2,70 +2,70 @@ import * as THREE from "three"
 import { LoadGLTFByPath } from './ModelHelper.js'
 import { generateUUID } from 'three/src/math/MathUtils.js';
 
-let username = generateUUID() ;
-let user = {
-  'email': username + '@email.com',
-  'password': '123456',
-  'username': username,
-}
+// let username = generateUUID() ;
+// let user = {
+//   'email': username + '@email.com',
+//   'password': '123456',
+//   'username': username,
+// }
 
-fetch('http://localhost:8000/api/auth/me/',
-  {
-    credentials: "include",
-  }).then(rep => rep.json())
-  .then(data => {
-    console.log(data)
-    if (data.success)
-    {
-      return ;
-    }
-    else
-    {
-      const url = `http://localhost:8000/api/auth/login/`
-      fetch(url, {
-        method: "POST",
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        credentials: "include",
-        body: JSON.stringify(user),
-      }).then(rep => rep.json())
-        .then(data => {
-          console.log(data);
-          if (data.success)
-          {
-            console.log(`loged in`);
-          }
-          else
-          {
-            fetch('http://localhost:8000/api/auth/register/', {
-              method: "POST",
-              headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              },
-              credentials: "include",
-              body: JSON.stringify(user),
-            }).then(rep => rep.json())
-              .then(data => {
-                console.log(data);
-                if (data.success)
-                {
-                  console.log(`registered`);
-                }
-              })
-              .catch(error => {
-                console.log("error")
+// fetch('http://localhost:8000/api/auth/me/',
+//   {
+//     credentials: "include",
+//   }).then(rep => rep.json())
+//   .then(data => {
+//     console.log(data)
+//     if (data.success)
+//     {
+//       return ;
+//     }
+//     else
+//     {
+//       const url = `http://localhost:8000/api/auth/login/`
+//       fetch(url, {
+//         method: "POST",
+//         headers: {
+//           'Accept': 'application/json',
+//           'Content-Type': 'application/json'
+//         },
+//         credentials: "include",
+//         body: JSON.stringify(user),
+//       }).then(rep => rep.json())
+//         .then(data => {
+//           console.log(data);
+//           if (data.success)
+//           {
+//             console.log(`loged in`);
+//           }
+//           else
+//           {
+//             fetch('http://localhost:8000/api/auth/register/', {
+//               method: "POST",
+//               headers: {
+//                 'Accept': 'application/json',
+//                 'Content-Type': 'application/json'
+//               },
+//               credentials: "include",
+//               body: JSON.stringify(user),
+//             }).then(rep => rep.json())
+//               .then(data => {
+//                 console.log(data);
+//                 if (data.success)
+//                 {
+//                   console.log(`registered`);
+//                 }
+//               })
+//               .catch(error => {
+//                 console.log("error")
                 
-              });
-          }
-        })
-        .catch(error => {
-          console.log("error")
-        });
-    }
-  }).catch(error => console.log(error));
+//               });
+//           }
+//         })
+//         .catch(error => {
+//           console.log("error")
+//         });
+//     }
+//   }).catch(error => console.log(error));
 
 
 //Renderer does the job of rendering the graphics
@@ -133,7 +133,7 @@ function retrieveListOfCameras(scene){
       player1Score = object
     if (object.name === "score2")
       player2Score = object
-    console.log(player1Score);
+    // console.log(player1Score);
   });
   updateScore() 
 
@@ -176,8 +176,6 @@ function animate() {
   if (left == true)
     socket.send(JSON.stringify({"type": 'left'})) ;
 };
-
-
 
 let socket = new WebSocket('ws://localhost:8000/ws/game/');
 
