@@ -60,6 +60,25 @@ def get_friends_request(request):
 
     return SuccessResponse(data=friends_request)
 
+@api_view(["GET"])
+@is_authenticated
+def get_sent_friends_request(request):
+    user = request.user
+    friends_request = Friendship.objects.filter(source_user=user, status="pending")
+
+    for friendship in friends_request:
+        if friendship.source_user == user:
+            friendship.user = friendship.source_user
+            friendship.friend = friendship.target_user
+        else:
+            friendship.user = friendship.target_user
+            friendship.friend = friendship.source_user
+    friends_request = [
+        ViewFriendshipSerializer(friendship).data for friendship in friends_request
+    ]
+
+    return SuccessResponse(data=friends_request)
+
 
 @api_view(["POST"])
 @is_authenticated

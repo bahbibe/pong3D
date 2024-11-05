@@ -7,6 +7,7 @@ from .views import (
     update_friendship_status,
     block_user,
     unblock_user,
+    get_sent_friends_request,
 )
 
 
@@ -14,6 +15,7 @@ urlpatterns = [
     path("", get_friends, name="get-friends"),
     path("send/", send_friend_request, name="send-friend-request"),
     path("requests/", get_friends_request, name="get-friends-request"),
+    path("sent-requests/", get_sent_friends_request, name="get-sent-friends-request"),
     path("accept/", accept_friend_request, name="accept-friend-request"),
     path("update/", update_friendship_status, name="update-friendship-status"),
     path("block/", block_user, name="block-user"),

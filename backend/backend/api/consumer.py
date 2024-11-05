@@ -1,6 +1,4 @@
-import asyncio
 from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.layers import get_channel_layer
 import json
 import redis
 
