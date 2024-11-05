@@ -74,10 +74,12 @@ class LoginPage extends AbstractPage {
 
   onclick(e) {
 
-    // if (e.target.id === "intra")
-    //   this.authenticationLogin();
-    // else 
-    if (e.target.id === "password" || e.target.id === 'confirm-password')
+    if (e.target.id === "intra")
+    {
+      console.log("intra");
+      this.authenticationLogin();
+    }
+    else if (e.target.id === "password" || e.target.id === 'confirm-password')
       this.lengthPassword.classList.remove("d-none");
     else
       this.lengthPassword.classList.add("d-none");

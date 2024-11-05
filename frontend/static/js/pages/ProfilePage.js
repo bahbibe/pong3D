@@ -85,27 +85,26 @@ class mainNav extends AbstractPage {
     const navUserImg = this.querySelector("#nav-user-img");
     this.notification = this.querySelector("div.content");
     this.notificationCounter = this.querySelector("[data-count]");
+    this.logoutBtn = this.querySelector("#logout");
     const user = window.user;
     navUsername.textContent = `${user.username}`;
     navUserImg.src = `${user.profile.avatar}`
     
     this.RequestFriends();
-
-    this.addEventListener("click", this);
+    this.logoutBtn.addEventListener("click", this.logout);
 
   }
 
-
+  
   handleEvent(event) {
     this[`on${event.type}`](event)
   }
 
-  onclick(e) {
-    e.preventDefault();
-    console.log("clicked");
-    if (e.target.id === "logout")
-      this.logout();
-  }
+  // onclick(e) {
+  //   e.preventDefault();
+  //   if (e.target.id === "logout")
+  //     this.logout();
+  // }
   RequestFriends() {
     fetch("http://localhost:8000/api/friends/requests/", {
       method: "GET",
@@ -136,7 +135,7 @@ class mainNav extends AbstractPage {
   async logout(e) {
     try{
       
-      const url = "http://localhost:8000/api/auth/logout/";  
+      const url = "http://localhost:8000/api/auth/logout/";
       const response = await  fetch(url, { method: "POST", credentials: "include"})
       const data = await response.json();
       if (response.status === 200)

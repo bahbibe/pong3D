@@ -65,6 +65,7 @@ class SearchBar extends AbstractPage {
 
     this.form.addEventListener("submit", (e) => {
       e.preventDefault();
+      console.log("searching");
       // window.SearchedUser = this.inputSearch.value;
       localStorage.setItem("SearchedUser", this.inputSearch.value)
       this.inputSearch.value = "";

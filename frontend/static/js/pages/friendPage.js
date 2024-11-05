@@ -137,7 +137,7 @@ class FriendPage extends AbstractPage {
 
   async checkIsSent() {
     console.log("checkIsSent");
-    const response = await fetch("http://localhost:8000/api/friends/sent", {
+    const response = await fetch("http://localhost:8000/api/friends/sent-requests/", {
       method: "GET",
       credentials: "include",
     });
