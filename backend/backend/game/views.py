@@ -4,18 +4,18 @@ from api.auth_utils import is_authenticated
 from utils.responses import SuccessResponse, ErrorResponse
 from .serializers import GameHistorySerializer, GameStatsSerializer
 from .models import Game
+from .models import Tournament
 from django.db.models import Q
 from django.db.models import F
 
+import redis
+import uuid
+import json
+
+r = redis.Redis(host="redis", charset="utf-8", decode_responses=True)
+
 
 # Create your views here.
-def index(request):
-    return render(request, "game/index.html")
-
-
-def game(request, game_id):
-    return render(request, "game/game.html", {"game_id": game_id})
-
 
 @api_view(["GET"])
 @is_authenticated
@@ -83,5 +83,66 @@ def history(request):
         data={
             "games": GameHistorySerializer(games, many=True).data,
             "stats": GameStatsSerializer(stats).data,
+        }
+    )
+
+@api_view(["GET"])
+@is_authenticated
+def create_tournament(request):
+    tournament = Tournament.objects.create(
+        owner = request.user,
+    )
+    print(tournament.owner.id)
+    # start the tournament
+    # only if the request user is the tournament owner
+    return SuccessResponse(
+        data={
+            "message": "tournament created successfuly",
+            "tournament": "tournament"
+        }
+    )
+
+@api_view(["GET"])
+@is_authenticated
+def start_tournament(request):
+    pass
+    # create a tournament in the database
+    # set this request user as the tournament owner
+    return SuccessResponse(
+        data={
+            "message": "tournament created successfuly",
+            "tournament_id": tournament_id,
+            "owner": request.user.id,
+        }
+    )
+
+@api_view(["GET"])
+@is_authenticated
+def get_tournaments(request):
+    pass
+    # add this user to the tournament
+    return SuccessResponse(
+        data={
+        }
+    )
+
+@api_view(["GET"])
+@is_authenticated
+def leave_tournament(request):
+    pass
+    # leave tournament if it didn't start yet
+    # if the tournament already stated count as eleminated
+    return SuccessResponse(
+        data={
+        }
+    )
+
+@api_view(["GET"])
+@is_authenticated
+def get_my_tournaments(request):
+    pass
+    # return only the tournaments that the request user has joined
+    return SuccessResponse(
+        data={
         }
     )

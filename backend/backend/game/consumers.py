@@ -6,55 +6,63 @@ import redis
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .game_manager import GameManager
+from .models import Game
+from channels.db import database_sync_to_async
 
 game_manager = GameManager()
 
-r = redis.Redis(host="redis")
-
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.game_id = None
-        self.player = 'player2'
-        self.game_instance = None
         await self.accept()
-        print(self.scope["user"])
-        
-        player2 = r.lpop(f'queue:1v1')
-        if player2 is None:
-            self.player = 'player1'
-            r.rpush(f'queue:1v1', self.channel_name)
+        self.user = self.scope["user"]
+        self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
+        self.player = 'player2'
+
+        self.game = await self.get_game()
+        if self.game is None:
+            print("game doesn't exist 2")
+            await self.close()
             return
 
-        self.game_id = str(uuid.uuid4())
+        
         await self.channel_layer.group_add(self.game_id, self.channel_name)
-        await self.channel_layer.group_add(self.game_id, player2.decode())
+
+        
 
         # Check if the game instance already exists
         self.game_instance = await game_manager.get_game_instance(self.game_id)
         if not self.game_instance:
             # Create a new game instance
-            await game_manager.create_game_instance(self.game_id)
+            await game_manager.create_game_instance(self.game)
             self.game_instance = await game_manager.get_game_instance(self.game_id)
         
+    @database_sync_to_async
+    def get_game(self):
+        try:
+            game = Game.objects.get(id=self.game_id)
+            if self.user == game.player1:
+                self.player = 'player1'
+            return game
+        except Game.DoesNotExist:
+            print("game doesn't exist")
+            return None
 
     async def disconnect(self, close_code):
-        r.lrem(f'queue:1v1', 1, self.channel_name)
-        if self.game_id:
-            await self.channel_layer.group_discard(self.game_id, self.channel_name)
+        await self.channel_layer.group_discard(self.game_id, self.channel_name)
 
     # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message_type = text_data_json['type']
 
-        print("receive type", message_type)
+        # print("receive type", message_type)
 
         if not self.game_instance:
             return
 
-        side = 1
-        if self.player == 'player2':
-            side = -1
+        side = -1
+        if self.game.player1 == self.user :
+            side = 1
         if message_type == 'right':
             self.game_instance.game_state[self.player] -= 5 * self.game_instance.speed * side
         if message_type == 'left':
@@ -97,10 +105,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         print(self.player, "sending game id")
         await self.join_game()
         await self.send(text_data=json.dumps(game_id))
+    
+    async def send_game_end(self, event):
+        await self.send(text_data=json.dumps("game over"))
 
     async def join_game(self):
         self.game_instance = await game_manager.get_game_instance(self.game_id)
-        if self.player == 'player1':
-            self.game_instance.setPlayer1(self.scope['user'])
-        if self.player == 'player2':
-            self.game_instance.setPlayer2(self.scope['user'])
