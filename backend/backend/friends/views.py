@@ -19,8 +19,7 @@ from utils.responses import ErrorResponse, SuccessResponse
 def get_friends(request):
     user = request.user
     friends = Friendship.objects.filter(
-        (Q(source_user=user) | Q(target_user=user))
-        & (Q(status="accepted") | Q(status="blocked"))
+        (Q(source_user=user) | Q(target_user=user)) & Q(status="accepted")
     )
     for friendship in friends:
         if friendship.source_user == user:
@@ -29,14 +28,25 @@ def get_friends(request):
         else:
             friendship.user = friendship.target_user
             friendship.friend = friendship.source_user
-    friends_filtered = []
+    friends = [ViewFriendshipSerializer(friendship).data for friendship in friends]
+
+    return SuccessResponse(data=friends)
+
+@api_view(["GET"])
+@is_authenticated
+def get_blocked_friends(request):
+    user = request.user
+    friends = Friendship.objects.filter(
+        (Q(source_user=user) | Q(target_user=user)) & Q(status="blocked") & Q(blocked_by=user)
+    )
     for friendship in friends:
-        if friendship.status == "blocked" and friendship.blocked_by != user:
-            continue
-        friends_filtered.append(friendship)
-    friends = [
-        ViewFriendshipSerializer(friendship).data for friendship in friends_filtered
-    ]
+        if friendship.source_user == user:
+            friendship.user = friendship.source_user
+            friendship.friend = friendship.target_user
+        else:
+            friendship.user = friendship.target_user
+            friendship.friend = friendship.source_user
+    friends = [ViewFriendshipSerializer(friendship).data for friendship in friends]
 
     return SuccessResponse(data=friends)
 
@@ -59,6 +69,7 @@ def get_friends_request(request):
     ]
 
     return SuccessResponse(data=friends_request)
+
 
 @api_view(["GET"])
 @is_authenticated

@@ -33,7 +33,6 @@ class FriendsStatusConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         # Remove user from online users set in Redis
         self.redis.srem("online_users", self.user_id)
-        print("disconnected user -> ", self.user_id)
 
         # Send an offline status update, including all remaining online users
         online_users = self.redis.smembers("online_users")
@@ -59,6 +58,6 @@ class FriendsStatusConsumer(AsyncWebsocketConsumer):
         # Update the UI based on the received user status and online user list
         await self.send(
             text_data=json.dumps(
-                {"user_id": user_id, "status": status, "online_users": online_users}
+                {"user_id": user_id, "status": status, "online_users": online_users, "type": "user_status"}
             )
         )

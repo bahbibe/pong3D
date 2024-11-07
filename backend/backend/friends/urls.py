@@ -8,11 +8,13 @@ from .views import (
     block_user,
     unblock_user,
     get_sent_friends_request,
+    get_blocked_friends,
 )
 
 
 urlpatterns = [
     path("", get_friends, name="get-friends"),
+    path("blocked/", get_blocked_friends, name="get-blocked-friends"),
     path("send/", send_friend_request, name="send-friend-request"),
     path("requests/", get_friends_request, name="get-friends-request"),
     path("sent-requests/", get_sent_friends_request, name="get-sent-friends-request"),
