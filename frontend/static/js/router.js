@@ -13,6 +13,7 @@ import {
   SetupPage,
   TwoFaPage,
   GamePage,
+  MatchmakingPage,
 } from "./pages/index.js";
 
 const pathToRegex = (path) =>
@@ -42,6 +43,8 @@ const routes = [
   { path: "/chat", view: ChatPage, isProtected: true, page: "chat-page" },
   { path: "/friend/:uuid", view: FriendPage, isProtected: true, page: "friend-page" },
   { path: "/game", view: GamePage, isProtected: true, page: "game-page" },
+  { path: "/matchmaking", view: MatchmakingPage, isProtected: true, page: "matchmaking-page" },
+  { path: "/game/:game_id", view: GamePage, isProtected: true, page: "game-page" },
   {
     path: "/chat/:roomId",
     view: ChatPage,
