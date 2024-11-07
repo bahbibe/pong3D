@@ -263,7 +263,7 @@
                   <div class="content__ me-2" style="width: 50%;">
                     <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Classic</h6>
                     <p  style="font-size: 13px;">Find you a rival </p>
-                    <a href="/game" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+                    <a href="/matchmaking" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
                     border-radius: 5px;
                     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
                       Play
@@ -829,8 +829,15 @@
 			};
     </style>
     <canvas id="game-canvas"></canvas>
-    hello game
-    <script type="module" src="./static/js/game.js"></script>
+  </template>
+
+  <template id="matchmaking-page">
+    <section>
+      <main-nav></main-nav>
+      <div class="container mt-4">
+        <h1>Looking for match...</h1>
+      </div>
+    </section>
   </template>
 
 
