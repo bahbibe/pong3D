@@ -832,11 +832,13 @@
   </template>
 
   <template id="matchmaking-page">
-    <section>
-      <main-nav></main-nav>
-      <div class="container mt-4">
-        <h1>Looking for match...</h1>
-      </div>
+    <link rel="stylesheet" href="/static/css/loader.css">
+    <section class="">
+      <main-nav class="position-absolute w-100"></main-nav>
+        <div class="d-flex min-vh-100 flex-column align-items-center justify-content-center">
+          <h1 id="loader-message" class="mx-auto"></h1>
+          <div class="loader mx-auto"></div>
+        </div>
     </section>
   </template>
 
