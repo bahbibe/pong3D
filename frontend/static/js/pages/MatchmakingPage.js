@@ -11,6 +11,9 @@ class MatchmakingPage extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
     this.find_match_button = this.querySelector("#find_match") ;
+    this.message = this.querySelector("#loader-message") ;
+    this.message.innerHTML = "Looking for a match..." ;
+    this.loader = this.querySelector(".loader") ;
     this.addEventListener('click', this);
     this.socket = new WebSocket('ws://localhost:8000/ws/matchmaking');
     this.socket.onopen = (event) =>
@@ -26,7 +29,11 @@ class MatchmakingPage extends AbstractPage {
       let message = JSON.parse(event.data) ;
       console.log(message);
       if (message['type'] === 'game_found')
-        navigateTo('/game/' + message['game_id']) ;
+        this.message.innerHTML = "Match Found!"
+        this.loader.style.display = "none"
+        setTimeout(() => {
+          navigateTo('/game/' + message['game_id']) ;
+        }, 2000);
       
     }
   }
