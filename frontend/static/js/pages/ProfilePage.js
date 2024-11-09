@@ -37,6 +37,7 @@ class ProfilePage extends AbstractPage {
       if (response.ok)
       {
         const friends = data.data;
+        console.log(friends);
         for (const friend of friends) {
           let isOnline = window.online_users && window.online_users.includes(friend.friend.id.toString());
           this.container.innerHTML += `

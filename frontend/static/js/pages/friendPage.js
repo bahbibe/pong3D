@@ -12,18 +12,22 @@ class FriendPage extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
     this.userId = JSON.parse(this.getAttribute("params"));
-    console.log("UUID: " , this.userId.uuid);
+    // console.log("UUID: " , this.userId.uuid);
 
     this.fullName = this.querySelector("#fullName");
     this.username = this.querySelector("#username");
     this.userImg = this.querySelector("#user-img");
     this.addFriend = this.querySelector("#add-friend");
+
+    this.blockFriend = this.querySelector("#block");
+
     this.isSent = false;
+
     
     showOverlay();
-    console.log("Friend Page");
     this.getUser();
     this.CheckIsFriend();
+
     if (!this.isSent)
     {
       this.checkIsSent();
@@ -36,15 +40,19 @@ class FriendPage extends AbstractPage {
     }
 
     this.addFriend.addEventListener("click", this);
+    this.blockFriend.addEventListener("click", () => this.blockingFriend());
 
   }
+
   handleEvent(e) {
     this[`on${e.type}`](e);
   }
+
   onclick(e) {
     if (this.addFriend.getAttribute("data-accept")) {
       this.acceptRequest();
-    } else {
+    }
+    else {
       this.sendRequest();
     }
   }
@@ -77,6 +85,7 @@ class FriendPage extends AbstractPage {
       console.error("Error Loading profile:", error);
     }
   }
+
   async sendRequest() {
     try {
       const response = await fetch(`http://localhost:8000/api/friends/send/`, {
@@ -97,6 +106,7 @@ class FriendPage extends AbstractPage {
       console.error("Error Sending Request:", error);
     }
   }
+  
   async acceptRequest() {
     try {
       const response = await fetch(`http://localhost:8000/api/friends/update/`, {
@@ -117,6 +127,7 @@ class FriendPage extends AbstractPage {
       console.error("Error Accepting Request:", error);
     }
   }
+
   async CheckIsFriend() {
     const response = await fetch("http://localhost:8000/api/friends/", {
       method: "GET",
@@ -125,25 +136,21 @@ class FriendPage extends AbstractPage {
     const data = await response.json();
     for (const friend of data.data) {
         if (friend.friend.profile.uuid === this.userId.uuid) {
-            // navigateTo(`/friend${this.userId.id}`);
             this.addFriend.innerHTML = `<i class="fa-solid fa-user-check me-2"></i> friends`;
             this.addFriend.disabled = true;
             window.isSent = true;
             break;
-        }
-    }
+          }
+    }  
   }
 
-
   async checkIsSent() {
-    console.log("checkIsSent");
     const response = await fetch("http://localhost:8000/api/friends/sent-requests/", {
       method: "GET",
       credentials: "include",
     });
     const data = await response.json();
     for (const friend of data.data) {
-      console.log(friend.friend.profile.uuid , this.userId.uuid);
         if (friend.friend.profile.uuid === this.userId.uuid) {
             this.isSent = true;
             this.addFriend.innerHTML = `<i class="fa-solid fa-user-clock me-2"></i> pending`;
@@ -154,7 +161,6 @@ class FriendPage extends AbstractPage {
   }
 
   async checkIsSend() {
-    console.log("checkIsSend", window.isSent);
     const response = await fetch("http://localhost:8000/api/friends/requests/", {
       method: "GET",
       credentials: "include",
@@ -162,12 +168,32 @@ class FriendPage extends AbstractPage {
     const data = await response.json();
     const  rqts = data.data
     for (const rqt of rqts) {
-      console.log(rqt.friend.profile.uuid , this.userId.uuid);
         if (rqt.friend.profile.uuid === this.userId.uuid) {
             this.addFriend.innerHTML = `<i class="fa-solid fa-user-plus fa-sm me-2"></i> accept`;
             this.addFriend.setAttribute("data-accept", true);
             break;
         }
+    }
+  }
+
+  async blockingFriend() {
+    console.log("start blocking");
+    try {
+      const response = await fetch(`http://localhost:8000/api/friends/block/`, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ user_id: this.friend.id}),
+      });
+
+      if (response.ok) {
+        console.log("Blocked");
+        navigateTo("/home");
+      }
+    } catch (error) {
+      console.error("Error Blocking Request:", error);
     }
   }
 }

@@ -35,5 +35,5 @@ export const showOverlay = () =>{
 
 export const hideOverlay = ()  =>{
   const showOverlay = document.querySelector("#overlay");
-  setInterval(() => showOverlay.style.display = "none", 1000);
+  setInterval(() => showOverlay.style.display = "none", 100);
 }
