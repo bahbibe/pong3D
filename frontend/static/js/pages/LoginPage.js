@@ -40,7 +40,17 @@ class LoginPage extends AbstractPage {
     this.switcher(registerBtn, loginBtn, boxRegister, boxLogin);
     this.switcher(loginBtn, registerBtn, boxLogin, boxRegister);
 
-    this.addEventListener('click', this);
+    this.intra.addEventListener('click', () => this.authenticationLogin());
+
+    this.querySelectorAll("input").forEach((input) => {
+      input.addEventListener('click', (e) => {
+        if (e.target.id === "password" || e.target.id === 'confirm-password')
+          this.lengthPassword.classList.remove("d-none");
+        else
+          this.lengthPassword.classList.add("d-none");
+        });
+    });
+    
     this.addEventListener('keydown', this);
 
 
@@ -70,19 +80,6 @@ class LoginPage extends AbstractPage {
     else
       this.lengthPassword.style.color = "red";
 
-  }
-
-  onclick(e) {
-
-    if (e.target.id === "intra")
-    {
-      console.log("intra");
-      this.authenticationLogin();
-    }
-    else if (e.target.id === "password" || e.target.id === 'confirm-password')
-      this.lengthPassword.classList.remove("d-none");
-    else
-      this.lengthPassword.classList.add("d-none");
   }
 
   getData(event) {

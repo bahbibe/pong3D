@@ -37,31 +37,33 @@ class ProfilePage extends AbstractPage {
       if (response.ok)
       {
         const friends = data.data;
+        console.log(friends);
         for (const friend of friends) {
-          this.container.innerHTML += `
-                    <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
-                      <div class="col-3 col-md-4">
-                        <div class="d-flex align-items-center">
-                        <img src="${friend.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" alt="user profile image">
-                          <div class="ps-2">
-                            <a href="friend/${friend.friend.profile.uuid}"><span class="fw-bold text-capitalize" style="font-size: 14px;">${friend.friend.username}</span></a>
+          console.log(friend.status );
+            this.container.innerHTML += `
+                      <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
+                        <div class="col-3 col-md-4">
+                          <div class="d-flex align-items-center">
+                          <img src="${friend.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" alt="user profile image">
+                            <div class="ps-2">
+                              <a href="friend/${friend.friend.profile.uuid}"><span class="fw-bold text-capitalize" style="font-size: 14px;">${friend.friend.username}</span></a>
+                            </div>
                           </div>
                         </div>
+                        <div class="col-2 pe-2 ">
+                          <span id="total"><strong>100</strong></span>
+                        </div>
+                        <div class="col-2 pe-2 ">
+                          <span id="wins"><strong>100</strong></span>
+                        </div>
+                        <div class="col-2 pe-2 d-none d-md-block">
+                          <span id="ratio"><strong>100</strong></span>
+                        </div>
+                        <div class="col-3 col-md-2 text-end">
+                          <a href="#" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
+                        </div> 
                       </div>
-                      <div class="col-2 pe-2 ">
-                        <span id="total"><strong>100</strong></span>
-                      </div>
-                      <div class="col-2 pe-2 ">
-                        <span id="wins"><strong>100</strong></span>
-                      </div>
-                      <div class="col-2 pe-2 d-none d-md-block">
-                        <span id="ratio"><strong>100</strong></span>
-                      </div>
-                      <div class="col-3 col-md-2 text-end">
-                        <a href="#" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
-                      </div> 
-                    </div>
-                    `;
+                      `;
         }
         hideOverlay();
       }

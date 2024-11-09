@@ -13,5 +13,6 @@ export { TwoFaPage } from "./TwoFaPage.js"
 import { ErrorToast } from "../components/ErrorToast.js"
 export { GamePage } from "./GamePage.js"
 export { MatchmakingPage } from "./MatchmakingPage.js"
+export { blockedFriendsPage } from "./blockedFriends.js"
 
 window.customElements.define("error-toast", ErrorToast);
