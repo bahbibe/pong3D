@@ -367,7 +367,7 @@
     </div>
     <section class="">
       <main-nav></main-nav>
-      <div class="container-md mt-4">
+      <div class="container-md p-2 mt-4">
         <div class="row p-3  text-white  glass-effect">
           <div class="col-12 col-md-6 col-lg-6 mx-auto">
             <div class="d-lg-flex align-items-center  text-center text-lg-start pb-3 pb-lg-0">
@@ -496,9 +496,9 @@
           </div>
         </div>
         
-        <div class="row mt-4 mb-2 justify-content-between">
+        <!-- <div class="row mt-4 mb-2 justify-content-between"> -->
   
-          <div class="col-12 col-lg-6 p-3 glass-effect mb-3 mb-lg-0" style="min-height: 47vh;">
+          <!-- <div class="col-12 col-lg-6 p-3 glass-effect mb-3 mb-lg-0" style="min-height: 47vh;">
             <h2 class="text-white">Game History</h2>
             <div class="profile-content p-1">
               <div class="row mt-3 p-1 mb-1" style="background: linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85));">
@@ -529,19 +529,19 @@
                 </div>
               </div>
             </div>
-          </div>      
+          </div>       -->
   
   
-          <div class="col-12 col-lg-5 p-3 glass-effect" style="height: 47vh; max-height: 47vh;">
-            <h2 class="text-white">Friends</h2>
-            <div id="friend-container" class="p-1">
-              <div class="row p-1 rounded-1 justify-content-between align-items-center">
+          <!-- <div class="col-12 col-lg-5 p-3 glass-effect" style="height: 47vh; max-height: 47vh;"> -->
+            <!-- <h2 class="text-white">Friends</h2> -->
+            <!-- <div id="friend-container" class="p-1"> -->
+              <!-- <div class="row p-1 rounded-1 justify-content-between align-items-center">
                 <div class="col-3 col-md-4"><strong>Username</strong> </div>
                 <div class="col-1 col-md-2"><strong>Total</strong></div>
                 <div class="col-1 col-md-2"><strong>Wins</strong></div>
                 <div class="col-2 d-none d-md-block"><strong>Ratio</strong></div>
                 <div class="col-3 col-md-2 text-end "><strong>Game</strong></div>
-              </div>
+              </div> -->
               <!-- <div class="row p-1 rounded-1 justify-content-between align-items-center" style="background: linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85)); cursor: pointer;">
                 <div class="col-4">
                   <div class="d-flex align-items-center">
@@ -564,9 +564,80 @@
                   <a href="#" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
                 </div> 
               </div> -->
+            <!-- </div> -->
+          <!-- </div> -->
+  
+        <!-- </div> -->
+        <div class="row justify-content-between">
+          <div class="col-6">
+            <h3>Game history</h3>
+            <div class="row glass-effect p-1" style="height: 550px; overflow-y: auto">
+              <div class="profile-content ">
+                <div class="row mt-3 p-1 mb-1 glass-effect">
+                  <div class="col-4 col-md-3 ">
+                  <div class="d-flex align-items-center">
+                      <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
+                      <div class="ps-2">
+                        <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-2 my-auto order-1 order-md-0 d-none d-md-block text-center">
+                    <img src="/static/asset/images/icons8-vs.png" class="img-fluid" width="30" alt="icon batlle">
+                  </div>
+                  <div class="col-4 col-md-3 order-3 order-md-0">
+                    <div class="d-md-flex align-items-center">
+                      <div class="pe-2">
+                        <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
+                      </div>
+                      <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
+                    </div>
+                  </div>
+                  <div class="col-4 col-md-2 my-auto order-2 order-md-0 text-center">
+                    <span class="result fw-bolder ">10:7</span>
+                  </div>
+                  <div class="col-2 my-auto text-center d-none d-md-block">
+                    <span class="result fw-bolder">WIN 🏆</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-  
+          <div class="col-5 ">
+            <h3>Friends</h3>
+            <div class="row mb-2 glass-effect p-2" style="height: 300px; overflow-y: auto">
+              <div id="friend-container">
+                <div class="row mb-2">
+                  <div class="col-3 col-md-4"><strong>Username</strong> </div>
+                  <div class="col-1 col-md-2"><strong>Total</strong></div>
+                  <div class="col-1 col-md-2"><strong>Wins</strong></div>
+                  <div class="col-2 d-none d-md-block"><strong>Ratio</strong></div>
+                  <div class="col-3 col-md-2 text-end "><strong>Game</strong></div>
+
+                </div>
+
+              </div>
+            </div>
+            <h3>Blocked Friends</h3>
+            <div class="row glass-effect p-2" style="height: 200px; overflow-y: auto;">
+              <div id="blocked-container">
+                <!-- <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
+                  <div class="col-3 col-md-4">
+                    <div class="d-flex align-items-center">
+                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle" width="35" alt="user profile image">
+                      <div class="ps-2">
+                        <span class="fw-bold text-capitalize" style="font-size: 14px;">bahbibe</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-3 col-md-2 text-end">
+                    <button id="unblock" role="button" class="btn btn-block bg-danger p-1">Unblock</button>
+                  </div> 
+                </div> -->
+              </div>
+              
+            </div>
+          </div>
         </div>
 
       </div>
