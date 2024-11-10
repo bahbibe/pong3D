@@ -1,4 +1,5 @@
 import API from "../API/API.js";
+import { ChatBox } from "./ChatBox.js";
 
 class Friends extends HTMLElement {
   constructor() {
@@ -13,7 +14,7 @@ class Friends extends HTMLElement {
     }
     );
   }
-
+  
   async render() {
     try {
       this.friends.forEach((item) => {
@@ -42,7 +43,15 @@ class Friends extends HTMLElement {
           </div>
     `;
     friendElement.addEventListener("click", () => {
-      console.log("clicked on friend:", item.friend);
+      const chatBox = document.querySelector(".chat-box");
+      chatBox.innerHTML = `
+      <div class="chat-box">
+        <img class="loading" src="/static/img/loading.gif" alt="loading"/>
+        <chat-box></chat-box>
+      </div>
+      `;
+      
+      // new ChatBox(item.friend.profile.uuid);
     });
     return friendElement;
   }

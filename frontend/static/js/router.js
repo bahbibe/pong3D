@@ -73,9 +73,9 @@ const getUser = async () => {
   const response = await data.json();
   if (response && response.success === true) {
     window.user = response.data.user;
-    console.log("user profile -> ", window.user.profile);
+    // console.log("user profile -> ", window.user.profile);
     if (response.data.is_tfa_verified === false && window.path !== "/twofa" && window.path !== "/setup") {
-      console.log("Navigating to /twofa");
+      // console.log("Navigating to /twofa");
       navigateTo("/twofa");
       return true;
     }

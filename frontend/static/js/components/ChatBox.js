@@ -1,31 +1,34 @@
 import API from "../API/API.js";
 import { Friends } from "./Friends.js";
-const dataBase = [{"id":"0ffececd-782e-426e-a64e-a61ecf2643eb","content":"erat curabitur gravida nisi","timestamp":"7:14 PM","read":false,"author_id":1,"conversation":"nisi"},
-  {"id":"95b6631e-bde5-44d7-a42e-06986dc2a5ed","content":"lacinia","timestamp":"3:32 AM","read":true,"author_id":2,"conversation":"venenatis"},
-  {"id":"4ea85a6f-52aa-43c1-bd0f-ae853b70e43d","content":"consequat","timestamp":"5:57 AM","read":true,"author_id":3,"conversation":"curae"},
-  {"id":"ad90b8cf-4dc3-4e86-90d9-e2c6bc21371b","content":"pede ullamcorper","timestamp":"7:48 AM","read":true,"author_id":4,"conversation":"nec"},
-  {"id":"5c0932a1-a6dc-4315-8574-2e9200d2ee73","content":"turpis","timestamp":"4:22 AM","read":false,"author_id":5,"conversation":"id"},
-  {"id":"1916f663-3e81-47b9-9080-5092dd310eea","content":"eu mi nulla ac","timestamp":"1:10 AM","read":false,"author_id":6,"conversation":"natoque"},
-  {"id":"5c21c5c3-3882-4423-861e-335d6280bcb8","content":"curae nulla dapibus dolor","timestamp":"2:50 PM","read":false,"author_id":7,"conversation":"luctus"},
-  {"id":"1896f3a5-ac0e-4fdd-981f-011cb32eb9d2","content":"in","timestamp":"7:18 PM","read":true,"author_id":8,"conversation":"nullam"},
-  {"id":"a147fc18-3ed8-430f-9f12-cde6468a46f0","content":"natoque penatibus et","timestamp":"1:03 PM","read":false,"author_id":9,"conversation":"turpis"},
-  {"id":"e8dbf416-7aa8-4be2-8dcf-05306a156c2e","content":"vestibulum","timestamp":"6:31 AM","read":false,"author_id":10,"conversation":"semper"}]
+import { WebSock } from "../ws/ws.js";
 class ChatBox extends HTMLElement {
   constructor(uuid) {
     super();
     this.API = new API();
+    this.ws = null;
     this.messages = [];
-    this.uuid = uuid;
+    this.uuid = "95b6631e-bde5-44d7-a42e-06986dc2a5ed";
   }
   connectedCallback() {
-    // this.API.getMessages(this.uuid).then((res) => {
-      this.messages =  dataBase;
+    this.API.getMessages(this.uuid).then((res) => {
+      // this.messages =  dataBase;
+      
+      this.messages = res;
+
       this.render();
+      // this.ws = new WebSock(this.uuid);
+      // this.ws.connect();
+      // this.ws.receive().then((data) => {
+      //   const message = JSON.parse(data);
+      //   this.messages.push(message);
+      //   this.render();
+      // });
     }
-    // );
-  // }
+    );
+  }
 
   async render() {
+    this.appendChild(this.headerElement());
     try {
       this.messages.forEach((item) => {
         this.appendChild(this.createMessageElement(item));
@@ -39,17 +42,46 @@ class ChatBox extends HTMLElement {
     }
   }
 
+  headerElement() {
+    const headerElement = document.createElement("div");
+    headerElement.classList.add("chat-header");
+    headerElement.innerHTML = `
+    <div class="avatar">
+      <img src="https://via.placeholder.com/150" alt="avatar"/>
+    </div>
+    <div class="chat-info">
+      <h5>Username</h5>
+      <span>Active 3m ago</span>
+    </div>
+    `;
+    return headerElement
+  }
+
   createMessageElement(item) {
     const messageElement = document.createElement("div");
     messageElement.classList.add("message-box");
     messageElement.innerHTML = `
-    <div class="message-header">
+    <div class="message-sender">
+      <div class="message-info">
+        <h5>${item.id}</h5>
+      </div>
       <div class="message-item">
         <span>${item.content}</span>
         <!-- <span>${new Date(item.timestamp).toLocaleString()}</span> -->
         <span>${item.timestamp}</span>
       </div>
     </div>
+       <div class="message-other">
+      <div class="message-info">
+        <h5>4ea85a6f-52aa-43c1-bd0f-ae853b70e43d</h5>
+      </div>
+      <div class="message-item">
+        <span>lorem epsum</span>
+        <!-- <span>${new Date(item.timestamp).toLocaleString()}</span> -->
+        <span>${item.timestamp}</span>
+      </div>
+    </div>
+
     `;
     return messageElement;
   }

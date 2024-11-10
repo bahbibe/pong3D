@@ -48,4 +48,4 @@ class WebSock {
   }
 }
 
-export default WebSock;
+export { WebSock };
