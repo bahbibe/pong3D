@@ -16,16 +16,24 @@ class ProfilePage extends AbstractPage {
     const fullName = this.querySelector("#fullName");
     const username = this.querySelector("#username");
     const userImg = this.querySelector("#user-img");
-
     const user = window.user;
-
+    
     this.container = this.querySelector("#friend-container");
-    // console.log(user);
+    this.blockedContainer = this.querySelector("#blocked-container");
+
     fullName.textContent = `${user.first_name} ${user.last_name}`;
     username.textContent =  `@${user.username}`;
     userImg.src = `${user.profile.avatar}`
-
+    
     this.getFriend();
+    this.getBlockedFriends();
+
+    // const unblockBtn = this.querySelectorAll("[data-unblock]");
+    console.log("unblockBtn");
+
+    // this.unblockBtn.forEach((btn) => {
+    //   btn.addEventListener("click", this.unblockFriend.bind(this));
+    // });
 
   }
   async getFriend(){
@@ -37,9 +45,7 @@ class ProfilePage extends AbstractPage {
       if (response.ok)
       {
         const friends = data.data;
-        console.log(friends);
         for (const friend of friends) {
-          console.log(friend.status );
             this.container.innerHTML += `
                       <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
                         <div class="col-3 col-md-4">
@@ -70,6 +76,61 @@ class ProfilePage extends AbstractPage {
 
     }
     catch(e){ console.log(e);}
+  }
+
+  async getBlockedFriends() {
+    try {
+      const response = await fetch('http://localhost:8000/api/friends/blocked/', { credentials: "include",});
+      const data = await response.json();
+      const users = data.data;
+
+      this.blockedContainer.innerHTML = "";
+
+      for (const user of users) {
+
+            this.blockedContainer.innerHTML += `
+            <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
+                  <div class="col-3 col-md-4">
+                    <div class="d-flex align-items-center">
+                    <img src="${user.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" alt="user profile image">
+                      <div class="ps-2">
+                        <span class="fw-bold text-capitalize" style="font-size: 14px;">${user.friend.username}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-3 col-md-2 text-end">
+                    <button data-unblock="${user.friend.id}" role="button" class="btn btn-block bg-danger p-1">Unblock</button>
+                  </div> 
+            </div>
+            `
+      }
+      this.unblockBtn = this.querySelectorAll("[data-unblock]");
+      console.log(this.unblockBtn);
+      this.unblockBtn.forEach((btn) => {
+      btn.addEventListener("click", this.unblockFriend.bind(this));
+    });
+    } catch (error) { console.log(error); }
+
+  }
+  
+  async unblockFriend(e) {
+    try {
+      console.log(e.target.getAttribute("data-unblock"));
+      const url = `http://localhost:8000/api/friends/unblock/`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ user_id: e.target.getAttribute("data-unblock") }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        this.getBlockedFriends();
+        // console.log("unblocked");
+      }
+    } catch (error) { console.log(error); }
   }
 }
 
