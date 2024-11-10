@@ -76,6 +76,25 @@
   margin: 0;
 }
 
+.message-sender {
+  /* display: grid;
+  grid-template-columns: 1fr 4fr;
+  gap: 5px;
+  align-items: center;
+  padding: 0; */
+  border: 3px solid var(--primary);
+  margin: 5px;
+}
+.message-other {
+  /* display: grid;
+  grid-template-columns: 1fr 4fr;
+  gap: 5px;
+  align-items: center;
+  padding: 0; */
+  border: 3px solid ;
+  margin: 5px;
+}
+
 @media (max-width: 576px) {
   .chat-box {
     display: none;

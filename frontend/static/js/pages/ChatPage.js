@@ -11,10 +11,25 @@ class ChatPage extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
     const list = document.querySelector(".friends-list");
-    list.appendChild(new Friends());
     const chatBox = document.querySelector(".chat-box");
-    chatBox.appendChild(new ChatBox());
+    chatBox.innerHTML = `
+      <div class="chat-box">
+        <img class="loading" src="/static/img/loading.gif" alt="loading"/>
+      </div>
+    `;
+    list.appendChild(new Friends());
+    // chatBox.appendChild(this.chatBoxContainer());
   }
+  // chatBoxContainer() {
+  //   const chatBoxContainer = document.createElement("div");
+  //   chatBoxContainer.innerHTML = `
+  //   <div class="chat-box">
+  //     <img class="loading" src="/static/img/loading.gif" alt="loading"/>
+  //     <chat-box></chat-box>
+  //   </div>
+  //   `;
+  //   return chatBoxContainer;
+  // }
 }
 
 window.customElements.define("chat-page", ChatPage);
