@@ -61,3 +61,24 @@ class FriendsStatusConsumer(AsyncWebsocketConsumer):
                 {"user_id": user_id, "status": status, "online_users": online_users, "type": "user_status"}
             )
         )
+
+class NotificationConusmer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user_id = self.scope["user"].id
+        await self.accept()
+        print("-- user_id --> ", self.user_id)
+        # Join the user's notification channel
+        await self.channel_layer.group_add(f"user_{self.user_id}", self.channel_name)
+
+    async def disconnect(self, close_code):
+        # Leave the user's notification channel
+        await self.channel_layer.group_discard(f"user_{self.user_id}", self.channel_name)
+
+    async def send_notification(self, event):
+        message = event["message"]
+        print("-- notification message --> ", message)
+
+        # Send the notification to the user
+        await self.send(
+            text_data=json.dumps({"message": message, "type": "notification"})
+        )

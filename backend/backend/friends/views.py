@@ -12,6 +12,8 @@ from .serializers import (
 )
 from api.auth_utils import is_authenticated
 from utils.responses import ErrorResponse, SuccessResponse
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 @api_view(["GET"])
@@ -32,12 +34,15 @@ def get_friends(request):
 
     return SuccessResponse(data=friends)
 
+
 @api_view(["GET"])
 @is_authenticated
 def get_blocked_friends(request):
     user = request.user
     friends = Friendship.objects.filter(
-        (Q(source_user=user) | Q(target_user=user)) & Q(status="blocked") & Q(blocked_by=user)
+        (Q(source_user=user) | Q(target_user=user))
+        & Q(status="blocked")
+        & Q(blocked_by=user)
     )
     for friendship in friends:
         if friendship.source_user == user:
@@ -125,6 +130,14 @@ def send_friend_request(request):
         source_user=source_user, target_user=target_user
     )
 
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"user_{target_user.id}",
+        {
+            "type": "send_notification",
+            "message": f"{source_user.username} sent you a friend request",
+        },
+    )
     return SuccessResponse(data=FriendshipSerializer(friendship).data)
 
 
