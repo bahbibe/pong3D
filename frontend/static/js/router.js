@@ -17,6 +17,8 @@ import {
   blockedFriendsPage,
 } from "./pages/index.js";
 import { FriendsStatus } from "./ws/FriendsStatus.js";
+import { TournamentDisplayPage } from "./pages/TournamentDisplayPage.js";
+import { TournamentPage } from "./pages/TournamentPage.js";
 
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
@@ -48,6 +50,8 @@ const routes = [
   { path: "/game", view: GamePage, isProtected: true, page: "game-page" },
   { path: "/matchmaking", view: MatchmakingPage, isProtected: true, page: "matchmaking-page" },
   { path: "/game/:game_id", view: GamePage, isProtected: true, page: "game-page" },
+  { path: "/tournament", view: TournamentPage, isProtected: true, page: "tournament-page" },
+  { path: "/tournament/:tournament_id", view: TournamentDisplayPage, isProtected: true, page: "tournament-display-page" },
   {
     path: "/chat/:roomId",
     view: ChatPage,

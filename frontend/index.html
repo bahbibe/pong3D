@@ -280,7 +280,7 @@
                   <div class="content__ me-2" style="width: 50%;">
                     <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Tournament</h6>
                     <p  style="font-size: 13px;">Grind & win the trophy</p>
-                    <a class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+                    <a href="/tournament" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
                     border-radius: 5px;
                     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
                       Play
@@ -1005,6 +1005,91 @@
     </section>
   </template>
 
+  <template id="tournament-page">
+    <style>
+    </style>
+    <main-nav></main-nav>
+  </template>
+
+  <template id="tournament-display-page">
+    <main-nav></main-nav>
+    <style>
+      .player {
+        height: 100px;  
+        width: 100px;
+        background-color: #624E88;
+        border: #fefefe 1px solid;
+        border-radius: 8px;
+        position: absolute;
+      }
+      .player1
+      {
+        top: 0%;
+        left: 0%;
+      }
+
+      .player2
+      {
+        bottom: 0%;
+        left: 0%;
+      }
+
+      .player3
+      {
+        top: 0%;
+        right: 0%;
+      }
+
+      .player4
+      {
+        bottom: 0%;
+        right: 0%;
+      }
+
+      .player5
+      {
+        top: 50%;
+        left: 75%;
+        transform: translate(0, -50%);
+      }
+
+      .player6
+      {
+        top: 50%;
+        right: 75%;
+        transform: translate(0, -50%);
+      }
+
+      .winner
+      {
+        top: 25%;
+        left: 50%;
+        transform: translate(-50%, 0);
+      }
+
+      .tournament > div > img
+      {
+        height: 100%;
+        width: 100%;
+        border-radius: 8px;
+      }
+      .tournament
+      {
+        position: relative;
+      }
+    </style>
+    <div class="d-flex p-5 min-vh-100 w-100">
+      <div class="tournament w-100">
+        <div class="player player1 round-1"></div>
+        <div class="player player2 round-1"></div>
+        <div class="player player3 round-1"></div>
+        <div class="player player4 round-1"></div>
+        <div class="player player5 round-1"></div>
+        <div class="player player6 round-2"></div>
+        <div class="player winner"></div>
+      </div>
+    </div>
+  </template>
 
 
   <!-- !  components -->
