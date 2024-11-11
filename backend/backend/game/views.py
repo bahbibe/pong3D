@@ -2,18 +2,11 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from api.auth_utils import is_authenticated
 from utils.responses import SuccessResponse, ErrorResponse
-from .serializers import GameHistorySerializer, GameStatsSerializer
+from .serializers import GameHistorySerializer, GameStatsSerializer, TournamentSerializer, TournamentParticipantsSerializer
 from .models import Game
-from .models import Tournament
+from .models import Tournament, Tournament_Participants, Tournament_Game
 from django.db.models import Q
 from django.db.models import F
-
-import redis
-import uuid
-import json
-
-r = redis.Redis(host="redis", charset="utf-8", decode_responses=True)
-
 
 # Create your views here.
 
@@ -92,13 +85,64 @@ def create_tournament(request):
     tournament = Tournament.objects.create(
         owner = request.user,
     )
+    Tournament_Participants.objects.create(
+        tournament = tournament,
+        player = request.user,
+    )
     print(tournament.owner.id)
     # start the tournament
     # only if the request user is the tournament owner
     return SuccessResponse(
         data={
             "message": "tournament created successfuly",
-            "tournament": "tournament"
+            "data": TournamentSerializer(tournament).data , 
+        }
+    )
+
+@api_view(["GET"])
+@is_authenticated
+def get_tournaments(request):
+    tournaments = Tournament.objects.all()
+    for tournament in tournaments:
+        tournament.is_participant = Tournament_Participants.objects.filter(player=request.user, tournament=tournament).exists()
+    return SuccessResponse(
+        data={
+            "data": TournamentSerializer(tournaments, many=True).data,
+        }
+    )
+
+@api_view(["GET"])
+@is_authenticated
+def join_tournament(request, tournament_id):
+    tournament = Tournament.objects.get(uuid=tournament_id)
+    if not tournament:
+        return ErrorResponse(
+            data={
+                "message": "Tournament doesn't exist!",
+            }
+        )
+    participant = Tournament_Participants.objects.filter(player=request.user).filter(tournament=tournament).first()
+    if not participant:
+        print(tournament_id)
+        participant = Tournament_Participants.objects.create(
+            tournament = tournament,
+            player = request.user,
+        )
+    return SuccessResponse(
+        data={
+            "message": "tournament joined successfuly",
+            "data": TournamentParticipantsSerializer(participant).data
+        }
+    )
+
+@api_view(["GET"])
+@is_authenticated
+def get_participants(request, tournament_id):
+    tournament = Tournament.objects.get(uuid=tournament_id)
+    participant = Tournament_Participants.objects.filter(tournament=tournament)
+    return SuccessResponse(
+        data={ 
+            "data": TournamentParticipantsSerializer(participant, many=True).data
         }
     )
 
@@ -113,16 +157,6 @@ def start_tournament(request):
             "message": "tournament created successfuly",
             "tournament_id": tournament_id,
             "owner": request.user.id,
-        }
-    )
-
-@api_view(["GET"])
-@is_authenticated
-def get_tournaments(request):
-    pass
-    # add this user to the tournament
-    return SuccessResponse(
-        data={
         }
     )
 

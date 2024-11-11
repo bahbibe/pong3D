@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Game
+from .models import Game, Tournament
 from api.serializers import UserSerializer
 
 
@@ -30,4 +30,31 @@ class GameHistorySerializer(serializers.ModelSerializer):
             "player_score",
             "user_score",
             "is_user_winner",
+        ]
+
+class TournamentSerializer(serializers.ModelSerializer):
+    uuid = serializers.CharField()
+    started = serializers.BooleanField()
+    owner = UserSerializer(read_only=True)
+    is_participant = serializers.BooleanField(default=False)
+
+    class Meta:
+        model = Tournament
+        fields = [
+            "uuid",
+            "started",
+            "owner",
+            "is_participant"
+        ]
+
+class TournamentParticipantsSerializer(serializers.ModelSerializer):
+    tournament = TournamentSerializer()
+    player = UserSerializer(read_only=True)
+    t_round = serializers.IntegerField()
+    class Meta:
+        model = Tournament
+        fields = [
+            "tournament",
+            "player",
+            "t_round"
         ]

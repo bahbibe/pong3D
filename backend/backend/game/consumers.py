@@ -23,11 +23,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             print("game doesn't exist 2")
             await self.close()
             return
-
         
         await self.channel_layer.group_add(self.game_id, self.channel_name)
-
-        
 
         # Check if the game instance already exists
         self.game_instance = await game_manager.get_game_instance(self.game_id)

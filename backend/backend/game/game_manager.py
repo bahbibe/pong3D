@@ -1,5 +1,6 @@
 # game_manager.py
 import asyncio
+import random
 from channels.layers import get_channel_layer
 from .models import Game
 from channels.db import database_sync_to_async
@@ -12,27 +13,14 @@ class GameInstance:
             'player1': 0,
             'player2': 0,
         }
-        self.vel = [1, 1]
+        self.vel = [random.choice([-1, 1]), random.choice([-1, 1])]
         self.speed = 0.02
         self.limit = [3.5, 5]
         self.channel_layer = channel_layer
         self.running = True
         self.game_loop_task = asyncio.create_task(self.game_loop())
         self.game = game
-        # self.player1 = None
-        # self.player2 = None
 
-    # def setPlayer1(self, user):
-    #     self.player1 = user
-
-    # def setPlayer2(self, user):
-    #     self.player2 = user
-
-    # def getPlayer1(self):
-    #     return self.player1
-        
-    # def getPlayer2(self):
-    #     return self.player2
 
     async def game_loop(self):
         await self.channel_layer.group_send(self.game_id, {
@@ -49,26 +37,9 @@ class GameInstance:
                 })
             if self.game.player1_score >= 3 or self.game.player2_score >= 3:
                 break
-            if self.check_for_game_end():
-                self.running = False
-                break
             await asyncio.sleep(1/60)  # Run at 60 FPS
-        # await self.on_game_end()
         await self.send_game_end_notification()
 
-
-    def check_for_game_end(self):
-        # Check if the game has ended (e.g., a player has reached a certain score)
-        # and update the game state accordingly
-        # Return True if the game has ended, False otherwise
-        return False
-
-    @database_sync_to_async
-    def on_game_end(self):
-        # Notify the clients that the game has ended
-        # await self.send_game_end_notification()
-        print("game end")
-    
     @database_sync_to_async
     def save_game(self):
         self.game.save()
@@ -81,14 +52,6 @@ class GameInstance:
             "game_id": self.game_id,
             })
     
-    async def send_game_state_update(self):
-        print("inside send_game_state")
-        pass
-        # await self.channel_layer.group_send(self.game_id, {
-        #     "type": "game_update_message",
-        #     "game_state": self.game_state,
-        #     })
-
     def update_ball_position(self):
         self.player_padding = [0.5, 0.1]
         self.ball_padding = 0.125
@@ -128,7 +91,8 @@ class GameInstance:
         self.game_state['ball_position'][1] = 0
         self.game_state['player1'] = 0
         self.game_state['player2'] = 0
-        self.vel = [1, 1]
+        self.vel = [random.choice([-1, 1]), random.choice([-1, 1])]
+
         
 class GameManager:
     def __init__(self):
