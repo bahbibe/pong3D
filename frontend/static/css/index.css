@@ -1006,23 +1006,23 @@ a.sidebar-link.active {
   color: #34495e;
   text-align: center;
 }
-/* .avatar-wrapper .upload-button {
+
+.user-status {
   position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-} */
-/* .avatar-wrapper .upload-button .fa-arrow-circle-up {
-  position: absolute;
-  font-size: 234px;
-  top: -17px;
-  left: 0;
-  text-align: center;
-  opacity: 0;
-  transition: all 0.3s ease;
-  color: #34495e;
+  bottom: 0;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #95a5a6;
+  border: 2px solid #fff;
+  z-index: 100;
 }
-.avatar-wrapper .upload-button:hover .fa-arrow-circle-up {
-  opacity: 0.9;
+
+.user-status.online {
+  background: #2ecc71;
+}
+
+/* .user-status.offline {
+  background: #95a5a6;
 } */

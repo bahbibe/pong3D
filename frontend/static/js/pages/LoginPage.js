@@ -1,5 +1,6 @@
 import { hideToast, showOverlay, hideOverlay, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
+import { FriendsStatus } from "../ws/FriendsStatus.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
 
@@ -104,13 +105,13 @@ class LoginPage extends AbstractPage {
       body: JSON.stringify(this.user),
     }).then(rep => rep.json())
       .then(data => {
-        console.log(data);
         if (data.success) {
           hideOverlay();
           if (data.data.user.profile.is_tfa_enabled)
             navigateTo("/twofa");
           else
             navigateTo("/home");
+          // FriendsStatus();
         } else {
           showToast(true, data.message, data.errors);
           hideOverlay();
