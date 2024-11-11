@@ -239,9 +239,9 @@
     <div class="overlay" id="overlay">
       <div class="custom-loader"></div>
     </div>
+    <main-nav></main-nav>
     <section>
-      <main-nav></main-nav>
-      <div class="container-md">
+      <div class="container-md px-4 px-md-0">
           <div class="row" style="color: var(--darker);">
             <div class="d-flex  p-4  mt-4  rounded-1 font-monospace justify-content-between align-items-center" style="background-color: #624E88;">
               <div class="welcome" style="font-size: 1rem;">
@@ -253,13 +253,13 @@
               </div>
             </div>
           </div>
-          <div class="row mt-5 justify-content-between">
+          <div class="row mt-5  justify-content-md-between">
             <div class="col-md-8 col-12">
               <h2 class="font-monospace">Games Modes</h2>
 
-              <div class="row p-1 Cards justify-content-between">
+              <div class="row p-1 Cards justify-content-center flex-column align-items-center align-items-md-stretch flex-md-row">
                 
-                <div class="newCard d-flex align-items-center justify mb-4">
+                <div class="newCard d-flex align-items-center  mb-4 me-md-4">
                   
                   <div class="content__ me-2" style="width: 50%;">
                     <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Classic</h6>
@@ -275,7 +275,7 @@
                   </div>
                 </div>
 
-                <div class="newCard d-flex align-items-center justify-content-between mb-4">
+                <div class="newCard d-flex align-items-center mb-4 me-md-4">
                   
                   <div class="content__ me-2" style="width: 50%;">
                     <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Tournament</h6>
@@ -292,7 +292,7 @@
                 </div>
 
 
-                <div class="newCard d-flex align-items-center justify-content-between">
+                <div class="newCard d-flex align-items-center mb-4  me-md-4">
                   
                   <div class="content__ me-2" style="width: 50%;">
                     <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Friend</h6>
@@ -311,12 +311,7 @@
 
               <h2 class="font-monospace">Best Players</h2>
 
-              <div class="row p-3" style="   background: rgba(255, 255, 255, 0.2);
-              border-radius: 10px;
-              box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-              backdrop-filter: blur(5px);
-              -webkit-backdrop-filter: blur(5px);
-              border: 1px solid rgba(255, 255, 255, 0.3);">
+              <div class="row p-3 mb-2 glass-effect">
 
               <div class="col-12">
                   <div class="d-flex p-3 rounded-1 justify-content-between align-items-center mb-1">
@@ -348,8 +343,8 @@
 
 
 
-            <div class="col-12 col-md-3 d-none d-md-block">
-              <h2 class="font-monospace">Recent Activities</h2>
+            <div class="col-12 col-md-3 d-none d-md-block border">
+              <h2 class="font-monospace">Activities</h2>
               <div class="row">
 
               </div>
@@ -367,7 +362,7 @@
     </div>
     <section class="">
       <main-nav></main-nav>
-      <div class="container-md p-2 mt-4">
+      <div class="container-md px-4 mt-4">
         <div class="row p-3  text-white  glass-effect">
           <div class="col-12 col-md-6 col-lg-6 mx-auto">
             <div class="d-lg-flex align-items-center  text-center text-lg-start pb-3 pb-lg-0">
@@ -393,7 +388,7 @@
         </div>
         
         <div class="row my-4">
-          <div class="col-12 col-md-6 col-lg-3 mb-4">
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
             <div class="status-card  work mx-auto">
               <div class="img-section">
                 <svg xmlns="http://www.w3.org/2000/svg" height="77" width="76">
@@ -419,7 +414,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-md-6 col-lg-3">
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
             <div class="status-card  work mx-auto">
               <div class="img-section">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="77" width="76">
@@ -444,7 +439,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-md-6 col-lg-3">
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
             <div class="status-card  work mx-auto">
               <div class="img-section">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="77" width="76">
@@ -495,81 +490,8 @@
             </div>
           </div>
         </div>
-        
-        <!-- <div class="row mt-4 mb-2 justify-content-between"> -->
-  
-          <!-- <div class="col-12 col-lg-6 p-3 glass-effect mb-3 mb-lg-0" style="min-height: 47vh;">
-            <h2 class="text-white">Game History</h2>
-            <div class="profile-content p-1">
-              <div class="row mt-3 p-1 mb-1" style="background: linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85));">
-                <div class="col-4 col-md-3 ">
-                <div class="d-flex align-items-center">
-                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
-                    <div class="ps-2">
-                      <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-2 my-auto order-1 order-md-0 d-none d-md-block text-center">
-                  <img src="/static/asset/images/icons8-vs.png" class="img-fluid" width="30" alt="icon batlle">
-                </div>
-                <div class="col-4 col-md-3 order-3 order-md-0">
-                  <div class="d-md-flex align-items-center">
-                    <div class="pe-2">
-                      <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
-                    </div>
-                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
-                  </div>
-                </div>
-                <div class="col-4 col-md-2 my-auto order-2 order-md-0 text-center">
-                  <span class="result fw-bolder ">10:7</span>
-                </div>
-                <div class="col-2 my-auto text-center d-none d-md-block">
-                  <span class="result fw-bolder">WIN 🏆</span>
-                </div>
-              </div>
-            </div>
-          </div>       -->
-  
-  
-          <!-- <div class="col-12 col-lg-5 p-3 glass-effect" style="height: 47vh; max-height: 47vh;"> -->
-            <!-- <h2 class="text-white">Friends</h2> -->
-            <!-- <div id="friend-container" class="p-1"> -->
-              <!-- <div class="row p-1 rounded-1 justify-content-between align-items-center">
-                <div class="col-3 col-md-4"><strong>Username</strong> </div>
-                <div class="col-1 col-md-2"><strong>Total</strong></div>
-                <div class="col-1 col-md-2"><strong>Wins</strong></div>
-                <div class="col-2 d-none d-md-block"><strong>Ratio</strong></div>
-                <div class="col-3 col-md-2 text-end "><strong>Game</strong></div>
-              </div> -->
-              <!-- <div class="row p-1 rounded-1 justify-content-between align-items-center" style="background: linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85)); cursor: pointer;">
-                <div class="col-4">
-                  <div class="d-flex align-items-center">
-                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle" width="35" alt="user profile image">
-                    <div class="ps-2">
-                      <sapn class="fw-bold text-capitalize" style="font-size: 14px;">bmakhlou</sapn>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-2 pe-2">
-                  <span id="total"><strong>100</strong></span>
-                </div>
-                <div class="col-2 pe-2">
-                  <span id="wins"><strong>100</strong></span>
-                </div>
-                <div class="col-2 pe-2">
-                  <span id="ratio"><strong>100</strong></span>
-                </div>
-                <div class="col-2 text-end">
-                  <a href="#" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
-                </div> 
-              </div> -->
-            <!-- </div> -->
-          <!-- </div> -->
-  
-        <!-- </div> -->
         <div class="row justify-content-between">
-          <div class="col-6">
+          <div class="col-12 col-md-6">
             <h3>Game history</h3>
             <div class="row glass-effect p-1" style="height: 550px; overflow-y: auto">
               <div class="profile-content ">
@@ -603,8 +525,8 @@
               </div>
             </div>
           </div>
-          <div class="col-5 ">
-            <h3>Friends</h3>
+          <div class="col-12 col-md-5 ">
+            <h3 class="mt-2">Friends</h3>
             <div class="row mb-2 glass-effect p-2" style="height: 300px; overflow-y: auto">
               <div id="friend-container">
                 <div class="row mb-2">
@@ -613,27 +535,12 @@
                   <div class="col-1 col-md-2"><strong>Wins</strong></div>
                   <div class="col-2 d-none d-md-block"><strong>Ratio</strong></div>
                   <div class="col-3 col-md-2 text-end "><strong>Game</strong></div>
-
                 </div>
-
               </div>
             </div>
             <h3>Blocked Friends</h3>
-            <div class="row glass-effect p-2" style="height: 200px; overflow-y: auto;">
+            <div class="row glass-effect p-2 mb-2" style="height: 200px; overflow-y: auto;">
               <div id="blocked-container">
-                <!-- <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
-                  <div class="col-3 col-md-4">
-                    <div class="d-flex align-items-center">
-                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle" width="35" alt="user profile image">
-                      <div class="ps-2">
-                        <span class="fw-bold text-capitalize" style="font-size: 14px;">bahbibe</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-3 col-md-2 text-end">
-                    <button id="unblock" role="button" class="btn btn-block bg-danger p-1">Unblock</button>
-                  </div> 
-                </div> -->
               </div>
               
             </div>
@@ -649,10 +556,10 @@
     <div class="overlay" id="overlay">
       <div class="custom-loader"></div>
     </div>
+    <main-nav></main-nav>
     <section>
-      <main-nav></main-nav>
-      <div class="container-md mt-4">
-        <div class="row p-3  text-white box-sh-1 secondary-bg">
+      <div class="container-md mt-4 px-4">
+        <div class="row p-1 p-md-3  text-white box-sh-1 secondary-bg">
               <div class="col-12 col-md-6 col-lg-6 mx-auto">
                 <div class="d-md-flex align-items-center  text-center text-md-start pb-3 pb-lg-0">
                   <div class="profile-image">
@@ -672,7 +579,7 @@
               </div>
         </div>
         <div class="row my-4">
-          <div class="col-12 col-md-6 col-lg-3 mb-4">
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
             <div class="status-card  work mx-auto">
               <div class="img-section">
                 <svg xmlns="http://www.w3.org/2000/svg" height="77" width="76">
@@ -698,7 +605,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-md-6 col-lg-3">
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
             <div class="status-card  work mx-auto">
               <div class="img-section">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="77" width="76">
@@ -723,7 +630,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-md-6 col-lg-3">
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
             <div class="status-card  work mx-auto">
               <div class="img-section">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="77" width="76">
@@ -748,7 +655,7 @@
               </div>
             </div>
           </div>
-          <div class="col-12 col-md-6 col-lg-3">
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
             <div class="status-card  work mx-auto">
               <div class="img-section">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" height="77" width="76">
@@ -775,7 +682,6 @@
         </div>
 
         <div class="row mt-4 mb-2 justify-content-between">
-  
           <div class="col-12 p-3 glass-effect mb-3 mb-lg-0" style="min-height: 47vh;">
             <h2 class="text-white">Game History</h2>
             <div class="profile-content p-1">
@@ -888,13 +794,13 @@
               </div>
               <div class="mb-3">
                 <label for="username" class="form-label fw-bold">Username</label>
-                <input type="text" name="username" id="username" class="form-control form-control-lg  mb-2" placeholder="username" value="" />
+                <input type="text" name="username" id="username" class="form-control form-control-lg  mb-2" placeholder="username" required value="" />
                 <label for="username" class="form-label fw-bold">email</label>
-                <input type="text" name="email" id="username" class="form-control form-control-lg mb-2" placeholder="email" value="" />
+                <input type="text" name="email" id="email" class="form-control form-control-lg mb-2" placeholder="email" required value="" />
                 <label for="username" class="form-label fw-bold">Password</label>
-                <input type="text" name="password" id="password" class="form-control form-control-lg mb-2" placeholder="password" value="" />
-                <label for="username" class="form-label fw-bold">Comfirm Password</label>
-                <input type="text" name="password" id="confirm_password" class="form-control form-control-lg mb-2" placeholder="confirm password" value="" />
+                <input type="text" name="password" id="password" class="form-control form-control-lg mb-2" placeholder="password" required value="" />
+                <label for="username" class="form-label fw-bold">Confirm Password</label>
+                <input type="text" name="password" id="confirm_password" class="form-control form-control-lg mb-2" placeholder="confirm password" required value="" />
               </div>
               <div class="w-100 d-flex">
                 <button type="button" id="disable-2fa" class="btn btn-outline-danger mx-auto d-none">Disable
@@ -1236,7 +1142,7 @@
       <a href="/home" data-link>
         <img src="/static/asset/images/transistor-ping-pong.gif" width="60" alt="">
       </a>
-      <search-bar class="d-none d-lg-flex"></search-bar>
+      <search-bar class="d-none d-md-flex"></search-bar>
 
 
       <div class="d-flex align-items-center">
