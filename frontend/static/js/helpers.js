@@ -48,9 +48,10 @@ export const renderNotifications = () => {
   notifications.forEach((notification) => {
     notificationsEl.innerHTML += `
         <div class="notification">
+            <img src="${notification.sender.avatar}" alt="" />
             <div class="text">
-                <p>
-                    <a href="friend/"><span class="name"></span> </a> ${notification.message}
+                <p class="text-wrap">
+                    <a href="/friend/${notification.sender.uuid}"><span class="name">${notification.sender.username}</span> </a> ${notification.message}
                 </p>
             </div>
         </div>
