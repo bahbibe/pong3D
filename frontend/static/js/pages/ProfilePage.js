@@ -90,9 +90,9 @@ class ProfilePage extends AbstractPage {
 
       for (const user of users) {
 
-        this.blockedContainer.innerHTML += `
-            <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
-                  <div class="col-3 col-md-4">
+            this.blockedContainer.innerHTML += `
+            <div class="row  p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
+                  <div class="col-6">
                     <div class="d-flex align-items-center">
                     <img src="${user.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" alt="user profile image">
                       <div class="ps-2">
@@ -100,10 +100,10 @@ class ProfilePage extends AbstractPage {
                       </div>
                     </div>
                   </div>
-                  <div class="col-3 col-md-2 text-end">
+                  <div class="col-4 text-end">
                     <button data-unblock="${user.friend.id}" role="button" class="btn btn-block bg-danger p-1">Unblock</button>
                   </div> 
-            </div>
+                </div>
             `
       }
       this.unblockBtn = this.querySelectorAll("[data-unblock]");
