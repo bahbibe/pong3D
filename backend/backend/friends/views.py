@@ -169,6 +169,21 @@ def accept_friend_request(request):
     friendship.status = "accepted"
     friendship.save()
 
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f"user_{source_user.id}",
+        {
+            "type": "send_notification",
+            "message": "accepted your friend request",
+            "user_id": source_user.id,
+            "sender_id": user.id,
+            "sender_uuid": str(user.profile.uuid),
+            "sender_username": user.username,
+            "sender_avatar": str(user.profile.avatar),
+            "ctx": "friend_request_accepted",
+        },
+    )
+
     return SuccessResponse(data=FriendshipSerializer(friendship).data)
 
 
@@ -201,6 +216,37 @@ def update_friendship_status(request):
 
     friendship.status = serializer.validated_data["status"]
     friendship.save()
+
+    if (friendship.status == "accepted") and (friendship.source_user == user):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"user_{friend_id}",
+            {
+                "type": "send_notification",
+                "message": "accepted your friend request",
+                "user_id": friend_id,
+                "sender_id": user.id,
+                "sender_uuid": str(user.profile.uuid),
+                "sender_username": user.username,
+                "sender_avatar": str(user.profile.avatar),
+                "ctx": "friend_request_accepted",
+            },
+        )
+    elif (friendship.status == "accepted") and (friendship.target_user == user):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"user_{friendship.source_user.id}",
+            {
+                "type": "send_notification",
+                "message": "accepted your friend request",
+                "user_id": friendship.source_user.id,
+                "sender_id": user.id,
+                "sender_uuid": str(user.profile.uuid),
+                "sender_username": user.username,
+                "sender_avatar": str(user.profile.avatar),
+                "ctx": "friend_request_accepted",
+            },
+        )
 
     return SuccessResponse(data=FriendshipSerializer(friendship).data)
 

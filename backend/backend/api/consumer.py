@@ -87,6 +87,11 @@ class NotificationConusmer(AsyncWebsocketConsumer):
         user_id = event["user_id"]
         sender_id = event["sender_id"]
         ctx = event["ctx"]
+        avatar = (
+            "intra.42.fr" in event["sender_avatar"]
+            and event["sender_avatar"]
+            or f"{os.getenv('API_URL')}/{event['sender_avatar']}"
+        )
 
         await create_notification(user_id, sender_id, message, "friend_request")
 
@@ -99,7 +104,7 @@ class NotificationConusmer(AsyncWebsocketConsumer):
                     "sender": {
                         "uuid": event["sender_uuid"],
                         "username": event["sender_username"],
-                        "avatar": f"{os.getenv('API_URL')}/{event["sender_avatar"]}",
+                        "avatar": avatar,
                     },
                 }
             )
