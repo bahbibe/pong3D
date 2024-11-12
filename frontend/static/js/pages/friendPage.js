@@ -109,13 +109,13 @@ class FriendPage extends AbstractPage {
   
   async acceptRequest() {
     try {
-      const response = await fetch(`http://localhost:8000/api/friends/update/`, {
-        method: "PUT",
+      const response = await fetch(`http://localhost:8000/api/friends/accept/`, {
+        method: "POST",
         headers: {
           "content-type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ friend_id: this.friend.id , status: "accepted"}),
+        body: JSON.stringify({ source_user: this.friend.id}),
       });
 
       if (response.ok) {

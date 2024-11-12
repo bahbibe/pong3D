@@ -1,4 +1,4 @@
-import { hideToast, showOverlay , hideOverlay, showToast } from "../helpers.js";
+import { hideToast, showOverlay, hideOverlay, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
@@ -17,14 +17,14 @@ class ProfilePage extends AbstractPage {
     const username = this.querySelector("#username");
     const userImg = this.querySelector("#user-img");
     const user = window.user;
-    
+
     this.container = this.querySelector("#friend-container");
     this.blockedContainer = this.querySelector("#blocked-container");
 
     fullName.textContent = `${user.first_name} ${user.last_name}`;
-    username.textContent =  `@${user.username}`;
+    username.textContent = `@${user.username}`;
     userImg.src = `${user.profile.avatar}`
-    
+
     this.getFriend();
     this.getBlockedFriends();
 
@@ -36,14 +36,12 @@ class ProfilePage extends AbstractPage {
     // });
 
   }
-  async getFriend(){
-    try
-    {
+  async getFriend() {
+    try {
       showOverlay();
-      const response = await fetch("http://localhost:8000/api/friends/", { credentials: "include"});
+      const response = await fetch("http://localhost:8000/api/friends/", { credentials: "include" });
       const data = await response.json();
-      if (response.ok)
-      {
+      if (response.ok) {
         const friends = data.data;
         for (const friend of friends) {
           let isOnline = window.online_users && window.online_users.includes(friend.friend.id.toString());
@@ -79,12 +77,12 @@ class ProfilePage extends AbstractPage {
       }
 
     }
-    catch(e){ console.log(e);}
+    catch (e) { console.log(e); }
   }
 
   async getBlockedFriends() {
     try {
-      const response = await fetch('http://localhost:8000/api/friends/blocked/', { credentials: "include",});
+      const response = await fetch('http://localhost:8000/api/friends/blocked/', { credentials: "include", });
       const data = await response.json();
       const users = data.data;
 
@@ -111,12 +109,12 @@ class ProfilePage extends AbstractPage {
       this.unblockBtn = this.querySelectorAll("[data-unblock]");
       console.log(this.unblockBtn);
       this.unblockBtn.forEach((btn) => {
-      btn.addEventListener("click", this.unblockFriend.bind(this));
-    });
+        btn.addEventListener("click", this.unblockFriend.bind(this));
+      });
     } catch (error) { console.log(error); }
 
   }
-  
+
   async unblockFriend(e) {
     try {
       console.log(e.target.getAttribute("data-unblock"));
@@ -156,13 +154,22 @@ class mainNav extends AbstractPage {
     const user = window.user;
     navUsername.textContent = `${user.username}`;
     navUserImg.src = `${user.profile.avatar}`
-    
-    this.RequestFriends();
+
+    // this.RequestFriends();
+    this.notificationBtn = this.querySelector("#notification-btn");
+    this.notificationBtn.addEventListener("click", () => {
+      this.notification.innerHTML = "";
+      this.notificationCounter.textContent = 0;
+      this.notificationBtn.classList.add("d-none");
+      window.notifications = [];
+      this.markNotificationsAsRead();
+    });
+    this.renderNotifications();
     this.logoutBtn.addEventListener("click", this.logout);
 
   }
 
-  
+
   handleEvent(event) {
     this[`on${event.type}`](event)
   }
@@ -172,6 +179,27 @@ class mainNav extends AbstractPage {
   //   if (e.target.id === "logout")
   //     this.logout();
   // }
+
+  renderNotifications() {
+    const notifications = window.notifications || [];
+    this.notificationCounter.textContent = notifications.length;
+    if (notifications.length === 0) {
+      this.notificationBtn.classList.add("d-none");
+    }
+    notifications.forEach((notification) => {
+      this.notification.innerHTML += `
+        <div class="notification">
+            <img src="${notification.sender.avatar}" alt="" />
+            <div class="text">
+                <p class="text-wrap">
+                  <a data-link href="/friend/${notification.sender.uuid}"><span class="name">${notification.sender.username}</span> </a> ${notification.message}
+                </p>
+            </div>
+        </div>
+      `
+    });
+  }
+
   RequestFriends() {
     fetch("http://localhost:8000/api/friends/requests/", {
       method: "GET",
@@ -198,27 +226,40 @@ class mainNav extends AbstractPage {
         console.log(error);
       });
   }
-  
+
+  async markNotificationsAsRead() {
+    try {
+      const response = await fetch("http://localhost:8000/api/auth/notifications/mark_as_read/", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async logout(e) {
-    try{
-      
+    try {
+
       const url = "http://localhost:8000/api/auth/logout/";
-      const response = await  fetch(url, { method: "POST", credentials: "include"})
+      const response = await fetch(url, { method: "POST", credentials: "include" })
       const data = await response.json();
       if (response.status === 200) {
         console.log("socket closed -> ", window.socket);
         if (window.socket) {
           window.socket.close();
         }
+        if (window.notif_socket) {
+          window.notif_socket.close();
+        }
         window.user = null;
         navigateTo("/login");
       }
     }
-    catch(e)
-    {
+    catch (e) {
       console.log(e);
     }
-}
+  }
 
 
 }
