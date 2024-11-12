@@ -4,11 +4,12 @@ from .serializers import (
     UserSerializer,
     SetupProfileSerializer,
     LoginUserSerializer,
+    NotificationSerializer,
 )
 from rest_framework import status, viewsets
 from django.contrib.auth.models import User
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Profile
+from .models import Profile, Notification
 from django.shortcuts import redirect
 from django.contrib.auth.hashers import check_password
 from .auth_utils import generate_token, is_authenticated
@@ -142,7 +143,12 @@ def logout_user(_):
 def get_user(request):
     user = request.user
     serializer = UserSerializer(user)
-    return SuccessResponse(data={"user": serializer.data})
+    notifications = NotificationSerializer(
+        Notification.objects.filter(user=user, is_read=False), many=True
+    )
+    return SuccessResponse(
+        data={"user": serializer.data, "notifications": notifications.data}
+    )
 
 
 @api_view(["GET"])
@@ -314,7 +320,7 @@ def verify_twofa(request):
     is_code_valid = pyotp.TOTP(user.profile.tfa_secret).verify(code)
     if not is_code_valid:
         return ErrorResponse(message="Invalid code")
-    
+
     access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
     access_token = generate_token(
         {"id": user.id, "is_tfa_verified": True, "exp": access_token_liftime}

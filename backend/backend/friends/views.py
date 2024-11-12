@@ -135,7 +135,13 @@ def send_friend_request(request):
         f"user_{target_user.id}",
         {
             "type": "send_notification",
-            "message": f"{source_user.username} sent you a friend request",
+            "message": "sent you a friend request",
+            "user_id": target_user.id,
+            "sender_id": source_user.id,
+            "sender_uuid": str(source_user.profile.uuid),
+            "sender_username": source_user.username,
+            "sender_avatar": str(source_user.profile.avatar),
+            "ctx": "friend_request",
         },
     )
     return SuccessResponse(data=FriendshipSerializer(friendship).data)
