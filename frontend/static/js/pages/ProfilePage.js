@@ -192,7 +192,7 @@ class mainNav extends AbstractPage {
             <img src="${notification.sender.avatar}" alt="" />
             <div class="text">
                 <p class="text-wrap">
-                    <a href="/friend/${notification.sender.uuid}"><span class="name">${notification.sender.username}</span> </a> ${notification.message}
+                  <a data-link href="/friend/${notification.sender.uuid}"><span class="name">${notification.sender.username}</span> </a> ${notification.message}
                 </p>
             </div>
         </div>
