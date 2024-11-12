@@ -1,4 +1,4 @@
-from .models import User, Profile
+from .models import User, Profile, Notification
 from rest_framework import serializers
 import os
 
@@ -38,7 +38,15 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "email", "password", "first_name", "last_name", "confirm_password"]
+        fields = [
+            "id",
+            "username",
+            "email",
+            "password",
+            "first_name",
+            "last_name",
+            "confirm_password",
+        ]
 
 
 class SetupProfileSerializer(serializers.ModelSerializer):
@@ -89,3 +97,22 @@ class UpdateSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ["avatar", "username"]
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    sender = serializers.SerializerMethodField()
+
+    def get_sender(self, obj):
+        avatar = obj.sender.profile.avatar
+        if obj.sender.profile.auth_method == Profile.EMAIL:
+            avatar = f"{os.getenv('API_URL')}/{avatar}"
+        return {
+            "id": obj.sender.id,
+            "username": obj.sender.username,
+            "avatar": str(avatar),
+            "uuid": str(obj.sender.profile.uuid),
+        }
+
+    class Meta:
+        model = Notification
+        fields = ["uuid", "type", "message", "is_read", "created_at", "sender"]

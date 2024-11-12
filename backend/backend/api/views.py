@@ -5,7 +5,7 @@ from .serializers import (
     UpdateSettingsSerializer,
 )
 from rest_framework import status
-from .models import User, Profile
+from .models import User, Profile, Notification
 from django.db.models import Q
 from api.auth_utils import is_authenticated
 from utils.responses import SuccessResponse, ErrorResponse
@@ -135,3 +135,10 @@ def get_users(request):
         if is_blocked(current_user, user):
             users = users.exclude(id=user.id)
     return SuccessResponse(data=UserSerializer(users, many=True).data)
+
+@api_view(["POST"])
+@is_authenticated
+def mark_all_notifications_as_read(request):
+    user = request.user
+    Notification.objects.filter(user=user, is_read=False).update(is_read=True)
+    return SuccessResponse(message="All notifications marked as read")

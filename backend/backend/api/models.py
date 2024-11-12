@@ -27,3 +27,13 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     is_tfa_enabled = models.BooleanField(default=False)
     tfa_secret = models.CharField(max_length=255, null=True, blank=True)
+
+
+class Notification(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    type = models.CharField(max_length=255)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user")
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sender", null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
