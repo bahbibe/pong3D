@@ -17,6 +17,7 @@ import {
   blockedFriendsPage,
 } from "./pages/index.js";
 import { FriendsStatus } from "./ws/FriendsStatus.js";
+import { Notifications } from "./ws/NotificationsSockets.js";
 
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
@@ -74,11 +75,13 @@ const getUser = async () => {
   const response = await data.json();
   if (response && response.success === true) {
     window.user = response.data.user;
-    FriendsStatus();
+    window.notifications = response.data.notifications;
     if (response.data.is_tfa_verified === false && window.path !== "/twofa" && window.path !== "/setup") {
       navigateTo("/twofa");
       return true;
     }
+    FriendsStatus();
+    Notifications();
     return true;
   }
   return false;

@@ -28,12 +28,32 @@ export const showToast = (isError, message, errors) => {
 }
 
 
-export const showOverlay = () =>{
+export const showOverlay = () => {
   const showOverlay = document.querySelector("#overlay");
   showOverlay.style.display = "block";
 }
 
-export const hideOverlay = ()  =>{
+export const hideOverlay = () => {
   const showOverlay = document.querySelector("#overlay");
   setInterval(() => showOverlay.style.display = "none", 100);
+}
+
+export const renderNotifications = () => {
+  const notifications = window.notifications || [];
+  const notificationWrapper = document.getElementById("notification-wrapper");
+  const notificationsEl = notificationWrapper.querySelector("div.content");
+  const notificationCounter = notificationWrapper.querySelector("[data-count]");
+  notificationCounter.textContent = notifications.length;
+  notificationsEl.innerHTML = "";
+  notifications.forEach((notification) => {
+    notificationsEl.innerHTML += `
+        <div class="notification">
+            <div class="text">
+                <p>
+                    <a href="friend/"><span class="name"></span> </a> ${notification.message}
+                </p>
+            </div>
+        </div>
+      `
+  });
 }
