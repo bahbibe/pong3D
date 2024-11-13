@@ -1,5 +1,4 @@
 import API from "../API/API.js";
-import { Friends } from "./Friends.js";
 import { WebSock } from "../ws/ws.js";
 class ChatBox extends HTMLElement {
   constructor(uuid) {
@@ -8,13 +7,12 @@ class ChatBox extends HTMLElement {
     this.ws = null;
     this.messages = [];
     this.uuid = "95b6631e-bde5-44d7-a42e-06986dc2a5ed";
+    this.friendItem = window.selectedFriend;
   }
   connectedCallback() {
-    this.API.getMessages(this.uuid).then((res) => {
+      this.API.getMessages(this.uuid).then((res) => {
       // this.messages =  dataBase;
-      
       this.messages = res;
-
       this.render();
       // this.ws = new WebSock(this.uuid);
       // this.ws.connect();
@@ -23,19 +21,18 @@ class ChatBox extends HTMLElement {
       //   this.messages.push(message);
       //   this.render();
       // });
-    }
-    );
+    });
   }
-
-  async render() {
-    this.appendChild(this.headerElement());
+ 
+  render() {
     try {
+      this.appendChild(this.headerElement());
       this.messages.forEach((item) => {
         this.appendChild(this.createMessageElement(item));
       });
       if (this.messages.length === 0) {
         this.appendChild(document.createTextNode("No messages yet"));
-      } 
+      }
     } catch (error) {
       console.error("Error rendering chat list:", error);
       this.appendChild(document.createTextNode("Error loading messages"));
@@ -46,44 +43,54 @@ class ChatBox extends HTMLElement {
     const headerElement = document.createElement("div");
     headerElement.classList.add("chat-header");
     headerElement.innerHTML = `
+    <div class="col-md-9 border chat-box">
+    <div class="close-chat">
+    <button class="btn btn-primary close-chat">X</button>
+    </div>
     <div class="avatar">
-      <img src="https://via.placeholder.com/150" alt="avatar"/>
+      <img src="${window.selectedFriend.profile.avatar}" alt="avatar"/>
     </div>
     <div class="chat-info">
-      <h5>Username</h5>
-      <span>Active 3m ago</span>
+      <h5>${this.friendItem.username}</h5>
+      <span>Active</span>
     </div>
+  </div>
     `;
-    return headerElement
+    const btn = headerElement.querySelector(".close-chat");
+    btn.addEventListener("click", () => {
+      this.removeChatBox();
+    }
+    );
+    return headerElement;
   }
 
   createMessageElement(item) {
     const messageElement = document.createElement("div");
-    messageElement.classList.add("message-box");
     messageElement.innerHTML = `
+    <div class="message-other">
+     <h5>${this.friendItem.username}</h5>
+   <div class="message-item">
+     <span>lorem epsum lkhaslkhklaslk laksjkljakldjs </span>
+     <!-- <span>${new Date(item.timestamp).toLocaleString()}</span> -->
+   </div>
+ </div>
     <div class="message-sender">
       <div class="message-info">
-        <h5>${item.id}</h5>
+        <h5> Me </h5>
       </div>
       <div class="message-item">
-        <span>${item.content}</span>
+        <span>ajshkjdhajshdjh alksjdkljaksj askljd</span>
         <!-- <span>${new Date(item.timestamp).toLocaleString()}</span> -->
-        <span>${item.timestamp}</span>
       </div>
     </div>
-       <div class="message-other">
-      <div class="message-info">
-        <h5>4ea85a6f-52aa-43c1-bd0f-ae853b70e43d</h5>
-      </div>
-      <div class="message-item">
-        <span>lorem epsum</span>
-        <!-- <span>${new Date(item.timestamp).toLocaleString()}</span> -->
-        <span>${item.timestamp}</span>
-      </div>
-    </div>
-
     `;
     return messageElement;
+  }
+
+  removeChatBox() {
+    this.remove();
+    const list = document.querySelector(".friends-list");
+    list.classList.remove("toggle-list");
   }
 }
 
