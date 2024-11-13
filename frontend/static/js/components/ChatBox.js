@@ -43,7 +43,6 @@ class ChatBox extends HTMLElement {
     const headerElement = document.createElement("div");
     headerElement.classList.add("chat-header");
     headerElement.innerHTML = `
-    <div class="col-md-9 border chat-box">
     <div class="close-chat">
     <button class="btn btn-primary close-chat">X</button>
     </div>
@@ -54,7 +53,6 @@ class ChatBox extends HTMLElement {
       <h5>${this.friendItem.username}</h5>
       <span>Active</span>
     </div>
-  </div>
     `;
     const btn = headerElement.querySelector(".close-chat");
     btn.addEventListener("click", () => {

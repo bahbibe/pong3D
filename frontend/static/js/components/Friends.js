@@ -1,5 +1,5 @@
 import API from "../API/API.js";
-// import { ChatBox } from "./ChatBox.js";
+import { ChatBox } from "./ChatBox.js";
 
 class Friends extends HTMLElement {
   constructor() {
@@ -19,9 +19,9 @@ class Friends extends HTMLElement {
     try {
         this.friends.forEach((item) => {
         this.appendChild(this.FriendElement(item));
-        this.appendChild(this.FriendElement(item));
+        // this.appendChild(this.FriendElement(item));
 
-        this.appendChild(this.FriendElement(item));
+        // this.appendChild(this.FriendElement(item));
       });
       if (this.friends.length === 0) {
         this.appendChild(document.createTextNode("No friends yet"));
@@ -44,13 +44,11 @@ class Friends extends HTMLElement {
           lorem ipsum dolor sit amet, consectetur adipiscing elit. </p>
           </div>
     `;
-    friendElement.addEventListener("click", () => {
+    // friendElement.addEventListener("click", () => {
       window.selectedFriend = item.friend;
       const chatBox = document.querySelector(".chat-box");
-      chatBox.innerHTML = `
-        <chat-box></chat-box>
-      `;
-    });
+      chatBox.appendChild(new ChatBox(item.friend.uuid));
+    // });
     return friendElement;
   }
 }
