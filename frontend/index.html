@@ -235,8 +235,8 @@
     </div>
     <main-nav></main-nav>
     <section>
-      <div class="container-md px-4 px-md-0">
-          <div class="row" style="color: var(--darker);">
+      <div class="container px-4 px-md-0">
+        <div class="row" style="color: var(--darker);">
             <div class="d-flex  p-4  mt-4  rounded-1 font-monospace justify-content-between align-items-center" style="background-color: #624E88;">
               <div class="welcome" style="font-size: 1rem;">
                 <h1 class="m-0 text-capitalize">Welcome Back,<span id="firstName">Bilal</span></h1>
@@ -246,104 +246,86 @@
                 <img src="/static/asset/images/robots_welcome.svg" class="img-fluid" width="120" alt="a robots waving" style="max-width: 100%;">
               </div>
             </div>
+        </div>
+        <div class="row p-3 mt-5 Cards justify-content-evenly flex-column align-items-center align-items-md-stretch flex-md-row">
+          <h2 class="font-monospace">Games Modes</h2>
+            
+          <div class="newCard d-flex align-items-center  mb-4 me-md-4">
+            
+            <div class="content__ me-2" style="width: 50%;">
+              <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Classic</h6>
+              <p  style="font-size: 13px;">Find you a rival </p>
+              <a href="/matchmaking" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
+                Play
+              </a>
+            </div>
+            <div class="image " style="width: 50%;" >
+              <img src="/static/asset/images/racket-ball.png" class="img-fluid" alt="">
+            </div>
           </div>
-          <div class="row mt-5  justify-content-md-between">
-            <div class="col-md-8 col-12">
-              <h2 class="font-monospace">Games Modes</h2>
 
-              <div class="row p-1 Cards justify-content-center flex-column align-items-center align-items-md-stretch flex-md-row">
-                
-                <div class="newCard d-flex align-items-center  mb-4 me-md-4">
-                  
-                  <div class="content__ me-2" style="width: 50%;">
-                    <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Classic</h6>
-                    <p  style="font-size: 13px;">Find you a rival </p>
-                    <a href="/matchmaking" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
-                    border-radius: 5px;
-                    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
-                      Play
-                    </a>
-                  </div>
-                  <div class="image " style="width: 50%;" >
-                    <img src="/static/asset/images/racket-ball.png" class="img-fluid" alt="">
-                  </div>
-                </div>
+          <div class="newCard d-flex align-items-center mb-4 me-md-4">
+            
+            <div class="content__ me-2" style="width: 50%;">
+              <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Tournament</h6>
+              <p  style="font-size: 13px;">Grind & win the trophy</p>
+              <a href="/tournament" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
+                Play
+              </a>
+            </div>
+            <div class="image " style="width: 50%;" >
+              <img src="/static/asset/images/throphy.png" class="img-fluid" alt="">
+            </div>
+          </div>
 
-                <div class="newCard d-flex align-items-center mb-4 me-md-4">
-                  
-                  <div class="content__ me-2" style="width: 50%;">
-                    <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Tournament</h6>
-                    <p  style="font-size: 13px;">Grind & win the trophy</p>
-                    <a href="/tournament" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
-                    border-radius: 5px;
-                    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
-                      Play
-                    </a>
-                  </div>
-                  <div class="image " style="width: 50%;" >
-                    <img src="/static/asset/images/throphy.png" class="img-fluid" alt="">
-                  </div>
-                </div>
-
-
-                <div class="newCard d-flex align-items-center mb-4  me-md-4">
-                  
-                  <div class="content__ me-2" style="width: 50%;">
-                    <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Friend</h6>
-                    <p  style="font-size: 13px;">Challenge your friend </p>
-                    <a class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
-                    border-radius: 5px;
-                    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
-                      Play
-                    </a>
-                  </div>
-                  <div class="image " style="width: 50%;" >
-                    <img src="/static/asset/images/ping-pong-rackets-ball-isolated(1).png" class="img-fluid" alt="">
-                  </div>
-                </div>
+          <div class="newCard d-flex align-items-center mb-4  me-md-4"> 
+            
+            <div class="content__ me-2" style="width: 50%;">
+              <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Friend</h6>
+              <p  style="font-size: 13px;">Challenge your friend </p>
+              <a class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
+                Play
+              </a>
+            </div>
+            <div class="image " style="width: 50%;" >
+              <img src="/static/asset/images/ping-pong-rackets-ball-isolated(1).png" class="img-fluid" alt="">
+            </div>
+          </div>
+        </div>      
+        <div class="row justify-content-center p-3 mb-2">
+            <h2 class="font-monospace">Best Players</h2>
+            <div class="col-12 col-lg-10 glass-effect p-2">
+              <div class="d-flex p-2  justify-content-between align-items-center mb-1">
+                <div class="col-2"><strong>Rank</strong></div>
+                <div class="col-4"><strong>Username</strong> </div>
+                <div class="col-3 col-md-2 text-center text-md-left"><strong>Total</strong></div>
+                <div class="col-3 col-md-2 text-center text-md-left"><strong>Wins</strong></div>
+                <div class="col-2 d-none d-md-block text-center"><strong>Ratio</strong></div>
               </div>
-
-              <h2 class="font-monospace">Best Players</h2>
-
-              <div class="row p-3 mb-2 glass-effect">
-
-              <div class="col-12">
-                  <div class="d-flex p-3 rounded-1 justify-content-between align-items-center mb-1">
-                    <div class=""><strong>Ranks</strong></div>
-                    <div class=""><strong>Username</strong> </div>
-                    <div class=""><strong>Total</strong></div>
-                    <div class=""><strong>Wins</strong></div>
-                    <div class=""><strong>Ratio</strong></div>
-                  </div>
-                  
-                  <div class="d-flex rounded-1 p-2 align-items-center " style="box-shadow: 0 4px 30px rgba(0, 0, 0, 1);">
-                    <div class="col-2"><img src="/static/asset/images/rank1.png" alt="badge Rank number one" width="30"></div>
-                    <div class="col-4">
-                      <div class="d-flex align-items-center">
-                        <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="35" alt="user profile image">
-                        <div class="ps-2">
-                          <span class="fw-bold text-capitalize" style="font-size: 14px;">Bmakhlou</span>
-                        </div>
-                      </div>
+              <div class="d-flex p-2 justify-content-between align-items-center glass-effect">
+                <div class="col-2"><img src="/static/asset/images/rank1.png" alt="badge Rank number one" width="30"></div>
+                <div class="col-4">
+                  <div class="d-flex align-items-center">
+                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="35" alt="user profile image">
+                    <div class="ps-2">
+                      <span class="fw-bold text-capitalize" style="font-size: 14px;">Bmakhlou</span>
                     </div>
-                    <div class="col-2"><strong>04</strong></div>
-                    <div class="col-2"><strong>10</strong></div>
-                    <div class="col-2"><strong>1%</strong></div>
                   </div>
                 </div>
-
+                <div class="col-3 col-md-2 text-center text-md-left"><strong>04</strong></div>
+                <div class="col-3 col-md-2 text-center text-md-left"><strong>10</strong></div>
+                <div class="col-2 d-none d-md-block text-center"><strong>1%</strong></div>
               </div>
             </div>
 
+        </div>
 
-
-            <div class="col-12 col-md-3 d-none d-md-block border">
-              <h2 class="font-monospace">Activities</h2>
-              <div class="row">
-
-              </div>
-            </div>
-          </div>
       </div>
     </section>
     </div>
@@ -394,7 +376,7 @@
 
               <div class="card-desc">
                 <div class="card-header">
-                  <div class="card-title">Play</div>
+                  <div class="card-title">Played</div>
 
                   <div class="card-menu">
                     <div class="dot"></div>
@@ -403,7 +385,7 @@
                   </div>
 
                 </div>
-                <div class="card-time">32 Match</div>
+                <div class="card-stats total">0 Match</div>
                 <!-- <p class="recent">Last Week-36hrs</p> -->
               </div>
             </div>
@@ -428,7 +410,7 @@
                   </div>
 
                 </div>
-                <div class="card-time">32 Match</div>
+                <div class="card-stats wins">0 Match</div>
                 <!-- <p class="recent">Last Week-36hrs</p> -->
               </div>
             </div>
@@ -453,7 +435,7 @@
                   </div>
 
                 </div>
-                <div class="card-time">32 Match</div>
+                <div class="card-stats losses">0 Match</div>
                 <!-- <p class="recent">Last Week-36hrs</p> -->
               </div>
             </div>
@@ -479,7 +461,7 @@
                   </div>
 
                 </div>
-                <div class="card-time">32%</div>
+                <div class="card-stats ratio">0%</div>
               </div>
             </div>
           </div>
@@ -585,7 +567,7 @@
 
               <div class="card-desc">
                 <div class="card-header">
-                  <div class="card-title">Play</div>
+                  <div class="card-title">Played</div>
 
                   <div class="card-menu">
                     <div class="dot"></div>
@@ -594,7 +576,7 @@
                   </div>
 
                 </div>
-                <div class="card-time">32 Match</div>
+                <div class="card-stats total">0 Match</div>
                 <!-- <p class="recent">Last Week-36hrs</p> -->
               </div>
             </div>
@@ -619,7 +601,7 @@
                   </div>
 
                 </div>
-                <div class="card-time">32 Match</div>
+                <div class="card-stats wins">0 Match</div>
                 <!-- <p class="recent">Last Week-36hrs</p> -->
               </div>
             </div>
@@ -644,7 +626,7 @@
                   </div>
 
                 </div>
-                <div class="card-time">32 Match</div>
+                <div class="card-stats losses">0 Match</div>
                 <!-- <p class="recent">Last Week-36hrs</p> -->
               </div>
             </div>
@@ -669,7 +651,7 @@
                   </div>
 
                 </div>
-                <div class="card-time">32%</div>
+                <div class="card-stats ratio">0%</div>
               </div>
             </div>
           </div>

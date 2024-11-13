@@ -27,13 +27,7 @@ class ProfilePage extends AbstractPage {
 
     this.getFriend();
     this.getBlockedFriends();
-
-    // const unblockBtn = this.querySelectorAll("[data-unblock]");
-    console.log("unblockBtn");
-
-    // this.unblockBtn.forEach((btn) => {
-    //   btn.addEventListener("click", this.unblockFriend.bind(this));
-    // });
+    this.getStatGames();
 
   }
   async getFriend() {
@@ -133,6 +127,29 @@ class ProfilePage extends AbstractPage {
         // console.log("unblocked");
       }
     } catch (error) { console.log(error); }
+  }
+  async getStatGames() {
+    try {
+      const total = this.querySelector(".total");
+      const wins = this.querySelector(".wins");
+      const losses = this.querySelector(".losses");
+      const ratio = this.querySelector(".ratio");
+      console.log("=====> total:", total);
+
+      const response = await fetch("http://localhost:8000/game/history/", { credentials: "include" });
+      const data = await response.json();
+      const stats = data.data.stats;
+      console.log(stats);
+      if (response.ok) {
+        console.log("stats.total_games:", stats.total_games);
+        total.textContent = `${stats.total_games} Matches`;
+        wins.textContent =  `${stats.total_wins} Wins`;
+        losses.textContent = `${stats.total_losses} Losses`; 
+        ratio.textContent = `${stats.ratio}%`;
+      }
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
 
