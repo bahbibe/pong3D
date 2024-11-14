@@ -93,10 +93,12 @@ class UserSerializer(serializers.ModelSerializer):
 class UpdateSettingsSerializer(serializers.ModelSerializer):
     avatar = serializers.ImageField(required=False)
     username = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
+    password = serializers.CharField(required=False)
 
     class Meta:
         model = Profile
-        fields = ["avatar", "username"]
+        fields = ["avatar", "username", "email", "password"]
 
 
 class NotificationSerializer(serializers.ModelSerializer):
