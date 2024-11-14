@@ -33,9 +33,9 @@
 </head>
 
 <body>
-  
+
   <div id="app"></div>
-  
+
   <div id="toast-wrapper" class="position-absolute bottom-0 end-0">
     <error-toast></error-toast>
   </div>
@@ -43,15 +43,14 @@
   <template id="chat-page">
     <section>
       <main-nav></main-nav>
-      <div class="chat-container">
-        <div class="row">
-          <div class="border chat">
-            <div class="chat-heading">
+      <div class="p-3 container-md">
+        <div class="row" style="height: 80dvh;">
+          <div class="friends-list border col-2 col-md-4 p-2">
+            <div class="chat-heading p-2 mb-4 border">
               <h2> Chats </h2>
             </div>
-            <div class="friends-list border">
-            </div>
-            <div class="chat-box border ">
+          </div>
+          <div class="chat-box border border-info col-10 col-md-8 p-0">
           </div>
         </div>
       </div>
@@ -238,92 +237,97 @@
     <section>
       <div class="container px-4 px-md-0">
         <div class="row" style="color: var(--darker);">
-            <div class="d-flex  p-4  mt-4  rounded-1 font-monospace justify-content-between align-items-center" style="background-color: #624E88;">
-              <div class="welcome" style="font-size: 1rem;">
-                <h1 class="m-0 text-capitalize">Welcome Back,<span id="firstName">Bilal</span></h1>
-                <p class="text-capitalize vt323-regular" style="font-size: 24px;">Embrace the opportunity to join our world and savor every moment.</p>
-              </div>
-              <div class="welcome-img d-none d-md-block">
-                <img src="/static/asset/images/robots_welcome.svg" class="img-fluid" width="120" alt="a robots waving" style="max-width: 100%;">
-              </div>
+          <div class="d-flex  p-4  mt-4  rounded-1 font-monospace justify-content-between align-items-center"
+            style="background-color: #624E88;">
+            <div class="welcome" style="font-size: 1rem;">
+              <h1 class="m-0 text-capitalize">Welcome Back,<span id="firstName">Bilal</span></h1>
+              <p class="text-capitalize vt323-regular" style="font-size: 24px;">Embrace the opportunity to join our
+                world and savor every moment.</p>
             </div>
+            <div class="welcome-img d-none d-md-block">
+              <img src="/static/asset/images/robots_welcome.svg" class="img-fluid" width="120" alt="a robots waving"
+                style="max-width: 100%;">
+            </div>
+          </div>
         </div>
-        <div class="row p-3 mt-5 Cards justify-content-evenly flex-column align-items-center align-items-md-stretch flex-md-row">
+        <div
+          class="row p-3 mt-5 Cards justify-content-evenly flex-column align-items-center align-items-md-stretch flex-md-row">
           <h2 class="font-monospace">Games Modes</h2>
-            
+
           <div class="newCard d-flex align-items-center  mb-4 me-md-4">
-            
+
             <div class="content__ me-2" style="width: 50%;">
               <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Classic</h6>
-              <p  style="font-size: 13px;">Find you a rival </p>
+              <p style="font-size: 13px;">Find you a rival </p>
               <a href="/matchmaking" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
               border-radius: 5px;
               box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
                 Play
               </a>
             </div>
-            <div class="image " style="width: 50%;" >
+            <div class="image " style="width: 50%;">
               <img src="/static/asset/images/racket-ball.png" class="img-fluid" alt="">
             </div>
           </div>
 
           <div class="newCard d-flex align-items-center mb-4 me-md-4">
-            
+
             <div class="content__ me-2" style="width: 50%;">
               <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Tournament</h6>
-              <p  style="font-size: 13px;">Grind & win the trophy</p>
+              <p style="font-size: 13px;">Grind & win the trophy</p>
               <a href="/tournament" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
               border-radius: 5px;
               box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
                 Play
               </a>
             </div>
-            <div class="image " style="width: 50%;" >
+            <div class="image " style="width: 50%;">
               <img src="/static/asset/images/throphy.png" class="img-fluid" alt="">
             </div>
           </div>
 
-          <div class="newCard d-flex align-items-center mb-4  me-md-4"> 
-            
+          <div class="newCard d-flex align-items-center mb-4  me-md-4">
+
             <div class="content__ me-2" style="width: 50%;">
               <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Friend</h6>
               <p  style="font-size: 13px;">Challenge your friend </p>
-              <a href="/profile" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+              <a class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
               border-radius: 5px;
               box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
                 Play
               </a>
             </div>
-            <div class="image " style="width: 50%;" >
+            <div class="image " style="width: 50%;">
               <img src="/static/asset/images/ping-pong-rackets-ball-isolated(1).png" class="img-fluid" alt="">
             </div>
           </div>
-        </div>      
+        </div>
         <div class="row justify-content-center p-3 mb-2">
-            <h2 class="font-monospace">Best Players</h2>
-            <div class="col-12 col-lg-10 glass-effect p-2">
-              <div class="d-flex p-2  justify-content-between align-items-center mb-1">
-                <div class="col-2"><strong>Rank</strong></div>
-                <div class="col-4"><strong>Username</strong> </div>
-                <div class="col-3 col-md-2 text-center text-md-left"><strong>Total</strong></div>
-                <div class="col-3 col-md-2 text-center text-md-left"><strong>Wins</strong></div>
-                <div class="col-2 d-none d-md-block text-center"><strong>Ratio</strong></div>
-              </div>
-              <div class="d-flex p-2 justify-content-between align-items-center glass-effect">
-                <div class="col-2"><img src="/static/asset/images/rank1.png" alt="badge Rank number one" width="30"></div>
-                <div class="col-4">
-                  <div class="d-flex align-items-center">
-                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="35" alt="user profile image">
-                    <div class="ps-2">
-                      <span class="fw-bold text-capitalize" style="font-size: 14px;">Bmakhlou</span>
-                    </div>
+          <h2 class="font-monospace">Best Players</h2>
+          <div class="col-12 col-lg-10 glass-effect p-2">
+            <div class="d-flex p-2  justify-content-between align-items-center mb-1">
+              <div class="col-2"><strong>Rank</strong></div>
+              <div class="col-4"><strong>Username</strong> </div>
+              <div class="col-3 col-md-2 text-center text-md-left"><strong>Total</strong></div>
+              <div class="col-3 col-md-2 text-center text-md-left"><strong>Wins</strong></div>
+              <div class="col-2 d-none d-md-block text-center"><strong>Ratio</strong></div>
+            </div>
+            <div class="d-flex p-2 justify-content-between align-items-center glass-effect">
+              <div class="col-2"><img src="/static/asset/images/rank1.png" alt="badge Rank number one" width="30"></div>
+              <div class="col-4">
+                <div class="d-flex align-items-center">
+                  <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block"
+                    width="35" alt="user profile image">
+                  <div class="ps-2">
+                    <span class="fw-bold text-capitalize" style="font-size: 14px;">Bmakhlou</span>
                   </div>
                 </div>
-                <div class="col-3 col-md-2 text-center text-md-left"><strong>04</strong></div>
-                <div class="col-3 col-md-2 text-center text-md-left"><strong>10</strong></div>
-                <div class="col-2 d-none d-md-block text-center"><strong>1%</strong></div>
               </div>
+              <div class="col-3 col-md-2 text-center text-md-left"><strong>04</strong></div>
+              <div class="col-3 col-md-2 text-center text-md-left"><strong>10</strong></div>
+              <div class="col-2 d-none d-md-block text-center"><strong>1%</strong></div>
             </div>
+          </div>
 
         </div>
 
@@ -363,7 +367,7 @@
             </div>
           </div>
         </div>
-        
+
         <div class="row my-4">
           <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
             <div class="status-card  work mx-auto">
@@ -474,8 +478,9 @@
               <div class="profile-content" id="games-container">
                 <!-- <div class="row mt-3 p-1 mb-1 glass-effect">
                   <div class="col-4 col-md-3 ">
-                  <div class="d-flex align-items-center">
-                      <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
+                    <div class="d-flex align-items-center">
+                      <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block"
+                        width="50" alt="user profile image">
                       <div class="ps-2">
                         <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
                       </div>
@@ -489,7 +494,8 @@
                       <div class="pe-2">
                         <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
                       </div>
-                      <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
+                      <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block"
+                        width="50" alt="user profile image">
                     </div>
                   </div>
                   <div class="col-4 col-md-2 my-auto order-2 order-md-0 text-center">
@@ -519,7 +525,7 @@
             <div class="row glass-effect p-2 mb-2" style="height: 200px; overflow-y: auto;">
               <div id="blocked-container">
               </div>
-              
+
             </div>
           </div>
         </div>
@@ -537,23 +543,27 @@
     <section>
       <div class="container-md mt-4 px-4">
         <div class="row p-1 p-md-3  text-white box-sh-1 secondary-bg">
-              <div class="col-12 col-md-6 col-lg-6 mx-auto">
-                <div class="d-md-flex align-items-center  text-center text-md-start pb-3 pb-lg-0">
-                  <div class="profile-image">
-                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded rounded-circle" width="120"
-                      alt="user profile image" id="user-img">
-                  </div>
-                  <div class="ps-0 ps-md-4 pt-3 pb-md-0">
-                    <h4 class="m-0 fw-bold text-capitalize" id="fullName">bilal makhloufi</h4>
-                    <sapn class="fw-medium text-capitalize" id="username">@bmakhlou</sapn>
-                  </div>
-                </div>
+          <div class="col-12 col-md-6 col-lg-6 mx-auto">
+            <div class="d-md-flex align-items-center  text-center text-md-start pb-3 pb-lg-0">
+              <div class="profile-image">
+                <img src="/static/asset/images/profile.svg" class="img-fluid rounded rounded-circle" width="120"
+                  alt="user profile image" id="user-img">
               </div>
-              <div class="col-12 col-md-6  d-flex align-items-center justify-content-center  justify-content-md-end mb-2 mb-md-0">
-                <button class="d-flex align-items-center btn btn-block bg-primary  me-2 text-truncate text-white" id="add-friend"> <i class="fa-solid fa-plus me-2"></i> Friend</button>
-                <button class="d-flex align-items-center btn btn-block text-white me-2" style=" background-color: #BE8CE4;"><i class="fa-solid fa-message me-2"></i> Message</button>
-                <button class="d-flex align-items-center btn btn-block text-white shadow" aria-label="Block" id="block"> <i class="fa-solid fa-lg fa-triangle-exclamation"></i></button>
+              <div class="ps-0 ps-md-4 pt-3 pb-md-0">
+                <h4 class="m-0 fw-bold text-capitalize" id="fullName">bilal makhloufi</h4>
+                <sapn class="fw-medium text-capitalize" id="username">@bmakhlou</sapn>
               </div>
+            </div>
+          </div>
+          <div
+            class="col-12 col-md-6  d-flex align-items-center justify-content-center  justify-content-md-end mb-2 mb-md-0">
+            <button class="d-flex align-items-center btn btn-block bg-primary  me-2 text-truncate text-white"
+              id="add-friend"> <i class="fa-solid fa-plus me-2"></i> Friend</button>
+            <button class="d-flex align-items-center btn btn-block text-white me-2"
+              style=" background-color: #BE8CE4;"><i class="fa-solid fa-message me-2"></i> Message</button>
+            <button class="d-flex align-items-center btn btn-block text-white shadow" aria-label="Block" id="block"> <i
+                class="fa-solid fa-lg fa-triangle-exclamation"></i></button>
+          </div>
         </div>
         <div class="row my-4">
           <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
@@ -658,14 +668,40 @@
           </div>
         </div>
 
-        <h2 class="text-white">Game History</h2>
-        <div class="row mt-4 mb-2 justify-content-between  glass-effect" style="min-height: 43vh;">
-          <div class="col-12 p-3 mb-3 mb-lg-0">
-            <div id="friend-history">
-
+        <div class="row mt-4 mb-2 justify-content-between">
+          <div class="col-12 p-3 glass-effect mb-3 mb-lg-0" style="min-height: 47vh;">
+            <h2 class="text-white">Game History</h2>
+            <div class="profile-content p-1">
+              <div class="d-flex justify-content-evenly mt-3 p-1 mb-1" style="background: linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85));">
+                <div class="  ">
+                <div class="d-flex align-items-center">
+                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
+                    <div class="ps-2">
+                      <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
+                    </div>
+                  </div>
+                </div>
+                <div class=" my-auto order-1 order-md-0 d-none d-md-block text-center">
+                  <img src="/static/asset/images/icons8-vs.png" class="img-fluid" width="30" alt="icon batlle">
+                </div>
+                <div class=" order-3 order-md-0">
+                  <div class="d-md-flex align-items-center">
+                    <div class="pe-2">
+                      <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
+                    </div>
+                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
+                  </div>
+                </div>
+                <div class=" my-auto order-2 order-md-0 text-center">
+                  <span class="result fw-bolder ">10:7</span>
+                </div>
+                <div class="my-auto text-center d-none d-md-block">
+                  <span class="result fw-bolder">WIN 🏆</span>
+                </div>
+              </div>
             </div>
-          </div>      
-  
+          </div>
+
         </div>
       </div>
     </section>
@@ -733,70 +769,74 @@
     </div>
     <section>
       <main-nav></main-nav>
-        <div class="container">
-          <div class="d-flex flex-column align-items-center justify-content-center">
-            <form action="POST" class="col-10 col-md-5  ">
-              <div class="avatar-wrapper">
-                <img class="profile-pic" src="" />
-                <input class="file-upload d-none" name="avatar" type="file" accept="image/*" />
-              </div>
-              <div class="w-100 d-flex align-items-center mb-4">
-                <button type="button" class="mx-auto upload-button btn btn-light">Upload</button>
-              </div>
-              <div class="mb-3">
-                <label for="username" class="form-label fw-bold">Username</label>
-                <input type="text" name="username" id="username" class="form-control form-control-lg  mb-2" placeholder="username" required value="" />
-                <label for="username" class="form-label fw-bold">email</label>
-                <input type="text" name="email" id="email" class="form-control form-control-lg mb-2" placeholder="email" required value="" />
-                <label for="username" class="form-label fw-bold">Password</label>
-                <input type="text" name="password" id="password" class="form-control form-control-lg mb-2" placeholder="password" required value="" />
-                <label for="username" class="form-label fw-bold">Confirm Password</label>
-                <input type="text" name="password" id="confirm_password" class="form-control form-control-lg mb-2" placeholder="confirm password" required value="" />
-              </div>
-              <div class="w-100 d-flex">
-                <button type="button" id="disable-2fa" class="btn btn-outline-danger mx-auto d-none">Disable
-                  2FA</button>
-                <button type="button" id="enable-2fa" class="btn btn-outline-light mx-auto">Enable 2FA</button>
-                <form id="towfamodalform">
-                  <div class="modal fade" id="twoFaModal" data-bs-backdrop="static" data-bs-keyboard="false"
-                    tabindex="-1" role="dialog" aria-labelledby="twoFaModalTitle" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                      <div class="modal-content text-bg-dark">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="twoFaModalTitle">Enable 2FA</h5>
-                          <button type="button" class="close btn btn-dark" data-bs-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
-                        </div>
-                        <div class="modal-body text-bg-dark">
-                          <div class="d-none d-flex flex-column justify-content-center">
-                            <img src="" alt="Qr code" id="qr-code" class="align-self-center"
-                              style="width: 300px; height: 300px;">
-                            <div class="mt-3">
-                              <label for="code" class="form-label">Two Factor Code</label>
-                              <input type="text" name="code" id="twofa-code" class="form-control form-control-lg "
-                                placeholder="code" value="" />
-                              <div class="form-text d-none text-danger">
-                              </div>
+      <div class="container">
+        <div class="d-flex flex-column align-items-center justify-content-center">
+          <form action="POST" class="col-10 col-md-5  ">
+            <div class="avatar-wrapper">
+              <img class="profile-pic" src="" />
+              <input class="file-upload d-none" name="avatar" type="file" accept="image/*" />
+            </div>
+            <div class="w-100 d-flex align-items-center mb-4">
+              <button type="button" class="mx-auto upload-button btn btn-light">Upload</button>
+            </div>
+            <div class="mb-3">
+              <label for="username" class="form-label fw-bold">Username</label>
+              <input type="text" name="username" id="username" class="form-control form-control-lg  mb-2"
+                placeholder="username" required value="" />
+              <label for="username" class="form-label fw-bold">email</label>
+              <input type="text" name="email" id="email" class="form-control form-control-lg mb-2" placeholder="email"
+                required value="" />
+              <label for="username" class="form-label fw-bold">Password</label>
+              <input type="text" name="password" id="password" class="form-control form-control-lg mb-2"
+                placeholder="password" required value="" />
+              <label for="username" class="form-label fw-bold">Confirm Password</label>
+              <input type="text" name="password" id="confirm_password" class="form-control form-control-lg mb-2"
+                placeholder="confirm password" required value="" />
+            </div>
+            <div class="w-100 d-flex">
+              <button type="button" id="disable-2fa" class="btn btn-outline-danger mx-auto d-none">Disable
+                2FA</button>
+              <button type="button" id="enable-2fa" class="btn btn-outline-light mx-auto">Enable 2FA</button>
+              <form id="towfamodalform">
+                <div class="modal fade" id="twoFaModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                  role="dialog" aria-labelledby="twoFaModalTitle" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content text-bg-dark">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="twoFaModalTitle">Enable 2FA</h5>
+                        <button type="button" class="close btn btn-dark" data-bs-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body text-bg-dark">
+                        <div class="d-none d-flex flex-column justify-content-center">
+                          <img src="" alt="Qr code" id="qr-code" class="align-self-center"
+                            style="width: 300px; height: 300px;">
+                          <div class="mt-3">
+                            <label for="code" class="form-label">Two Factor Code</label>
+                            <input type="text" name="code" id="twofa-code" class="form-control form-control-lg "
+                              placeholder="code" value="" />
+                            <div class="form-text d-none text-danger">
                             </div>
                           </div>
                         </div>
-                        <div class="modal-footer text-bg-dark">
-                          <button type="button" class="btn btn-primary" id="confirm-2fa">Confirm</button>
-                        </div>
+                      </div>
+                      <div class="modal-footer text-bg-dark">
+                        <button type="button" class="btn btn-primary" id="confirm-2fa">Confirm</button>
                       </div>
                     </div>
                   </div>
-                </form>
+                </div>
+              </form>
 
-              </div>
+            </div>
 
-              <div class="input-group mt-4">
-                <button type="submit" class="btn btn-lg btn-primary w-100 fs-6 fw-bold">Update</button>
-              </div>
-            </form>
-          </div>
+            <div class="input-group mt-4">
+              <button type="submit" class="btn btn-lg btn-primary w-100 fs-6 fw-bold">Update</button>
+            </div>
+          </form>
         </div>
+      </div>
     </section>
   </template>
 
@@ -937,10 +977,12 @@
   <template id="game-page">
     <style>
       canvas {
-				position: fixed;
-				top: 0;
-				left: 0;
-			};
+        position: fixed;
+        top: 0;
+        left: 0;
+      }
+
+      ;
     </style>
     <canvas id="game-canvas"></canvas>
   </template>
@@ -949,10 +991,10 @@
     <link rel="stylesheet" href="/static/css/loader.css">
     <section class="">
       <main-nav class="position-absolute w-100"></main-nav>
-        <div class="d-flex min-vh-100 flex-column align-items-center justify-content-center">
-          <h1 id="loader-message" class="mx-auto"></h1>
-          <div class="loader mx-auto"></div>
-        </div>
+      <div class="d-flex min-vh-100 flex-column align-items-center justify-content-center">
+        <h1 id="loader-message" class="mx-auto"></h1>
+        <div class="loader mx-auto"></div>
+      </div>
     </section>
   </template>
 
@@ -966,66 +1008,59 @@
     <main-nav></main-nav>
     <style>
       .player {
-        height: 100px;  
+        height: 100px;
         width: 100px;
         background-color: #624E88;
         border: #fefefe 1px solid;
         border-radius: 8px;
         position: absolute;
       }
-      .player1
-      {
+
+      .player1 {
         top: 0%;
         left: 0%;
       }
 
-      .player2
-      {
+      .player2 {
         bottom: 0%;
         left: 0%;
       }
 
-      .player3
-      {
+      .player3 {
         top: 0%;
         right: 0%;
       }
 
-      .player4
-      {
+      .player4 {
         bottom: 0%;
         right: 0%;
       }
 
-      .player5
-      {
+      .player5 {
         top: 50%;
         left: 75%;
         transform: translate(0, -50%);
       }
 
-      .player6
-      {
+      .player6 {
         top: 50%;
         right: 75%;
         transform: translate(0, -50%);
       }
 
-      .winner
-      {
+      .winner {
         top: 25%;
         left: 50%;
         transform: translate(-50%, 0);
       }
 
-      .tournament > div > img
-      {
+      .tournament>div>img {
         height: 100%;
         width: 100%;
         border-radius: 8px;
       }
-      .tournament
-      {
+
+      .tournament {
         position: relative;
       }
     </style>
@@ -1186,19 +1221,19 @@
           <input type="checkbox" name="" class="the-btn" />
           <span class="counter" data-count>0</span>
           <div class="box">
-              <div class="header">
-                  <p>Notifications</p>
-              </div>
-              <div class="content">
-                  
-              </div>
-              <button class="btn btn-link text-center w-100" id="notification-btn">
-                Mark all as read
-              </button>
+            <div class="header">
+              <p>Notifications</p>
+            </div>
+            <div class="content">
+
+            </div>
+            <button class="btn btn-link text-center w-100" id="notification-btn">
+              Mark all as read
+            </button>
           </div>
         </div>
 
-      <div class="dropdown">
+        <div class="dropdown">
           <div class="user d-flex align-items-center mb-2">
             <img src="/static/asset/images/profile.svg" class="rounded-circle" height="40" alt="user profile image"
               loading="lazy" id="nav-user-img" />
@@ -1242,7 +1277,7 @@
               </a>
             </li>
           </ul>
-      </div>
+        </div>
 
       </div>
     </nav>
@@ -1270,4 +1305,5 @@
   <script type="module" src="/static/js/index.js"></script>
 
 </body>
+
 </html>

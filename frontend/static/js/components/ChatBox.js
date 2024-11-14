@@ -23,13 +23,13 @@ class ChatBox extends HTMLElement {
       // });
     });
   }
- 
   render() {
     try {
       this.appendChild(this.headerElement());
       this.messages.forEach((item) => {
         this.appendChild(this.createMessageElement(item));
       });
+      this.appendChild(this.inputElement());
       if (this.messages.length === 0) {
         this.appendChild(document.createTextNode("No messages yet"));
       }
@@ -39,26 +39,27 @@ class ChatBox extends HTMLElement {
     }
   }
 
+  inputElement() {
+    const inputElement = document.createElement("div");
+    inputElement.className = "input-group send-msg";
+    inputElement.innerHTML = `
+    <input type="text" class="form-control" placeholder="Type a message" aria-label="Type a message" aria-describedby="button-addon2"/>
+    <button class="btn btn-outline-secondary" type="button" id="button-addon2">Send</button>
+    `;
+    return inputElement;
+  }
+
   headerElement() {
     const headerElement = document.createElement("div");
-    headerElement.classList.add("chat-header");
+    headerElement.className = "status mb-3 p-2 d-flex";
     headerElement.innerHTML = `
-    <div class="close-chat">
-    <button class="btn btn-primary close-chat">X</button>
+    <div class="col-2 ">
+      <img src="${window.selectedFriend.profile.avatar}" class="img-fluid rounded-circle pe-1" width="60" alt="avatar"/>
     </div>
-    <div class="avatar">
-      <img src="${window.selectedFriend.profile.avatar}" alt="avatar"/>
-    </div>
-    <div class="chat-info">
-      <h5>${this.friendItem.username}</h5>
-      <span>Active</span>
+    <div class="chat-info col-10">
+      <span>${this.friendItem.username}</span>
     </div>
     `;
-    const btn = headerElement.querySelector(".close-chat");
-    btn.addEventListener("click", () => {
-      this.removeChatBox();
-    }
-    );
     return headerElement;
   }
 
@@ -66,29 +67,21 @@ class ChatBox extends HTMLElement {
     const messageElement = document.createElement("div");
     messageElement.innerHTML = `
     <div class="message-other">
-     <h5>${this.friendItem.username}</h5>
-   <div class="message-item">
-     <span>lorem epsum lkhaslkhklaslk laksjkljakldjs </span>
-     <!-- <span>${new Date(item.timestamp).toLocaleString()}</span> -->
-   </div>
- </div>
+      <h5>${this.friendItem.username}</h5>
+    <div class="message-item">
+      <span>lorem epsum lkhaslkhklaslk laksjkljakldjs </span>
+    </div>
+    </div>
     <div class="message-sender">
       <div class="message-info">
         <h5> Me </h5>
       </div>
       <div class="message-item">
         <span>ajshkjdhajshdjh alksjdkljaksj askljd</span>
-        <!-- <span>${new Date(item.timestamp).toLocaleString()}</span> -->
       </div>
     </div>
     `;
     return messageElement;
-  }
-
-  removeChatBox() {
-    this.remove();
-    const list = document.querySelector(".friends-list");
-    list.classList.remove("toggle-list");
   }
 }
 

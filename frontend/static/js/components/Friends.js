@@ -17,11 +17,10 @@ class Friends extends HTMLElement {
 
   render() {
     try {
-        this.friends.forEach((item) => {
+      this.friends.forEach((item) => {
         this.appendChild(this.FriendElement(item));
-        // this.appendChild(this.FriendElement(item));
-
-        // this.appendChild(this.FriendElement(item));
+        this.appendChild(this.FriendElement(item));
+        this.appendChild(this.FriendElement(item));
       });
       if (this.friends.length === 0) {
         this.appendChild(document.createTextNode("No friends yet"));
@@ -33,24 +32,26 @@ class Friends extends HTMLElement {
   }
   FriendElement(item) {
     const friendElement = document.createElement("div");
-    friendElement.classList.add("friends-item");
+    friendElement.className = "friends-item p-2 mb-2 d-flex";
     friendElement.innerHTML = `
-          <div class="avatar">
-          <img src="${item.friend.profile.avatar}" alt="avatar"/>
+          <div class="col-12 col-md-2">
+          <img src="${item.friend.profile.avatar}" class="img-fluid rounded-circle " width="100" alt="avatar"/>
           </div>
-          <div class="conv">
+          <div class="conv d-none d-md-block">
           <h5>${item.friend.username}</h5>
           <p> lorem ipsum dolor sit amet, consectetur adipiscing elit.
           lorem ipsum dolor sit amet, consectetur adipiscing elit. </p>
           </div>
     `;
-    // friendElement.addEventListener("click", () => {
-      window.selectedFriend = item.friend;
-      const chatBox = document.querySelector(".chat-box");
-      chatBox.appendChild(new ChatBox(item.friend.uuid));
-    // });
+    friendElement.addEventListener("click", () => {
+    window.selectedFriend = item.friend;
+    const chatBox = document.querySelector(".chat-box");
+    chatBox.innerHTML = "";
+    chatBox.appendChild(new ChatBox(item.friend.uuid));
+    });
     return friendElement;
   }
+
 }
 
 window.customElements.define("friends-list", Friends);
