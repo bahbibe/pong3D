@@ -1,6 +1,7 @@
 import { AbstractPage } from "./AbstarctPage.js";
 import API from "../API/API.js";
 import { navigateTo } from "../router.js";
+import { WebSock } from "../ws/ws.js";
 
 
 
@@ -43,9 +44,9 @@ class TournamentPage extends AbstractPage {
           join_button.classList += "play px-3 py-1 fw-bold text-uppercase" ;
           elem.appendChild(join_button) ;
           this.list.appendChild(elem) ;
-          
         }) ;
     });
+    
     this.appendChild(this.list) ;
   }
 }

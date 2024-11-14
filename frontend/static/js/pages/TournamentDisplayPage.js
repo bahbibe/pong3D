@@ -7,20 +7,27 @@ class TournamentDisplayPage extends AbstractPage {
     this.API = new API();
   }
   connectedCallback() {
+    this.socket = new WebSocket('ws://localhost:8000/ws/tournament/' + this.params.tournament_id);
     const template = document.getElementById("tournament-display-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
-    this.API.getTournament(this.params.tournament_id).then((res) => {
+    this.socket.onmessage = e => {
+      this.API.getTournament(this.params.tournament_id).then((res) => {
         this.participants = res;
         console.log(this.participants);
         let player_number = 1 ;
         this.participants.data.forEach(participant => {
           let player_div = this.querySelector(`.player${player_number++}`)
           let image = document.createElement('img');
+          if (participant.ready)
+            player_div.style = "border: #00FF00 3px solid"
+          else
+            player_div.style = "border: none"
           image.src = new URL(participant.player.profile.avatar) ;
-          player_div.appendChild(image) ;
+          player_div.replaceChildren(image) ;
         });
-    });
+      });
+    }
   }
 }
 
