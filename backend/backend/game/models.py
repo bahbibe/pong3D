@@ -21,6 +21,7 @@ class Tournament_Participants(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
     player = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     t_round = models.IntegerField(default=3) # round decrement with each win
+    ready = models.BooleanField(default=False)
     class Meta:
         unique_together = ('tournament', 'player',)
 

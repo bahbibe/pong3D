@@ -6,7 +6,7 @@ import redis
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .game_manager import GameManager
-from .models import Game
+from .models import Game, Tournament, Tournament_Participants
 from channels.db import database_sync_to_async
 
 game_manager = GameManager()
@@ -108,3 +108,60 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def join_game(self):
         self.game_instance = await game_manager.get_game_instance(self.game_id)
+
+
+
+class TournamentConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.accept()
+        self.user = self.scope["user"]
+        self.tournament_id = self.scope["url_route"]["kwargs"]["tournament_id"]
+        self.participant = await self.get_participant(self.tournament_id)
+        if self.participant is None:
+            await self.close()
+            print("didnt find")
+            return
+        
+        await self.channel_layer.group_add(self.tournament_id, self.channel_name)
+        await self.set_participant_ready(True)
+        await self.channel_layer.group_send(
+                self.tournament_id,
+                {
+                    'type': 'update',
+                }
+            )
+
+    @database_sync_to_async
+    def get_participant(self, tournament_id):
+        try:
+            tournament = Tournament.objects.get(uuid=tournament_id)
+            return Tournament_Participants.objects.select_related('tournament').get(
+                tournament=tournament,
+                player=self.user
+            )
+        except (Tournament.DoesNotExist, Tournament_Participants.DoesNotExist):
+            return None
+    
+    @database_sync_to_async
+    def set_participant_ready(self, ready_status):
+        if self.participant:
+            self.participant.ready = ready_status
+            self.participant.save()
+            print(f"Set to {self.participant.id, self.participant.tournament, self.participant.player}")
+        print("participant is empty")
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_send(
+                self.tournament_id,
+                {
+                    'type': 'update',
+                }
+            )
+        await self.set_participant_ready(False)
+        await self.channel_layer.group_discard(self.tournament_id, self.channel_name)
+
+    async def receive(self, text_data):
+        print(text_data)
+    
+    async def update(self, event):
+        await self.send(text_data=json.dumps(event["type"]))

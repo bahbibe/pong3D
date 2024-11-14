@@ -44,17 +44,20 @@ class TournamentSerializer(serializers.ModelSerializer):
             "uuid",
             "started",
             "owner",
-            "is_participant"
+            "is_participant",
         ]
 
 class TournamentParticipantsSerializer(serializers.ModelSerializer):
     tournament = TournamentSerializer()
     player = UserSerializer(read_only=True)
     t_round = serializers.IntegerField()
+    ready = serializers.BooleanField()
+    
     class Meta:
         model = Tournament
         fields = [
             "tournament",
             "player",
-            "t_round"
+            "t_round",
+            "ready",
         ]
