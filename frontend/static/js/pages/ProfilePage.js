@@ -101,7 +101,6 @@ class ProfilePage extends AbstractPage {
             `
       }
       this.unblockBtn = this.querySelectorAll("[data-unblock]");
-      console.log(this.unblockBtn);
       this.unblockBtn.forEach((btn) => {
         btn.addEventListener("click", this.unblockFriend.bind(this));
       });
@@ -122,10 +121,8 @@ class ProfilePage extends AbstractPage {
         body: JSON.stringify({ user_id: e.target.getAttribute("data-unblock") }),
       });
       const data = await response.json();
-      if (response.ok) {
+      if (response.ok)
         this.getBlockedFriends();
-        // console.log("unblocked");
-      }
     } catch (error) { console.log(error); }
   }
   async getStatGames() {
@@ -134,18 +131,54 @@ class ProfilePage extends AbstractPage {
       const wins = this.querySelector(".wins");
       const losses = this.querySelector(".losses");
       const ratio = this.querySelector(".ratio");
-      console.log("=====> total:", total);
+      const gamesContainer = this.querySelector("#games-container");
+      console.log("games container ",gamesContainer);
 
       const response = await fetch("http://localhost:8000/game/history/", { credentials: "include" });
       const data = await response.json();
       const stats = data.data.stats;
-      console.log(stats);
+      const games = data.data.games;
+      console.log("game status: ", games);
+      console.log("game score: ", games[0].player_score);
+
       if (response.ok) {
-        console.log("stats.total_games:", stats.total_games);
         total.textContent = `${stats.total_games} Matches`;
         wins.textContent =  `${stats.total_wins} Wins`;
         losses.textContent = `${stats.total_losses} Losses`; 
         ratio.textContent = `${stats.ratio}%`;
+
+        for (const game of games) {
+          gamesContainer.innerHTML = `
+              <div class="row mt-3 p-1 mb-1 glass-effect">
+                  <div class="col-4 col-md-3 ">
+                    <div class="d-flex align-items-center">
+                      <img src="${game.user.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user image">
+                      <div class="ps-2">
+                        <span class="fw-bold text-capitalize">${game.user.username}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-2 my-auto order-1 order-md-0 d-none d-md-block text-center">
+                    <img src="/static/asset/images/icons8-vs.png" class="img-fluid" width="30" alt="icon battle">
+                  </div>
+                  <div class="col-4 col-md-3 order-3 order-md-0">
+                    <div class="d-md-flex align-items-center">
+                      <div class="pe-2">
+                        <span class="fw-bold text-capitalize">${game.player.username}</span>
+                      </div>
+                      <img src="${game.player.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="rival image">
+                    </div>
+                  </div>
+                  <div class="col-4 col-md-2 my-auto order-2 order-md-0 text-center">
+                    <span class="result fw-bolder ">${game.user_score}:${game.player_score}</span>
+                  </div>
+                  <div class="col-2 my-auto text-center d-none d-md-block">
+                    <span class="result fw-bolder">${game.is_user_winner ? "WIN 🏆" : "Lose 😓"}</span>
+                  </div>
+              </div>  
+          `
+        }
+
       }
     } catch (error) {
       console.log(error);

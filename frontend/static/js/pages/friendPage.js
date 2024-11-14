@@ -76,10 +76,59 @@ class FriendPage extends AbstractPage {
       }
       else
       {
-        this.friend = res.data;
+        const total = this.querySelector(".total");
+        const wins = this.querySelector(".wins");
+        const losses = this.querySelector(".losses");
+        const ratio = this.querySelector(".ratio");
+        const friendHistory = this.querySelector("#friend-history");
+        
+        this.friend = res.data.user;
+        const stats = res.data.stats;
+        const games = res.data.history;
+        console.log(games);
+        
         this.fullName.textContent = `${this.friend.first_name} ${this.friend.last_name}`;
         this.username.textContent = `@${this.friend.username}`;
         this.userImg.src = `${this.friend.profile.avatar}`;
+
+        total.textContent = `${stats.total_games} Matches`;
+        wins.textContent =  `${stats.total_wins} Wins`;
+        losses.textContent = `${stats.total_losses} Losses`; 
+        ratio.textContent = `${stats.ratio}%`;
+
+        for (const game of games) {
+          friendHistory.innerHTML += `
+                <div class="row profile-content p-1 justify-content-center">
+                <div class="d-flex justify-content-between mt-3 p-1 mb-1 col-12 col-md-8 glass-effect" >
+                  <div class="  ">
+                  <div class="d-flex align-items-center">
+                      <img src="${game.user.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
+                      <div class="ps-2">
+                        <span class="fw-bold text-capitalize">${game.user.username}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class=" my-auto order-1 order-md-0 d-none d-md-block text-center">
+                    <img src="/static/asset/images/icons8-vs.png" class="img-fluid" width="30" alt="icon battle">
+                  </div>
+                  <div class=" order-3 order-md-0">
+                    <div class="d-md-flex align-items-center">
+                      <div class="pe-2">
+                        <span class="fw-bold text-capitalize">${game.player.username}</span>
+                      </div>
+                      <img src="${game.player.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
+                    </div>
+                  </div>
+                  <div class=" my-auto order-2 order-md-0 text-center">
+                    <span class="result fw-bolder ">${game.user_score}:${game.player_score}</span>
+                  </div>
+                  <div class="my-auto text-center d-none d-md-block">
+                    <span class="result fw-bolder">${game.is_user_winner ? "WIN 🏆" : "Lose 😓"}</span>
+                  </div>
+                </div>
+              </div>
+          `;
+        }
       }
     } catch (error) {
       console.error("Error Loading profile:", error);
