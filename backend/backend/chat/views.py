@@ -17,3 +17,4 @@ def get_messages(request, conversation):
             return SuccessResponse(data={"messages": []}, message="No messages found.", status_code=status.HTTP_200_OK)
     except Exception as e:
         return ErrorResponse(message=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
