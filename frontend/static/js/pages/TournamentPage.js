@@ -1,7 +1,6 @@
 import { AbstractPage } from "./AbstarctPage.js";
 import API from "../API/API.js";
 import { navigateTo } from "../router.js";
-import { WebSock } from "../ws/ws.js";
 
 
 
@@ -61,7 +60,8 @@ async function join_tournament(tournament_id) {
       credentials: "include",
     })
   .then((res) => {
-    navigateTo(`/tournament/${tournament_id}`) ;
+    // if (res.ok)
+      navigateTo(`/tournament/${tournament_id}`) ;
     console.log(res);
     
   })

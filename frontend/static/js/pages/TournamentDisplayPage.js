@@ -12,14 +12,18 @@ class TournamentDisplayPage extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
     this.socket.onmessage = e => {
+      console.log(e.data);
+      
       this.API.getTournament(this.params.tournament_id).then((res) => {
         this.participants = res;
         console.log(this.participants);
         let player_number = 1 ;
+        this.querySelectorAll(".player").forEach(div => {div.innerHTML = "" ; div.style = "border: none"}) ;
         this.participants.data.forEach(participant => {
           let player_div = this.querySelector(`.player${player_number++}`)
+          player_div.inn
           let image = document.createElement('img');
-          if (participant.ready)
+          if (participant)
             player_div.style = "border: #00FF00 3px solid"
           else
             player_div.style = "border: none"
