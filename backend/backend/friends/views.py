@@ -14,6 +14,7 @@ from api.auth_utils import is_authenticated
 from utils.responses import ErrorResponse, SuccessResponse
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from api.models import Notification
 
 
 @api_view(["GET"])
@@ -130,6 +131,13 @@ def send_friend_request(request):
         source_user=source_user, target_user=target_user
     )
 
+    Notification.objects.create(
+        user_id=target_user.id,
+        message="sent you a friend request",
+        type="friend_request",
+        sender_id=source_user.id,
+    )
+
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         f"user_{target_user.id}",
@@ -168,6 +176,13 @@ def accept_friend_request(request):
 
     friendship.status = "accepted"
     friendship.save()
+
+    Notification.objects.create(
+        user_id=source_user.id,
+        message="accepted your friend request",
+        type="friend_request_accepted",
+        sender_id=user.id,
+    )
 
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
@@ -218,6 +233,12 @@ def update_friendship_status(request):
     friendship.save()
 
     if (friendship.status == "accepted") and (friendship.source_user == user):
+        Notification.objects.create(
+            user_id=friend_id,
+            message="accepted your friend request",
+            type="friend_request_accepted",
+            sender_id=user.id,
+        )
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             f"user_{friend_id}",
@@ -233,6 +254,12 @@ def update_friendship_status(request):
             },
         )
     elif (friendship.status == "accepted") and (friendship.target_user == user):
+        Notification.objects.create(
+            user_id=friendship.source_user.id,
+            message="accepted your friend request",
+            type="friend_request_accepted",
+            sender_id=user.id,
+        )
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             f"user_{friendship.source_user.id}",

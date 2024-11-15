@@ -93,7 +93,7 @@ class NotificationConusmer(AsyncWebsocketConsumer):
             or f"{os.getenv('API_URL')}/{event['sender_avatar']}"
         )
 
-        await create_notification(user_id, sender_id, message, "friend_request")
+        # await create_notification(user_id, sender_id, message, "friend_request")
 
         await self.send(
             text_data=json.dumps(
