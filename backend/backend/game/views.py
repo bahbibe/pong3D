@@ -117,9 +117,12 @@ def join_tournament(request, tournament_id):
     tournament = Tournament.objects.get(uuid=tournament_id)
     if not tournament:
         return ErrorResponse(
-            data={
-                "message": "Tournament doesn't exist!",
-            }
+            message= "Tournament doesn't exist!",
+        )
+    participant_count = Tournament_Participants.objects.filter(tournament=tournament).count()
+    if participant_count >= 4:
+        return ErrorResponse(
+            message="tournament is full",
         )
     participant = Tournament_Participants.objects.filter(player=request.user).filter(tournament=tournament).first()
     if not participant:
@@ -148,34 +151,10 @@ def get_participants(request, tournament_id):
 
 @api_view(["GET"])
 @is_authenticated
-def start_tournament(request):
-    pass
-    # create a tournament in the database
-    # set this request user as the tournament owner
-    return SuccessResponse(
-        data={
-            "message": "tournament created successfuly",
-            "tournament_id": tournament_id,
-            "owner": request.user.id,
-        }
-    )
-
-@api_view(["GET"])
-@is_authenticated
 def leave_tournament(request):
     pass
     # leave tournament if it didn't start yet
     # if the tournament already stated count as eleminated
-    return SuccessResponse(
-        data={
-        }
-    )
-
-@api_view(["GET"])
-@is_authenticated
-def get_my_tournaments(request):
-    pass
-    # return only the tournaments that the request user has joined
     return SuccessResponse(
         data={
         }

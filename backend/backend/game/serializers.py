@@ -61,3 +61,32 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
             "t_round",
             "ready",
         ]
+
+class GameSerializer(serializers.ModelSerializer):
+    uuid = serializers.CharField()
+    player1 = UserSerializer(read_only=True)
+    player2 = UserSerializer(read_only=True)
+    player1_score = serializers.IntegerField()
+    player2_score = serializers.IntegerField()
+    
+    class Meta:
+        model = Game
+        fields = [
+            "uuid",
+            "player1",
+            "player2",
+            "player1_score",
+            "player2_score",
+        ]
+
+
+class TournamentGameSerializer(serializers.ModelSerializer):
+    tournament = TournamentSerializer()
+    game = GameSerializer()
+
+    class Meta:
+        model = Game
+        fields = [
+            "tournament",
+            "game",
+        ]

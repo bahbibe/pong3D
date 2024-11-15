@@ -6,8 +6,9 @@ import redis
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .game_manager import GameManager
-from .models import Game, Tournament, Tournament_Participants
+from .models import Game, Tournament, Tournament_Participants, Tournament_Game
 from channels.db import database_sync_to_async
+from .serializers import TournamentGameSerializer
 
 game_manager = GameManager()
 
@@ -32,6 +33,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             # Create a new game instance
             await game_manager.create_game_instance(self.game)
             self.game_instance = await game_manager.get_game_instance(self.game_id)
+        
         
     @database_sync_to_async
     def get_game(self):
@@ -130,15 +132,34 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                     'type': 'update',
                 }
             )
+        games = await self.create_tournament_games()
+        if games is not None:
+            await self.channel_layer.group_send(
+                self.tournament_id,
+                {
+                    'type': 'start',
+                    'data': await self.call_serializer(games) 
+                }
+            )
+        
+
+    @database_sync_to_async
+    def call_serializer(self, games):
+        return TournamentGameSerializer(games, many=True).data
+
 
     @database_sync_to_async
     def get_participant(self, tournament_id):
         try:
-            tournament = Tournament.objects.get(uuid=tournament_id)
-            return Tournament_Participants.objects.select_related('tournament').get(
-                tournament=tournament,
-                player=self.user
-            )
+            self.tournament = Tournament.objects.get(uuid=tournament_id)
+            self.participants = Tournament_Participants.objects.filter(tournament=self.tournament)
+            self.participant = Tournament_Participants.objects.get(tournament=self.tournament, player=self.user)
+            if self.participant is None:
+                self.participant = Tournament_Participants.objects.create(
+                    tournament = self.tournament,
+                    player = self.user,
+                )
+            return self.participant
         except (Tournament.DoesNotExist, Tournament_Participants.DoesNotExist):
             return None
     
@@ -147,8 +168,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         if self.participant:
             self.participant.ready = ready_status
             self.participant.save()
+            if not ready_status:
+                self.participant.delete()
             print(f"Set to {self.participant.id, self.participant.tournament, self.participant.player}")
-        print("participant is empty")
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_send(
@@ -165,3 +187,32 @@ class TournamentConsumer(AsyncWebsocketConsumer):
     
     async def update(self, event):
         await self.send(text_data=json.dumps(event["type"]))
+
+    async def start(self, event):
+        await self.send(text_data=json.dumps(event["data"]))
+
+    @database_sync_to_async
+    def create_tournament_games(self):
+        if self.participants.count() < 4:
+            return None
+        try:
+            for player1, player2 in self.pairwise(self.participants):
+                print(player1.player.username, " vs ", player2.player.username)
+                game = Game.objects.create(
+                    player1=player1.player,
+                    player2=player2.player,
+                )
+                Tournament_Game.objects.create(
+                    tournament=self.tournament,
+                    game=game
+                )
+            return Tournament_Game.objects.filter(tournament=self.tournament)
+        except :
+            return None
+            
+
+
+    def pairwise(self, iterable):
+        "s -> (s0, s1), (s2, s3), (s4, s5), ..."
+        a = iter(iterable)
+        return zip(a, a)
