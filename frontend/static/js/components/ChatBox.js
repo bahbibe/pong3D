@@ -1,27 +1,29 @@
 import API from "../API/API.js";
 import { WebSock } from "../ws/ws.js";
 class ChatBox extends HTMLElement {
-  constructor(uuid) {
+  constructor() {
     super();
     this.API = new API();
     this.ws = null;
     this.messages = [];
-    this.uuid = "95b6631e-bde5-44d7-a42e-06986dc2a5ed";
     this.friendItem = window.selectedFriend;
   }
   connectedCallback() {
-      this.API.getMessages(this.uuid).then((res) => {
-      // this.messages =  dataBase;
+    const uuid = this.friendItem.profile.uuid;
+    this.API.getMessages(uuid).then((res) => {
       this.messages = res;
       this.render();
-      // this.ws = new WebSock(this.uuid);
-      // this.ws.connect();
-      // this.ws.receive().then((data) => {
-      //   const message = JSON.parse(data);
-      //   this.messages.push(message);
-      //   this.render();
-      // });
+      this.ws = new WebSock(uuid);
+      this.ws.connect();
+      this.ws.receive().then((data) => {
+        const message = JSON.parse(data);
+        this.messages.push(message);
+        this.render();
+      });
     });
+  }
+  disconnectedCallback() {
+    this.ws.close();
   }
   render() {
     try {
@@ -31,12 +33,20 @@ class ChatBox extends HTMLElement {
       });
       this.appendChild(this.inputElement());
       if (this.messages.length === 0) {
-        this.appendChild(document.createTextNode("No messages yet"));
+        this.appendChild(this.emptyElement());
       }
     } catch (error) {
       console.error("Error rendering chat list:", error);
       this.appendChild(document.createTextNode("Error loading messages"));
     }
+  }
+  emptyElement() {
+    const emptyElement = document.createElement("div");
+    emptyElement.className = "d-flex justify-content-center";
+    emptyElement.innerHTML = `
+    <span> No messages </span>
+    `;
+    return emptyElement;
   }
 
   inputElement() {
@@ -46,6 +56,17 @@ class ChatBox extends HTMLElement {
     <input type="text" class="form-control" placeholder="Type a message" aria-label="Type a message" aria-describedby="button-addon2"/>
     <button class="btn btn-outline-secondary" type="button" id="button-addon2">Send</button>
     `;
+    inputElement.querySelector("button").addEventListener("click", () => {
+      const input = inputElement.querySelector("input");
+      const message = input.value;
+      input.value = "";
+      this.ws.send(message);
+      this.messages.push({
+        message: message,
+        sender: "me",
+      });
+    }
+    );
     return inputElement;
   }
 
@@ -65,24 +86,15 @@ class ChatBox extends HTMLElement {
 
   createMessageElement(item) {
     const messageElement = document.createElement("div");
+    messageElement.className = item.sender === "me" ? "message me" : "message";
     messageElement.innerHTML = `
-    <div class="message-other">
-      <h5>${this.friendItem.username}</h5>
-    <div class="message-item">
-      <span>lorem epsum lkhaslkhklaslk laksjkljakldjs </span>
-    </div>
-    </div>
-    <div class="message-sender">
-      <div class="message-info">
-        <h5> Me </h5>
-      </div>
-      <div class="message-item">
-        <span>ajshkjdhajshdjh alksjdkljaksj askljd</span>
-      </div>
+    <div class="message-content">
+      <p>${item.message}</p>
     </div>
     `;
     return messageElement;
-  }
+
+}
 }
 
 window.customElements.define("chat-box", ChatBox);

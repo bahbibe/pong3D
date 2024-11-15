@@ -11,15 +11,12 @@ class Friends extends HTMLElement {
     this.API.getFriends().then((res) => {
       this.friends = res;
       this.render();
-      console.log(this.friends);
     });
   }
 
   render() {
     try {
       this.friends.forEach((item) => {
-        this.appendChild(this.FriendElement(item));
-        this.appendChild(this.FriendElement(item));
         this.appendChild(this.FriendElement(item));
       });
       if (this.friends.length === 0) {
@@ -47,7 +44,7 @@ class Friends extends HTMLElement {
     window.selectedFriend = item.friend;
     const chatBox = document.querySelector(".chat-box");
     chatBox.innerHTML = "";
-    chatBox.appendChild(new ChatBox(item.friend.uuid));
+    chatBox.appendChild(new ChatBox()); 
     });
     return friendElement;
   }

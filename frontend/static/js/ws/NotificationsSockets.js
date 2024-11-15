@@ -7,7 +7,7 @@ export const Notifications = () => {
   }
 
   notif_socket.onopen = () => {
-    console.log("connected to notifications websocket");
+    // console.log("connected to notifications websocket");
   }
 
   notif_socket.onmessage = (event) => {

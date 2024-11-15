@@ -5,12 +5,12 @@ export const FriendsStatus = () => {
   }
 
   socket.onopen = () => {
-    console.log("connected to friends status websocket");
+    // console.log("connected to friends status websocket");
   }
 
   socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    console.log("message received -> ", data);
+    // console.log("message received -> ", data);
     if (data.type === "user_status") {
       if (data.status === "offline") {
         window.online_users = data.online_users;
