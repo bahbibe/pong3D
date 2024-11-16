@@ -214,12 +214,14 @@ def login_intra_callback(request):
         "last_name": json_response["last_name"],
         "avatar": json_response["image"]["link"],
     }
-    user = User.objects.filter(username=user_data["username"]).first()
-    if user and user.profile.auth_method != Profile.INTRA:
-        profile = Profile.objects.filter(intra_id=user_data["id"]).first()
-        if profile and profile.intra_id == user_data["id"]:
-            user = profile.user
-        else:
+    
+    user = None
+    profile = Profile.objects.filter(intra_id=user_data["id"]).first()
+    if profile:
+        user = profile.user
+    else:
+        user = User.objects.filter(username=user_data["username"]).first()
+        if user and user.profile.auth_method != Profile.INTRA:
             user_data["username"] = (
                 f"{user_data['username']}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
             )
