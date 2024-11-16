@@ -2,6 +2,7 @@ import { hideToast, showOverlay, hideOverlay, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
+
 class ProfilePage extends AbstractPage {
   constructor() {
     super();
@@ -148,34 +149,33 @@ class ProfilePage extends AbstractPage {
         ratio.textContent = `${stats.ratio}%`;
 
         for (const game of games) {
-          gamesContainer.innerHTML = `
+          gamesContainer.innerHTML += `
               <div class="row mt-3 p-1 mb-1 glass-effect">
-                  <div class="col-4 col-md-3 ">
-                    <div class="d-flex align-items-center">
-                      <img src="${game.user.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user image">
+                  <div class="col-4 my-auto p-0">
+                    <div class="d-md-flex align-items-center">
+                      <img src="${game.user.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block"
+                        width="40" alt="user profile image">
                       <div class="ps-2">
                         <span class="fw-bold text-capitalize">${game.user.username}</span>
                       </div>
                     </div>
                   </div>
-                  <div class="col-2 my-auto order-1 order-md-0 d-none d-md-block text-center">
-                    <img src="/static/asset/images/icons8-vs.png" class="img-fluid" width="30" alt="icon battle">
+                  <div class="col-2 col-md-2 my-auto text-center">
+                    <span class="result fw-bolder ">${game.user_score}:${game.player_score}</span>
                   </div>
-                  <div class="col-4 col-md-3 order-3 order-md-0">
-                    <div class="d-md-flex align-items-center">
+                  <div class="col-4 my-auto p-0 text-center">
+                    <div class="d-md-flex justify-content-center align-items-center">
                       <div class="pe-2">
                         <span class="fw-bold text-capitalize">${game.player.username}</span>
                       </div>
-                      <img src="${game.player.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="rival image">
+                      <img src="${game.player.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block"
+                        width="40" alt="user profile image">
                     </div>
                   </div>
-                  <div class="col-4 col-md-2 my-auto order-2 order-md-0 text-center">
-                    <span class="result fw-bolder ">${game.user_score}:${game.player_score}</span>
+                  <div class="col-2 my-auto text-center ">
+                    <span class="result h3 ${game.is_user_winner ? "win" : "lose"}">${game.is_user_winner ? "🏆" : "😓"}</span>
                   </div>
-                  <div class="col-2 my-auto text-center d-none d-md-block">
-                    <span class="result fw-bolder">${game.is_user_winner ? "WIN 🏆" : "Lose 😓"}</span>
-                  </div>
-              </div>  
+              </div>
           `
         }
 

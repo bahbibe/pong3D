@@ -260,7 +260,7 @@
             <div class="content__ me-2" style="width: 50%;">
               <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Classic</h6>
               <p style="font-size: 13px;">Find you a rival </p>
-              <a href="/matchmaking" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+              <a data-link href="/matchmaking" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
               border-radius: 5px;
               box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
                 Play
@@ -276,7 +276,7 @@
             <div class="content__ me-2" style="width: 50%;">
               <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Tournament</h6>
               <p style="font-size: 13px;">Grind & win the trophy</p>
-              <a href="/tournament" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+              <a data-link href="/tournament" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
               border-radius: 5px;
               box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
                 Play
@@ -292,7 +292,7 @@
             <div class="content__ me-2" style="width: 50%;">
               <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Friend</h6>
               <p  style="font-size: 13px;">Challenge your friend </p>
-              <a class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+              <a href="/profile" class="play px-3 py-1 fw-bold text-uppercase" data-link data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
               border-radius: 5px;
               box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
                 Play
@@ -370,7 +370,7 @@
         </div>
 
         <div class="row my-4">
-          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
             <div class="status-card  work mx-auto">
               <div class="img-section">
                 <svg xmlns="http://www.w3.org/2000/svg" height="77" width="76">
@@ -473,43 +473,14 @@
           </div>
         </div>
         <div class="row justify-content-between">
-          <div class="col-12 col-md-6">
+          <div class="col-12 col-lg-6">
             <h3>Game history</h3>
             <div class="row glass-effect p-1" style="height: 550px; overflow-y: auto">
               <div class="profile-content" id="games-container">
-                <!-- <div class="row mt-3 p-1 mb-1 glass-effect">
-                  <div class="col-4 col-md-3 ">
-                    <div class="d-flex align-items-center">
-                      <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block"
-                        width="50" alt="user profile image">
-                      <div class="ps-2">
-                        <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-2 my-auto order-1 order-md-0 d-none d-md-block text-center">
-                    <img src="/static/asset/images/icons8-vs.png" class="img-fluid" width="30" alt="icon batlle">
-                  </div>
-                  <div class="col-4 col-md-3 order-3 order-md-0">
-                    <div class="d-md-flex align-items-center">
-                      <div class="pe-2">
-                        <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
-                      </div>
-                      <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block"
-                        width="50" alt="user profile image">
-                    </div>
-                  </div>
-                  <div class="col-4 col-md-2 my-auto order-2 order-md-0 text-center">
-                    <span class="result fw-bolder ">10:7</span>
-                  </div>
-                  <div class="col-2 my-auto text-center d-none d-md-block">
-                    <span class="result fw-bolder">WIN 🏆</span>
-                  </div>
-                </div> -->
               </div>
             </div>
           </div>
-          <div class="col-12 col-md-5 ">
+          <div class="col-12 col-lg-5">
             <h3 class="mt-2">Friends</h3>
             <div class="row mb-2 glass-effect p-2" style="height: 300px; overflow-y: auto">
               <div id="friend-container">
@@ -518,7 +489,7 @@
                   <div class="col-1 col-md-2"><strong>Total</strong></div>
                   <div class="col-1 col-md-2"><strong>Wins</strong></div>
                   <div class="col-2 d-none d-md-block"><strong>Ratio</strong></div>
-                  <div class="col-3 col-md-2 text-end "><strong>Game</strong></div>
+                  <div class="col-3 col-md-2 text-end"><strong>Game</strong></div>
                 </div>
               </div>
             </div>
@@ -772,7 +743,7 @@
       <main-nav></main-nav>
       <div class="container">
         <div class="d-flex flex-column align-items-center justify-content-center">
-          <form action="POST" class="col-10 col-md-5  ">
+          <form id="settings-form" action="" class="col-10 col-md-5  ">
             <div class="avatar-wrapper">
               <img class="profile-pic" src="" />
               <input class="file-upload d-none" name="avatar" type="file" accept="image/*" />
@@ -783,16 +754,16 @@
             <div class="mb-3">
               <label for="username" class="form-label fw-bold">Username</label>
               <input type="text" name="username" id="username" class="form-control form-control-lg  mb-2"
-                placeholder="username" required value="" />
+                placeholder="username"  value="" />
               <label for="username" class="form-label fw-bold">email</label>
               <input type="text" name="email" id="email" class="form-control form-control-lg mb-2" placeholder="email"
-                required value="" />
+                value="" />
               <label for="username" class="form-label fw-bold">Password</label>
-              <input type="text" name="password" id="password" class="form-control form-control-lg mb-2"
-                placeholder="password" required value="" />
+              <input type="password" name="password" id="password" class="form-control form-control-lg mb-2"
+                placeholder="password" value="" />
               <label for="username" class="form-label fw-bold">Confirm Password</label>
-              <input type="text" name="password" id="confirm_password" class="form-control form-control-lg mb-2"
-                placeholder="confirm password" required value="" />
+              <input type="password" name="password" id="confirm_password" class="form-control form-control-lg mb-2"
+                placeholder="confirm password"  value="" />
             </div>
             <div class="w-100 d-flex">
               <button type="button" id="disable-2fa" class="btn btn-outline-danger mx-auto d-none">Disable
@@ -1358,7 +1329,7 @@
 
   <template id="search-bar">
     <form class="input-group" id="search">
-      <input class="form-control" type="search" placeholder="Search" aria-label="Search" data-search required />
+      <input class="form-control" type="search" placeholder="Search" aria-label="Search" data-search  />
       <button class="input-group-text  d-lg-flex">
         <i class="fas fa-search"></i>
       </button>

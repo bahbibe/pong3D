@@ -1033,7 +1033,7 @@ a.sidebar-link.active {
 
 
 .theme {
-  height: 100%;
+  height: 80vh;
   width: 100%;
   position: absolute;
 }
@@ -1044,6 +1044,7 @@ a.sidebar-link.active {
 .bracket {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   position: relative;
 }
 .column {
@@ -1051,6 +1052,7 @@ a.sidebar-link.active {
   flex-direction: column;
   min-height: 100%;
   justify-content: space-around;
+  align-items: center;
   align-content: center;
 }
 .match {
@@ -1158,10 +1160,10 @@ a.sidebar-link.active {
   margin-bottom: 0px;
 }
 /* Dark Theme */
-.theme-dark {
+/* .theme-dark {
   background: #0e1217;
   border-color: #040607;
-}
+} */
 .theme-dark .match-lines .line {
   background: #36404e;
 }

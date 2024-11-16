@@ -1,3 +1,5 @@
+import { navigateTo } from "../router.js";
+import { hideToast, showToast } from "../helpers.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
 class SettingsPage extends AbstractPage {
@@ -39,11 +41,13 @@ class SettingsPage extends AbstractPage {
       this.disable2FA();
     });
 
-    // const form = this.querySelector("form");
-    // form.addEventListener("submit", (e) => {
-    //   e.preventDefault();
-    //   this.submitForm(form);
-    // });
+    const form = this.querySelector("#settings-form");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      // console.log("submitting form");
+      this.submitForm(form);
+      return false;
+    });
 
     if (window.user.profile.is_tfa_enabled) {
       this.querySelector("#enable-2fa").classList.add("d-none");
@@ -64,32 +68,36 @@ class SettingsPage extends AbstractPage {
     this.querySelector("#email").value = window.user.email;
   }
 
-  // async submitForm(form) {
-  //   try {
-  //     hideToast();
-  //     const formData = new FormData(form);
-  //     if (this.file)
-  //       formData.append("avatar", this.file);
+  async submitForm(form) {
+    try {
+      hideToast();
+      const formData = new FormData(form);
+      if (this.file)
+        formData.append("avatar", this.file);
 
-  //     const response = await fetch("http://localhost:8000/api/auth/settings/update/", {
-  //       method: "PUT",
-  //       body: formData,
-  //       credentials: "include",
-  //     });
+      const response = await fetch("http://localhost:8000/api/auth/settings/update/", {
+        method: "PUT",
+        body: formData,
+        credentials: "include",
+      });
 
-  //     const data = await response.json();
+      const data = await response.json();
 
-  //     if (data && data.success) {
-  //       window.user = data.data;
-  //       showToast(false, "Profile setup successfully");
-  //       navigateTo("/home");
-  //     } else {
-  //       showToast(true, data.message, data.errors);
-  //     }
-  //   } catch (err) {
-  //     showToast(true);
-  //   }
-  // }
+      if (data && data.success) {
+        window.user = data.data;
+        showToast(false, "settings updated successfully");
+        // navigateTo("/profile");
+        console.log(data.data);
+      } else {
+
+        showToast(true, data.message, data.errors);
+      }
+    } catch (err) {
+      console.log(err);
+      
+      showToast(true);
+    }
+  }
 
   async enable2FA() {
     try {
