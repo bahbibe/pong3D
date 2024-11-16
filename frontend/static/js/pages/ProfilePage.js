@@ -172,8 +172,8 @@ class ProfilePage extends AbstractPage {
                         width="40" alt="user profile image">
                     </div>
                   </div>
-                  <div class="col-2 my-auto text-center ">
-                    <span class="result h3 ${game.is_user_winner ? "win" : "lose"}">${game.is_user_winner ? "🏆" : "😓"}</span>
+                  <div class="col-2 my-auto text-center" style="cursor:pointer;">
+                    <span class="result h3" aria-label="${game.is_user_winner ? "WIN" : "LOSE"}">${game.is_user_winner ? "🏆" : "😓"}</span>
                   </div>
               </div>
           `

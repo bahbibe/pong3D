@@ -901,7 +901,7 @@ a.sidebar-link.active {
   pointer-events: none;
 }
 
-[aria-label]:hover::before {
+#block[aria-label]:hover::before {
   content: "";
   position: absolute;
   top: -13px;
@@ -983,7 +983,7 @@ a.sidebar-link.active {
 }
 /* .avatar-wrapper:hover {
   transform: scale(1.05);
-  cursor: pointer;
+  cursor: pointer;profil
 }
 .avatar-wrapper:hover .profile-pic {
   opacity: 0.5;
@@ -1028,6 +1028,39 @@ a.sidebar-link.active {
 } */
 
 
+span[aria-label] {
+  position: relative;
+}
+
+
+
+span[aria-label]:hover:after {
+  content: attr(aria-label);
+  position: absolute;
+  top: -20px;
+  left: 10px;
+  padding: 4px;
+  background-color: #000;
+  font-size: 12px;
+  font-weight: bolder;
+  font-family: sans-serif;
+  white-space: nowrap;
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 999;
+}
+
+span[aria-label]:hover::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 15px;
+  border-width: 4px;
+  border-style: solid;
+  border-color: #000 transparent transparent  transparent;
+}
+
+
 
 /* ============tournament page===================== */
 
@@ -1036,14 +1069,16 @@ a.sidebar-link.active {
   height: 80vh;
   width: 100%;
   position: absolute;
+  top: 25%;
 }
 .bracket {
   padding: 40px;
   margin: 5px;
 }
 .bracket {
+  /* height: 100%; */
   display: flex;
-  flex-direction: row;
+  /* flex-direction: row; */
   justify-content: center;
   position: relative;
 }
@@ -1062,7 +1097,10 @@ a.sidebar-link.active {
   min-width: 240px;
   max-width: 240px;
   height: 62px;
-  margin: 12px 24px 12px 0;
+  /* margin: 12px 150px 12px 0; */
+  margin: 12px 150px 50px 50px;
+
+  z-index: 9999;
 }
 .match .match-top {
   border-radius: 2px 2px 0 0;
@@ -1093,10 +1131,11 @@ a.sidebar-link.active {
 .match-lines {
   display: block;
   position: absolute;
-  top: 50%;
-  bottom: 0;
+  top: 49%;
+  /* bottom: 0; */
   margin-top: 0px;
   right: -1px;
+  z-index: -1 !important;
 }
 .match-lines .line {
   background: red;
@@ -1104,15 +1143,16 @@ a.sidebar-link.active {
 }
 .match-lines .line.one {
   height: 1px;
-  width: 12px;
+  width: 120px;
 }
 .match-lines .line.two {
-  height: 44px;
+  height: 65px;
   width: 1px;
-  left: 11px;
+  left: 120px;
+  z-index: 1;
 }
 .match-lines.alt {
-  left: -12px;
+  left: -78px;  
 }
 .match:nth-child(even) .match-lines .line.two {
   transform: translate(0, -100%);
@@ -1127,7 +1167,7 @@ a.sidebar-link.active {
   display: block;
 }
 .column:nth-child(2) .match-lines .line.two {
-  height: 88px;
+  height: 125px;
 }
 .column:nth-child(3) .match-lines .line.two {
   height: 175px;
@@ -1159,6 +1199,14 @@ a.sidebar-link.active {
 .disable-seperator .team:first-child {
   margin-bottom: 0px;
 }
+
+.three {
+  /* display: flex; */
+  /* flex-direction: row; */
+  align-items: center;
+}
+
+
 /* Dark Theme */
 /* .theme-dark {
   background: #0e1217;
