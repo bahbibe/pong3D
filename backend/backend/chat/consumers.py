@@ -3,16 +3,12 @@ from pprint import pprint
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import Message
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
+
 
 
 @database_sync_to_async
 def save_message(conversation, user, message):
     Message.objects.create(author=user, content=message, conversation=conversation)
-
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -38,9 +34,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "message": text_data_json,
             },
         )
-        # await save_message(
-        #     self.room_name, self.scope["user"], text_data_json["content"]
-        # )
+        await save_message(
+            self.room_name,
+            self.scope["user"],
+            text_data_json["content"],
+        )
 
     async def chat_message(self, event):
         message = event["message"]

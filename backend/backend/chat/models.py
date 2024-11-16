@@ -10,7 +10,6 @@ class Message(models.Model):
     content = models.TextField()
     timestamp = models.DateTimeField(default=timezone.now)
     conversation = models.CharField(max_length=128, blank=False , null=True)
-    read = models.BooleanField(default=False)
     class Meta:
         ordering = ["timestamp"]
     def __str__(self):
