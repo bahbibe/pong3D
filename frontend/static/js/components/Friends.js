@@ -45,7 +45,7 @@ class Friends extends HTMLElement {
     const chatBox = document.querySelector(".chat-box");
     chatBox.innerHTML = "";
     chatBox.appendChild(new ChatBox()); 
-    });
+    }); 
     return friendElement;
   }
 

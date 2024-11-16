@@ -31,11 +31,6 @@ class API {
         throw new Error(`API request failed with status: ${response.status}`);
       }
       const res = await response.json();
-      // for (let i = 0; i < dataBase.length; i++) {
-      //   if (dataBase[i].id === uuid) {
-      //     res.data.messages.push(dataBase[i]);
-      //   }
-      // }
       return res.data.messages;
     } catch (error) {
       console.error("Error Loading DMs:", error);

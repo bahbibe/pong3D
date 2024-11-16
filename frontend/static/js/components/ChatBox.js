@@ -12,19 +12,18 @@ class ChatBox extends HTMLElement {
     const uuid = this.friendItem.profile.uuid;
     this.API.getMessages(uuid).then((res) => {
       this.messages = res;
-      this.render();
+      // console.log("Messages:", this.messages);
+      // this.render();
       this.ws = new WebSock(uuid);
       this.ws.connect();
       this.ws.receive().then((data) => {
         const message = JSON.parse(data);
-        this.messages.push(message);
-        this.render();
+        // console.log("Received message:", message);
+        this.appendChild(this.createMessageElement(message));
       });
     });
   }
-  disconnectedCallback() {
-    this.ws.close();
-  }
+
   render() {
     try {
       this.appendChild(this.headerElement());
@@ -58,15 +57,17 @@ class ChatBox extends HTMLElement {
     `;
     inputElement.querySelector("button").addEventListener("click", () => {
       const input = inputElement.querySelector("input");
-      const message = input.value;
+      const message = {
+        author : window.user.profile.uuid,
+        content: input.value,
+      };
       input.value = "";
       this.ws.send(message);
       this.messages.push({
         message: message,
         sender: "me",
       });
-    }
-    );
+    });
     return inputElement;
   }
 
@@ -86,15 +87,12 @@ class ChatBox extends HTMLElement {
 
   createMessageElement(item) {
     const messageElement = document.createElement("div");
-    messageElement.className = item.sender === "me" ? "message me" : "message";
+    messageElement.className = item.author === window.user.profile.uuid ? "msg-sent" : "msg-received border";
     messageElement.innerHTML = `
-    <div class="message-content">
-      <p>${item.message}</p>
-    </div>
+      <p>${item.content}</p>
     `;
     return messageElement;
-
-}
+  }
 }
 
 window.customElements.define("chat-box", ChatBox);
