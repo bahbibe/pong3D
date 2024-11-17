@@ -1,4 +1,4 @@
-import API from "../API/API.js";
+import { API } from "../API/API.js";
 
 class Profile extends HTMLElement {
   constructor() {

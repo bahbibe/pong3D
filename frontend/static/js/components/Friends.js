@@ -1,4 +1,4 @@
-import API from "../API/API.js";
+import { API } from "../API/API.js";
 import { ChatBox } from "./ChatBox.js";
 
 class Friends extends HTMLElement {
@@ -36,19 +36,16 @@ class Friends extends HTMLElement {
           </div>
           <div class="conv d-none d-md-block">
           <h5>${item.friend.username}</h5>
-          <p> lorem ipsum dolor sit amet, consectetur adipiscing elit.
-          lorem ipsum dolor sit amet, consectetur adipiscing elit. </p>
+          <p>last one </p>
           </div>
     `;
     friendElement.addEventListener("click", () => {
-    window.selectedFriend = item.friend;
-    const chatBox = document.querySelector(".chat-box");
-    chatBox.innerHTML = "";
-    chatBox.appendChild(new ChatBox()); 
-    }); 
+      const chatBox = document.querySelector(".chat-box");
+      chatBox.innerHTML = "";
+      chatBox.appendChild(new ChatBox(item));
+    });
     return friendElement;
   }
-
 }
 
 window.customElements.define("friends-list", Friends);

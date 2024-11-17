@@ -8,37 +8,66 @@
   color: var(--text-mute);
   font-size: smaller;
 } */
+.no-scroll::-webkit-scrollbar {
+  background: transparent; /* Chrome/Safari/Webkit */
+  width: 0px;
+}
+
+.no-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+}
 
 .friends-list {
   overflow: hidden;
 }
 
-/* .friends-item {
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
-
-} */
-
-.message-other {
-  color: var(--text-light);
-  border-radius: 5px;
-  padding: 10px;
-  margin: 5px;
-  max-width: 70%;
-  word-wrap: break-word;
-  border :1px solid;
+.msg-box {
+  max-height: 70vh;
+  overflow-y: auto;
 }
-.message-sender {
-
-  color: var(--text-light);
+.time {
+  font-size: 12px;
+}
+.msg-received {
+  display: flex;
+  align-items: center;
+  max-width: fit-content;
+  padding: 5px;
+  margin: 5px;
+  border: 1px solid;
   border-radius: 5px;
+  border-color: red;
+}
+.msg-received p {
+  margin: 0;
+  padding: 0;
+  /* grid-column: 1/3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-mute);
+  font-size: smaller; */
+}
+.msg-sent {
+  display: flex;
+  justify-self: end;
+  /* align-items: center; */
+  max-width: fit-content;
   padding: 10px;
   margin: 5px;
-  /* max-width: 70%; */
-  word-wrap: break-word;
-  white-space: nowrap;
-  border :1px solid;
-  justify-self: end;
+  border: 1px solid;
+  border-radius: 5px;
+  border-color: cyan;
+
+}
+.msg-sent p {
+  margin: 0;
+  padding: 0;
+  /* grid-column: 1/3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-mute);
+  font-size: smaller; */
 }
 
 .status {
@@ -58,11 +87,11 @@
 .chat-box {
   position: relative;
 }
-.send-msg {
+/* .send-msg {
   position: absolute;
   bottom: 0;
   width: 100%;
-}
+} */
 /* @media(max-width: 768px) {
   .toggle-list {
     display: none;

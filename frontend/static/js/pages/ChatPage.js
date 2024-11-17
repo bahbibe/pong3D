@@ -1,5 +1,4 @@
 import { AbstractPage } from "./AbstarctPage.js";
-import { ChatBox } from "../components/ChatBox.js";
 import { Friends } from "../components/Friends.js";
 
 class ChatPage extends AbstractPage {
