@@ -1119,6 +1119,10 @@ span[aria-label]:hover::before {
 .match .team span {
   padding-left: 8px;
 }
+.match .team span img {
+  height: 50px;
+  width: 50px;
+}
 .match .team span:last-child {
   padding-right: 8px;
 }

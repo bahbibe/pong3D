@@ -47,6 +47,10 @@ class MatchmakingPage extends AbstractPage {
       console.log("finding match");
 
   }
+
+  disconnectedCallback() {
+    this.socket.close() ;
+  }
 }
 
 

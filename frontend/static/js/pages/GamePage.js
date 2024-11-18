@@ -7,230 +7,306 @@ import { navigateTo } from "../router.js";
 const scenePath = "/static/scene.glb"
 
 export const LoadGLTFByPath = (scene) => {
-    return new Promise((resolve, reject) => {
-      // Create a loader
-      const loader = new GLTFLoader();
-  
-      // Load the GLTF file
-      loader.load(scenePath, (gltf) => {
+  return new Promise((resolve, reject) => {
+    // Create a loader
+    const loader = new GLTFLoader();
 
-        scene.add(gltf.scene);
+    // Load the GLTF file
+    loader.load(scenePath, (gltf) => {
 
-        resolve();
-      }, undefined, (error) => {
-        reject(error);
-      });
+      scene.add(gltf.scene);
+
+      resolve();
+    }, undefined, (error) => {
+      reject(error);
     });
+  });
 };
 
 class GamePage extends AbstractPage {
   constructor() {
     super();
+    // Bind the animate method to the class instance
+    this.animate = this.animate.bind(this);
+    this.keyDown = this.keyDown.bind(this);
+    this.keyUp = this.keyUp.bind(this);
   }
   connectedCallback() {
     const template = document.getElementById("game-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
-   
+
+    this.left = false;
+    this.right = false;
+    this.score1Text = 0 ;
+    this.score2Text = 0 ;
+
+    this.scene = new THREE.Scene();
+    this.game_url = 'ws://localhost:8000/ws/game/' + this.params.game_id ;
     
-//Renderer does the job of rendering the graphics
-let renderer = new THREE.WebGLRenderer({
-  //Defines the canvas component in the DOM that will be used
-	canvas: document.querySelector('#game-canvas'),
-  antialias: true,
-  alpha: true
-});
-renderer.setClearColor( 0x000000, 0 );
+    if (this.params.tournament_id)
+      this.game_url = 'ws://localhost:8000/ws/game/' + this.params.tournament_id +'/' + this.params.game_id;
+    this.socket = new WebSocket(this.game_url);
 
-renderer.setSize(window.innerWidth, window.innerHeight);
+    //Renderer does the job of rendering the graphics
+    this.renderer = new THREE.WebGLRenderer({
+      //Defines the canvas component in the DOM that will be used
+      canvas: document.querySelector('#game-canvas'),
+      antialias: true,
+      alpha: true
+    });
+    
+    //set up the renderer with the default settings for threejs.org/editor - revision r153
+    this.renderer.setClearColor(0x000000, 0);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.shadows = true;
+    this.renderer.shadowType = 1;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.renderer.toneMapping = 0;
+    this.renderer.toneMappingExposure = 1
+    this.renderer.toneMapping = THREE.NoToneMapping;
+    this.renderer.setClearColor(0xffffff, 0);
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace
 
-//set up the renderer with the default settings for threejs.org/editor - revision r153
-renderer.shadows = true;
-renderer.shadowType = 1;
-renderer.shadowMap.enabled = true;
-renderer.setPixelRatio( window.devicePixelRatio );
-renderer.toneMapping = 0;
-renderer.toneMappingExposure = 1
-renderer.toneMapping = THREE.NoToneMapping;
-renderer.setClearColor(0xffffff, 0);
-//make sure three/build/three.module.js is over r152 or this feature is not available.
-renderer.outputColorSpace = THREE.SRGBColorSpace 
+    // Load the GLTF model
+    
+    LoadGLTFByPath(this.scene)
+      .then(() => {
+        this.retrieveListOfCameras(this.scene);
+    })
+    .then(() => {
+      // on window resize
+      window.addEventListener('resize', () => {
+        // update sizes
+        this.camera.aspect = window.innerWidth / window.innerHeight
+        this.camera.updateProjectionMatrix()
+        this.renderer.setSize(window.innerWidth, window.innerHeight)
+      })
 
-const scene = new THREE.Scene();
+      console.log(this.params.tournament_id);
 
-let cameraList = [];
+      this.socket.onmessage = (event) => {
+        let obj = JSON.parse(event.data);
+        console.log(obj.type) ;
+        console.log(obj);
 
-let camera;
-let player;
-let player2;
-let ball ;
-let opposit_side_cam_pos ;
-let score1Text = 0 ;
-let score2Text = 0 ;
-let player1Score ;
-let player2Score ;
+        if (obj.type === "game over")
+        {
+          
+          if (this.params.tournament_id)
+          {
+            console.log(`/tournament/${this.params.tournament_id}`);
+            navigateTo(`/tournament/${this.params.tournament_id}`)
+          }
+          else
+          {
+            console.log(`/score/${this.params.game_id}`);
+            navigateTo(`/score/${this.params.game_id}`)
+          }
+          return
+        }
+        if (obj.type === 'game_update_message')
+        {
+          const game = obj.game_state ;
+          this.ball.position.x = game.ball_position[0];
+          this.ball.position.z = game.ball_position[1];
+          this.player.position.x = game.player1;
+          this.player2.position.x = game.player2;
+          if (this.score1Text !== game.score[0]) {
+            this.score1Text = game.score[0];
+            this.updateScore();
+          }
+          if (this.score2Text !== game.score[1]) {
+            this.score2Text = game.score[1];
+            this.updateScore();
+          }
+          if (game.side == 'player2')
+            this.camera.position.z = this.opposit_side_cam_pos;
+          this.camera.lookAt(0, 0, 0);
+          this.newUpdate = true;
+        }
+      };
 
-let newUpdate = true ;
+      this.socket.onopen = (event) => {
+        console.log("connected");
+      }
 
-// Load the GLTF model
-LoadGLTFByPath(scene)
-  .then(() => {
-    retrieveListOfCameras(scene);
-  })
-  .catch((error) => {
-    console.error('Error loading JSON scene:', error);
-  });
+      this.socket.onclose = (event) => {
+        console.log("connection closed");
+      }
 
-//retrieve list of all cameras
-function retrieveListOfCameras(scene){
-  // Get a list of all cameras in the scene
-  scene.traverse(function (object) {
-    if (object.isCamera) {
-      cameraList.push(object);
-    }
-    if (object.name === "PaddlePlayer1")
-      player = object ;
-    if (object.name === "PaddlePlayer2")
-      player2 = object ;
-    if (object.name === "Cube")
-      ball = object ;
-    if (object.name === "score1")
-      player1Score = object
-    if (object.name === "score2")
-      player2Score = object
-    // console.log(player1Score);
-  });
-  updateScore() 
+      document.onkeydown = this.keyDown;
+      document.onkeyup = this.keyUp;
+    })
+    .catch((error) => {
+      console.error('Error loading JSON scene:', error);
+    });
 
-  //Set the camera to the first value in the list of cameras
-  camera = cameraList[0];
-
-  updateCameraAspect(camera);
-
-  // Start the animation loop after the model and cameras are loaded
-  animate();
-}
-
-// Set the camera aspect ratio to match the browser window dimensions
-function updateCameraAspect(camera) {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-  opposit_side_cam_pos = -camera.position.z ;
-
-  camera.lookAt(0,0,0)
-}
-
-// on window resize
-window.addEventListener('resize', () => {
-  // update sizes
-  camera.aspect = window.innerWidth / window.innerHeight
-  camera.updateProjectionMatrix()
-  renderer.setSize(window.innerWidth, window.innerHeight)
-})
-//A method to be run each time a frame is generated
-function animate() {
-  requestAnimationFrame(animate);
-  renderer.render(scene, camera);
-  if (!newUpdate)
-    return ;
-  newUpdate = false ;
-  if (right == true)
-    socket.send(JSON.stringify({"type": 'right'})) ;
-  if (left == true)
-    socket.send(JSON.stringify({"type": 'left'})) ;
-};
-
-let socket = new WebSocket('ws://localhost:8000/ws/game/' + this.params.game_id);
-
-socket.onmessage = (event) => {
-  let obj = JSON.parse(event.data) ;
-  console.log(obj);
-  
-  if (obj === "game over")
-    navigateTo("/home")
-  ball.position.x = obj.ball_position[0] ;
-  ball.position.z = obj.ball_position[1] ;
-  player.position.x = obj.player1 ;
-  player2.position.x = obj.player2 ;
-  if (score1Text !== obj.score[0])
-  {
-    score1Text = obj.score[0] ;
-    updateScore() ;
   }
-  if (score2Text !== obj.score[1])
-  {
-    score2Text = obj.score[1] ;
-    updateScore() ;
+
+  // Set the camera aspect ratio to match the browser window dimensions
+  updateCameraAspect(camera) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.opposit_side_cam_pos = -this.camera.position.z;
+
+    this.camera.lookAt(0, 0, 0)
   }
-  if (obj.side == 'player2')
-    camera.position.z = opposit_side_cam_pos ;
-  camera.lookAt(0,0,0) ;
-  newUpdate = true ;
-};
 
-socket.onopen = (event) =>
-{
-  console.log("connected") ;
-}
-
-socket.onclose = (event) =>
-{
-  console.log("connection closed") ;
-  navigateTo("../")
-}
-
-document.onkeydown = keyDown;
-document.onkeyup = keyUp;
-
-let left = false ;
-let right = false ;
-
-function keyDown(e) {
+  keyDown(e) {
     e = e || window.event;
 
     if (e.keyCode == '37')      // right arrow
-       right = true
+      this.right = true
     else if (e.keyCode == '39') // left arrow
-       left = true
-}
+      this.left = true
+  }
 
-function keyUp(e) {
-  e = e || window.event;
+  keyUp(e) {
+    e = e || window.event;
 
-  if (e.keyCode == '37')      // right arrow
-     right = false
-  else if (e.keyCode == '39') // left arrow
-     left = false
-}
+    if (e.keyCode == '37')      // right arrow
+      this.right = false
+    else if (e.keyCode == '39') // left arrow
+      this.left = false
+  }
 
+  createTextTexture(text) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 256;
+    canvas.height = 256;
 
-function createTextTexture(text) {
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  canvas.width = 256;
-  canvas.height = 256;
+    context.fillStyle = "rgba(0, 0, 0, 0.0)";
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
-  context.fillStyle = "rgba(0, 0, 0, 0.0)";
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.fillRect(0, 0, canvas.width, canvas.height);
+    context.font = 'Bold 256px Arial';
+    context.fillStyle = '#ffffff';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(text, canvas.width / 2, canvas.height / 2);
 
-  context.font = 'Bold 256px Arial';
-  context.fillStyle = '#ffffff';
-  context.textAlign = 'center';
-  context.textBaseline = 'middle';
-  context.fillText(text, canvas.width / 2, canvas.height / 2);
+    return new THREE.CanvasTexture(canvas);
+  }
 
-  return new THREE.CanvasTexture(canvas);
-}
+  updateScore() {
+    this.player1Score.material.map = this.createTextTexture(`${this.score1Text}`);
+    this.player2Score.material.map = this.createTextTexture(`${this.score2Text}`);
+    this.player1Score.material.needsUpdate = true;
+    this.player2Score.material.needsUpdate = true;
+  }
 
-function updateScore() {
-  player1Score.material.map = createTextTexture(`${score1Text}`) ;
-  player2Score.material.map = createTextTexture(`${score2Text}`) ;
-  player1Score.material.needsUpdate = true ;
-  player2Score.material.needsUpdate = true ;
-}
+  //retrieve list of all cameras
+  retrieveListOfCameras(scene) {
+    // Get a list of all cameras in the scene
+    let cameraList = []
+    scene.traverse((object) => {
+      if (object.isCamera) {
+        cameraList.push(object);
+      }
+      if (object.name === "PaddlePlayer1")
+        this.player = object;
+      if (object.name === "PaddlePlayer2")
+        this.player2 = object;
+      if (object.name === "Cube")
+        this.ball = object;
+      if (object.name === "score1")
+        this.player1Score = object
+      if (object.name === "score2")
+        this.player2Score = object
+      // console.log(player1Score);
+    });
+    this.updateScore()
+
+    //Set the camera to the first value in the list of cameras
+    this.camera = cameraList[0];
+
+    this.updateCameraAspect(this.camera);
+
+    // Start the animation loop after the model and cameras are loaded
+    this.animate();
+  }
+
+  //A method to be run each time a frame is generated
+  animate() {
+    this.animationFrameId = requestAnimationFrame(this.animate);
+    this.renderer.render(this.scene, this.camera);
+    if (!this.newUpdate)
+      return;
+    this.newUpdate = false;
+    if (this.right == true)
+      this.socket.send(JSON.stringify({ "type": 'right' }));
+    if (this.left == true)
+      this.socket.send(JSON.stringify({ "type": 'left' }));
+  };
+
+  disconnectedCallback() {
+    if (this.socket) this.socket.close();
+
+    // Remove event listeners
+    window.removeEventListener('resize', this.onResize);
+    document.removeEventListener('keydown', this.keyDown);
+    document.removeEventListener('keyup', this.keyUp);
+
+    // Dispose of Three.js resources
+    this.scene.traverse((object) => {
+        // Dispose geometries
+        if (object.geometry) {
+            object.geometry.dispose();
+        }
+
+        // Dispose materials and textures
+        if (object.material) {
+            if (Array.isArray(object.material)) {
+                object.material.forEach(material => {
+                    if (material.map) material.map.dispose();
+                    if (material.lightMap) material.lightMap.dispose();
+                    if (material.bumpMap) material.bumpMap.dispose();
+                    if (material.normalMap) material.normalMap.dispose();
+                    if (material.specularMap) material.specularMap.dispose();
+                    if (material.envMap) material.envMap.dispose();
+                    material.dispose();
+                });
+            } else {
+                if (object.material.map) object.material.map.dispose();
+                if (object.material.lightMap) object.material.lightMap.dispose();
+                if (object.material.bumpMap) object.material.bumpMap.dispose();
+                if (object.material.normalMap) object.material.normalMap.dispose();
+                if (object.material.specularMap) object.material.specularMap.dispose();
+                if (object.material.envMap) object.material.envMap.dispose();
+                object.material.dispose();
+            }
+        }
+    });
+
+    // Dispose of the scene
+    this.scene.clear();
+
+    // Dispose of the renderer
+    if (this.renderer) {
+        this.renderer.dispose();
+        this.renderer.forceContextLoss();
+        this.renderer.domElement = null;
+        this.renderer = null;
+    }
+
+    // Clear any animation frame requests
+    if (this.animationFrameId) {
+        cancelAnimationFrame(this.animationFrameId);
+    }
+
+    // Clear references
+    this.scene = null;
+    this.camera = null;
+    this.player = null;
+    this.player2 = null;
+    this.ball = null;
+    this.player1Score = null;
+    this.player2Score = null;
   }
 }
 

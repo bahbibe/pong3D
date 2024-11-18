@@ -1126,83 +1126,158 @@
     </section>
   </template>
 
-  <template id="tournament-page">
-    <style>
-    </style>
-    <main-nav></main-nav>
-  </template>
-
-  <template id="tournament-display-page">
+  <template id="score-page">
     <main-nav></main-nav>
     <style>
+      #score {
+        font-size: xx-large;
+      }
       .player {
         height: 100px;
         width: 100px;
         background-color: #624E88;
         border: #fefefe 1px solid;
         border-radius: 8px;
-        position: absolute;
       }
-
-      .player1 {
-        top: 0%;
-        left: 0%;
-      }
-
-      .player2 {
-        bottom: 0%;
-        left: 0%;
-      }
-
-      .player3 {
-        top: 0%;
-        right: 0%;
-      }
-
-      .player4 {
-        bottom: 0%;
-        right: 0%;
-      }
-
-      .player5 {
-        top: 50%;
-        left: 75%;
-        transform: translate(0, -50%);
-      }
-
-      .player6 {
-        top: 50%;
-        right: 75%;
-        transform: translate(0, -50%);
-      }
-
-      .winner {
-        top: 25%;
-        left: 50%;
-        transform: translate(-50%, 0);
-      }
-
-      .tournament>div>img {
+      .player > img {
         height: 100%;
         width: 100%;
         border-radius: 8px;
       }
-
-      .tournament {
-        position: relative;
-      }
     </style>
-    <div class="d-flex p-5 min-vh-100 w-100">
-      <div class="tournament w-100">
-        <div class="player player1 round-1"></div>
-        <div class="player player2 round-1"></div>
-        <div class="player player3 round-1"></div>
-        <div class="player player4 round-1"></div>
-        <div class="player player5 round-1"></div>
-        <div class="player player6 round-2"></div>
-        <div class="player winner"></div>
-      </div>
+    <div id="score" class="score d-flex min-vh-100 w-100 align-items-center justify-content-evenly">
+      <div class="player player1 round-1"></div>
+      <span id="player1_score">0</span>
+      <span>-</span>
+      <span id="player2_score">0</span>
+      <div class="player player2 round-1"></div>
     </div>
+  </template>
+
+  <template id="tournament-page">
+    <main-nav></main-nav>
+  </template>
+
+  <template id="tournament-display-page">
+    <main-nav></main-nav>
+    <section>
+      <div class="theme theme-dark">
+        <div class="bracket disable-image">
+          <div class="column one">
+            <div class="round1 game1 match winner-top">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">1</span>
+                <span class="name">Orlando Jetsetters</span>
+                <span class="score">2</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+            <div class="round1 game1 match winner-top">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">4</span>
+                <span class="name">New Orleans Rockstars</span>
+                <span class="score">1</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+            <div class="round1 game2 match winner-top">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">2</span>
+                <span class="name">Denver Demon Horses</span>
+                <span class="score">2</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+            <div class="round1 game2 match winner-top">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">3</span>
+                <span class="name">San Francisco Porters</span>
+                <span class="score">2</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+          </div>
+          <div class="column two">
+            <div class="round2 game3 match winner-top">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">1</span>
+                <span class="name">Orlando Jetsetters</span>
+                <span class="score">1</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+            <div class="round2 game3 match winner-top">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">2</span>
+                <span class="name">Denver Demon Horses</span>
+                <span class="score">1</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+          </div>
+          <div class="column three">
+            <div class="winner match winner-top">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">5</span>
+                <span class="name">West Virginia Runners</span>
+                <span class="score">3</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>        
+          </div>
+        </div>
+      </div>
+      
+    </section>
   </template>
 
 

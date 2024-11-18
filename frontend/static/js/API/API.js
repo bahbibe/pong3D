@@ -73,6 +73,23 @@ class API {
       console.error("Error Loading profile:", error);
     }
   }
+  async getTournamentGames(tournament_id) {
+    try {
+      const response = await fetch(`http://localhost:8000/game/get_tournament_games/${tournament_id}`, {
+        method: "GET",
+        headers: {
+          "content-type": "application/json",
+        },
+        credentials: "include",
+      });
+      if (!response.ok)
+        throw new Error(`API request failed with status: ${response.status}`);
+      const res = await response.json();
+      return res.data;
+    } catch (error) {
+      console.error("Error Loading profile:", error);
+    }
+  }
 
   async getTournament(tournament_id) {
     try {
@@ -111,6 +128,27 @@ class API {
       const res = await response.json();
       return res.data;
     } catch (error) {
+      console.error("Error creating tournament:", error);
+    }
+  }
+
+  async get_game(game_id) {
+    try
+    {
+      const response = await fetch(`http://localhost:8000/game/get_game/${game_id}`,
+        {
+          method: "GET",
+          headers: {
+            "content-type": "application/json",
+          },
+          credentials: "include",
+        }) ;
+        if (!response.ok)
+          throw new Error(`API request failed with status: ${response.status}`);
+        const res = await response.json();
+        return res.data;
+    } catch (error)
+    {
       console.error("Error creating tournament:", error);
     }
   }
