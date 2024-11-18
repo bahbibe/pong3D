@@ -33,7 +33,7 @@
 
 </head>
 
-<body>
+<body class="no-scroll">
 
   <div id="app"></div>
 
@@ -44,14 +44,16 @@
   <template id="chat-page">
     <section>
       <main-nav></main-nav>
-      <div class="p-3 container-md">
-        <div class="row" style="height: 80dvh;">
-          <div class="friends-list border col-2 col-md-4 p-2">
-            <div class="chat-heading p-2 mb-4 border">
-              <h2> Friends </h2>
+      <div class="p-3 container-md d-flex flex-grow-1">
+          <div class="friends-list col-2 col-md-4 p-2">
+            <div class="chat-heading p-3 mb-3 d-flex w-100 ">
+              <h2> <i class="fa-solid fa-user-group"></i><span class="d-none d-md-inline"> Contacts</span> </h2>
             </div>
           </div>
-          <div class="chat-box border border-info col-10 col-md-8 p-0">
+          <div class="chat-box glass-effect col-10 col-md-8 p-0" >
+            <div class=" d-flex justify-content-center align-items-center h-100">
+              <img src="/static/asset/images/no-message.png" class=" w-25 opacity-25" alt="chat image">
+            </div>
           </div>
         </div>
       </div>

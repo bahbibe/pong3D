@@ -83,6 +83,7 @@ body {
   background: var(--backgroud);
   color: var(--text);
   min-height: 100vh;
+  min-width: 375px;
 }
 
 #overlay {

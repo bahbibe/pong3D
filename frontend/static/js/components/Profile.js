@@ -8,6 +8,10 @@ class Profile extends HTMLElement {
   connectedCallback() {
     const template = document.getElementById("profile");
     const clone = template.content.cloneNode(true);
+    const rootElement = clone.firstElementChild;
+    if (rootElement) {
+      rootElement.className = "vh-100 d-flex flex-column no-scroll";
+    }
     this.appendChild(clone);
     this.render();
   }

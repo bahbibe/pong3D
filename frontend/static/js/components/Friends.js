@@ -29,14 +29,16 @@ class Friends extends HTMLElement {
   }
   FriendElement(item) {
     const friendElement = document.createElement("div");
-    friendElement.className = "friends-item p-2 mb-2 d-flex";
+    friendElement.className = "contact  p-2 m-2 mb-3 d-flex gap-2";
     friendElement.innerHTML = `
-          <div class="col-12 col-md-2">
-          <img src="${item.friend.profile.avatar}" class="img-fluid rounded-circle " width="100" alt="avatar"/>
+          <div class="col-12 col-md-3 col-lg-2 d-flex justify-content-center align-items-center">
+          <img src="${item.friend.profile.avatar}" class="img-fluid rounded-circle h-md-75 h-sm-100" alt="avatar"/>
           </div>
-          <div class="conv d-none d-md-block">
-          <h5>${item.friend.username}</h5>
-          <p>last one </p>
+          <div class="d-none d-md-block col-md-9 col-lg-10">
+          <div class="last-msg d-flex flex-column h-100 justify-content-center">
+          <p class="m-0 fs-5">${item.friend.username}</p>
+          <p class="m-0 opacity-75">a AKJsygfdjkghLAKSJDHJGASKFGAKJHSDGFAGSDFHJGASDHJFG </p>
+          </div>
           </div>
     `;
     friendElement.addEventListener("click", () => {

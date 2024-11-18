@@ -36,7 +36,7 @@ class ChatBox extends HTMLElement {
     this.ws ? this.ws.close() : null;
   }
 
-  renderMessages() {
+  render() {
     try {
       this.messages.forEach((item) => {
         this.msgBox.appendChild(this.createMessageElement(item));
@@ -52,10 +52,13 @@ class ChatBox extends HTMLElement {
 
   emptyElement() {
     const emptyElement = document.createElement("div");
-    emptyElement.className = "d-flex justify-content-center";
+    emptyElement.id = "empty";
+    emptyElement.className = "d-flex justify-content-center h-100 align-items-center";
     emptyElement.innerHTML = `
-    <span> No messages </span>
-    `;
+    <div class="d-flex flex-column gap-5 text-center">
+      <span class="fs-2 fw-bold"> Hello !! </span>
+    <span>  <i class="fa-solid fa-hand-sparkles fa-bounce fs-1"></i> </span>
+    </div>`;
     return emptyElement;
   }
 
@@ -63,9 +66,10 @@ class ChatBox extends HTMLElement {
     const inputElement = document.createElement("form");
     inputElement.className = "input-group";
     inputElement.innerHTML = `
-    <input type="text" class="form-control" placeholder="Type a message" aria-label="Type a message" aria-describedby="button-addon2"/>
-    <button class="btn btn-outline-info" type="submit" id="button-addon2">Send</button>
-    `;
+    <div class=" send w-100 d-flex justify-content-around align-items-center mt-2">
+    <input type="text" class=" send-input me-0 h-100" placeholder="  Type a message" aria-label="Type a message" aria-describedby="button-addon2"/>
+    <button class=" send-icon btn h-100" type="submit" id="button-addon2"><i class="fs-3 fa-solid fa-paper-plane"></i> </button>
+    </div>`;
     inputElement.addEventListener("submit", (e) => {
       e.preventDefault();
       const input = inputElement.querySelector("input");
@@ -82,14 +86,19 @@ class ChatBox extends HTMLElement {
 
   headerElement(friend) {
     const headerElement = document.createElement("div");
-    headerElement.className = "status mb-3 p-2 d-flex";
+    headerElement.className = "msg-head mb-3 p-2 d-flex gap-2";
+    // window.online_users.includes(friend.id)
+    //   ? document.querySelector(".stat").classList.add("online")
+    //   : null
     headerElement.innerHTML = `
-    <div class="col-2 ">
-      <img src="${friend.profile.avatar}" class="img-fluid rounded-circle pe-1" width="60" alt="avatar"/>
+    <div>
+      <img src="${friend.profile.avatar}" class="img-fluid rounded-circle h-100" alt="avatar"/>
     </div>
-    <div class="chat-info col-10">
-      <span>${friend.username}</span>
+    <div class="chat-info d-flex flex-column justify-content-center">
+      <span class="fs-5">${friend.username}</span>
+      <span class="stat opacity-75"> <i class="fa-solid fa-circle"></i> Online</span>
     </div>
+
     `;
     return headerElement;
   }
@@ -120,7 +129,7 @@ class ChatBox extends HTMLElement {
       if (!message) {
         return;
       }
-      this.querySelector(".msg-container").appendChild(
+      this.querySelector(".msg-box").appendChild(
         this.createMessageElement(JSON.parse(message))
       );
       this.msgBox.scrollTop = this.msgBox.scrollHeight;
