@@ -14,31 +14,47 @@ class GameInstance:
             'player2': 0,
         }
         self.vel = [random.choice([-1, 1]), random.choice([-1, 1])]
-        self.speed = 0.02
+        self.speed = 0.04
         self.limit = [3.5, 5]
         self.channel_layer = channel_layer
         self.running = True
         self.game_loop_task = asyncio.create_task(self.game_loop())
         self.game = game
-
+        self.paused = False
+        self.ready = {
+            'player1': False,
+            'player2': False,
+        }
 
     async def game_loop(self):
-        await self.channel_layer.group_send(self.game_id, {
-            "type": "send_game_id",
-            "game_id": self.game_id,
-            })
         while self.running:
-            self.update_ball_position()
-            await self.save_game()
-            self.game_state['score'] = [self.game.player1_score, self.game.player2_score]
-            await self.channel_layer.group_send(self.game_id, {
-                "type": "game_update_message",
-                "game_state": self.game_state,
-                })
             if self.game.player1_score >= 3 or self.game.player2_score >= 3:
-                break
+                    self.game_state['score'] = [self.game.player1_score, self.game.player2_score]
+                    await self.channel_layer.group_send(self.game_id, {
+                        "type": "game_update_message",
+                        "game_state": self.game_state,
+                    })
+                    await asyncio.sleep(1)  # Wait 1 second
+                    break
+            if not self.paused and self.ready['player1'] and self.ready['player2']:
+                self.update_ball_position()
+                await self.save_game()
+                self.game_state['score'] = [self.game.player1_score, self.game.player2_score]
+                await self.channel_layer.group_send(self.game_id, {
+                    "type": "game_update_message",
+                    "game_state": self.game_state,
+                    })
+            else:
+                await self.channel_layer.group_send(self.game_id, {
+                    "type": "send_game_id",
+                    "game_id": self.game_id,
+                })
+                await asyncio.sleep(1)  # Wait 1 second
             await asyncio.sleep(1/60)  # Run at 60 FPS
         await self.send_game_end_notification()
+
+    def set_player_ready(self, player):
+        self.ready[player] = True
 
     @database_sync_to_async
     def save_game(self):
@@ -89,9 +105,12 @@ class GameInstance:
     def reset_game(self):
         self.game_state['ball_position'][0] = 0
         self.game_state['ball_position'][1] = 0
-        self.game_state['player1'] = 0
-        self.game_state['player2'] = 0
+        # self.game_state['player1'] = 0
+        # self.game_state['player2'] = 0
         self.vel = [random.choice([-1, 1]), random.choice([-1, 1])]
+
+    def set_paused(self, state):
+        self.paused = state
 
         
 class GameManager:

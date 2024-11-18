@@ -14,8 +14,8 @@ class Game(models.Model):
 class Tournament(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
-    started = models.BooleanField(default=0)
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    t_round = models.IntegerField(default=3)
 
 class Tournament_Participants(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
@@ -23,13 +23,14 @@ class Tournament_Participants(models.Model):
     t_round = models.IntegerField(default=3) # round decrement with each win
     ready = models.BooleanField(default=False)
     class Meta:
-        unique_together = ('tournament', 'player',)
+        unique_together = (('tournament', 'player',))
 
 class Tournament_Game(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.DO_NOTHING)
     game = models.ForeignKey(Game, on_delete=models.DO_NOTHING, blank=True, null=True)
+    t_round = models.IntegerField(default=2)
     class Meta:
-        unique_together = (('tournament', 'game'),)
+        unique_together = (('tournament', 'game',),)
 
 
 

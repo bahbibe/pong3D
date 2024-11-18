@@ -8,7 +8,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .game_manager import GameManager
 from .models import Game, Tournament, Tournament_Participants, Tournament_Game
 from channels.db import database_sync_to_async
-from .serializers import TournamentGameSerializer
+from .serializers import TournamentGameSerializer, GameSerializer
+from django.db.models import Q, F
 
 game_manager = GameManager()
 
@@ -17,6 +18,13 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.accept()
         self.user = self.scope["user"]
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
+        try:
+            self.tournament_id = self.scope["url_route"]["kwargs"]["tournament_id"]
+            if self.tournament_id:
+                print("self.tournament_id:", self.tournament_id)
+        except:
+            pass
+
         self.player = 'player2'
 
         self.game = await self.get_game()
@@ -31,9 +39,12 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.game_instance = await game_manager.get_game_instance(self.game_id)
         if not self.game_instance:
             # Create a new game instance
+            print("gameinstance create")
             await game_manager.create_game_instance(self.game)
             self.game_instance = await game_manager.get_game_instance(self.game_id)
         
+        if self.game and self.game_instance:
+            self.game_instance.set_paused(False)
         
     @database_sync_to_async
     def get_game(self):
@@ -47,6 +58,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             return None
 
     async def disconnect(self, close_code):
+        if self.game and self.game_instance:
+            self.game_instance.set_paused(True)
         await self.channel_layer.group_discard(self.game_id, self.channel_name)
 
     # Receive message from WebSocket
@@ -85,17 +98,13 @@ class GameConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-    # Handle game state updates
-    async def update_game_state(self, game_state):
-        # Update the game state based on the received data
-        pass
-
     # Broadcast game updates to all players in the game
     async def game_update_message(self, event):
         game_state = event['game_state']
         side = self.player
         game_state['side'] = side
-        await self.send(text_data=json.dumps(game_state))
+        event['game_state'] = game_state
+        await self.send(text_data=json.dumps(event))
 
     async def send_game_id(self, event):
         game_id = event['game_id']
@@ -103,115 +112,114 @@ class GameConsumer(AsyncWebsocketConsumer):
         self.game_instance = await game_manager.get_game_instance(self.game_id)
         print(self.player, "sending game id")
         await self.join_game()
-        await self.send(text_data=json.dumps(game_id))
+        await self.send(text_data=json.dumps(event))
     
     async def send_game_end(self, event):
-        await self.send(text_data=json.dumps("game over"))
+        print("game_over")
+        await self.send(text_data=json.dumps({
+            'type': "game over"
+            }))
+        await game_manager.remove_game_instance(self.game_id)
 
     async def join_game(self):
         self.game_instance = await game_manager.get_game_instance(self.game_id)
-
-
+        self.game_instance.set_player_ready(self.player)
 
 class TournamentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
         self.user = self.scope["user"]
         self.tournament_id = self.scope["url_route"]["kwargs"]["tournament_id"]
-        self.participant = await self.get_participant(self.tournament_id)
-        if self.participant is None:
-            await self.close()
-            print("didnt find")
-            return
-        
+
         await self.channel_layer.group_add(self.tournament_id, self.channel_name)
-        await self.set_participant_ready(True)
+        self.games = await self.create_tournament_games()
+        self.t_round = await self.get_player_round()
+        await self.set_game(True, self.t_round)
         await self.channel_layer.group_send(
                 self.tournament_id,
                 {
                     'type': 'update',
                 }
             )
-        games = await self.create_tournament_games()
-        if games is not None:
-            await self.channel_layer.group_send(
-                self.tournament_id,
-                {
-                    'type': 'start',
-                    'data': await self.call_serializer(games) 
-                }
-            )
         
+    @database_sync_to_async
+    def get_player_round(self):
+        t_round = 2
+        games = Tournament_Game.objects.filter((Q(game__player1=self.user) | Q(game__player2=self.user)), tournament=self.tournament)
+        for game in games:
+            if game.game.player1 == self.user and game.game.player1_score > game.game.player2_score:
+                print("won")
+                t_round -= 1
+            if game.game.player2 == self.user and game.game.player2_score > game.game.player1_score:
+                print("won")
+                t_round -= 1
+        return t_round
+
+    @database_sync_to_async
+    def set_game(self, join, t_round):
+        if not join:
+            game = Tournament_Game.objects.filter((Q(game__player1=self.user) | Q(game__player2=self.user)), tournament=self.tournament, t_round=t_round).first()
+            if game:
+                if game.game.player2 == None:
+                    game.game.player1 = None
+                if game.game.player1 == None:
+                    game.game.player2 = None
+                game.game.save()
+        print("tround dd ", t_round)
+        if join:
+            game = Tournament_Game.objects.filter((Q(game__player1=None) | Q(game__player2=None)), tournament=self.tournament, t_round=t_round).first()
+            if game:
+                print("joining game")
+                if game.game.player1:
+                    game.game.player2 = self.user
+                else:
+                    game.game.player1 = self.user
+                game.game.save()
+            else:
+                print("didnt find spot")
 
     @database_sync_to_async
     def call_serializer(self, games):
         return TournamentGameSerializer(games, many=True).data
 
-
-    @database_sync_to_async
-    def get_participant(self, tournament_id):
-        try:
-            self.tournament = Tournament.objects.get(uuid=tournament_id)
-            self.participants = Tournament_Participants.objects.filter(tournament=self.tournament)
-            self.participant = Tournament_Participants.objects.get(tournament=self.tournament, player=self.user)
-            if self.participant is None:
-                self.participant = Tournament_Participants.objects.create(
-                    tournament = self.tournament,
-                    player = self.user,
-                )
-            return self.participant
-        except (Tournament.DoesNotExist, Tournament_Participants.DoesNotExist):
-            return None
-    
-    @database_sync_to_async
-    def set_participant_ready(self, ready_status):
-        if self.participant:
-            self.participant.ready = ready_status
-            self.participant.save()
-            if not ready_status:
-                self.participant.delete()
-            print(f"Set to {self.participant.id, self.participant.tournament, self.participant.player}")
-
     async def disconnect(self, close_code):
+        await self.set_game(False, self.t_round)
         await self.channel_layer.group_send(
                 self.tournament_id,
                 {
                     'type': 'update',
                 }
             )
-        await self.set_participant_ready(False)
         await self.channel_layer.group_discard(self.tournament_id, self.channel_name)
 
     async def receive(self, text_data):
         print(text_data)
     
     async def update(self, event):
-        await self.send(text_data=json.dumps(event["type"]))
+        await self.send(text_data=json.dumps(event))
 
     async def start(self, event):
-        await self.send(text_data=json.dumps(event["data"]))
+        await self.send(text_data=json.dumps(event))
 
     @database_sync_to_async
     def create_tournament_games(self):
-        if self.participants.count() < 4:
-            return None
-        try:
-            for player1, player2 in self.pairwise(self.participants):
-                print(player1.player.username, " vs ", player2.player.username)
-                game = Game.objects.create(
-                    player1=player1.player,
-                    player2=player2.player,
-                )
-                Tournament_Game.objects.create(
-                    tournament=self.tournament,
-                    game=game
-                )
-            return Tournament_Game.objects.filter(tournament=self.tournament)
-        except :
-            return None
+        self.tournament = Tournament.objects.get(uuid=self.tournament_id)
+        if not Tournament_Game.objects.filter(tournament=self.tournament).exists():
+            for i in range(1,3,1):
+                print("i",i)
+                for j in range(1,i+1,1):
+                    print("j",j)
+                    game = Game.objects.create(
+                                player1=None,
+                                player2=None,
+                    )
+                    Tournament_Game.objects.create(
+                        tournament=self.tournament,
+                        game=game,
+                        t_round=i
+                    )
+        return Tournament_Game.objects.filter(tournament=self.tournament)
             
-
-
     def pairwise(self, iterable):
         "s -> (s0, s1), (s2, s3), (s4, s5), ..."
         a = iter(iterable)

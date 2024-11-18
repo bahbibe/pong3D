@@ -34,7 +34,6 @@ class GameHistorySerializer(serializers.ModelSerializer):
 
 class TournamentSerializer(serializers.ModelSerializer):
     uuid = serializers.CharField()
-    started = serializers.BooleanField()
     owner = UserSerializer(read_only=True)
     is_participant = serializers.BooleanField(default=False)
 
@@ -42,7 +41,6 @@ class TournamentSerializer(serializers.ModelSerializer):
         model = Tournament
         fields = [
             "uuid",
-            "started",
             "owner",
             "is_participant",
         ]
@@ -63,6 +61,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
         ]
 
 class GameSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
     uuid = serializers.CharField()
     player1 = UserSerializer(read_only=True)
     player2 = UserSerializer(read_only=True)
@@ -72,6 +71,7 @@ class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = [
+            "id",
             "uuid",
             "player1",
             "player2",
@@ -83,10 +83,12 @@ class GameSerializer(serializers.ModelSerializer):
 class TournamentGameSerializer(serializers.ModelSerializer):
     tournament = TournamentSerializer()
     game = GameSerializer()
+    t_round = serializers.IntegerField()
 
     class Meta:
         model = Game
         fields = [
             "tournament",
             "game",
+            "t_round"
         ]

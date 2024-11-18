@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from api.auth_utils import is_authenticated
 from utils.responses import SuccessResponse, ErrorResponse
-from .serializers import GameHistorySerializer, GameStatsSerializer, TournamentSerializer, TournamentParticipantsSerializer
+from .serializers import GameHistorySerializer, GameStatsSerializer, TournamentSerializer, TournamentParticipantsSerializer, GameSerializer, TournamentGameSerializer
 from .models import Game
 from .models import Tournament, Tournament_Participants, Tournament_Game
 from django.db.models import Q
@@ -85,10 +85,6 @@ def create_tournament(request):
     tournament = Tournament.objects.create(
         owner = request.user,
     )
-    Tournament_Participants.objects.create(
-        tournament = tournament,
-        player = request.user,
-    )
     print(tournament.owner.id)
     # start the tournament
     # only if the request user is the tournament owner
@@ -113,49 +109,27 @@ def get_tournaments(request):
 
 @api_view(["GET"])
 @is_authenticated
-def join_tournament(request, tournament_id):
+def get_tournament_games(request, tournament_id):
     tournament = Tournament.objects.get(uuid=tournament_id)
-    if not tournament:
-        return ErrorResponse(
-            message= "Tournament doesn't exist!",
-        )
-    participant_count = Tournament_Participants.objects.filter(tournament=tournament).count()
-    if participant_count >= 4:
-        return ErrorResponse(
-            message="tournament is full",
-        )
-    participant = Tournament_Participants.objects.filter(player=request.user).filter(tournament=tournament).first()
-    if not participant:
-        print(tournament_id)
-        participant = Tournament_Participants.objects.create(
-            tournament = tournament,
-            player = request.user,
-        )
-    return SuccessResponse(
-        data={
-            "message": "tournament joined successfuly",
-            "data": TournamentParticipantsSerializer(participant).data
-        }
-    )
-
-@api_view(["GET"])
-@is_authenticated
-def get_participants(request, tournament_id):
-    tournament = Tournament.objects.get(uuid=tournament_id)
-    participant = Tournament_Participants.objects.filter(tournament=tournament)
+    games = Tournament_Game.objects.select_related('game').filter(tournament=tournament)
     return SuccessResponse(
         data={ 
-            "data": TournamentParticipantsSerializer(participant, many=True).data
+            "data": TournamentGameSerializer(games, many=True).data
         }
     )
 
 @api_view(["GET"])
 @is_authenticated
-def leave_tournament(request):
-    pass
-    # leave tournament if it didn't start yet
-    # if the tournament already stated count as eleminated
-    return SuccessResponse(
-        data={
-        }
-    )
+def get_game(request, game_id):
+    try:
+        game = Game.objects.get(id=game_id)
+        return SuccessResponse(
+            data={
+                "game": GameSerializer(game).data
+            }
+        )
+    except Exception as error:
+        print(error)
+        return ErrorResponse(
+            message="Game not found",
+        )
