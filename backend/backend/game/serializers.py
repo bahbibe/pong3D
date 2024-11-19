@@ -35,14 +35,14 @@ class GameHistorySerializer(serializers.ModelSerializer):
 class TournamentSerializer(serializers.ModelSerializer):
     uuid = serializers.CharField()
     owner = UserSerializer(read_only=True)
-    is_participant = serializers.BooleanField(default=False)
+    spots = serializers.IntegerField(default=4)
 
     class Meta:
         model = Tournament
         fields = [
             "uuid",
             "owner",
-            "is_participant",
+            "spots",
         ]
 
 class TournamentParticipantsSerializer(serializers.ModelSerializer):

@@ -14,7 +14,7 @@ class GameInstance:
             'player2': 0,
         }
         self.vel = [random.choice([-1, 1]), random.choice([-1, 1])]
-        self.speed = 0.04
+        self.speed = 0.05
         self.limit = [3.5, 5]
         self.channel_layer = channel_layer
         self.running = True
@@ -29,14 +29,15 @@ class GameInstance:
     async def game_loop(self):
         while self.running:
             if self.game.player1_score >= 3 or self.game.player2_score >= 3:
-                    self.game_state['score'] = [self.game.player1_score, self.game.player2_score]
-                    await self.channel_layer.group_send(self.game_id, {
-                        "type": "game_update_message",
-                        "game_state": self.game_state,
-                    })
-                    await asyncio.sleep(1)  # Wait 1 second
-                    break
+                self.game_state['score'] = [self.game.player1_score, self.game.player2_score]
+                await self.channel_layer.group_send(self.game_id, {
+                    "type": "game_update_message",
+                    "game_state": self.game_state,
+                })
+                await asyncio.sleep(1)  # Wait 1 second
+                break
             if not self.paused and self.ready['player1'] and self.ready['player2']:
+                # print(f"ready['player1']: {self.ready['player1']}\nready['player2']: {self.ready['player2']}")
                 self.update_ball_position()
                 await self.save_game()
                 self.game_state['score'] = [self.game.player1_score, self.game.player2_score]

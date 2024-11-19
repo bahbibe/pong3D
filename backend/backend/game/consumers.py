@@ -167,6 +167,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 game.game.save()
         print("tround dd ", t_round)
         if join:
+            if Tournament_Game.objects.filter((Q(game__player1=self.user) | Q(game__player2=self.user)), tournament=self.tournament, t_round=t_round).exists():
+                print("already joined")
+                return
             game = Tournament_Game.objects.filter((Q(game__player1=None) | Q(game__player2=None)), tournament=self.tournament, t_round=t_round).first()
             if game:
                 print("joining game")

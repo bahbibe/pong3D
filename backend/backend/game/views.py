@@ -100,7 +100,10 @@ def create_tournament(request):
 def get_tournaments(request):
     tournaments = Tournament.objects.all()
     for tournament in tournaments:
-        tournament.is_participant = Tournament_Participants.objects.filter(player=request.user, tournament=tournament).exists()
+        player1_spots = Tournament_Game.objects.filter(tournament=tournament, game__player1=None, t_round=2).count()
+        player2_spots = Tournament_Game.objects.filter(tournament=tournament, game__player2=None, t_round=2).count()
+        spots = player1_spots + player2_spots
+        tournament.spots = spots
     return SuccessResponse(
         data={
             "data": TournamentSerializer(tournaments, many=True).data,
