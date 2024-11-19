@@ -34,7 +34,7 @@ class TournamentPage extends AbstractPage {
           let elem = document.createElement('li') ;
           elem.classList = "d-flex alight-items-center justify-content-between py-1 px-4"
           let tourName = document.createElement('span') ;
-          tourName.innerHTML = `${element.owner.username}'s Tournament` ;
+          tourName.innerHTML = `${element.owner.username}'s ${element.uuid} Tournament` ;
           elem.appendChild(tourName) ;
           let tourState = document.createElement('span') ;
           tourState.innerHTML = `${4 - element.spots}/4` ;

@@ -31,7 +31,7 @@ class TournamentDisplayPage extends AbstractPage {
         }
 
         let game_it = 1;
-        this.games.data.filter(game => game.t_round == 2).forEach(game => {
+        this.games.data.filter(game => game.t_round == 2).sort((a, b) => a.game.id - b.game.id).forEach(game => {
           const slots = this.querySelectorAll(`.game${game_it++}`) ;
 
           const player1 = game.game.player1 ;
