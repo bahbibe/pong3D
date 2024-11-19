@@ -76,9 +76,9 @@ class GameConsumer(AsyncWebsocketConsumer):
         if self.game.player1 == self.user :
             side = 1
         if message_type == 'right':
-            self.game_instance.game_state[self.player] -= 5 * self.game_instance.speed * side
+            self.game_instance.game_state[self.player] -= 5 * 0.015 * side
         if message_type == 'left':
-            self.game_instance.game_state[self.player] += 5 * self.game_instance.speed * side
+            self.game_instance.game_state[self.player] += 5 * 0.015 * side
 
         if self.game_instance.game_state[self.player] < -3:
             self.game_instance.game_state[self.player] = -3
@@ -110,7 +110,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         game_id = event['game_id']
         self.game_id = game_id
         self.game_instance = await game_manager.get_game_instance(self.game_id)
-        print(self.player, "sending game id")
+        # print(self.player, "sending game id")
         await self.join_game()
         await self.send(text_data=json.dumps(event))
     
@@ -120,6 +120,43 @@ class GameConsumer(AsyncWebsocketConsumer):
             'type': "game over"
             }))
         await game_manager.remove_game_instance(self.game_id)
+        await self.qualify_next_round()
+        print("game_end")
+    
+    @database_sync_to_async
+    def qualify_next_round(self):
+        try:
+            print("qualify1")
+            game = Tournament_Game.objects.get(game__id=self.game_id)
+            if game.game.player1 == self.user and game.game.player1_score < game.game.player2_score:
+                return
+            if game.game.player2 == self.user and game.game.player1_score > game.game.player2_score:
+                return
+            print("qualify2")
+            t_round = game.t_round
+            print("qualify3")
+            if t_round != 2:
+                print("not round 2")
+                return
+            print("qualify4")
+            final = Tournament_Game.objects.get(tournament__uuid=self.tournament_id, t_round=1)
+            print("qualify5")
+            games = Tournament_Game.objects.filter(tournament__uuid=self.tournament_id, t_round=2)
+            print("qualify6")
+            if game == games[0]:
+                print("game1")
+                final.game.player1 = self.user
+                final.game.save()
+            elif game == games[1]:
+                print("game2")
+                final.game.player2 = self.user
+                final.game.save()
+            else:
+                print("qualify next round error: *didnt find the games")
+            
+        except Exception as error:
+            print("qualify next round error:", error)
+            pass
 
     async def join_game(self):
         self.game_instance = await game_manager.get_game_instance(self.game_id)
@@ -157,6 +194,8 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def set_game(self, join, t_round):
+        if t_round < 2:
+            return
         if not join:
             game = Tournament_Game.objects.filter((Q(game__player1=self.user) | Q(game__player2=self.user)), tournament=self.tournament, t_round=t_round).first()
             if game:
@@ -167,10 +206,11 @@ class TournamentConsumer(AsyncWebsocketConsumer):
                 game.game.save()
         print("tround dd ", t_round)
         if join:
+            # if already joined
             if Tournament_Game.objects.filter((Q(game__player1=self.user) | Q(game__player2=self.user)), tournament=self.tournament, t_round=t_round).exists():
-                print("already joined")
                 return
-            game = Tournament_Game.objects.filter((Q(game__player1=None) | Q(game__player2=None)), tournament=self.tournament, t_round=t_round).first()
+            # get empty seats
+            game = Tournament_Game.objects.filter((Q(game__player1=None) | Q(game__player2=None)), tournament=self.tournament, t_round=t_round).order_by("id").first()
             if game:
                 print("joining game")
                 if game.game.player1:

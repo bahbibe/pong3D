@@ -15,7 +15,7 @@ class Tournament(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
     owner = models.ForeignKey(User, on_delete=models.DO_NOTHING)
-    t_round = models.IntegerField(default=3)
+    finished = models.BooleanField(default=False)
 
 class Tournament_Participants(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)

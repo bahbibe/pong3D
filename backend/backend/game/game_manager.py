@@ -14,7 +14,7 @@ class GameInstance:
             'player2': 0,
         }
         self.vel = [random.choice([-1, 1]), random.choice([-1, 1])]
-        self.speed = 0.05
+        self.speed = 0.055
         self.limit = [3.5, 5]
         self.channel_layer = channel_layer
         self.running = True

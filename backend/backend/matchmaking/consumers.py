@@ -15,6 +15,9 @@ class Matchmaking(AsyncWebsocketConsumer):
         self.opponent_id = r.lpop(f'matchmaking:random')
         print(f"player {self.user.id} added to queue")
         await self.channel_layer.group_add(f"matchmaking_{self.user.id}", self.channel_name)
+        if self.user == await self.get_user(self.opponent_id):
+            r.rpush(f"matchmaking:random", self.user.id)
+            return
         if self.opponent_id is None :
             r.rpush(f"matchmaking:random", self.user.id)
             return
@@ -36,9 +39,17 @@ class Matchmaking(AsyncWebsocketConsumer):
         )
 
     @database_sync_to_async
+    def get_user(self, user_id):
+        if not user_id:
+            return None
+        user = User.objects.get(id=int(user_id))
+        print(user.id)
+        return user
+    @database_sync_to_async
     def create_game(self):
+        opponent = User.objects.get(id=int(self.opponent_id[0]))
         game = Game.objects.create(
-            player1 = User.objects.get(id=int(self.opponent_id[0])),
+            player1 = opponent,
             player2 = self.user,
         )
 

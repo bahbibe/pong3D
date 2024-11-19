@@ -36,6 +36,7 @@ class TournamentSerializer(serializers.ModelSerializer):
     uuid = serializers.CharField()
     owner = UserSerializer(read_only=True)
     spots = serializers.IntegerField(default=4)
+    finished = serializers.BooleanField()
 
     class Meta:
         model = Tournament
@@ -43,6 +44,7 @@ class TournamentSerializer(serializers.ModelSerializer):
             "uuid",
             "owner",
             "spots",
+            "finished"
         ]
 
 class TournamentParticipantsSerializer(serializers.ModelSerializer):
