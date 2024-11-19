@@ -28,14 +28,19 @@ class TournamentPage extends AbstractPage {
     this.list.classList += "w-100 p-4";
     this.API.getTournaments().then((res) => {
         this.tournaments = res ;
+        console.log();
+        
         this.tournaments.data.forEach(element => {
           let elem = document.createElement('li') ;
           elem.classList = "d-flex alight-items-center justify-content-between py-1 px-4"
-          let tourName = document.createElement('span')
+          let tourName = document.createElement('span') ;
           tourName.innerHTML = `${element.owner.username}'s Tournament` ;
           elem.appendChild(tourName) ;
+          let tourState = document.createElement('span') ;
+          tourState.innerHTML = `${4 - element.spots}/4` ;
+          elem.appendChild(tourState) ;
           let join_button = document.createElement('button') ;
-          join_button.innerHTML = 'Join'
+          join_button.innerHTML = element.spots ? 'Join' : 'Check'
           console.log(element);
           
           join_button.onclick = (e) => {join_tournament(element.uuid)} ;
