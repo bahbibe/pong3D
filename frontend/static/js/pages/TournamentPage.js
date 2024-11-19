@@ -52,6 +52,9 @@ class TournamentPage extends AbstractPage {
 
     this.appendChild(this.list);
   }
+  attributeChangedCallback(name, oldValue, newValue) {
+    console.log(`Attribute ${name} has changed.`);
+  }
 }
 
 async function join_tournament(tournament_id) {

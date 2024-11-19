@@ -18,15 +18,6 @@ class TournamentDisplayPage extends AbstractPage {
       const res = JSON.parse(e.data)
       console.log(res);
       
-      if (res.type == 'start')
-      {
-        const game = res.data.filter((elem) => elem.game.player1.username === user.username || elem.game.player2.username === user.username) ;
-        if (game)
-          console.log(game);
-          
-          // navigateTo(`/game/${game.id}`) ;
-      }
-      
       this.API.getTournamentGames(this.params.tournament_id).then((res) => {
         this.games = res;
         console.log(this.games);
@@ -76,7 +67,7 @@ class TournamentDisplayPage extends AbstractPage {
             slots[0]?.classList.replace('winner-top', 'winner-bottom')
 
           if (player1 && player2 && (player1.username == user.username || player2.username == user.username) && (game.game.player1_score < 3 && game.game.player2_score < 3))
-            navigateTo(`/game/${this.params.tournament_id}/${game.game.id}`)
+            navigateTo(`/game/${this.params.tournament_id}/${game.game.id}`) ;
         });
 
 
@@ -114,7 +105,7 @@ class TournamentDisplayPage extends AbstractPage {
             slots[0]?.classList.replace('winner-top', 'winner-bottom')
 
           if (player1 && player2 && (player1.username == user.username || player2.username == user.username) && (game.game.player1_score < 3 && game.game.player2_score < 3))
-            navigateTo(`/game/${this.params.tournament_id}/${game.game.id}`)
+            navigateTo(`/game/${this.params.tournament_id}/${game.game.id}`) ;
         });
 
         const lastgame = this.games.data.filter(game => game.t_round == 1)[0].game
@@ -148,7 +139,6 @@ class TournamentDisplayPage extends AbstractPage {
   }
   disconnectedCallback() {
     this.socket.close() ;
-    console.log("Custom element removed from page.");
   }
 }
 

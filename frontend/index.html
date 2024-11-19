@@ -1147,12 +1147,22 @@
         border-radius: 8px;
       }
     </style>
-    <div id="score" class="score d-flex min-vh-100 w-100 align-items-center justify-content-evenly">
-      <div class="player player1 round-1"></div>
-      <span id="player1_score">0</span>
-      <span>-</span>
-      <span id="player2_score">0</span>
-      <div class="player player2 round-1"></div>
+    <div class="min-vh-100 d-flex align-items-center justify-content-evenly flex-column">
+      <div id="score" class="score d-flex w-100 align-items-center justify-content-evenly">
+        <div class="player player1 round-1"></div>
+        <span id="player1_score">0</span>
+        <span>-</span>
+        <span id="player2_score">0</span>
+        <div class="player player2 round-1"></div>
+      </div>
+      <div id="score" class="score d-flex w-100 align-items-center justify-content-evenly">
+        <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--light); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);" href="/matchmaking" data-link=>Play again</a>
+        <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--light); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);" href="/Home" data-link=>Leave</a>
+      </div>
     </div>
   </template>
 
