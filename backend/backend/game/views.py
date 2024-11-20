@@ -2,13 +2,24 @@ from django.shortcuts import render
 from rest_framework.decorators import api_view
 from api.auth_utils import is_authenticated
 from utils.responses import SuccessResponse, ErrorResponse
-from .serializers import GameHistorySerializer, GameStatsSerializer, TournamentSerializer, TournamentParticipantsSerializer, GameSerializer, TournamentGameSerializer
+from .serializers import (
+    GameHistorySerializer,
+    GameStatsSerializer,
+    TournamentSerializer,
+    TournamentParticipantsSerializer,
+    GameSerializer,
+    TournamentGameSerializer,
+    LeaderboardSerializer,
+)
 from .models import Game
 from .models import Tournament, Tournament_Participants, Tournament_Game
 from django.db.models import Q
 from django.db.models import F
+from api.models import User
+from api.serializers import UserSerializer
 
 # Create your views here.
+
 
 @api_view(["GET"])
 @is_authenticated
@@ -79,11 +90,38 @@ def history(request):
         }
     )
 
+
+@api_view(["GET"])
+@is_authenticated
+def get_leaderboard(request):
+    users = User.objects.all()
+    for user in users:
+        games = Game.objects.filter(Q(player1_id=user) | Q(player2_id=user))
+        total_games = games.count()
+        total_wins = games.filter(
+            Q(player1_id=user, player1_score__gt=F("player2_score"))
+            | Q(player2_id=user, player2_score__gt=F("player1_score"))
+        ).count()
+        total_losses = total_games - total_wins
+        ratio = (total_wins / total_games) * 100 if total_games > 0 else 0
+        user.total_games = total_games
+        user.total_wins = total_wins
+        user.total_losses = total_losses
+        user.ratio = ratio
+    users = sorted(users, key=lambda x: x.ratio, reverse=True)
+
+    return SuccessResponse(
+        data={
+            "users": LeaderboardSerializer(users, many=True).data,
+        }
+    )
+
+
 @api_view(["GET"])
 @is_authenticated
 def create_tournament(request):
     tournament = Tournament.objects.create(
-        owner = request.user,
+        owner=request.user,
     )
     print(tournament.owner.id)
     # start the tournament
@@ -91,17 +129,22 @@ def create_tournament(request):
     return SuccessResponse(
         data={
             "message": "tournament created successfuly",
-            "data": TournamentSerializer(tournament).data , 
+            "data": TournamentSerializer(tournament).data,
         }
     )
+
 
 @api_view(["GET"])
 @is_authenticated
 def get_tournaments(request):
     tournaments = Tournament.objects.all()
     for tournament in tournaments:
-        player1_spots = Tournament_Game.objects.filter(tournament=tournament, game__player1=None, t_round=2).count()
-        player2_spots = Tournament_Game.objects.filter(tournament=tournament, game__player2=None, t_round=2).count()
+        player1_spots = Tournament_Game.objects.filter(
+            tournament=tournament, game__player1=None, t_round=2
+        ).count()
+        player2_spots = Tournament_Game.objects.filter(
+            tournament=tournament, game__player2=None, t_round=2
+        ).count()
         spots = player1_spots + player2_spots
         tournament.spots = spots
     return SuccessResponse(
@@ -110,27 +153,23 @@ def get_tournaments(request):
         }
     )
 
+
 @api_view(["GET"])
 @is_authenticated
 def get_tournament_games(request, tournament_id):
     tournament = Tournament.objects.get(uuid=tournament_id)
-    games = Tournament_Game.objects.select_related('game').filter(tournament=tournament)
+    games = Tournament_Game.objects.select_related("game").filter(tournament=tournament)
     return SuccessResponse(
-        data={ 
-            "data": TournamentGameSerializer(games, many=True).data
-        }
+        data={"data": TournamentGameSerializer(games, many=True).data}
     )
+
 
 @api_view(["GET"])
 @is_authenticated
 def get_game(request, game_id):
     try:
         game = Game.objects.get(id=game_id)
-        return SuccessResponse(
-            data={
-                "game": GameSerializer(game).data
-            }
-        )
+        return SuccessResponse(data={"game": GameSerializer(game).data})
     except Exception as error:
         print(error)
         return ErrorResponse(

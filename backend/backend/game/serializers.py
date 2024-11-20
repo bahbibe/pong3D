@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Game, Tournament
 from api.serializers import UserSerializer
+import os
+from api.models import Profile
 
 
 class GameStatsSerializer(serializers.ModelSerializer):
@@ -32,6 +34,36 @@ class GameHistorySerializer(serializers.ModelSerializer):
             "is_user_winner",
         ]
 
+
+class LeaderboardSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    total_games = serializers.IntegerField()
+    total_wins = serializers.IntegerField()
+    total_losses = serializers.IntegerField()
+    ratio = serializers.IntegerField()
+
+    def get_user(self, obj):
+        avatar = obj.profile.avatar
+        if obj.profile.auth_method == Profile.EMAIL:
+            avatar = f"{os.getenv('API_URL')}/{avatar}"
+
+        return {
+            "id": obj.id,
+            "username": obj.username,
+            "avatar": str(avatar),
+        }
+
+    class Meta:
+        model = Game
+        fields = [
+            "user",
+            "total_games",
+            "total_wins",
+            "total_losses",
+            "ratio",
+        ]
+
+
 class TournamentSerializer(serializers.ModelSerializer):
     uuid = serializers.CharField()
     owner = UserSerializer(read_only=True)
@@ -40,19 +72,15 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tournament
-        fields = [
-            "uuid",
-            "owner",
-            "spots",
-            "finished"
-        ]
+        fields = ["uuid", "owner", "spots", "finished"]
+
 
 class TournamentParticipantsSerializer(serializers.ModelSerializer):
     tournament = TournamentSerializer()
     player = UserSerializer(read_only=True)
     t_round = serializers.IntegerField()
     ready = serializers.BooleanField()
-    
+
     class Meta:
         model = Tournament
         fields = [
@@ -62,6 +90,7 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
             "ready",
         ]
 
+
 class GameSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     uuid = serializers.CharField()
@@ -69,7 +98,7 @@ class GameSerializer(serializers.ModelSerializer):
     player2 = UserSerializer(read_only=True)
     player1_score = serializers.IntegerField()
     player2_score = serializers.IntegerField()
-    
+
     class Meta:
         model = Game
         fields = [
@@ -89,8 +118,4 @@ class TournamentGameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Game
-        fields = [
-            "tournament",
-            "game",
-            "t_round"
-        ]
+        fields = ["tournament", "game", "t_round"]
