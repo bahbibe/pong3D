@@ -52,7 +52,7 @@ export const renderNotifications = () => {
             <div class="text">
                 <p class="text-wrap">
                   <a data-link href="/friend/${notification.sender.uuid}"><span class="name">${notification.sender.username}</span> </a> ${notification.message} 
-                  ${ notification.ctx == "game_invite" ? "<button data-game=" + notification.game_id + ">Play</button>" : ""}
+                  ${ notification?.ctx == "game_invite" || notification.type == 'game_invite' ? "<button data-game=" + notification.game_id + ">Play</button>" : ""}
                 </p>
             </div>
         </div>
