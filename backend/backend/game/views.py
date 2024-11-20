@@ -19,6 +19,7 @@ from api.models import User
 from api.serializers import UserSerializer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from api.models import Notification
 # Create your views here.
 
 
@@ -186,6 +187,13 @@ def invite_friend(request, friend_id):
         game = Game.objects.create(
             player1 = source_user,
             player2 = target_user
+        )
+        Notification.objects.create(
+            user_id=target_user.id,
+            message="invated you to a game",
+            type="game_invite",
+            sender_id=source_user.id,
+            game_id = game.id
         )
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
