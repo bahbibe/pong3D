@@ -14,4 +14,5 @@ urlpatterns = [
         name="get_tournament_games",
     ),
     path("get_game/<game_id>", views.get_game, name="get_game"),
+    path("invite_friend/<friend_id>", views.invite_friend, name="invite_friend"),
 ]

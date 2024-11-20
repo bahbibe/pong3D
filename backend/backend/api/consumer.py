@@ -92,7 +92,7 @@ class NotificationConusmer(AsyncWebsocketConsumer):
             and event["sender_avatar"]
             or f"{os.getenv('API_URL')}/{event['sender_avatar']}"
         )
-
+        game_id = event["game_id"]
         # await create_notification(user_id, sender_id, message, "friend_request")
 
         await self.send(
@@ -106,6 +106,7 @@ class NotificationConusmer(AsyncWebsocketConsumer):
                         "username": event["sender_username"],
                         "avatar": avatar,
                     },
+                    "game_id": game_id
                 }
             )
         )

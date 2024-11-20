@@ -17,7 +17,8 @@ from django.db.models import Q
 from django.db.models import F
 from api.models import User
 from api.serializers import UserSerializer
-
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 # Create your views here.
 
 
@@ -174,4 +175,36 @@ def get_game(request, game_id):
         print(error)
         return ErrorResponse(
             message="Game not found",
+        )
+
+@api_view(["GET"])
+@is_authenticated
+def invite_friend(request, friend_id):
+    try:
+        source_user = request.user
+        target_user = User.objects.get(id=int(friend_id))
+        game = Game.objects.create(
+            player1 = source_user,
+            player2 = target_user
+        )
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"user_{target_user.id}",
+            {
+                "type": "send_notification",
+                "message": "invated you to a game",
+                "user_id": target_user.id,
+                "sender_id": source_user.id,
+                "sender_uuid": str(source_user.profile.uuid),
+                "sender_username": source_user.username,
+                "sender_avatar": str(source_user.profile.avatar),
+                "ctx": "game_invite",
+                "game_id": game.id
+            },
+        )
+        return SuccessResponse(data={"game": GameSerializer(game).data})
+    except Exception as error:
+        print(error)
+        return ErrorResponse(
+            message = error,
         )
