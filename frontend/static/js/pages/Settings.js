@@ -44,7 +44,6 @@ class SettingsPage extends AbstractPage {
     const form = this.querySelector("#settings-form");
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      // console.log("submitting form");
       this.submitForm(form);
       return false;
     });
@@ -86,8 +85,7 @@ class SettingsPage extends AbstractPage {
       if (data && data.success) {
         window.user = data.data;
         showToast(false, "settings updated successfully");
-        // navigateTo("/profile");
-        console.log(data.data);
+        navigateTo("/profile");
       } else {
 
         showToast(true, data.message, data.errors);

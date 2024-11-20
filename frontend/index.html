@@ -643,38 +643,14 @@
         </div>
 
         <div class="row mt-4 mb-2 justify-content-between">
-          <div class="col-12 p-3 glass-effect mb-3 mb-lg-0" style="min-height: 47vh;">
+          <div class="col-12 p-3 glass-effect mb-3 mb-lg-0 justify-content-center" style="min-height: 47vh;">
             <h2 class="text-white">Game History</h2>
-            <div class="profile-content p-1">
-              <div class="d-flex justify-content-evenly mt-3 p-1 mb-1" style="background: linear-gradient(to right, rgb(20, 30, 48), rgb(36, 59, 85));">
-                <div class="  ">
-                <div class="d-flex align-items-center">
-                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
-                    <div class="ps-2">
-                      <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
-                    </div>
-                  </div>
-                </div>
-                <div class=" my-auto order-1 order-md-0 d-none d-md-block text-center">
-                  <img src="/static/asset/images/icons8-vs.png" class="img-fluid" width="30" alt="icon batlle">
-                </div>
-                <div class=" order-3 order-md-0">
-                  <div class="d-md-flex align-items-center">
-                    <div class="pe-2">
-                      <sapn class="fw-bold text-capitalize">bmakhlou</sapn>
-                    </div>
-                    <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block" width="50" alt="user profile image">
-                  </div>
-                </div>
-                <div class=" my-auto order-2 order-md-0 text-center">
-                  <span class="result fw-bolder ">10:7</span>
-                </div>
-                <div class="my-auto text-center d-none d-md-block">
-                  <span class="result fw-bolder">WIN 🏆</span>
-                </div>
-              </div>
+            <div class="row justify-content-center">
+            <div class="col-12 col-md-9" id="friend-history"></div>
+
             </div>
           </div>
+
 
         </div>
       </div>
@@ -924,170 +900,7 @@
     </section>
   </template>
 
-  <!-- !Blocked page -->
-  <template id="blocked-page">
-    <main-nav></main-nav>
-    <section>
-      <div class="theme theme-dark">
-        <div class="bracket disable-image">
-          <div class="column one">
-            <div class="match winner-top">
-              <div class="match-top team">
-                <span class="image"></span>
-                <span class="seed">1</span>
-                <span class="name">Orlando Jetsetters</span>
-                <span class="score">2</span>
-              </div>
-              <!-- <div class="match-bottom team">
-                <span class="image"></span>
-                <span class="seed">8</span>
-                <span class="name">D.C. Senators</span>
-                <span class="score">1</span>
-              </div> -->
-              <div class="match-lines">
-                <div class="line one"></div>
-                <div class="line two"></div>
-              </div>
-              <div class="match-lines alt">
-                <div class="line one"></div>
-              </div>
-            </div>
-            <div class="match winner-bottom">
-              <div class="match-top team">
-                <span class="image"></span>
-                <span class="seed">4</span>
-                <span class="name">New Orleans Rockstars</span>
-                <span class="score">1</span>
-              </div>
-              <!-- <div class="match-bottom team">
-                <span class="image"></span>
-                <span class="seed">5</span>
-                <span class="name">West Virginia Runners</span>
-                <span class="score">2</span>
-              </div> -->
-              <div class="match-lines">
-                <div class="line one"></div>
-                <div class="line two"></div>
-              </div>
-              <div class="match-lines alt">
-                <div class="line one"></div>
-              </div>
-            </div>
-            <div class="match winner-top">
-              <div class="match-top team">
-                <span class="image"></span>
-                <span class="seed">2</span>
-                <span class="name">Denver Demon Horses</span>
-                <span class="score">2</span>
-              </div>
-              <!-- <div class="match-bottom team">
-                <span class="image"></span>
-                <span class="seed">7</span>
-                <span class="name">Chicago Pistons</span>
-                <span class="score">0</span>
-              </div> -->
-              <div class="match-lines">
-                <div class="line one"></div>
-                <div class="line two"></div>
-              </div>
-              <div class="match-lines alt">
-                <div class="line one"></div>
-              </div>
-            </div>
-            <div class="match winner-top">
-              <div class="match-top team">
-                <span class="image"></span>
-                <span class="seed">3</span>
-                <span class="name">San Francisco Porters</span>
-                <span class="score">2</span>
-              </div>
-              <!-- <div class="match-bottom team">
-                <span class="image"></span>
-                <span class="seed">6</span>
-                <span class="name">Seattle Climbers</span>
-                <span class="score">1</span>
-              </div> -->
-              <div class="match-lines">
-                <div class="line one"></div>
-                <div class="line two"></div>
-              </div>
-              <div class="match-lines alt">
-                <div class="line one"></div>
-              </div>
-            </div>
-          </div>
-          <div class="column two">
-            <div class="match winner-bottom">
-              <div class="match-top team">
-                <span class="image"></span>
-                <span class="seed">1</span>
-                <span class="name">Orlando Jetsetters</span>
-                <span class="score">1</span>
-              </div>
-              <!-- <div class="match-bottom team">
-                <span class="image"></span>
-                <span class="seed">5</span>
-                <span class="name">West Virginia Runners</span>
-                <span class="score">2</span>
-              </div> -->
-              <div class="match-lines">
-                <div class="line one"></div>
-                <div class="line two"></div>
-              </div>
-              <div class="match-lines alt">
-                <div class="line one"></div>
-              </div>
-            </div>
-            <div class="match winner-bottom">
-              <div class="match-top team">
-                <span class="image"></span>
-                <span class="seed">2</span>
-                <span class="name">Denver Demon Horses</span>
-                <span class="score">1</span>
-              </div>
-              <!-- <div class="match-bottom team">
-                <span class="image"></span>
-                <span class="seed">3</span>
-                <span class="name">San Francisco Porters</span>
-                <span class="score">2</span>
-              </div> -->
-              <div class="match-lines">
-                <div class="line one"></div>
-                <div class="line two"></div>
-              </div>
-              <div class="match-lines alt">
-                <div class="line one"></div>
-              </div>
-            </div>
-          </div>
-          <div class="column three">
-            <div class="match winner-top">
-              <div class="match-top team">
-                <span class="image"></span>
-                <span class="seed">5</span>
-                <span class="name">West Virginia Runners</span>
-                <span class="score">3</span>
-              </div>
-              <!-- <div class="match-bottom team">
-                <span class="image"></span>
-                <span class="seed">3</span>
-                <span class="name">San Francisco Porters</span>
-                <span class="score">2</span>
-              </div> -->
-              <div class="match-lines">
-                <div class="line one"></div>
-                <div class="line two"></div>
-              </div>
-              <div class="match-lines alt">
-                <div class="line one"></div>
-              </div>
-            </div>        
-          </div>
-        </div>
-      </div>
-      
-    </section>
-  </template>
+
   <!-- !not found page -->
   <template id="not-found-page">
     <h1>404 Not Found</h1>
@@ -1169,6 +982,51 @@
     </div>
   </template>
 
+  <template id="tour-page">
+    <main-nav></main-nav>
+    <section>
+      <div class="container-md p-4 p-md-0">
+        <h1 class="display-1 my-5">Tournament</h1>
+        <div class="row align-items-center justify-content-evenly">
+          <div class="secondary-bg p-2 tourCard tourCardBgImg CardBgImg1 mb-3 mb-md-0">
+            <div class="overlay-card"></div>
+            <button href="#" class="btn btn-block btn-primary"style="z-index: 10;">Create Tournament</button>
+          </div>
+          <div class="secondary-bg tourCard tourCardBgImg CardBgImg2">
+            <div class="overlay-card"></div>
+            <button href="#" class="btn btn-block btn-primary" style="z-index: 10;">Join Tournament</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+  <template id="join-page">
+    <main-nav></main-nav>
+    <section>
+      <div class="container-md p-4">
+        <h1>Join a Tournament </h1>
+        <table class="table text-center mt-4" >
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Tournament Id</th>
+              <th scope="col">Players Number</th>
+              <th scope="col">Join a Tournament</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">bolbol's 3521a8a3-b858-4c7b-8a48-015dd36ecc97 Tournament</th>
+              <td>1/4</td>
+              <td><button type="button" class="btn btn-block bg-dark text-white ps-4 pe-4">Join</button></td>
+            </tr>
+          </tbody>
+        </table>
+        
+      
+      </div>
+    </section>
+  </template>
+
   <template id="tournament-page">
     <main-nav></main-nav>
   </template>
@@ -1176,7 +1034,7 @@
   <template id="tournament-display-page">
     <main-nav></main-nav>
     <section>
-      <div class="theme theme-dark">
+      <div class="theme theme-dark" style="overflow-x: scroll;">
         <div class="bracket disable-image">
           <div class="column one">
             <div class="round1 game1 match winner-bottom">

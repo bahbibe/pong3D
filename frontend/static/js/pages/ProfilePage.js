@@ -158,14 +158,11 @@ class ProfilePage extends AbstractPage {
       const losses = this.querySelector(".losses");
       const ratio = this.querySelector(".ratio");
       const gamesContainer = this.querySelector("#games-container");
-      console.log("games container ",gamesContainer);
 
       const response = await fetch("http://localhost:8000/game/history/", { credentials: "include" });
       const data = await response.json();
       const stats = data.data.stats;
       const games = data.data.games;
-      console.log("game status: ", games);
-      console.log("game score: ", games[0].player_score);
 
       if (response.ok) {
         total.textContent = `${stats.total_games} Matches`;

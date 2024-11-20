@@ -58,6 +58,8 @@ const routes = [
   { path: "/tournament", view: TournamentPage, isProtected: true, page: "tournament-page" },
   { path: "/tournament/:tournament_id", view: TournamentDisplayPage, isProtected: true, page: "tournament-display-page" },
   { path: "/score/:game_id", view: ScorePage, isProtected: true, page: "score-page" },
+  { path: "/tour", view: ScorePage, isProtected: true, page: "tour-page" },
+  { path: "/join", view: ScorePage, isProtected: true, page: "join-page" },
   {
     path: "/chat/:roomId",
     view: ChatPage,
