@@ -30,7 +30,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "api",
     "friends",
-    "tournaments",
     "channels",
     "game",
     "matchmaking",
