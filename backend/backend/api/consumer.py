@@ -84,16 +84,13 @@ class NotificationConusmer(AsyncWebsocketConsumer):
 
     async def send_notification(self, event):
         message = event["message"]
-        user_id = event["user_id"]
-        sender_id = event["sender_id"]
         ctx = event["ctx"]
         avatar = (
-            "intra.42.fr" in event["sender_avatar"]
+            "cdn.intra.42.fr" in event["sender_avatar"]
             and event["sender_avatar"]
             or f"{os.getenv('API_URL')}/{event['sender_avatar']}"
         )
         game_id = event["game_id"]
-        # await create_notification(user_id, sender_id, message, "friend_request")
 
         await self.send(
             text_data=json.dumps(
@@ -106,7 +103,7 @@ class NotificationConusmer(AsyncWebsocketConsumer):
                         "username": event["sender_username"],
                         "avatar": avatar,
                     },
-                    "game_id": game_id
+                    "game_id": game_id,
                 }
             )
         )

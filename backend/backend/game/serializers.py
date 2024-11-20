@@ -44,8 +44,9 @@ class LeaderboardSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         avatar = obj.profile.avatar
-        if obj.profile.auth_method == Profile.EMAIL:
-            avatar = f"{os.getenv('API_URL')}/{avatar}"
+        avatar = (
+            "cdn.intra.42.fr" in avatar and avatar or f"{os.getenv('API_URL')}/{avatar}"
+        )
 
         return {
             "id": obj.id,

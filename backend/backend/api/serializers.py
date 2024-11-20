@@ -75,9 +75,11 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        avatar_url = data["avatar"]
-        if data["auth_method"] == Profile.EMAIL:
-            data["avatar"] = f"{os.getenv('API_URL')}/{avatar_url}"
+        data["avatar"] = (
+            "cdn.intra.42.fr" in data["avatar"]
+            and data["avatar"]
+            or f"{os.getenv('API_URL')}/{data['avatar']}"
+        )
         return data
 
 
@@ -105,13 +107,16 @@ class NotificationSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField()
 
     def get_sender(self, obj):
-        avatar = obj.sender.profile.avatar
-        if obj.sender.profile.auth_method == Profile.EMAIL:
-            avatar = f"{os.getenv('API_URL')}/{avatar}"
+        avatar = str(obj.sender.profile.avatar)
+        avatar_url = (
+            "cdn.intra.42.fr" in avatar
+            and avatar
+            or f"{os.getenv('API_URL')}/{avatar}"
+        )
         return {
             "id": obj.sender.id,
             "username": obj.sender.username,
-            "avatar": str(avatar),
+            "avatar": avatar_url,
             "uuid": str(obj.sender.profile.uuid),
         }
 

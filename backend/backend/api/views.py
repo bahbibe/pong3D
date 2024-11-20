@@ -49,12 +49,21 @@ def update_settings(request):
     serializer = UpdateSettingsSerializer(data=request.data)
     if serializer.is_valid():
         profile = user.profile
-        if User.objects.filter(
-            username=serializer.validated_data.get("username")
-        ).exists():
+        username = serializer.validated_data.get("username")
+        email = serializer.validated_data.get("email")
+
+        if (
+            username != user.username
+            and User.objects.filter(username=username).exists()
+        ):
             return ErrorResponse(message="Username already exists")
 
-        if User.objects.filter(email=serializer.validated_data.get("email")).exists():
+        if (
+            email != user.email
+            and User.objects.filter(
+                email=serializer.validated_data.get("email")
+            ).exists()
+        ):
             return ErrorResponse(message="Email already exists")
 
         profile.avatar = serializer.validated_data.get("avatar", profile.avatar)
