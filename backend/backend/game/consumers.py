@@ -52,6 +52,10 @@ class GameConsumer(AsyncWebsocketConsumer):
             game = Game.objects.get(id=self.game_id)
             if self.user == game.player1:
                 self.player = 'player1'
+            elif self.user == game.player2:
+                self.player = 'player2'
+            else:
+                return None
             return game
         except Game.DoesNotExist:
             print("game doesn't exist")
