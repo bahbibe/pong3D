@@ -29,8 +29,33 @@ class ProfilePage extends AbstractPage {
     this.getFriend();
     this.getBlockedFriends();
     this.getStatGames();
-
+    
+    // Add event listener to container
+    this.container.addEventListener('click', (e) => {
+      const playButton = e.target.closest('[data-id]');
+      if (playButton) {
+        const friendId = playButton.dataset.id;
+        this.invate_friend(friendId) ;
+      }
+    });  
   }
+
+  async invate_friend(friendId)
+  {
+    try
+    {
+      const response = await fetch(`http://localhost:8000/game/invite_friend/${friendId}`, { credentials: "include" }) ;
+      const data = await response.json() ;
+      if (response.ok)
+        {
+          navigateTo(`/game/${data.data.game.id}`)
+        }
+    } catch(error) {
+      console.log(error);
+    }
+  }
+
+
   async getFriend() {
     try {
       showOverlay();
@@ -63,7 +88,7 @@ class ProfilePage extends AbstractPage {
                   <span id="ratio"><strong>100</strong></span>
                 </div>
                 <div class="col-3 col-md-2 text-end">
-                  <a href="#" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
+                  <a data-id="${friend.friend.id}" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
                 </div> 
               </div>
           `;
@@ -216,6 +241,14 @@ class mainNav extends AbstractPage {
     });
     this.renderNotifications();
     this.logoutBtn.addEventListener("click", this.logout);
+
+    this.notification.addEventListener('click', (e) => {
+      const playButton = e.target.closest('[data-game]');
+      if (playButton) {
+        const game = playButton.dataset.game;
+        navigateTo(`/game/${game}`) ;
+      }
+    });
 
   }
 
