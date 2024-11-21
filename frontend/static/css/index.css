@@ -13,22 +13,15 @@
   --secondary: #58178A;
   --accent: #8E1DE7;
   --text: #EAE0F2;
-  --white: #f1f1f1;
+  --white: #1a1515;
   --text-mute: #a0a0a0;
   --placeholder: #757575;
   --logged-in: #33c533;
   --logged-out: #ff0000;
 }
 
-/* :root {
-  --backgroud: #110818;
-  --darker: #1a0f23;
-  --primary: #BE8CE4;
-  --secondary: #58178A;
-  --accent: #8E1DE7;
-  --text : #EAE0F2;
-  --white: #f1f1f1;
-} */
+
+
 
 h1 {
   font-weight: 800;
@@ -146,7 +139,17 @@ body {
 
 
 
-
+.styled-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.styled-scrollbar::-webkit-scrollbar-track {
+  background: var(--darker);
+}
+.styled-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #624E88;
+}
 
 
 /*-------------------fonts------------------------ */
@@ -374,15 +377,15 @@ button[data-login]:hover, button#intra:hover, [data-play]:hover {
 
 
 
-.main {
+/* .main {
   min-height: 100vh;
   width: 100%;
   max-width: 100%;
-  /* overflow: hidden; */
-  /* background-color: #f9f9f9; */
-}
+  overflow: hidden;
+  background-color: #f9f9f9;
+} */
 
-#sidebar {
+/* #sidebar {
   contain: paint;
   min-height: 100vh;
   height: 100%;
@@ -408,14 +411,14 @@ button[data-login]:hover, button#intra:hover, [data-play]:hover {
   font-size: 1.75rem;
   color: #000;
   font-weight: 1000;
-}
+} */
 
 .navbar {
   padding: 1.15rem 1.5rem;
   border-bottom: 2px solid #b3a8a8;
 }
 
-.sidebar-nav {
+/* .sidebar-nav {
   flex: 1 1 auto;
 }
 
@@ -428,9 +431,9 @@ button[data-login]:hover, button#intra:hover, [data-play]:hover {
   color: #FFF;
   font-weight: 800;
   font-size: 1.5rem;
-}
+} */
 
-.sidebar-header {
+/* .sidebar-header {
   color: #FFF;
   font-size: .75rem;
   padding: 1.5rem 1.5rem .375rem;
@@ -443,9 +446,9 @@ a.sidebar-link {
   transition: all 0.35s;
   display: block;
   font-size: 1.25rem;
-}
+} */
 
-a.sidebar-link:hover,
+/* a.sidebar-link:hover,
 a.sidebar-link.active {
   background-color: #f9f6f630;
 }
@@ -466,11 +469,11 @@ a.sidebar-link.active {
 .sidebar-link[data-bs-toggle="collapse"].collapsed::after {
   transform: rotate(45deg);
   transition: all .2s ease-out;
-}
+} */
 
 /* Screen size less than 768px */
 
-@media (max-width:768px) {
+/* @media (max-width:768px) {
 
   .sidebar-toggle {
     margin-left: -230px;
@@ -479,9 +482,7 @@ a.sidebar-link.active {
   #sidebar.collapsed {
     margin-left: 0;
   }
-}
-
-
+} */
 
 
 /* From Uiverse.io by SupportHotline */

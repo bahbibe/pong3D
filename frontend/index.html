@@ -33,7 +33,7 @@
 
 </head>
 
-<body class="no-scroll">
+<body class="styled-scrollbar">
 
   <div id="app"></div>
 
@@ -356,7 +356,7 @@
               </div>
               <div class="ps-0 ps-md-4 pt-4 pb-md-0">
                 <h4 class="m-0 fw-bold text-capitalize" id="fullName">bilal makhloufi</h4>
-                <sapn class="fw-medium text-capitalize" id="username">@bmakhlou</sapn>
+                <span class="fw-medium text-capitalize" id="username">@bmakhlou</span>
               </div>
             </div>
           </div>
@@ -895,7 +895,8 @@
   <template id="search-page">
     <section>
       <main-nav></main-nav>
-      <div class="container mt-4 d-flex gap-4" id="search-container">
+      <div class="container p-3">
+        <div class="row flex-column flex-md-row mt-4" id="search-container"></div>
       </div>
     </section>
   </template>
@@ -1029,7 +1030,7 @@
   <template id="tournament-display-page">
     <main-nav></main-nav>
     <section>
-      <div class="theme theme-dark" style="overflow-x: scroll;">
+      <div class="theme theme-dark" style="overflow-x: auto;">
         <div class="bracket disable-image">
           <div class="column one">
             <div class="round1 game1 match winner-bottom">

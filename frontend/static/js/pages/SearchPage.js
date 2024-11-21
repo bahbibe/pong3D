@@ -26,9 +26,9 @@ class SearchPage extends AbstractPage {
       const data = await response.json();
       const users = data.data;
       if (response.ok) {
-        for (const user of users) {
+        User.forEach(user => {
           this.container.innerHTML += `
-          <div class="secondary-bg box-sh-1 p-2 text-center rounded mx-auto mx-md-0" style="width: 160px; height: 140px;">
+          <div class=" secondary-bg box-sh-1 p-2 text-center rounded  mx-auto mx-md-0  me-md-3 mb-3" style="width: 160px; height: 140px;">
                     <div class="img ">
                       <img class="img-fluid rounded rounded-circle" src="${user.profile.avatar}" alt="" width="100" height="100">
                     </div>
@@ -37,7 +37,7 @@ class SearchPage extends AbstractPage {
                     </div>
           </div>
           `
-        }
+        });
       }
       else
         this.container.innerHTML = `<p class="fw-bold fs-1">User Not Fount!</p>`
