@@ -10,6 +10,10 @@ from .models import Game, Tournament, Tournament_Participants, Tournament_Game
 from channels.db import database_sync_to_async
 from .serializers import TournamentGameSerializer, GameSerializer
 from django.db.models import Q, F
+from .views import invite_friend
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+from api.models import Notification
 
 game_manager = GameManager()
 
@@ -18,20 +22,23 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.accept()
         self.user = self.scope["user"]
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
-        try:
-            self.tournament_id = self.scope["url_route"]["kwargs"]["tournament_id"]
-            if self.tournament_id:
-                print("self.tournament_id:", self.tournament_id)
-        except:
-            pass
-
         self.player = 'player2'
-
         self.game = await self.get_game()
+
         if self.game is None:
             print("game doesn't exist 2")
             await self.close()
             return
+
+        try:
+            self.tournament_id = self.scope["url_route"]["kwargs"]["tournament_id"]
+            if self.tournament_id:
+                print("self.tournament_id:", self.tournament_id)
+                await self.send_opponent_invite()
+        except Exception as error:
+            print("error", error)
+
+
         
         await self.channel_layer.group_add(self.game_id, self.channel_name)
 
@@ -45,7 +52,33 @@ class GameConsumer(AsyncWebsocketConsumer):
         
         if self.game and self.game_instance:
             self.game_instance.set_paused(False)
-        
+    
+    @database_sync_to_async
+    def send_opponent_invite(self):
+        source_user = self.user
+        target_user = self.game.player1 if self.user != self.game.player1 else self.game.player2
+        Notification.objects.create(
+            user_id=target_user.id,
+            message="Tourament game ready",
+            type="game_invite",
+            sender_id=source_user.id,
+            game_id = f"{self.tournament_id}/{self.game.id}"
+        )
+        notification_channel_layer = get_channel_layer()
+        async_to_sync(notification_channel_layer.group_send)(
+            f"user_{target_user.id}",
+            {
+                "type": "send_notification",
+                "message": "Tourament game ready",
+                "user_id": target_user.id,
+                "sender_id": source_user.id,
+                "sender_uuid": str(source_user.profile.uuid),
+                "sender_username": source_user.username,
+                "sender_avatar": str(source_user.profile.avatar),
+                "ctx": "game_invite",
+                "game_id": f"{self.tournament_id}/{self.game.id}"
+            },
+        )
     @database_sync_to_async
     def get_game(self):
         try:
