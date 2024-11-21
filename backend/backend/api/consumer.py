@@ -90,7 +90,7 @@ class NotificationConusmer(AsyncWebsocketConsumer):
             and event["sender_avatar"]
             or f"{os.getenv('API_URL')}/{event['sender_avatar']}"
         )
-        game_id = event["game_id"]
+        game_id = event["game_id"] if "game_id" in event else None
 
         await self.send(
             text_data=json.dumps(
