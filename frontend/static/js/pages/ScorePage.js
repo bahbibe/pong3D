@@ -1,5 +1,6 @@
 import { AbstractPage } from "./AbstarctPage.js";
 import { API } from "../API/API.js";
+import { navigateTo } from "../router.js";
 
 class ScorePage extends AbstractPage {
   constructor() {
@@ -30,10 +31,30 @@ class ScorePage extends AbstractPage {
         player2_img.src = res.game.player2.profile.avatar ;
         player2.appendChild(player2_img) ;
       }
+      const invite_to_play_button = this.querySelector("#invite_game") ;
+      invite_to_play_button.onclick = (e) => {
+        const opponent_id = res.game.player1.id === user.id ?
+                      res.game.player2.id : res.game.player1.id
+        this.invate_friend(opponent_id) ;
+      }
     }) ;
   }
-  
+  async invate_friend(friendId)
+  {
+    try
+    {
+      const response = await fetch(`http://localhost:8000/game/invite_friend/${friendId}`, { credentials: "include" }) ;
+      const data = await response.json() ;
+      if (response.ok)
+        {
+          navigateTo(`/game/${data.data.game.id}`)
+        }
+    } catch(error) {
+      console.log(error);
+    }
+  }
 }
+
 
 window.customElements.define("score-page", ScorePage);
 export { ScorePage };

@@ -975,6 +975,10 @@
         <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--light); background: rgba(255, 255, 255, 0.1);
               border-radius: 5px;
               box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);" href="/matchmaking" data-link=>Play again</a>
+        
+        <a id="invite_game" class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--light); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);" href="" data-link=>Play again with <span></span></span></a>
         <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--light); background: rgba(255, 255, 255, 0.1);
               border-radius: 5px;
               box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);" href="/Home" data-link=>Leave</a>
@@ -990,11 +994,11 @@
         <div class="row align-items-center justify-content-evenly">
           <div class="secondary-bg p-2 tourCard tourCardBgImg CardBgImg1 mb-3 mb-md-0">
             <div class="overlay-card"></div>
-            <button href="#" class="btn btn-block btn-primary"style="z-index: 10;">Create Tournament</button>
+            <button id="create_tour" href="#" class="btn btn-block btn-primary"style="z-index: 10;">Create Tournament</button>
           </div>
           <div class="secondary-bg tourCard tourCardBgImg CardBgImg2">
             <div class="overlay-card"></div>
-            <button href="#" class="btn btn-block btn-primary" style="z-index: 10;">Join Tournament</button>
+            <button id="join_tour" href="#" class="btn btn-block btn-primary" style="z-index: 10;">Join Tournament</button>
           </div>
         </div>
       </div>
@@ -1014,21 +1018,12 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <th scope="row">bolbol's 3521a8a3-b858-4c7b-8a48-015dd36ecc97 Tournament</th>
-              <td>1/4</td>
-              <td><button type="button" class="btn btn-block bg-dark text-white ps-4 pe-4">Join</button></td>
-            </tr>
           </tbody>
         </table>
         
       
       </div>
     </section>
-  </template>
-
-  <template id="tournament-page">
-    <main-nav></main-nav>
   </template>
 
   <template id="tournament-display-page">

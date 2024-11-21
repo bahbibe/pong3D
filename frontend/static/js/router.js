@@ -19,7 +19,6 @@ import {
 import { FriendsStatus } from "./ws/FriendsStatus.js";
 import { Notifications } from "./ws/NotificationsSockets.js";
 import { TournamentDisplayPage } from "./pages/TournamentDisplayPage.js";
-import { TournamentPage } from "./pages/TournamentPage.js";
 import { ScorePage } from "./pages/ScorePage.js";
 
 const pathToRegex = (path) =>
@@ -55,10 +54,9 @@ const routes = [
   { path: "/matchmaking", view: MatchmakingPage, isProtected: true, page: "matchmaking-page" },
   { path: "/game/:tournament_id/:game_id", view: GamePage, isProtected: true, page: "game-page" },
   { path: "/game/:game_id", view: GamePage, isProtected: true, page: "game-page" },
-  { path: "/tournament", view: TournamentPage, isProtected: true, page: "tournament-page" },
   { path: "/tournament/:tournament_id", view: TournamentDisplayPage, isProtected: true, page: "tournament-display-page" },
   { path: "/score/:game_id", view: ScorePage, isProtected: true, page: "score-page" },
-  { path: "/tour", view: ScorePage, isProtected: true, page: "tour-page" },
+  { path: "/tournament", view: ScorePage, isProtected: true, page: "tour-page" },
   { path: "/join", view: ScorePage, isProtected: true, page: "join-page" },
   {
     path: "/chat/:roomId",
