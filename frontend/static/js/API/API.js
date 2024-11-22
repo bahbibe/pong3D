@@ -179,6 +179,29 @@ class API {
       console.log(error);
     }
   }
+
+  async play_again(game_id) {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/game/play_again/${game_id}`,
+        {
+          method: "GET",
+          headers: {
+            "content-type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      if (!response.ok)
+        throw new Error(`API request failed with status: ${response.status}`);
+      const data = await response.json();
+      if (response.ok) {
+        navigateTo(`/game/${data.data.game.id}`);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
 
 export { API };

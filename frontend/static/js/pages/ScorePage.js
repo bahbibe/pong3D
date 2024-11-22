@@ -32,9 +32,7 @@ class ScorePage extends AbstractPage {
       }
       const invite_to_play_button = this.querySelector("#invite_game") ;
       invite_to_play_button.onclick = (e) => {
-        const opponent_id = res.game.player1.id === user.id ?
-                      res.game.player2.id : res.game.player1.id
-        this.API.invite_friend(opponent_id) ;
+        this.API.play_again(res.game.id) ;
       }
     }) ;
   }
