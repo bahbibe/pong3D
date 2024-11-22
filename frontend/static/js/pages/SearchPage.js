@@ -26,11 +26,11 @@ class SearchPage extends AbstractPage {
       const data = await response.json();
       const users = data.data;
       if (response.ok) {
-        User.forEach(user => {
+        users.forEach(user => {
           this.container.innerHTML += `
           <div class=" secondary-bg box-sh-1 p-2 text-center rounded  mx-auto mx-md-0  me-md-3 mb-3" style="width: 160px; height: 140px;">
-                    <div class="img ">
-                      <img class="img-fluid rounded rounded-circle" src="${user.profile.avatar}" alt="" width="100" height="100">
+                    <div class="">
+                      <img class="img-fluid ratio ratio-1x1 rounded rounded-circle" src="${user.profile.avatar}" alt="" width="100" height="100" style="width: 100px; height: 100px">
                     </div>
                     <div class="my-2">
                       <a class="font-monospace fw-bold" href='/friend/${user.profile.uuid}'>${user.username} </a>
