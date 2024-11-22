@@ -1,3 +1,4 @@
+import { navigateTo } from "../router.js";
 class API {
   constructor() {}
   async getFriends() {
@@ -75,13 +76,16 @@ class API {
   }
   async getTournamentGames(tournament_id) {
     try {
-      const response = await fetch(`http://localhost:8000/game/get_tournament_games/${tournament_id}`, {
-        method: "GET",
-        headers: {
-          "content-type": "application/json",
-        },
-        credentials: "include",
-      });
+      const response = await fetch(
+        `http://localhost:8000/game/get_tournament_games/${tournament_id}`,
+        {
+          method: "GET",
+          headers: {
+            "content-type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
       if (!response.ok)
         throw new Error(`API request failed with status: ${response.status}`);
       const res = await response.json();
@@ -133,23 +137,46 @@ class API {
   }
 
   async get_game(game_id) {
-    try
-    {
-      const response = await fetch(`http://localhost:8000/game/get_game/${game_id}`,
+    try {
+      const response = await fetch(
+        `http://localhost:8000/game/get_game/${game_id}`,
         {
           method: "GET",
           headers: {
             "content-type": "application/json",
           },
           credentials: "include",
-        }) ;
-        if (!response.ok)
-          throw new Error(`API request failed with status: ${response.status}`);
-        const res = await response.json();
-        return res.data;
-    } catch (error)
-    {
+        }
+      );
+      if (!response.ok)
+        throw new Error(`API request failed with status: ${response.status}`);
+      const res = await response.json();
+      return res.data;
+    } catch (error) {
       console.error("Error creating tournament:", error);
+    }
+  }
+
+  async invite_friend(friendId) {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/game/invite_friend/${friendId}`,
+        {
+          method: "GET",
+          headers: {
+            "content-type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
+      if (!response.ok)
+        throw new Error(`API request failed with status: ${response.status}`);
+      const data = await response.json();
+      if (response.ok) {
+        navigateTo(`/game/${data.data.game.id}`);
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 }

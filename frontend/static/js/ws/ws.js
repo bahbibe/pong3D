@@ -6,13 +6,13 @@ class WebSock {
 
   async connect() {
     this.socket.onopen = () => {
-      console.log(this.uuid + " ===> connected");
+      // console.log(this.uuid + " ===> connected");
     };
     this.socket.onerror = (error) => {
       console.log("error", error);
     };
     this.socket.onclose = (event) => {
-      console.log(this.uuid + " ====> disconnected");
+      // console.log(this.uuid + " ====> disconnected");
       if (event.code === 4001) {
         alert("Unauthorized access. Please login.");
         window.location.href = "/login";

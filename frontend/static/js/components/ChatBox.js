@@ -1,5 +1,23 @@
 import { API } from "../API/API.js";
 import { WebSock } from "../ws/ws.js";
+
+
+// const recieveMsg = async (ws, msgBox) => {
+//   const msgBoxElem = document.querySelector(".msg-box");
+//   try {
+//     const msg = await ws.receive();
+//     if (!msg) {
+//       return;
+
+//     }
+//     msgBoxElem.appendChild(createMessageElement(JSON.parse(msg)));
+//     msgBoxElem.scrollTop = msgBoxElem.scrollHeight;
+//     // await recieveMsg(ws, msgBox);
+//   } catch (error) {
+//     console.error("Error receiving message:", error);
+//   }
+// };
+
 class ChatBox extends HTMLElement {
   constructor(friendship) {
     super();
@@ -87,19 +105,26 @@ class ChatBox extends HTMLElement {
   headerElement(friend) {
     const headerElement = document.createElement("div");
     headerElement.className = "msg-head mb-3 p-2 d-flex gap-2";
-    // window.online_users.includes(friend.id)
-    //   ? document.querySelector(".stat").classList.add("online")
-    //   : null
+    const stat = window.online_users.includes(friend.id) ? "Online" : "Offline";
+    console.log(stat);
+    // !  ? document.querySelector(".stat").classList.add("online")
+    // !  : null
     headerElement.innerHTML = `
-    <div>
-      <img src="${friend.profile.avatar}" class="img-fluid rounded-circle h-100" alt="avatar"/>
+    <div class="d-flex align-items-center">
+      <img src="${friend.profile.avatar}" class=" d-block img-cover img-fluid rounded-circle h-100" alt="avatar"/>
     </div>
-    <div class="chat-info d-flex flex-column justify-content-center">
+    <div class="chat-info d-flex flex-column flex-grow-1 justify-content-center">
+    <a href="/friend/${friend.profile.uuid}">
       <span class="fs-5">${friend.username}</span>
+      </a>
       <span class="stat opacity-75"> <i class="fa-solid fa-circle"></i> Online</span>
     </div>
-
+      <button class=" btn challenge"><span class="d-none d-md-block">Challenge</span> <i class="fa-solid fa-gamepad fs-2 d-md-none"></i> </button>
     `;
+    headerElement.querySelector("button").addEventListener("click", () => {
+      this.inviteToGame(friend);
+    }
+    );
     return headerElement;
   }
 
@@ -121,6 +146,12 @@ class ChatBox extends HTMLElement {
       <p>${item.content}</p>
     `;
     return messageElement;
+  }
+  async inviteToGame(friend) { 
+    const response = await this.API.invite_friend(friend.id);
+    if (response) {
+      console.log("Invitation sent");
+    }
   }
 
   async receiveMessage() {

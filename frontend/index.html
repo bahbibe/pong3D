@@ -36,28 +36,32 @@
 <body class="styled-scrollbar">
 
   <div id="app"></div>
-
   <div id="toast-wrapper" class="position-absolute bottom-0 end-0">
     <error-toast></error-toast>
   </div>
   <!--! Chat page -->
   <template id="chat-page">
-    <section>
-      <main-nav></main-nav>
-      <div class="p-3 container-md d-flex flex-grow-1">
-          <div class="friends-list col-2 col-md-4 p-2">
-            <div class="chat-heading p-3 mb-3 d-flex w-100 ">
-              <h2> <i class="fa-solid fa-user-group"></i><span class="d-none d-md-inline"> Contacts</span> </h2>
-            </div>
-          </div>
-          <div class="chat-box glass-effect col-10 col-md-8 p-0" >
-            <div class=" d-flex justify-content-center align-items-center h-100">
-              <img src="/static/asset/images/no-message.png" class=" w-25 opacity-25" alt="chat image">
-            </div>
+    <!-- <section> -->
+    <main-nav></main-nav>
+    <div class=" chat-container p-3 container-md d-flex ">
+      <div class="side d-flex flex-column">
+        <div class=" chat-heading p-3 me-2 mb-2 blur">
+          <div class="px-2 d-flex gap-2 justify-content-center justify-content-md-start align-items-center ">
+            <i class=" fa-solid fa-user-group fs-3"> </i>
+            <span class="d-none d-md-flex fs-2"> Contacts</span>
           </div>
         </div>
+        <div class="friends-list  blur py-1 me-2">
+        </div>
       </div>
-    </section>
+      <div class="chat-box blur col-10 col-md-8 p-0">
+        <div class=" d-flex justify-content-center align-items-center h-100">
+          <img src="/static/asset/images/no-message.png" class=" w-25 opacity-25" alt="chat image">
+        </div>
+      </div>
+    </div>
+    </div>
+    <!-- </section> -->
   </template>
 
   <!--! Home page -->
@@ -293,7 +297,7 @@
 
             <div class="content__ me-2" style="width: 50%;">
               <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Friend</h6>
-              <p  style="font-size: 13px;">Challenge your friend </p>
+              <p style="font-size: 13px;">Challenge your friend </p>
               <a href="/profile" class="play px-3 py-1 fw-bold text-uppercase" data-link data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
               border-radius: 5px;
               box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
@@ -646,7 +650,7 @@
           <div class="col-12 p-3 glass-effect mb-3 mb-lg-0 justify-content-center" style="min-height: 47vh;">
             <h2 class="text-white">Game History</h2>
             <div class="row justify-content-center">
-            <div class="col-12 col-md-9" id="friend-history"></div>
+              <div class="col-12 col-md-9" id="friend-history"></div>
 
             </div>
           </div>
@@ -732,7 +736,7 @@
             <div class="mb-3">
               <label for="username" class="form-label fw-bold">Username</label>
               <input type="text" name="username" id="username" class="form-control form-control-lg  mb-2"
-                placeholder="username"  value="" />
+                placeholder="username" value="" />
               <label for="username" class="form-label fw-bold">email</label>
               <input type="text" name="email" id="email" class="form-control form-control-lg mb-2" placeholder="email"
                 value="" />
@@ -741,7 +745,7 @@
                 placeholder="password" value="" />
               <label for="username" class="form-label fw-bold">Confirm Password</label>
               <input type="password" name="password" id="confirm_password" class="form-control form-control-lg mb-2"
-                placeholder="confirm password"  value="" />
+                placeholder="confirm password" value="" />
             </div>
             <div class="w-100 d-flex">
               <button type="button" id="disable-2fa" class="btn btn-outline-danger mx-auto d-none">Disable
@@ -951,6 +955,7 @@
       #score {
         font-size: xx-large;
       }
+
       .player {
         height: 100px;
         width: 100px;
@@ -958,7 +963,8 @@
         border: #fefefe 1px solid;
         border-radius: 8px;
       }
-      .player > img {
+
+      .player>img {
         height: 100%;
         width: 100%;
         border-radius: 8px;
@@ -976,7 +982,7 @@
         <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--light); background: rgba(255, 255, 255, 0.1);
               border-radius: 5px;
               box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);" href="/matchmaking" data-link=>Play again</a>
-        
+
         <a id="invite_game" class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--light); background: rgba(255, 255, 255, 0.1);
               border-radius: 5px;
               box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);" href="" data-link=>Play again with <span></span></span></a>
@@ -995,11 +1001,13 @@
         <div class="row align-items-center justify-content-evenly">
           <div class="secondary-bg p-2 tourCard tourCardBgImg CardBgImg1 mb-3 mb-md-0">
             <div class="overlay-card"></div>
-            <button id="create_tour" href="#" class="btn btn-block btn-primary"style="z-index: 10;">Create Tournament</button>
+            <button id="create_tour" href="#" class="btn btn-block btn-primary" style="z-index: 10;">Create
+              Tournament</button>
           </div>
           <div class="secondary-bg tourCard tourCardBgImg CardBgImg2">
             <div class="overlay-card"></div>
-            <button id="join_tour" href="#" class="btn btn-block btn-primary" style="z-index: 10;">Join Tournament</button>
+            <button id="join_tour" href="#" class="btn btn-block btn-primary" style="z-index: 10;">Join
+              Tournament</button>
           </div>
         </div>
       </div>
@@ -1010,7 +1018,7 @@
     <section>
       <div class="container-md p-4">
         <h1>Join a Tournament </h1>
-        <table class="table text-center mt-4" >
+        <table class="table text-center mt-4">
           <thead class="thead-dark">
             <tr>
               <th scope="col">Tournament Id</th>
@@ -1021,8 +1029,8 @@
           <tbody>
           </tbody>
         </table>
-        
-      
+
+
       </div>
     </section>
   </template>
@@ -1141,11 +1149,11 @@
               <div class="match-lines alt">
                 <div class="line one"></div>
               </div>
-            </div>        
+            </div>
           </div>
         </div>
       </div>
-      
+
     </section>
   </template>
 
@@ -1273,7 +1281,7 @@
 
   <template id="search-bar">
     <form class="input-group" id="search">
-      <input class="form-control" type="search" placeholder="Search" aria-label="Search" data-search  />
+      <input class="form-control" type="search" placeholder="Search" aria-label="Search" data-search />
       <button class="input-group-text  d-lg-flex">
         <i class="fas fa-search"></i>
       </button>
@@ -1304,8 +1312,9 @@
           </div>
         </div>
 
-      <div class="dropdown">
-          <div class="user d-flex align-items-center mb-2 rounded-pill secondary-bg px-3 py-2 shadow " style="cursor: pointer;" >
+        <div class="dropdown">
+          <div class="user d-flex align-items-center mb-2 rounded-pill secondary-bg px-3 py-2 shadow "
+            style="cursor: pointer;">
             <img src="/static/asset/images/profile.svg" class="rounded-circle" height="40" alt="user profile image"
               loading="lazy" id="nav-user-img" />
             <strong class="d-none d-sm-block ms-2" id="nav-username" style="cursor: pointer;">bmakhlou</strong>
@@ -1367,7 +1376,6 @@
       </div>
     </div>
   </template>
-
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
