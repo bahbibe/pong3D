@@ -219,3 +219,44 @@ def invite_friend(request, friend_id):
         return ErrorResponse(
             message = str(error),
         )
+
+@api_view(["GET"])
+@is_authenticated
+def play_again(request, game_id):
+    try:
+        prev_game = Game.objects.get((Q(player1=request.user) 
+                    | Q(player2=request.user)), id=game_id)
+        target_user = prev_game.player1 if prev_game.player2 == request.user else prev_game.player2
+        source_user = request.user
+        game = Game.objects.create(
+            player1 = source_user,
+            player2 = target_user
+        )
+        Notification.objects.create(
+            user_id=target_user.id,
+            message="invated you to a game",
+            type="game_invite",
+            sender_id=source_user.id,
+            game_id = game.id
+        )
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"user_{target_user.id}",
+            {
+                "type": "send_notification",
+                "message": "invated you to a game",
+                "user_id": target_user.id,
+                "sender_id": source_user.id,
+                "sender_uuid": str(source_user.profile.uuid),
+                "sender_username": source_user.username,
+                "sender_avatar": str(source_user.profile.avatar),
+                "ctx": "game_invite",
+                "game_id": game.id
+            },
+        )
+        return SuccessResponse(data={"game": GameSerializer(game).data})
+    except Exception as error:
+        print(error)
+        return ErrorResponse(
+            message = str(error),
+        )

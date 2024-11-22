@@ -15,4 +15,5 @@ urlpatterns = [
     ),
     path("get_game/<game_id>", views.get_game, name="get_game"),
     path("invite_friend/<friend_id>", views.invite_friend, name="invite_friend"),
+    path("play_again/<game_id>", views.play_again, name="play_again"),
 ]

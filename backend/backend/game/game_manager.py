@@ -128,3 +128,155 @@ class GameManager:
     async def remove_game_instance(self, game_id):
         if game_id in self.game_instances:
             del self.game_instances[game_id]
+
+class BotInstance:
+    def __init__(self, player, channel_layer):
+        self.player = player
+        self.game = Game(
+            player1 = player,
+            player2 = None,
+        )
+
+        self.game_state = {
+            'ball_position': [0, 0],
+            'player1': 0,
+            'player2': 0,
+        }
+        self.vel = [random.choice([-1, 1]), random.choice([-1, 1])]
+        self.speed = 0.055
+        self.limit = [3.5, 5]
+        self.channel_layer = channel_layer
+        self.running = True
+        self.game_loop_task = asyncio.create_task(self.game_loop())    
+        self.paused = False
+        self.ready = {
+            'player1': False,
+            'player2': True,
+        }
+
+    async def game_loop(self):
+        print(f"{self.player.username}_bot")
+
+        while self.running:
+            if self.game.player1_score >= 3 or self.game.player2_score >= 3:
+                self.game_state['score'] = [self.game.player1_score, self.game.player2_score]
+                await self.channel_layer.group_send(f"{self.player.username}_bot", {
+                    "type": "game_update_message",
+                    "game_state": self.game_state,
+                })
+                await asyncio.sleep(1)  # Wait 1 second
+                break
+            if not self.paused:
+                self.update_ball_position()
+                self.move_bot_paddle()
+                self.game_state['score'] = [self.game.player1_score, self.game.player2_score]
+                await self.channel_layer.group_send(f"{self.player.username}_bot", {
+                    "type": "game_update_message",
+                    "game_state": self.game_state,
+                    })
+            else:
+                await self.channel_layer.group_send(f"{self.player.username}_bot", {
+                    "type": "send_game_id",
+                    "game_id": f"{self.player.username}_bot",
+                })
+                await asyncio.sleep(1)  # Wait 1 second
+            await asyncio.sleep(1/60)  # Run at 60 FPS
+        await self.send_game_end_notification()
+
+    def set_player_ready(self, player):
+        self.ready[player] = True
+
+    async def send_game_end_notification(self):
+        # Use Django Channels to send a game end notification to all the clients
+        # in the game instance
+        await self.channel_layer.group_send(f"{self.player.username}_bot", {
+            "type": "send_game_end",
+            "game_id": f"{self.player.username}_bot",
+            })
+    
+    def update_ball_position(self):
+        self.player_padding = [0.5, 0.1]
+        self.ball_padding = 0.125
+        self.game_state['ball_position'][0] += self.vel[0] * self.speed
+        self.game_state['ball_position'][1] += self.vel[1] * self.speed
+
+        if self.game_state['ball_position'][0] > self.limit[0]  - self.ball_padding:
+            self.vel[0] *= -1
+        if self.game_state['ball_position'][0] < -self.limit[0]  + self.ball_padding:
+            self.vel[0] *= -1
+            
+
+        if self.game_state['ball_position'][1] > self.limit[1] - self.ball_padding: # player 1 lost
+            self.game.player2_score += 1 # add point to player 2
+            self.reset_game()
+            print(self.game.player2_score)
+            
+        if self.game_state['ball_position'][1] < -self.limit[1] + self.ball_padding: # player 2 lost
+            self.game.player1_score += 1 # add point to player 1
+            self.reset_game()
+            print(self.game.player1_score)
+        
+        if self.game_state['ball_position'][1] > 4.5 - self.player_padding[1] - self.ball_padding \
+        and self.game_state['ball_position'][1] < 4.5 + self.player_padding[1] + self.ball_padding:
+            if self.game_state['ball_position'][0] - self.ball_padding < self.game_state['player1'] + self.player_padding[0] \
+            and self.game_state['ball_position'][0] + self.ball_padding > self.game_state['player1'] - self.player_padding[0]:
+                self.vel[1] = -1
+        
+        if self.game_state['ball_position'][1] < -4.5 + self.player_padding[1] + self.ball_padding \
+        and self.game_state['ball_position'][1] > -4.5 - self.player_padding[1] - self.ball_padding:
+            if self.game_state['ball_position'][0] - self.ball_padding < self.game_state['player2'] + self.player_padding[0] \
+            and self.game_state['ball_position'][0] + self.ball_padding > self.game_state['player2'] - self.player_padding[0]:
+                self.vel[1] = 1
+        
+    def move_bot_paddle(self):
+        BOT_SPEED = 5 * 0.015  # Same speed as player
+
+        # Determine direction to move
+        if random.random() < 0.5:  # 20% chance to make wrong move
+            target_y = self.game_state['player2'] + random.choice([-1, 0, 1])
+        else:
+            target_y = self.game_state['ball_position'][0]
+        
+        # Calculate difference between current position and target
+        diff = target_y - self.game_state['player2']
+        
+        # Move towards target at specified speed
+        if abs(diff) > BOT_SPEED:
+            if diff > 0:
+                self.game_state['player2'] += BOT_SPEED
+            else:
+                self.game_state['player2'] -= BOT_SPEED
+        else:
+            self.game_state['player2'] = target_y
+        
+        # Keep paddle within bounds
+        self.game_state['player2'] = max(-3, min(3, self.game_state['player2']))
+
+    
+    def reset_game(self):
+        self.game_state['ball_position'][0] = 0
+        self.game_state['ball_position'][1] = 0
+        # self.game_state['player1'] = 0
+        # self.game_state['player2'] = 0
+        self.vel = [random.choice([-1, 1]), random.choice([-1, 1])]
+
+    def set_paused(self, state):
+        self.paused = state
+
+class BotManager:
+    def __init__(self):
+        self.bot_instances = {}
+        self.channel_layer = get_channel_layer()
+
+    async def create_bot_instance(self, player):
+        print(f"create player_id: {player.id}")
+        self.bot_instances[str(player.id)] = BotInstance(player, self.channel_layer)
+
+    async def get_bot_instance(self, player_id):
+        print(f"get player_id: {player_id}")
+        return self.bot_instances.get(player_id)
+
+    async def remove_bot_instance(self, player_id):
+        print(f"remove player_id: {player_id}")
+        if player_id in self.bot_instances:
+            del self.bot_instances[player_id]

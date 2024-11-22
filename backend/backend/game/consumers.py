@@ -5,7 +5,7 @@ import math
 import redis
 
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .game_manager import GameManager
+from .game_manager import GameManager, BotManager
 from .models import Game, Tournament, Tournament_Participants, Tournament_Game
 from channels.db import database_sync_to_async
 from .serializers import TournamentGameSerializer, GameSerializer
@@ -16,6 +16,7 @@ from asgiref.sync import async_to_sync
 from api.models import Notification
 
 game_manager = GameManager()
+bot_manager = BotManager()
 
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -82,7 +83,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_game(self):
         try:
-            game = Game.objects.get(id=self.game_id)
+            game = Game.objects.get(id=int(self.game_id))
             if self.user == game.player1:
                 self.player = 'player1'
             elif self.user == game.player2:
@@ -304,3 +305,67 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         "s -> (s0, s1), (s2, s3), (s4, s5), ..."
         a = iter(iterable)
         return zip(a, a)
+
+class GameBotConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        await self.accept()
+        self.user = self.scope["user"]
+        self.player = 'player1'
+
+        await self.channel_layer.group_add(f"{self.user.username}_bot", self.channel_name)
+
+        # Check if the game instance already exists
+        self.bot_instance = await bot_manager.get_bot_instance(self.user.id)
+        if not self.bot_instance:
+            # Create a new game instance
+            print("botinstance create")
+            await bot_manager.create_bot_instance(self.user)
+            self.bot_instance = await bot_manager.get_bot_instance((str(self.user.id)))         
+    
+    async def disconnect(self, close_code):
+        if self.user and self.bot_instance:
+            self.bot_instance.set_paused(True)
+            await bot_manager.remove_bot_instance(str(self.user.id))
+        await self.channel_layer.group_discard(f"{self.user.username}_bot", self.channel_name)
+
+    # Receive message from WebSocket
+    async def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        message_type = text_data_json['type']
+        if not self.bot_instance:
+            print("no bot instance")
+            return
+        side = 1
+        if message_type == 'right':
+            self.bot_instance.game_state[self.player] -= 5 * 0.015 * side
+        if message_type == 'left':
+            self.bot_instance.game_state[self.player] += 5 * 0.015 * side
+
+        if self.bot_instance.game_state[self.player] < -3:
+            self.bot_instance.game_state[self.player] = -3
+        if self.bot_instance.game_state[self.player] > 3:
+            self.bot_instance.game_state[self.player] = 3
+
+    # Broadcast game updates to all players in the game
+    async def game_update_message(self, event):
+        game_state = event['game_state']
+        side = self.player
+        game_state['side'] = side
+        event['game_state'] = game_state
+        await self.send(text_data=json.dumps(event))
+
+    async def send_game_id(self, event):
+        self.bot_instance = await bot_manager.get_bot_instance(str(self.user.id))
+        await self.join_game()
+        await self.send(text_data=json.dumps(event))
+    
+    async def send_game_end(self, event):
+        print("game_over")
+        await self.send(text_data=json.dumps({
+            'type': "game over"
+            }))
+        await bot_manager.remove_bot_instance(str(self.user.id))
+        print("game_end")
+
+    async def join_game(self):
+        self.bot_instance = await bot_manager.get_bot_instance(str(self.user.id))
