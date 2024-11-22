@@ -13,6 +13,7 @@ from .serializers import (
 )
 from .models import Game
 from .models import Tournament, Tournament_Participants, Tournament_Game
+from friends.models import Friendship
 from django.db.models import Q
 from django.db.models import F
 from api.models import User
@@ -184,6 +185,8 @@ def invite_friend(request, friend_id):
     try:
         source_user = request.user
         target_user = User.objects.get(id=int(friend_id))
+        friendship = Friendship.objects.get((Q(source_user=target_user, target_user=source_user) 
+                    | Q(target_user=target_user, source_user=source_user)), blocked_by=None)
         game = Game.objects.create(
             player1 = source_user,
             player2 = target_user
@@ -214,5 +217,5 @@ def invite_friend(request, friend_id):
     except Exception as error:
         print(error)
         return ErrorResponse(
-            message = error,
+            message = str(error),
         )
