@@ -70,7 +70,7 @@ class ProfilePage extends AbstractPage {
                 <div class="col-3 col-md-4">
                   <div class="d-flex align-items-center">
                     <div class="position-relative">
-                      <img src="${friend.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" alt="user profile image">
+                      <img src="${friend.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" style="width: 35px; height: 35px;" alt="user profile image">
                       <div class="user-status ${isOnline ? "online" : ""}"></div>
                     </div>
                     <div class="ps-2">
@@ -114,7 +114,7 @@ class ProfilePage extends AbstractPage {
             <div class="row  p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
                   <div class="col-6">
                     <div class="d-flex align-items-center">
-                    <img src="${user.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" alt="user profile image">
+                    <img src="${user.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" style="width: 35px; height: 35px" alt="user profile image">
                       <div class="ps-2">
                         <span class="fw-bold text-capitalize" style="font-size: 14px;">${user.friend.username}</span>
                       </div>
@@ -176,7 +176,7 @@ class ProfilePage extends AbstractPage {
                   <div class="col-4 my-auto p-0">
                     <div class="d-md-flex align-items-center">
                       <img src="${game.user.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block"
-                        width="40" alt="user profile image">
+                        width="40" style="width: 40px; height: 40px" alt="user profile image">
                       <div class="ps-2">
                         <span class="fw-bold text-capitalize">${game.user.username}</span>
                       </div>
@@ -191,7 +191,7 @@ class ProfilePage extends AbstractPage {
                         <span class="fw-bold text-capitalize">${game.player.username}</span>
                       </div>
                       <img src="${game.player.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block"
-                        width="40" alt="user profile image">
+                        width="40" style="width: 40px; height: 40px" alt="user profile image">
                     </div>
                   </div>
                   <div class="col-2 my-auto text-center" style="cursor:pointer;">

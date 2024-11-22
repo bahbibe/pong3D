@@ -102,7 +102,7 @@ class FriendPage extends AbstractPage {
                   <div class="col-4 my-auto p-0">
                     <div class="d-md-flex align-items-center">
                       <img src="${game.user.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block"
-                        width="40" alt="user profile image">
+                       style="width: 40px; height: 40px" alt="user profile image">
                       <div class="ps-2">
                         <span class="fw-bold text-capitalize">${game.user.username}</span>
                       </div>
@@ -117,7 +117,7 @@ class FriendPage extends AbstractPage {
                         <span class="fw-bold text-capitalize">${game.player.username}</span>
                       </div>
                       <img src="${game.player.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block"
-                        width="40" alt="user profile image">
+                        style="width: 40px; height: 40px" alt="user profile image">
                     </div>
                   </div>
                   <div class="col-2 my-auto text-center" style="cursor:pointer;">

@@ -29,13 +29,15 @@ class SearchPage extends AbstractPage {
         users.forEach(user => {
           this.container.innerHTML += `
           <div class=" secondary-bg box-sh-1 p-2 text-center rounded  mx-auto mx-md-0  me-md-3 mb-3" style="width: 160px; height: 140px;">
-                    <div class="">
-                      <img class="img-fluid ratio ratio-1x1 rounded rounded-circle" src="${user.profile.avatar}" alt="" width="100" height="100" style="width: 100px; height: 100px">
-                    </div>
-                    <div class="my-2">
-                      <a class="font-monospace fw-bold" href='/friend/${user.profile.uuid}'>${user.username} </a>
-                    </div>
-          </div>
+            <a class="font-monospace fw-bold" href='/friend/${user.profile.uuid}'>
+              <div class="">
+                <img class="img-fluid ratio ratio-1x1 rounded rounded-circle" src="${user.profile.avatar}" alt="" width="100" height="100" style="width: 100px; height: 100px">
+              </div>
+              <div class="my-2">
+                <span class="font-monospace fw-bold">${user.username} </span>
+              </div>
+              </a>
+            </div>
           `
         });
       }
