@@ -1,11 +1,13 @@
 import { hideToast, showOverlay, hideOverlay, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
+import { API } from "../API/API.js"
 
 
 class ProfilePage extends AbstractPage {
   constructor() {
     super();
+    this.API = new API() ;
   }
 
   connectedCallback() {
@@ -35,26 +37,10 @@ class ProfilePage extends AbstractPage {
       const playButton = e.target.closest('[data-id]');
       if (playButton) {
         const friendId = playButton.dataset.id;
-        this.invate_friend(friendId) ;
+        this.API.invite_friend(friendId) ;
       }
     });  
   }
-
-  async invate_friend(friendId)
-  {
-    try
-    {
-      const response = await fetch(`http://localhost:8000/game/invite_friend/${friendId}`, { credentials: "include" }) ;
-      const data = await response.json() ;
-      if (response.ok)
-        {
-          navigateTo(`/game/${data.data.game.id}`)
-        }
-    } catch(error) {
-      console.log(error);
-    }
-  }
-
 
   async getFriend() {
     try {
