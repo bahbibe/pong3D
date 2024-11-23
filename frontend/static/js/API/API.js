@@ -3,7 +3,7 @@ class API {
   constructor() {}
   async getFriends() {
     try {
-      const response = await fetch("http://localhost:8000/api/friends/", {
+      const response = await fetch("https://localhost/api/friends/", {
         method: "GET",
         headers: {
           "content-type": "application/json",
@@ -21,7 +21,7 @@ class API {
 
   async getMessages(uuid) {
     try {
-      const response = await fetch(`http://localhost:8000/chat/${uuid}/`, {
+      const response = await fetch(`https://localhost/chat/${uuid}/`, {
         method: "GET",
         headers: {
           "content-type": "application/json",
@@ -39,7 +39,7 @@ class API {
   }
   async getUser() {
     try {
-      const response = await fetch("http://localhost:8000/api/auth/me", {
+      const response = await fetch("https://localhost/api/auth/me", {
         method: "GET",
         headers: {
           "content-type": "application/json",
@@ -57,7 +57,7 @@ class API {
   async getTournaments() {
     try {
       const response = await fetch(
-        "http://localhost:8000/game/get_tournaments",
+        "https://localhost/game/get_tournaments",
         {
           method: "GET",
           headers: {
@@ -77,7 +77,7 @@ class API {
   async getTournamentGames(tournament_id) {
     try {
       const response = await fetch(
-        `http://localhost:8000/game/get_tournament_games/${tournament_id}`,
+        `https://localhost/game/get_tournament_games/${tournament_id}`,
         {
           method: "GET",
           headers: {
@@ -98,7 +98,7 @@ class API {
   async getTournament(tournament_id) {
     try {
       const response = await fetch(
-        `http://localhost:8000/game/get_participants/${tournament_id}`,
+        `https://localhost/game/get_participants/${tournament_id}`,
         {
           method: "GET",
           headers: {
@@ -118,7 +118,7 @@ class API {
   async create_tournament() {
     try {
       const response = await fetch(
-        `http://localhost:8000/game/create_tournament`,
+        `https://localhost/game/create_tournament`,
         {
           method: "GET",
           headers: {
@@ -139,7 +139,7 @@ class API {
   async get_game(game_id) {
     try {
       const response = await fetch(
-        `http://localhost:8000/game/get_game/${game_id}`,
+        `https://localhost/game/get_game/${game_id}`,
         {
           method: "GET",
           headers: {
@@ -160,7 +160,7 @@ class API {
   async invite_friend(friendId) {
     try {
       const response = await fetch(
-        `http://localhost:8000/game/invite_friend/${friendId}`,
+        `https://localhost/game/invite_friend/${friendId}`,
         {
           method: "GET",
           headers: {
@@ -183,7 +183,7 @@ class API {
   async play_again(game_id) {
     try {
       const response = await fetch(
-        `http://localhost:8000/game/play_again/${game_id}`,
+        `https://localhost/game/play_again/${game_id}`,
         {
           method: "GET",
           headers: {

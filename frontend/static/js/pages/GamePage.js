@@ -42,10 +42,10 @@ class GamePage extends AbstractPage {
     this.score2Text = 0 ;
 
     this.scene = new THREE.Scene();
-    this.game_url = 'ws://localhost:8000/ws/game/' + this.params.game_id ;
+    this.game_url = 'wss://localhost/ws/game/' + this.params.game_id ;
     
     if (this.params.tournament_id)
-      this.game_url = 'ws://localhost:8000/ws/game/' + this.params.tournament_id +'/' + this.params.game_id;
+      this.game_url = 'wss://localhost/ws/game/' + this.params.tournament_id +'/' + this.params.game_id;
     this.socket = new WebSocket(this.game_url);
 
     //Renderer does the job of rendering the graphics

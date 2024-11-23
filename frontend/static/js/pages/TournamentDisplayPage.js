@@ -10,7 +10,7 @@ class TournamentDisplayPage extends AbstractPage {
   connectedCallback() {
     console.log("connectedCallback");
     
-    this.socket = new WebSocket('ws://localhost:8000/ws/tournament/' + this.params.tournament_id);
+    this.socket = new WebSocket('wss://localhost/ws/tournament/' + this.params.tournament_id);
     const template = document.getElementById("tournament-display-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);

@@ -1,7 +1,7 @@
 import { hideToast, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
-
+import { BASE_URL } from "../router.js";
 export class SetupPage extends AbstractPage {
   constructor() {
     super();
@@ -55,7 +55,9 @@ export class SetupPage extends AbstractPage {
       this.querySelector("#disable-2fa").classList.add("d-none");
     }
 
-    this.querySelector("#towfamodalform").addEventListener("submit", (e) => { e.preventDefault(); });
+    this.querySelector("#towfamodalform").addEventListener("submit", (e) => {
+      e.preventDefault();
+    });
   }
 
   fillDefaultValues() {
@@ -67,10 +69,9 @@ export class SetupPage extends AbstractPage {
     try {
       hideToast();
       const formData = new FormData(form);
-      if (this.file)
-        formData.append("avatar", this.file);
+      if (this.file) formData.append("avatar", this.file);
 
-      const response = await fetch("http://localhost:8000/api/auth/setup/", {
+      const response = await fetch(`${BASE_URL}/api/auth/setup/`, {
         method: "POST",
         body: formData,
         credentials: "include",
@@ -92,7 +93,7 @@ export class SetupPage extends AbstractPage {
 
   async enable2FA() {
     try {
-      const response = await fetch("http://localhost:8000/api/auth/twofa/enable/", {
+      const response = await fetch(`${BASE_URL}/api/auth/twofa/enable/`, {
         method: "POST",
         credentials: "include",
       });
@@ -105,7 +106,9 @@ export class SetupPage extends AbstractPage {
         const qrCode = this.querySelector("#qr-code");
         qrCode.src = data.data.image;
         qrCode.parentElement.classList.remove("d-none");
-        this.querySelector("#confirm-2fa").addEventListener("click", () => this.confirm2FA());
+        this.querySelector("#confirm-2fa").addEventListener("click", () =>
+          this.confirm2FA()
+        );
       } else {
         showToast(true, data.message, data.errors);
       }
@@ -125,7 +128,7 @@ export class SetupPage extends AbstractPage {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/twofa/confirm/", {
+      const response = await fetch(`${BASE_URL}/api/auth/twofa/confirm/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -152,7 +155,7 @@ export class SetupPage extends AbstractPage {
 
   async disable2FA() {
     try {
-      const response = await fetch("http://localhost:8000/api/auth/twofa/disable/", {
+      const response = await fetch(`${BASE_URL}/api/auth/twofa/disable/`, {
         method: "POST",
         credentials: "include",
       });

@@ -29,6 +29,7 @@ class ChatBox extends HTMLElement {
 
   async getMessages() {
     this.messages = await this.API.getMessages(this.friendship.uuid);
+    console.log(this.messages);
     this.chatContainer = document.createElement("div");
     this.chatContainer.className =
       "chat-container no-scroll p-2 d-flex flex-column h-100";

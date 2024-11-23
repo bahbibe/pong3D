@@ -1,9 +1,9 @@
 import { hideToast, showOverlay, hideOverlay, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
-import { FriendsStatus } from "../ws/FriendsStatus.js";
+// import { FriendsStatus } from "../ws/FriendsStatus.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
-
+import { BASE_URL } from "../router.js";
 
 class LoginPage extends AbstractPage {
   constructor() {
@@ -94,7 +94,7 @@ class LoginPage extends AbstractPage {
       'email': this.email.value,
       'password': this.password.value,
     }
-    const url = `http://localhost:8000/api/auth/login/`
+    const url = `${BASE_URL}/api/auth/login/`
     fetch(url, {
       method: "POST",
       headers: {
@@ -144,7 +144,7 @@ class LoginPage extends AbstractPage {
       'confirm_password': this.confirmpassword.value,
     }
 
-    const url = `http://localhost:8000/api/auth/register/`
+    const url = `${BASE_URL}/api/auth/register/`
     if (this.password.value !== this.confirmPassword.value || !this.isValidPassword) {
       console.log("passwords do not match");
       showToast("register-errors", "passwords do not match or password is not valid");
@@ -174,7 +174,7 @@ class LoginPage extends AbstractPage {
 
   async authenticationLogin() {
     showOverlay();
-    const url = `http://localhost:8000/api/auth/intra/`
+    const url = `${BASE_URL}/api/auth/intra/`
     try {
       const response = await fetch(url, {
         method: "GET",

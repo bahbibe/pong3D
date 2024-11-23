@@ -1,6 +1,6 @@
 export const FriendsStatus = () => {
   if (!window.socket) {
-    const socket = new WebSocket('ws://localhost:8000/ws/status/');
+    const socket = new WebSocket('wss://localhost/ws/status/');
     window.socket = socket;
   }
 

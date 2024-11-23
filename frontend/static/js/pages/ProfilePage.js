@@ -1,13 +1,12 @@
 import { hideToast, showOverlay, hideOverlay, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
-import { API } from "../API/API.js"
-
-
+import { API } from "../API/API.js";
+import { BASE_URL } from "../router.js";
 class ProfilePage extends AbstractPage {
   constructor() {
     super();
-    this.API = new API() ;
+    this.API = new API();
   }
 
   connectedCallback() {
@@ -26,41 +25,55 @@ class ProfilePage extends AbstractPage {
 
     fullName.textContent = `${user.first_name} ${user.last_name}`;
     username.textContent = `@${user.username}`;
-    userImg.src = `${user.profile.avatar}`
+    userImg.src = `${user.profile.avatar}`;
 
     this.getFriend();
     this.getBlockedFriends();
     this.getStatGames();
-    
+
     // Add event listener to container
-    this.container.addEventListener('click', (e) => {
-      const playButton = e.target.closest('[data-id]');
+    this.container.addEventListener("click", (e) => {
+      const playButton = e.target.closest("[data-id]");
       if (playButton) {
         const friendId = playButton.dataset.id;
-        this.API.invite_friend(friendId) ;
+        this.API.invite_friend(friendId);
       }
-    });  
+    });
   }
 
   async getFriend() {
     try {
       showOverlay();
-      const response = await fetch("http://localhost:8000/api/friends/", { credentials: "include" });
+      const response = await fetch(`${BASE_URL}/api/friends/`, {
+        credentials: "include",
+      });
       const data = await response.json();
       if (response.ok) {
         const friends = data.data;
         for (const friend of friends) {
-          let isOnline = window.online_users && window.online_users.includes(friend.friend.id.toString());
+          let isOnline =
+            window.online_users &&
+            window.online_users.includes(friend.friend.id.toString());
           this.container.innerHTML += `
-              <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;" id="friend-${friend.friend.id}">
+              <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;" id="friend-${
+                friend.friend.id
+              }">
                 <div class="col-3 col-md-4">
                   <div class="d-flex align-items-center">
                     <div class="position-relative">
-                      <img src="${friend.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" style="width: 35px; height: 35px;" alt="user profile image">
-                      <div class="user-status ${isOnline ? "online" : ""}"></div>
+                      <img src="${
+                        friend.friend.profile.avatar
+                      }" class="img-fluid rounded-circle" width="35" style="width: 35px; height: 35px;" alt="user profile image">
+                      <div class="user-status ${
+                        isOnline ? "online" : ""
+                      }"></div>
                     </div>
                     <div class="ps-2">
-                      <a href="friend/${friend.friend.profile.uuid}"><span class="fw-bold text-capitalize" style="font-size: 14px;">${friend.friend.username}</span></a>
+                      <a href="friend/${
+                        friend.friend.profile.uuid
+                      }"><span class="fw-bold text-capitalize" style="font-size: 14px;">${
+            friend.friend.username
+          }</span></a>
                     </div>
                   </div>
                 </div>
@@ -74,29 +87,32 @@ class ProfilePage extends AbstractPage {
                   <span id="ratio"><strong>100</strong></span>
                 </div>
                 <div class="col-3 col-md-2 text-end">
-                  <a data-id="${friend.friend.id}" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
+                  <a data-id="${
+                    friend.friend.id
+                  }" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
                 </div> 
               </div>
           `;
         }
         hideOverlay();
       }
-
+    } catch (e) {
+      console.log(e);
     }
-    catch (e) { console.log(e); }
   }
 
   async getBlockedFriends() {
     try {
-      const response = await fetch('http://localhost:8000/api/friends/blocked/', { credentials: "include", });
+      const response = await fetch(`${BASE_URL}/api/friends/blocked/`, {
+        credentials: "include",
+      });
       const data = await response.json();
       const users = data.data;
 
       this.blockedContainer.innerHTML = "";
 
       for (const user of users) {
-
-            this.blockedContainer.innerHTML += `
+        this.blockedContainer.innerHTML += `
             <div class="row  p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
                   <div class="col-6">
                     <div class="d-flex align-items-center">
@@ -110,32 +126,36 @@ class ProfilePage extends AbstractPage {
                     <button data-unblock="${user.friend.id}" role="button" class="btn btn-block bg-danger p-1">Unblock</button>
                   </div> 
                 </div>
-            `
+            `;
       }
       this.unblockBtn = this.querySelectorAll("[data-unblock]");
       this.unblockBtn.forEach((btn) => {
         btn.addEventListener("click", this.unblockFriend.bind(this));
       });
-    } catch (error) { console.log(error); }
-
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async unblockFriend(e) {
     try {
       console.log(e.target.getAttribute("data-unblock"));
-      const url = `http://localhost:8000/api/friends/unblock/`;
+      const url = `${BASE_URL}/api/friends/unblock/`;
       const response = await fetch(url, {
         method: "POST",
         headers: {
           "content-type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ user_id: e.target.getAttribute("data-unblock") }),
+        body: JSON.stringify({
+          user_id: e.target.getAttribute("data-unblock"),
+        }),
       });
       const data = await response.json();
-      if (response.ok)
-        this.getBlockedFriends();
-    } catch (error) { console.log(error); }
+      if (response.ok) this.getBlockedFriends();
+    } catch (error) {
+      console.log(error);
+    }
   }
   async getStatGames() {
     try {
@@ -145,15 +165,17 @@ class ProfilePage extends AbstractPage {
       const ratio = this.querySelector(".ratio");
       const gamesContainer = this.querySelector("#games-container");
 
-      const response = await fetch("http://localhost:8000/game/history/", { credentials: "include" });
+      const response = await fetch(`${BASE_URL}/game/history/`, {
+        credentials: "include",
+      });
       const data = await response.json();
       const stats = data.data.stats;
       const games = data.data.games;
 
       if (response.ok) {
         total.textContent = `${stats.total_games} Matches`;
-        wins.textContent =  `${stats.total_wins} Wins`;
-        losses.textContent = `${stats.total_losses} Losses`; 
+        wins.textContent = `${stats.total_wins} Wins`;
+        losses.textContent = `${stats.total_losses} Losses`;
         ratio.textContent = `${stats.ratio}%`;
 
         for (const game of games) {
@@ -161,32 +183,43 @@ class ProfilePage extends AbstractPage {
               <div class="row mt-3 p-1 mb-1 glass-effect">
                   <div class="col-4 my-auto p-0">
                     <div class="d-md-flex align-items-center">
-                      <img src="${game.user.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block"
+                      <img src="${
+                        game.user.profile.avatar
+                      }" class="img-fluid rounded-circle d-none d-md-block"
                         width="40" style="width: 40px; height: 40px" alt="user profile image">
                       <div class="ps-2">
-                        <span class="fw-bold text-capitalize">${game.user.username}</span>
+                        <span class="fw-bold text-capitalize">${
+                          game.user.username
+                        }</span>
                       </div>
                     </div>
                   </div>
                   <div class="col-2 col-md-2 my-auto text-center">
-                    <span class="result fw-bolder ">${game.user_score}:${game.player_score}</span>
+                    <span class="result fw-bolder ">${game.user_score}:${
+            game.player_score
+          }</span>
                   </div>
                   <div class="col-4 my-auto p-0 text-center">
                     <div class="d-md-flex justify-content-center align-items-center">
                       <div class="pe-2">
-                        <span class="fw-bold text-capitalize">${game.player.username}</span>
+                        <span class="fw-bold text-capitalize">${
+                          game.player.username
+                        }</span>
                       </div>
-                      <img src="${game.player.profile.avatar}" class="img-fluid rounded-circle d-none d-md-block"
+                      <img src="${
+                        game.player.profile.avatar
+                      }" class="img-fluid rounded-circle d-none d-md-block"
                         width="40" style="width: 40px; height: 40px" alt="user profile image">
                     </div>
                   </div>
                   <div class="col-2 my-auto text-center" style="cursor:pointer;">
-                    <span class="result h3" aria-label="${game.is_user_winner ? "WIN" : "LOSE"}">${game.is_user_winner ? "🏆" : "😓"}</span>
+                    <span class="result h3" aria-label="${
+                      game.is_user_winner ? "WIN" : "LOSE"
+                    }">${game.is_user_winner ? "🏆" : "😓"}</span>
                   </div>
               </div>
-          `
+          `;
         }
-
       }
     } catch (error) {
       console.log(error);
@@ -211,7 +244,7 @@ class mainNav extends AbstractPage {
     this.logoutBtn = this.querySelector("#logout");
     const user = window.user;
     navUsername.textContent = `${user.username}`;
-    navUserImg.src = `${user.profile.avatar}`
+    navUserImg.src = `${user.profile.avatar}`;
 
     // this.RequestFriends();
     this.notificationBtn = this.querySelector("#notification-btn");
@@ -225,18 +258,17 @@ class mainNav extends AbstractPage {
     this.renderNotifications();
     this.logoutBtn.addEventListener("click", this.logout);
 
-    this.notification.addEventListener('click', (e) => {
-      const playButton = e.target.closest('[data-game]');
+    this.notification.addEventListener("click", (e) => {
+      const playButton = e.target.closest("[data-game]");
       if (playButton) {
         const game = playButton.dataset.game;
-        navigateTo(`/game/${game}`) ;
+        navigateTo(`/game/${game}`);
       }
     });
   }
 
-
   handleEvent(event) {
-    this[`on${event.type}`](event)
+    this[`on${event.type}`](event);
   }
 
   // onclick(e) {
@@ -257,17 +289,28 @@ class mainNav extends AbstractPage {
             <img src="${notification.sender.avatar}" alt="" />
             <div class="text">
                 <p class="text-wrap">
-                  <a data-link href="/friend/${notification.sender.uuid}"><span class="name">${notification.sender.username}</span> </a> ${notification.message}
-                  ${ notification?.ctx == "game_invite" || notification.type == 'game_invite' ? "<button data-game=" + notification.game_id + ">Play</button>" : ""}
+                  <a data-link href="/friend/${
+                    notification.sender.uuid
+                  }"><span class="name">${
+        notification.sender.username
+      }</span> </a> ${notification.message}
+                  ${
+                    notification?.ctx == "game_invite" ||
+                    notification.type == "game_invite"
+                      ? "<button data-game=" +
+                        notification.game_id +
+                        ">Play</button>"
+                      : ""
+                  }
                 </p>
             </div>
         </div>
-      `
+      `;
     });
   }
 
   RequestFriends() {
-    fetch("http://localhost:8000/api/friends/requests/", {
+    fetch(`${BASE_URL}/api/friends/requests/`, {
       method: "GET",
       credentials: "include",
     })
@@ -275,7 +318,7 @@ class mainNav extends AbstractPage {
       .then((data) => {
         const friends = data.data;
         this.notificationCounter.textContent = friends.length;
-        friends.forEach(element => {
+        friends.forEach((element) => {
           console.log();
           this.notification.innerHTML += `
           <div class="notification">
@@ -286,19 +329,23 @@ class mainNav extends AbstractPage {
                             </p>
                         </div>
                     </div>
-          `
+          `;
         });
-      }).catch((error) => {
+      })
+      .catch((error) => {
         console.log(error);
       });
   }
 
   async markNotificationsAsRead() {
     try {
-      const response = await fetch("http://localhost:8000/api/auth/notifications/mark_as_read/", {
-        method: "POST",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${BASE_URL}/api/auth/notifications/mark_as_read/`,
+        {
+          method: "POST",
+          credentials: "include",
+        }
+      );
     } catch (error) {
       console.log(error);
     }
@@ -306,9 +353,11 @@ class mainNav extends AbstractPage {
 
   async logout(e) {
     try {
-
-      const url = "http://localhost:8000/api/auth/logout/";
-      const response = await fetch(url, { method: "POST", credentials: "include" })
+      const url = `${BASE_URL}/api/auth/logout/`;
+      const response = await fetch(url, {
+        method: "POST",
+        credentials: "include",
+      });
       const data = await response.json();
       if (response.status === 200) {
         console.log("socket closed -> ", window.socket);
@@ -321,16 +370,13 @@ class mainNav extends AbstractPage {
         window.user = null;
         navigateTo("/login");
       }
-    }
-    catch (e) {
+    } catch (e) {
       console.log(e);
     }
   }
-
-
 }
 
 window.customElements.define("user-profile", ProfilePage);
 window.customElements.define("main-nav", mainNav);
 
-export { ProfilePage }
+export { ProfilePage };

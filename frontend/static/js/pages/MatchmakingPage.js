@@ -15,7 +15,7 @@ class MatchmakingPage extends AbstractPage {
     this.message.innerHTML = "Looking for a match..." ;
     this.loader = this.querySelector(".loader") ;
     this.addEventListener('click', this);
-    this.socket = new WebSocket('ws://localhost:8000/ws/matchmaking');
+    this.socket = new WebSocket('wss://localhost/ws/matchmaking');
     this.socket.onopen = (event) =>
     {
       console.log("connected");

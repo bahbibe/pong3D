@@ -1,7 +1,7 @@
 import { showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
-
+import { BASE_URL } from "../router.js";
 export class TwoFaPage extends AbstractPage {
   constructor() {
     super();
@@ -12,7 +12,7 @@ export class TwoFaPage extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
 
-    this.querySelector("#verify-twofa").addEventListener('click', () => {
+    this.querySelector("#verify-twofa").addEventListener("click", () => {
       this.verifyTwoFa();
     });
   }
@@ -28,7 +28,7 @@ export class TwoFaPage extends AbstractPage {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/twofa/verify/", {
+      const response = await fetch(`${BASE_URL}/api/auth/twofa/verify/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -49,4 +49,4 @@ export class TwoFaPage extends AbstractPage {
   }
 }
 
-customElements.define('two-fa-page', TwoFaPage);
+customElements.define("two-fa-page", TwoFaPage);

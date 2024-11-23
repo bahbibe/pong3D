@@ -14,11 +14,8 @@ class Home extends AbstractPage {
 
     const user = window.user;
     first_name.textContent = `${user.first_name}`;
-
-
   }
 }
-
 
 // class AsideNav extends AbstractPage {
 //   constructor() {
@@ -29,7 +26,7 @@ class Home extends AbstractPage {
 //     const template = document.getElementById("aside-nav");
 //     const clone = template.content.cloneNode(true);
 //     this.appendChild(clone);
-    
+
 //     const links = this.querySelectorAll(".sidebar-link");
 
 //     links.forEach((link) => {
@@ -40,14 +37,11 @@ class Home extends AbstractPage {
 
 //     });
 
-
 //     this.addEventListener("click", this);
-    
-    
 
 //   }
 //   handleEvent(e) {
-//     this[`on${e.type}`](e)   
+//     this[`on${e.type}`](e)
 //   }
 //   onclick(e) {
 //     e.preventDefault();
@@ -55,32 +49,31 @@ class Home extends AbstractPage {
 
 //   }
 
-  // logout(e) {
-  //   e.preventDefault();
-  //   if (!(e.target.id === "logout")) return;
-  //   fetch("http://localhost:8000/api/auth/logout/", {
-  //     method: "POST",
-  //     credentials: "include",
-  //   })
-  //   .then((res) => {
-  //     console.log("socket closed -> ", window.socket);
-  //     if (window.socket) {
-  //       window.socket.close();
-  //     }
-  //     window.user = null;
-  //     if (res.status === 200) {
-  //       navigateTo("/login");
-  //     }
-  //   })
-  //   .catch((err) => {
-  //     console.log(err);
-  // });
+// logout(e) {
+//   e.preventDefault();
+//   if (!(e.target.id === "logout")) return;
+//   fetch(`${BASE_URL}/api/auth/logout/`, {
+//     method: "POST",
+//     credentials: "include",
+//   })
+//   .then((res) => {
+//     console.log("socket closed -> ", window.socket);
+//     if (window.socket) {
+//       window.socket.close();
+//     }
+//     window.user = null;
+//     if (res.status === 200) {
+//       navigateTo("/login");
+//     }
+//   })
+//   .catch((err) => {
+//     console.log(err);
+// });
 // }
 
 // }
-
 
 window.customElements.define("user-home", Home);
 // window.customElements.define("aside-nav", AsideNav);
 
-export { Home }
+export { Home };

@@ -1,7 +1,7 @@
 class WebSock {
   constructor(uuid) {
     this.uuid = uuid;
-    this.socket = new WebSocket(`ws://localhost:8000/ws/chat/${uuid}/`);
+    this.socket = new WebSocket(`wss://localhost/ws/chat/${uuid}/`);
   }
 
   async connect() {

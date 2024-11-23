@@ -1,6 +1,6 @@
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
-
+import { BASE_URL } from "../router.js";
 class blockedFriendsPage extends AbstractPage {
   constructor() {
     super();
@@ -11,12 +11,12 @@ class blockedFriendsPage extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
     this.container = document.querySelector("#search-container");
-    
+
     // this.renderBlockedFriends();
   }
   // async renderBlockedFriends() {
   //   try {
-  //     const response = await fetch('http://localhost:8000/api/friends/blocked/', { credentials: "include",});
+  //     const response = await fetch('${BASE_URL}/api/friends/blocked/', { credentials: "include",});
   //     const data = await response.json();
   //     const users = data.data;
 
@@ -39,7 +39,6 @@ class blockedFriendsPage extends AbstractPage {
   // }
 }
 
-
 window.customElements.define("blocked-page", blockedFriendsPage);
 
-export { blockedFriendsPage}
+export { blockedFriendsPage };

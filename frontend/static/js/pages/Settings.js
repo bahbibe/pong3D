@@ -1,7 +1,7 @@
 import { navigateTo } from "../router.js";
 import { hideToast, showToast } from "../helpers.js";
 import { AbstractPage } from "./AbstarctPage.js";
-
+import { BASE_URL } from "../router.js";
 class SettingsPage extends AbstractPage {
   constructor() {
     super();
@@ -56,10 +56,10 @@ class SettingsPage extends AbstractPage {
       this.querySelector("#disable-2fa").classList.add("d-none");
     }
 
-    this.querySelector("#towfamodalform").addEventListener("submit", (e) => { e.preventDefault(); });
+    this.querySelector("#towfamodalform").addEventListener("submit", (e) => {
+      e.preventDefault();
+    });
   }
-
-
 
   fillDefaultValues() {
     this.querySelector("#username").value = window.user.username;
@@ -71,10 +71,9 @@ class SettingsPage extends AbstractPage {
     try {
       hideToast();
       const formData = new FormData(form);
-      if (this.file)
-        formData.append("avatar", this.file);
+      if (this.file) formData.append("avatar", this.file);
 
-      const response = await fetch("http://localhost:8000/api/auth/settings/update/", {
+      const response = await fetch(`${BASE_URL}/api/auth/settings/update/`, {
         method: "PUT",
         body: formData,
         credentials: "include",
@@ -87,19 +86,18 @@ class SettingsPage extends AbstractPage {
         showToast(false, "settings updated successfully");
         navigateTo("/profile");
       } else {
-
         showToast(true, data.message, data.errors);
       }
     } catch (err) {
       console.log(err);
-      
+
       showToast(true);
     }
   }
 
   async enable2FA() {
     try {
-      const response = await fetch("http://localhost:8000/api/auth/twofa/enable/", {
+      const response = await fetch(`${BASE_URL}/api/auth/twofa/enable/`, {
         method: "POST",
         credentials: "include",
       });
@@ -112,7 +110,9 @@ class SettingsPage extends AbstractPage {
         const qrCode = this.querySelector("#qr-code");
         qrCode.src = data.data.image;
         qrCode.parentElement.classList.remove("d-none");
-        this.querySelector("#confirm-2fa").addEventListener("click", () => this.confirm2FA());
+        this.querySelector("#confirm-2fa").addEventListener("click", () =>
+          this.confirm2FA()
+        );
       } else {
         showToast(true, data.message, data.errors);
       }
@@ -132,7 +132,7 @@ class SettingsPage extends AbstractPage {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/auth/twofa/confirm/", {
+      const response = await fetch(`${BASE_URL}/api/auth/twofa/confirm/`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -159,7 +159,7 @@ class SettingsPage extends AbstractPage {
 
   async disable2FA() {
     try {
-      const response = await fetch("http://localhost:8000/api/auth/twofa/disable/", {
+      const response = await fetch(`${BASE_URL}/api/auth/twofa/disable/`, {
         method: "POST",
         credentials: "include",
       });
@@ -182,7 +182,6 @@ class SettingsPage extends AbstractPage {
   }
 }
 
-
 window.customElements.define("settings-page", SettingsPage);
 
-export { SettingsPage }
+export { SettingsPage };
