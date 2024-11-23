@@ -205,3 +205,4 @@ pip-selfcheck.json
 # End of https://www.toptal.com/developers/gitignore/api/django,visualstudiocode,venv
 backend/avatars/*
 !/avatars/profile_default.jpg
+nginx/ssl/

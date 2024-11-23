@@ -150,3 +150,4 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 ACCESS_TOKEN_LIFETIME = timedelta(days=1)  # 1 day
+

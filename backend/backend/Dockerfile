@@ -12,6 +12,8 @@ RUN  pip3 install --disable-pip-version-check --no-cache-dir -r ./requirements.t
 
 COPY . .
 
+EXPOSE 8000
+
 ENTRYPOINT [ "./entrypoint.sh" ]
 
-CMD [ "python3", "manage.py", "runserver", "0.0.0.0:8000" ]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "ft_transcendence.asgi:application"]

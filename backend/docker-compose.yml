@@ -4,13 +4,10 @@ volumes:
 networks:
   ft_transcendence:
     name: ft_transcendence
-
 services:
   backend:
     container_name: backend
     build: ./backend
-    ports:
-      - "8000:8000"
     volumes:
       - ./backend:/backend
     depends_on:
@@ -21,7 +18,6 @@ services:
       - ft_transcendence
     restart: always
     init: true
-
   db:
     image: postgres:alpine
     container_name: db
@@ -33,7 +29,6 @@ services:
       - ft_transcendence
     restart: always
     init: true
-
   adminer:
     image: adminer
     container_name: adminer
@@ -45,15 +40,23 @@ services:
       - ft_transcendence
     restart: always
     init: true
-
   redis:
     image: redis:alpine
     container_name: redis
-    ports:
-      - "6380:6379"
     networks:
       - ft_transcendence
     env_file:
       - ./backend/.env
+    restart: always
+    init: true
+  nginx:
+    container_name: nginx
+    build: ./nginx
+    ports:
+      - "8001:443"
+    networks:
+      - ft_transcendence
+    depends_on:
+      - backend
     restart: always
     init: true
