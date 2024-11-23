@@ -9,10 +9,11 @@ services:
       - node_modules:/frontend/node_modules
     restart: unless-stopped
     networks:
-      - front_ft_transcendence
+      - ft_transcendence
 
 volumes:
   node_modules:
   
 networks:
-  front_ft_transcendence:
+  ft_transcendence:
+    name: ft_transcendence

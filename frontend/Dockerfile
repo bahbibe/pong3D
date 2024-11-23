@@ -9,4 +9,6 @@ COPY yarn.lock /frontend
 
 RUN yarn install --production=false
 
+EXPOSE 3000
+
 CMD [ "yarn", "dev" ]
