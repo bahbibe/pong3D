@@ -248,7 +248,7 @@ def login_intra_callback(request):
         {"id": user.id, "is_tfa_verified": False, "exp": access_token_liftime}
     )
 
-    response = redirect("http://localhost:3000/")
+    response = redirect("https://localhost/")
     response.set_cookie(
         "access_token", access_token, httponly=True, expires=access_token_liftime
     )

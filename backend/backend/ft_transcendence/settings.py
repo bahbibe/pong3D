@@ -16,7 +16,10 @@ SECRET_KEY = "django-insecure-13)19b-v0$@n(qk$8(lq$er@s87=du*--uk7yh#_ja&w-h5kgv
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -27,6 +30,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
     "rest_framework",
     "api",
     "friends",
@@ -50,10 +54,12 @@ MIDDLEWARE = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000/",
-    "http://localhost:5173/",
-]
+CORS_ALLOW_ALL_ORIGINS = True
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000/",
+#     "http://localhost:5173/",
+# ]
 
 ROOT_URLCONF = "ft_transcendence.urls"
 
