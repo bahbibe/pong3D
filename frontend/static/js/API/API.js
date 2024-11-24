@@ -173,7 +173,7 @@ class API {
         throw new Error(`API request failed with status: ${response.status}`);
       const data = await response.json();
       if (response.ok) {
-        navigateTo(`/game/${data.data.game.id}`);
+        navigateTo(`/play/${data.data.game.id}`);
       }
     } catch (error) {
       console.log(error);
@@ -196,7 +196,7 @@ class API {
         throw new Error(`API request failed with status: ${response.status}`);
       const data = await response.json();
       if (response.ok) {
-        navigateTo(`/game/${data.data.game.id}`);
+        navigateTo(`/play/${data.data.game.id}`);
       }
     } catch (error) {
       console.log(error);

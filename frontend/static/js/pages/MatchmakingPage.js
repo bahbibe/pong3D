@@ -32,7 +32,7 @@ class MatchmakingPage extends AbstractPage {
         this.message.innerHTML = "Match Found!"
         this.loader.style.display = "none"
         setTimeout(() => {
-          navigateTo('/game/' + message['game_id']) ;
+          navigateTo('/play/' + message['game_id']) ;
         }, 2000);
       
     }

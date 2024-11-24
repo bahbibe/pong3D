@@ -67,7 +67,7 @@ class TournamentDisplayPage extends AbstractPage {
             slots[0]?.classList.replace('winner-top', 'winner-bottom')
 
           if (player1 && player2 && (player1.username == user.username || player2.username == user.username) && (game.game.player1_score < 3 && game.game.player2_score < 3))
-            navigateTo(`/game/${this.params.tournament_id}/${game.game.id}`) ;
+            navigateTo(`/play/${this.params.tournament_id}/${game.game.id}`) ;
         });
 
 
@@ -105,7 +105,7 @@ class TournamentDisplayPage extends AbstractPage {
             slots[0]?.classList.replace('winner-top', 'winner-bottom')
 
           if (player1 && player2 && (player1.username == user.username || player2.username == user.username) && (game.game.player1_score < 3 && game.game.player2_score < 3))
-            navigateTo(`/game/${this.params.tournament_id}/${game.game.id}`) ;
+            navigateTo(`/play/${this.params.tournament_id}/${game.game.id}`) ;
         });
 
         const lastgame = this.games.data.filter(game => game.t_round == 1)[0].game

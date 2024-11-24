@@ -101,8 +101,10 @@ class GamePage extends AbstractPage {
           }
           else
           {
-            console.log(`/score/${this.params.game_id}`);
-            navigateTo(`/score/${this.params.game_id}`)
+            if (this.params.game_id === 'bot')
+              navigateTo(`/score/${this.params.game_id}?player1_score=${this.score1Text}&player2_score=${this.score2Text}`);
+            else
+              navigateTo(`/score/${this.params.game_id}`)
           }
           return
         }

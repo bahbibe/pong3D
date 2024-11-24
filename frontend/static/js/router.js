@@ -79,7 +79,7 @@ const routes = [
     isProtected: true,
     page: "blocked-page",
   },
-  { path: "/game", view: GamePage, isProtected: true, page: "game-page" },
+  { path: "/play", view: GamePage, isProtected: true, page: "game-page" },
   {
     path: "/matchmaking",
     view: MatchmakingPage,
@@ -87,13 +87,13 @@ const routes = [
     page: "matchmaking-page",
   },
   {
-    path: "/game/:tournament_id/:game_id",
+    path: "/play/:tournament_id/:game_id",
     view: GamePage,
     isProtected: true,
     page: "game-page",
   },
   {
-    path: "/game/:game_id",
+    path: "/play/:game_id",
     view: GamePage,
     isProtected: true,
     page: "game-page",

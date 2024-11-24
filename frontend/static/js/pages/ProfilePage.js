@@ -262,7 +262,7 @@ class mainNav extends AbstractPage {
       const playButton = e.target.closest("[data-game]");
       if (playButton) {
         const game = playButton.dataset.game;
-        navigateTo(`/game/${game}`);
+        navigateTo(`/play/${game}`);
       }
     });
   }
