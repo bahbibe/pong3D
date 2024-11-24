@@ -1,9 +1,12 @@
 FROM nginx:alpine
 
+RUN apk update && apk add openssl
+
 COPY ./nginx.conf /etc/nginx/conf.d/nginx.conf
 
-COPY  ./ssl/nginx.crt /etc/nginx/ssl/nginx.crt
-COPY  ./ssl/nginx.key /etc/nginx/ssl/nginx.key
+WORKDIR /etc/nginx/ssl
+
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout nginx.key -out nginx.crt -subj "/"
 
 CMD ["nginx", "-g", "daemon off;"]
 
