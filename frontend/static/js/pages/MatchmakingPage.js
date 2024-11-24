@@ -1,5 +1,5 @@
 import { AbstractPage } from "./AbstarctPage.js";
-import { navigateTo } from "../router.js";
+import { navigateTo, WSS_URL } from "../router.js";
 
 
 class MatchmakingPage extends AbstractPage {
@@ -15,7 +15,7 @@ class MatchmakingPage extends AbstractPage {
     this.message.innerHTML = "Looking for a match..." ;
     this.loader = this.querySelector(".loader") ;
     this.addEventListener('click', this);
-    this.socket = new WebSocket('wss://localhost/ws/matchmaking');
+    this.socket = new WebSocket(`${WSS_URL}/ws/matchmaking`);
     this.socket.onopen = (event) =>
     {
       console.log("connected");

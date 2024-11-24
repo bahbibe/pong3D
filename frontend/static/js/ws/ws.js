@@ -1,7 +1,9 @@
+import { WSS_URL } from "../router.js";
+
 class WebSock {
   constructor(uuid) {
     this.uuid = uuid;
-    this.socket = new WebSocket(`wss://localhost/ws/chat/${uuid}/`);
+    this.socket = new WebSocket(`${WSS_URL}/ws/chat/${uuid}/`);
   }
 
   async connect() {

@@ -2,7 +2,7 @@ import { AbstractPage } from "./AbstarctPage.js";
 import * as THREE from "three"
 
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { navigateTo } from "../router.js";
+import { navigateTo, WSS_URL } from "../router.js";
 
 const scenePath = "/static/scene.glb"
 
@@ -42,10 +42,10 @@ class GamePage extends AbstractPage {
     this.score2Text = 0 ;
 
     this.scene = new THREE.Scene();
-    this.game_url = 'wss://localhost/ws/game/' + this.params.game_id ;
+    this.game_url = `${WSS_URL}/ws/game/` + this.params.game_id ;
     
     if (this.params.tournament_id)
-      this.game_url = 'wss://localhost/ws/game/' + this.params.tournament_id +'/' + this.params.game_id;
+      this.game_url = `${WSS_URL}/ws/game/` + this.params.tournament_id +'/' + this.params.game_id;
     this.socket = new WebSocket(this.game_url);
 
     //Renderer does the job of rendering the graphics

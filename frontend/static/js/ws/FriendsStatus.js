@@ -1,6 +1,8 @@
+import { WSS_URL } from "../router.js";
+
 export const FriendsStatus = () => {
   if (!window.socket) {
-    const socket = new WebSocket('wss://localhost/ws/status/');
+    const socket = new WebSocket(`${WSS_URL}/ws/status/`);
     window.socket = socket;
   }
 

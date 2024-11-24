@@ -1,6 +1,6 @@
 import { AbstractPage } from "./AbstarctPage.js";
 import { API } from "../API/API.js";
-import { navigateTo } from "../router.js";
+import { navigateTo, WSS_URL } from "../router.js";
 
 class TournamentDisplayPage extends AbstractPage {
   constructor() {
@@ -10,7 +10,7 @@ class TournamentDisplayPage extends AbstractPage {
   connectedCallback() {
     console.log("connectedCallback");
     
-    this.socket = new WebSocket('wss://localhost/ws/tournament/' + this.params.tournament_id);
+    this.socket = new WebSocket(`${WSS_URL}/ws/tournament/` + this.params.tournament_id);
     const template = document.getElementById("tournament-display-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);

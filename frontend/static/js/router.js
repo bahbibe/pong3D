@@ -16,11 +16,14 @@ import {
   MatchmakingPage,
   blockedFriendsPage,
 } from "./pages/index.js";
-// import { FriendsStatus } from "./ws/FriendsStatus.js";
-// import { Notifications } from "./ws/NotificationsSockets.js";
+import { FriendsStatus } from "./ws/FriendsStatus.js";
+import { Notifications } from "./ws/NotificationsSockets.js";
 import { TournamentDisplayPage } from "./pages/TournamentDisplayPage.js";
 import { ScorePage } from "./pages/ScorePage.js";
+
 export const BASE_URL = "https://localhost:1337";
+export const WSS_URL = "wss://localhost:1337"
+
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
@@ -29,7 +32,6 @@ const getParams = (match) => {
   const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
     (result) => result[1]
   );
-  // console.log(keys);
 
   return Object.fromEntries(keys.map((key, i) => [key, values[i]]));
 };
@@ -154,8 +156,8 @@ const getUser = async () => {
       navigateTo("/twofa");
       return true;
     }
-    // FriendsStatus();
-    // Notifications();
+    FriendsStatus();
+    Notifications();
     return true;
   }
   return false;
