@@ -20,7 +20,7 @@ import {
 // import { Notifications } from "./ws/NotificationsSockets.js";
 import { TournamentDisplayPage } from "./pages/TournamentDisplayPage.js";
 import { ScorePage } from "./pages/ScorePage.js";
-export const BASE_URL = "https://localhost";
+export const BASE_URL = "https://localhost:1337";
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
 
