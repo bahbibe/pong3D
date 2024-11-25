@@ -8,6 +8,8 @@ services:
     restart: unless-stopped
     networks:
       - ft_transcendence
+    ports:
+      - "3001:3001"
 
 volumes:
   node_modules:
