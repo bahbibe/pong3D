@@ -686,48 +686,38 @@
       <main-nav></main-nav>
       <div class="container-md font-monospace">
         <h1 class="display-1 my-5">Leaderboard</h1>
-        <div class="" id="ranks">
-          <div class="row bg-secondary rounded mb-4 p-2">
-            <div class="col-2 col-md-4 d-flex align-items-center  me-auto">
-              <img src="/static/asset/images/profile.svg" alt="player image" class="img-fluid rounded-circle"
-                width="80">
-              <div class="ps-2">
-                <span class="text-uppercase">bmakhlou</span>
-              </div>
-            </div>
-            <div class="col-md-5  my-auto d-none d-md-inline-block">
-              <div class="row text-center">
-                <div class="total-match col-3">
-                  <span class="d-block">
-                    Total
-                  </span>
-                  <span class="fw-bold">100</span>
-                </div>
-                <div class="match-wins  col-3">
-                  <span class="d-block">
-                    wins
-                  </span>
-                  <span class="fw-bold">100</span>
-                </div>
-                <div class="match-loses col-3">
-                  <span class="d-block">
-                    Loses
-                  </span>
-                  <span class="fw-bold">100</span>
-                </div>
-                <div class="match-ratio col-3">
-                  <span class="d-block">
-                    Ratio
-                  </span>
-                  <span class="fw-bold">100%</span>
-                </div>
-              </div>
-            </div>
-            <div class="rank col-2 my-auto text-end">
-              <span class="fw-bolder">#1</span>
-            </div>
-          </div>
+
+
+        <div class="table-responsive">
+          <table class="mytable">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Users</th>
+                <th scope="col">Total</th>
+                <th scope="col">Wins</th>
+                <th scope="col" class="">Loses</th>
+                <th scope="col">Ratio</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- <tr>
+                <th scope="row">1</th>
+                <td>
+                  <div class="user-cell">
+                    <img src="/static/asset/images/bmakhlou.jpeg" alt="">
+                    <div class="username">bmakhlou</div>
+                  </div>
+                </td>
+                <td>100</td>
+                <td>50</td>
+                <td class="">50</td>
+                <td>50%</td>
+              </tr> -->
+            </tbody>
+          </table>
         </div>
+
       </div>
     </section>
   </template>
