@@ -1,23 +1,6 @@
 import { API } from "../API/API.js";
 import { WebSock } from "../ws/ws.js";
 
-
-// const recieveMsg = async (ws, msgBox) => {
-//   const msgBoxElem = document.querySelector(".msg-box");
-//   try {
-//     const msg = await ws.receive();
-//     if (!msg) {
-//       return;
-
-//     }
-//     msgBoxElem.appendChild(createMessageElement(JSON.parse(msg)));
-//     msgBoxElem.scrollTop = msgBoxElem.scrollHeight;
-//     // await recieveMsg(ws, msgBox);
-//   } catch (error) {
-//     console.error("Error receiving message:", error);
-//   }
-// };
-
 class ChatBox extends HTMLElement {
   constructor(friendship) {
     super();
@@ -106,8 +89,7 @@ class ChatBox extends HTMLElement {
   headerElement(friend) {
     const headerElement = document.createElement("div");
     headerElement.className = "msg-head mb-3 p-2 d-flex gap-2";
-    const stat = window.online_users.includes(friend.id) ? "Online" : "Offline";
-    console.log(stat);
+    const stat = window.online_users.includes(friend.id.toString()) ? "Online" : "Offline";
     // !  ? document.querySelector(".stat").classList.add("online")
     // !  : null
     headerElement.innerHTML = `

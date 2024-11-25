@@ -21,7 +21,7 @@ class API {
 
   async getMessages(uuid) {
     try {
-      const response = await fetch(`${BASE_URL}/chat/${uuid}/`, {
+      const response = await fetch(`${BASE_URL}/api/chat/messages/${uuid}/`, {
         method: "GET",
         headers: {
           "content-type": "application/json",
@@ -57,7 +57,7 @@ class API {
   async getTournaments() {
     try {
       const response = await fetch(
-        `${BASE_URL}/game/get_tournaments`,
+        `${BASE_URL}/api/game/get_tournaments`,
         {
           method: "GET",
           headers: {
@@ -77,7 +77,7 @@ class API {
   async getTournamentGames(tournament_id) {
     try {
       const response = await fetch(
-        `${BASE_URL}/game/get_tournament_games/${tournament_id}`,
+        `${BASE_URL}/api/game/get_tournament_games/${tournament_id}`,
         {
           method: "GET",
           headers: {
@@ -98,7 +98,7 @@ class API {
   async getTournament(tournament_id) {
     try {
       const response = await fetch(
-        `${BASE_URL}/game/get_participants/${tournament_id}`,
+        `${BASE_URL}/api/game/get_participants/${tournament_id}`,
         {
           method: "GET",
           headers: {
@@ -118,7 +118,7 @@ class API {
   async create_tournament() {
     try {
       const response = await fetch(
-        `${BASE_URL}/game/create_tournament`,
+        `${BASE_URL}/api/game/create_tournament`,
         {
           method: "GET",
           headers: {
@@ -139,7 +139,7 @@ class API {
   async get_game(game_id) {
     try {
       const response = await fetch(
-        `${BASE_URL}/game/get_game/${game_id}`,
+        `${BASE_URL}/api/game/get_game/${game_id}`,
         {
           method: "GET",
           headers: {
@@ -160,7 +160,7 @@ class API {
   async invite_friend(friendId) {
     try {
       const response = await fetch(
-        `${BASE_URL}/game/invite_friend/${friendId}`,
+        `${BASE_URL}/api/game/invite_friend/${friendId}`,
         {
           method: "GET",
           headers: {
@@ -183,7 +183,7 @@ class API {
   async play_again(game_id) {
     try {
       const response = await fetch(
-        `${BASE_URL}/game/play_again/${game_id}`,
+        `${BASE_URL}/api/game/play_again/${game_id}`,
         {
           method: "GET",
           headers: {
