@@ -22,12 +22,12 @@ from .views import (
 )
 
 
-def hello():
-    return JsonResponse({"status": "success", "message": "Hello World!"})
+# def hello():
+#     return JsonResponse({"status": "success", "message": "Hello World!"})
 
 
 urlpatterns = [
-    path("", hello),
+    # path("", hello),
     path("register/", register_user, name="register"),
     path("login/", login_user, name="login"),
     path("intra/", login_intra, name="intra-login"),

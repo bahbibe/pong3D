@@ -2,7 +2,7 @@ import os
 import django
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ft_transcendence.settings")
-django.setup()
+# django.setup()
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from channels.security.websocket import AllowedHostsOriginValidator
