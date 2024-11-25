@@ -12,11 +12,11 @@ def redirect_to_api(request):
 
 urlpatterns = [
     path("", redirect_to_api),
-    path("chat/", include("chat.urls")),
+    path("api/chat/", include("chat.urls")),
     path("api/auth/", include("api.urls")),
     path("api/friends/", include("friends.urls")),
     path("admin/", admin.site.urls),
-    path("game/", include("game.urls")),
+    path("api/game/", include("game.urls")),
 ]
 
 # urlpatterns += static("/avatars/", document_root=settings.BASE_DIR / "avatars/")

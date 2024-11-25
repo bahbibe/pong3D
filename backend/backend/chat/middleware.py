@@ -25,6 +25,7 @@ class WSAuthMiddleware:
             user = await get_user(decoded["id"])
             if not user:
                 print("User does not exist")
+                # !scope['user'] = AnonymousUser()
                 return None
             scope['user'] = user
         except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):

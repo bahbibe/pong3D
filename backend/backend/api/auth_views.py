@@ -47,7 +47,6 @@ def login_user(request):
                 message="An email or username is required to log in.",
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
-
         auth_field = (
             "email"
             if serailizer.validated_data.get("email") is not None
@@ -248,7 +247,7 @@ def login_intra_callback(request):
         {"id": user.id, "is_tfa_verified": False, "exp": access_token_liftime}
     )
 
-    response = redirect("https://localhost/")
+    response = redirect("https://localhost:1337/")
     response.set_cookie(
         "access_token", access_token, httponly=True, expires=access_token_liftime
     )
