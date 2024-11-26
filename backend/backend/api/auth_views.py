@@ -143,7 +143,7 @@ def get_user(request):
     user = request.user
     serializer = UserSerializer(user)
     notifications = NotificationSerializer(
-        Notification.objects.filter(user=user, is_read=False), many=True
+        Notification.objects.filter(user=user, is_read=False).order_by("-created_at"), many=True
     )
     return SuccessResponse(
         data={"user": serializer.data, "notifications": notifications.data}
