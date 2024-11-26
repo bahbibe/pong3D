@@ -89,9 +89,7 @@ class ChatBox extends HTMLElement {
   headerElement(friend) {
     const headerElement = document.createElement("div");
     headerElement.className = "msg-head mb-3 p-2 d-flex gap-2";
-    const stat = window.online_users.includes(friend.id.toString()) ? "Online" : "Offline";
-    // !  ? document.querySelector(".stat").classList.add("online")
-    // !  : null
+    const stat = window.online_users && window.online_users.includes(friend.id.toString()) ? "Online" : "Offline";
     headerElement.innerHTML = `
     <div class="d-flex align-items-center">
       <img src="${friend.profile.avatar}" class=" d-block img-cover img-fluid rounded-circle h-100" alt="avatar"/>
@@ -100,7 +98,9 @@ class ChatBox extends HTMLElement {
     <a href="/friend/${friend.profile.uuid}">
       <span class="fs-5">${friend.username}</span>
       </a>
-      <span class="stat opacity-75"> <i class="fa-solid fa-circle"></i> Online</span>
+      <span class="stat opacity-75 stat-${friend.id} ${stat === "Online" ? "online" : ""}"> 
+        <i class="fa-solid fa-circle"></i> <span class="friend-status">${stat}</span>
+      </span>
     </div>
       <button class=" btn challenge"><span class="d-none d-md-block">Challenge</span> <i class="fa-solid fa-gamepad fs-2 d-md-none"></i> </button>
     `;
@@ -130,7 +130,7 @@ class ChatBox extends HTMLElement {
     `;
     return messageElement;
   }
-  async inviteToGame(friend) { 
+  async inviteToGame(friend) {
     const response = await this.API.invite_friend(friend.id);
     if (response) {
       console.log("Invitation sent");

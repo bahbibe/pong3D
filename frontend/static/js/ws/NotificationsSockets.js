@@ -16,7 +16,7 @@ export const Notifications = () => {
     console.log("notification received -> ", data);
     const notifications = window.notifications || [];
     notifications.push(data);
-    // window.notifications = notifications;
+    window.notifications = notifications;
     renderNotifications();
   }
 
