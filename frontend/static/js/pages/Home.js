@@ -1,5 +1,6 @@
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
+import { BASE_URL } from "../router.js";
 class Home extends AbstractPage {
   constructor() {
     super();
@@ -14,66 +15,51 @@ class Home extends AbstractPage {
 
     const user = window.user;
     first_name.textContent = `${user.first_name}`;
+    this.render();
+  }
+
+  async render() {
+    try {
+      const response = await fetch(`${BASE_URL}/api/game/leaderboard/`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+      const data = await response.json();
+      if (response.ok) {
+        const bestPlayer = this.querySelector("#bestPlayer");
+        const users = data.data.users;
+        console.log(users);
+
+        for (const [index, user] of users.entries()) {
+          if (index < 3)
+            {
+            console.log("index", index);
+            bestPlayer.innerHTML += `
+              <div class="d-flex p-2 justify-content-between align-items-center glass-effect mb-2">
+                  <div class="col-2"><img src="/static/asset/images/rank${index + 1}.png" alt="badge Rank number one" width="30"></div>
+                  <div class="col-4">
+                    <div class="d-flex align-items-center">
+                      <img src="${user.user.avatar}" class="img-fluid rounded-circle d-none d-md-block" alt="user profile image" style="width=35px; height:35px">
+                      <div class="ps-2">
+                        <span class="fw-bold text-capitalize" style="font-size: 14px;">${user.user.username}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-3 col-md-2 text-center text-md-left"><strong>${user.total_games}</strong></div>
+                  <div class="col-3 col-md-2 text-center text-md-left"><strong>${user.total_wins}</strong></div>
+                  <div class="col-2 d-none d-md-block text-center"><strong>${user.ratio}%</strong></div>
+              </div>
+          `;
+          }
+      }
+      }
+    } catch (error) {
+    console.error("Error:", error);
+    }
   }
 }
 
-// class AsideNav extends AbstractPage {
-//   constructor() {
-//     super();
-//   }
-
-//   connectedCallback() {
-//     const template = document.getElementById("aside-nav");
-//     const clone = template.content.cloneNode(true);
-//     this.appendChild(clone);
-
-//     const links = this.querySelectorAll(".sidebar-link");
-
-//     links.forEach((link) => {
-//       if (window.path === link.getAttribute("href")) {
-//         this.activeLink = this.querySelector(`a[href="${window.path}"].sidebar-link`);
-//         this.activeLink.classList.add("active");
-//       }
-
-//     });
-
-//     this.addEventListener("click", this);
-
-//   }
-//   handleEvent(e) {
-//     this[`on${e.type}`](e)
-//   }
-//   onclick(e) {
-//     e.preventDefault();
-//     this.logout(e);
-
-//   }
-
-// logout(e) {
-//   e.preventDefault();
-//   if (!(e.target.id === "logout")) return;
-//   fetch(`${BASE_URL}/api/auth/logout/`, {
-//     method: "POST",
-//     credentials: "include",
-//   })
-//   .then((res) => {
-//     console.log("socket closed -> ", window.socket);
-//     if (window.socket) {
-//       window.socket.close();
-//     }
-//     window.user = null;
-//     if (res.status === 200) {
-//       navigateTo("/login");
-//     }
-//   })
-//   .catch((err) => {
-//     console.log(err);
-// });
-// }
-
-// }
-
 window.customElements.define("user-home", Home);
-// window.customElements.define("aside-nav", AsideNav);
 
 export { Home };

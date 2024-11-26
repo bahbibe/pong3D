@@ -17,9 +17,10 @@ class RankingPage extends AbstractPage {
   
   async render() {
     try {
-      const response = await fetch(`${BASE_URL}/game/leaderboard/ `, {
+      const response = await fetch(`${BASE_URL}/api/game/leaderboard/`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
+        
       });
       const data = await response.json();
       console.log(data);

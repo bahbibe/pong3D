@@ -327,28 +327,13 @@
         </div>
         <div class="row justify-content-center p-3 mb-2">
           <h2 class="font-monospace">Best Players</h2>
-          <div class="col-12 col-lg-10 glass-effect p-2">
+          <div class="col-12 col-lg-10 glass-effect p-2" id="bestPlayer">
             <div class="d-flex p-2  justify-content-between align-items-center mb-1">
               <div class="col-2"><strong>Rank</strong></div>
               <div class="col-4"><strong>Username</strong> </div>
               <div class="col-3 col-md-2 text-center text-md-left"><strong>Total</strong></div>
               <div class="col-3 col-md-2 text-center text-md-left"><strong>Wins</strong></div>
               <div class="col-2 d-none d-md-block text-center"><strong>Ratio</strong></div>
-            </div>
-            <div class="d-flex p-2 justify-content-between align-items-center glass-effect">
-              <div class="col-2"><img src="/static/asset/images/rank1.png" alt="badge Rank number one" width="30"></div>
-              <div class="col-4">
-                <div class="d-flex align-items-center">
-                  <img src="/static/asset/images/profile.svg" class="img-fluid rounded-circle d-none d-md-block"
-                    width="35" alt="user profile image">
-                  <div class="ps-2">
-                    <span class="fw-bold text-capitalize" style="font-size: 14px;">Bmakhlou</span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-3 col-md-2 text-center text-md-left"><strong>04</strong></div>
-              <div class="col-3 col-md-2 text-center text-md-left"><strong>10</strong></div>
-              <div class="col-2 d-none d-md-block text-center"><strong>1%</strong></div>
             </div>
           </div>
 
@@ -545,7 +530,7 @@
               </div>
               <div class="ps-0 ps-md-4 pt-3 pb-md-0">
                 <h4 class="m-0 fw-bold text-capitalize" id="fullName">bilal makhloufi</h4>
-                <sapn class="fw-medium text-capitalize" id="username">@bmakhlou</sapn>
+                <span class="fw-medium text-capitalize" id="username">@bmakhlou</span>
               </div>
             </div>
           </div>
@@ -553,8 +538,8 @@
             class="col-12 col-md-6  d-flex align-items-center justify-content-center  justify-content-md-end mb-2 mb-md-0">
             <button class="d-flex align-items-center btn btn-block bg-primary  me-2 text-truncate text-white"
               id="add-friend"> <i class="fa-solid fa-plus me-2"></i> Friend</button>
-            <button class="d-flex align-items-center btn btn-block text-white me-2"
-              style=" background-color: #BE8CE4;"><i class="fa-solid fa-message me-2"></i> Message</button>
+            <a href="/chat" class="d-flex align-items-center btn btn-block text-white me-2"
+              style=" background-color: #BE8CE4;"><i class="fa-solid fa-message me-2"></i>Message</a>
             <button class="d-flex align-items-center btn btn-block text-white shadow" aria-label="Block" id="block"> <i
                 class="fa-solid fa-lg fa-triangle-exclamation"></i></button>
           </div>
@@ -701,19 +686,6 @@
               </tr>
             </thead>
             <tbody>
-              <!-- <tr>
-                <th scope="row">1</th>
-                <td>
-                  <div class="user-cell">
-                    <img src="/static/asset/images/bmakhlou.jpeg" alt="">
-                    <div class="username">bmakhlou</div>
-                  </div>
-                </td>
-                <td>100</td>
-                <td>50</td>
-                <td class="">50</td>
-                <td>50%</td>
-              </tr> -->
             </tbody>
           </table>
         </div>
@@ -910,8 +882,13 @@
 
   <!-- !not found page -->
   <template id="not-found-page">
-    <h1>404 Not Found</h1>
-    <p>Sorry, the page you are looking for does not exist.</p>
+    <section class="p-1">
+      <div class="container vt323-regular d-flex flex-column  justify-content-center text-center text-capitalize" style="height: 100dvh; width: 100vw;">
+        <h1 class="display-1 fw-bolder">404 Not Found</h1>
+        <p class="display-6">Sorry, the page you are looking for does not exist.</p>
+      </div>
+
+    </section>
   </template>
 
   <template id="notification">

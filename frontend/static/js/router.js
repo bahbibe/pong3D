@@ -21,8 +21,8 @@ import { Notifications } from "./ws/NotificationsSockets.js";
 import { TournamentDisplayPage } from "./pages/TournamentDisplayPage.js";
 import { ScorePage } from "./pages/ScorePage.js";
 
-export const BASE_URL = "https://localhost:1337";
-export const WSS_URL = "wss://localhost:1337"
+export const BASE_URL = "http://localhost:8000";
+export const WSS_URL = "ws://localhost:8000"
 
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
