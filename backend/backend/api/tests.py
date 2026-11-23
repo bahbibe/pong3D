@@ -3,7 +3,7 @@ import json
 import pyotp
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.test import TestCase
+from django.test import TestCase, TransactionTestCase
 
 from .models import Profile
 
@@ -594,3 +594,37 @@ class IntraStateTests(AuthTestCase):
         with mock.patch("api.auth_views.requests.post", side_effect=requests_lib.Timeout()):
             response = self.client.get(f"/api/auth/intra/callback/?code=abc&state={state}")
         self.assertEqual(response.status_code, 502)
+
+
+class UniqueIntraIdTests(TestCase):
+    def test_duplicate_intra_id_is_rejected_by_the_database(self):
+        from django.db import IntegrityError, transaction
+
+        make_user("one", auth_method=Profile.INTRA, intra_id=9001)
+        two = make_user("two", auth_method=Profile.INTRA)
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Profile.objects.filter(user=two).update(intra_id=9001)
+
+
+class UniqueIntraIdMigrationTests(TransactionTestCase):
+    def test_migration_clears_duplicates_before_adding_the_index(self):
+        from django.db import connection
+        from django.db.migrations.executor import MigrationExecutor
+
+        before = [("api", "0015_backfill_missing_profiles")]
+        after = [("api", "0016_unique_intra_id")]
+        executor = MigrationExecutor(connection)
+        executor.migrate(before)
+        old_apps = executor.loader.project_state(before).apps
+        OldUser = old_apps.get_model("auth", "User")
+        OldProfile = old_apps.get_model("api", "Profile")
+        ids = []
+        for name in ("dup_a", "dup_b"):
+            user = OldUser.objects.create(username=name)
+            ids.append(OldProfile.objects.create(user=user, intra_id=55, auth_method="intra").id)
+
+        executor = MigrationExecutor(connection)
+        executor.migrate(after)
+
+        self.assertEqual(Profile.objects.get(id=ids[0]).intra_id, 55)
+        self.assertIsNone(Profile.objects.get(id=ids[1]).intra_id)

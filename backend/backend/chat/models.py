@@ -9,7 +9,8 @@ class Message(models.Model):
     author = models.ForeignKey(to=User, on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(default=timezone.now)
-    conversation = models.CharField(max_length=128, blank=False , null=True)
+    # Friendship uuid. Indexed: chat history is loaded by conversation.
+    conversation = models.CharField(max_length=128, blank=False, null=True, db_index=True)
     class Meta:
         ordering = ["timestamp"]
     def __str__(self):
