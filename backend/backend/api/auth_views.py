@@ -13,9 +13,11 @@ from .models import Profile, Notification
 from django.shortcuts import redirect
 from django.contrib.auth.hashers import check_password
 from .auth_utils import is_authenticated, set_access_token
+from . import rate_limit
 from django.conf import settings
 from utils.responses import ErrorResponse, SuccessResponse
 import urllib.parse
+from django.db import transaction
 import requests
 import os
 import random
@@ -24,6 +26,94 @@ import pyotp.totp
 import qrcode
 import base64
 import io
+
+
+INTRA_TIMEOUT_SECONDS = 10
+
+
+def check_totp(user, code):
+    """
+    Check a TOTP code and count failures per user (rate_limit "tfa-user").
+    Returns False while the user is blocked, without checking the code.
+    """
+    if rate_limit.is_blocked("tfa-user", user.id):
+        return False
+    if pyotp.TOTP(user.profile.tfa_secret).verify(str(code)):
+        rate_limit.reset("tfa-user", user.id)
+        return True
+    rate_limit.record_failure("tfa-user", user.id)
+    return False
+
+
+def parse_intra_user(payload):
+    """Pick the fields we need from /v2/me. None if the payload is unusable."""
+    if not isinstance(payload, dict):
+        return None
+    intra_id = payload.get("id")
+    login = payload.get("login")
+    if not isinstance(intra_id, int) or not login:
+        return None
+    image = payload.get("image") or {}
+    return {
+        "id": intra_id,
+        "username": login,
+        "email": payload.get("email") or "",
+        "first_name": (payload.get("first_name") or "")[:150],
+        "last_name": (payload.get("last_name") or "")[:150],
+        # Some intra accounts have no picture: keep the model default then.
+        "avatar": image.get("link") if isinstance(image, dict) else None,
+    }
+
+
+def find_or_create_intra_user(user_data):
+    """
+    Return the account for an intra user, creating it on first login.
+
+    Accounts are matched by intra id only. Matching by username let an
+    intra user rename their account to someone's 42 login and receive that
+    person's first login.
+    """
+    profile = (
+        Profile.objects.select_related("user").filter(intra_id=user_data["id"]).first()
+    )
+    if profile:
+        return profile.user
+
+    # Accounts created before intra_id was stored: claim them once and
+    # save the id. Only intra accounts that have no id yet can match.
+    legacy = (
+        Profile.objects.select_related("user")
+        .filter(
+            user__username=user_data["username"],
+            auth_method=Profile.INTRA,
+            intra_id__isnull=True,
+        )
+        .first()
+    )
+    if legacy:
+        legacy.intra_id = user_data["id"]
+        legacy.save(update_fields=["intra_id"])
+        return legacy.user
+
+    username = user_data["username"]
+    while User.objects.filter(username=username).exists():
+        suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+        username = f"{user_data['username']}_{suffix}"
+
+    with transaction.atomic():
+        user = User.objects.create_user(
+            username=username,
+            email=user_data["email"],
+            first_name=user_data["first_name"],
+            last_name=user_data["last_name"],
+        )
+        user.set_unusable_password()
+        user.save()
+        profile_fields = {"auth_method": Profile.INTRA, "intra_id": user_data["id"]}
+        if user_data["avatar"]:
+            profile_fields["avatar"] = user_data["avatar"]
+        Profile.objects.create(user=user, **profile_fields)
+    return user
 
 
 class RegisterUserViewSet(viewsets.ModelViewSet):
@@ -51,24 +141,29 @@ def login_user(request):
             if serailizer.validated_data.get("email") is not None
             else "username"
         )
-        user = User.objects.filter(
-            **{auth_field: serailizer.validated_data.get(auth_field)}
-        ).first()
-        if user is None or user.profile.auth_method == Profile.INTRA:
-            return ErrorResponse(
-                message="These credentials does not match any records.",
-                status_code=status.HTTP_404_NOT_FOUND,
-            )
+        login_value = str(serailizer.validated_data.get(auth_field))
+        account_key = f"{auth_field}:{login_value.lower()}"
+        ip_key = rate_limit.client_ip(request)
+        if rate_limit.is_blocked("login-account", account_key) or rate_limit.is_blocked(
+            "login-ip", ip_key
+        ):
+            return rate_limit.too_many_attempts()
 
-        is_password_valid = check_password(
-            serailizer.validated_data.get("password"), user.password
+        user = User.objects.filter(**{auth_field: login_value}).first()
+        is_password_valid = (
+            user is not None
+            and user.profile.auth_method != Profile.INTRA
+            and check_password(serailizer.validated_data.get("password"), user.password)
         )
         if not is_password_valid:
+            rate_limit.record_failure("login-account", account_key)
+            rate_limit.record_failure("login-ip", ip_key)
             return ErrorResponse(
                 message="These credentials does not match any records.",
                 status_code=status.HTTP_404_NOT_FOUND,
             )
 
+        rate_limit.reset("login-account", account_key)
         response = SuccessResponse({"user": UserSerializer(user).data})
         return set_access_token(response, user, is_tfa_verified=False)
 
@@ -156,77 +251,52 @@ def login_intra_callback(request):
     if not code:
         return ErrorResponse(message="No code found")
 
-    intra_response = requests.post(
-        "https://api.intra.42.fr/oauth/token",
-        data={
-            "grant_type": "authorization_code",
-            "client_id": os.getenv("INTRA_CLIENT_ID"),
-            "client_secret": os.getenv("INTRA_CLIENT_SECRET"),
-            "code": code,
-            "redirect_uri": f"{os.getenv('API_URL')}/api/auth/intra/callback/",
-        },
-    )
+    try:
+        intra_response = requests.post(
+            "https://api.intra.42.fr/oauth/token",
+            data={
+                "grant_type": "authorization_code",
+                "client_id": os.getenv("INTRA_CLIENT_ID"),
+                "client_secret": os.getenv("INTRA_CLIENT_SECRET"),
+                "code": code,
+                "redirect_uri": f"{os.getenv('API_URL')}/api/auth/intra/callback/",
+            },
+            timeout=INTRA_TIMEOUT_SECONDS,
+        )
+        access_token = (
+            intra_response.json().get("access_token")
+            if intra_response.status_code == 200
+            else None
+        )
+        if not access_token:
+            return ErrorResponse(
+                message="Failed to get access token",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+            )
 
-    if intra_response.status_code != 200:
+        intra_response = requests.get(
+            "https://api.intra.42.fr/v2/me",
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=INTRA_TIMEOUT_SECONDS,
+        )
+        if intra_response.status_code != 200:
+            return ErrorResponse(
+                message="Failed to get user data",
+                status_code=status.HTTP_401_UNAUTHORIZED,
+            )
+        user_data = parse_intra_user(intra_response.json())
+    except (requests.RequestException, ValueError):
         return ErrorResponse(
-            message="Failed to get access token",
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            message="42 intra is not reachable, please try again later.",
+            status_code=status.HTTP_502_BAD_GATEWAY,
         )
 
-    json_response = intra_response.json()
-    access_token = json_response["access_token"]
-    if not access_token:
-        return ErrorResponse(
-            message="Failed to get access token",
-            status_code=status.HTTP_401_UNAUTHORIZED,
-        )
-
-    intra_response = requests.get(
-        "https://api.intra.42.fr/v2/me",
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
-    if intra_response.status_code != 200:
+    if user_data is None:
         return ErrorResponse(
             message="Failed to get user data", status_code=status.HTTP_401_UNAUTHORIZED
         )
 
-    json_response = intra_response.json()
-    user_data = {
-        "id": json_response["id"],
-        "username": json_response["login"],
-        "email": json_response["email"],
-        "first_name": json_response["first_name"],
-        "last_name": json_response["last_name"],
-        "avatar": json_response["image"]["link"],
-    }
-    
-    user = None
-    profile = Profile.objects.filter(intra_id=user_data["id"]).first()
-    if profile:
-        user = profile.user
-    else:
-        user = User.objects.filter(username=user_data["username"]).first()
-        if user and user.profile.auth_method != Profile.INTRA:
-            user_data["username"] = (
-                f"{user_data['username']}_{''.join(random.choices(string.ascii_lowercase + string.digits, k=6))}"
-            )
-            user = None
-
-    if user is None:
-        user = User.objects.create_user(
-            username=user_data["username"],
-            email=user_data["email"],
-            first_name=user_data["first_name"],
-            last_name=user_data["last_name"],
-        )
-        Profile.objects.create(
-            user=user,
-            avatar=user_data["avatar"],
-            auth_method=Profile.INTRA,
-            intra_id=user_data["id"],
-        )
-        user.set_unusable_password()
-        user.save()
+    user = find_or_create_intra_user(user_data)
 
     response = redirect(settings.FRONTEND_URL)
     return set_access_token(response, user, is_tfa_verified=False)
@@ -275,9 +345,9 @@ def confirm_twofa(request):
     if not user.profile.tfa_secret:
         return ErrorResponse(message="2FA is not enabled")
 
-    secret = user.profile.tfa_secret
-    is_code_valid = pyotp.TOTP(secret).verify(code)
-    if not is_code_valid:
+    if rate_limit.is_blocked("tfa-user", user.id):
+        return rate_limit.too_many_attempts()
+    if not check_totp(user, code):
         return ErrorResponse(message="Invalid code")
 
     user.profile.is_tfa_enabled = True
@@ -299,8 +369,9 @@ def verify_twofa(request):
     if not code:
         return ErrorResponse(message="No code found")
 
-    is_code_valid = pyotp.TOTP(user.profile.tfa_secret).verify(code)
-    if not is_code_valid:
+    if rate_limit.is_blocked("tfa-user", user.id):
+        return rate_limit.too_many_attempts()
+    if not check_totp(user, code):
         return ErrorResponse(message="Invalid code")
 
     response = SuccessResponse(message="Code is valid")
@@ -318,7 +389,9 @@ def disable_twofa(request):
     if not code:
         return ErrorResponse(message="No code found")
 
-    if not pyotp.TOTP(user.profile.tfa_secret).verify(str(code)):
+    if rate_limit.is_blocked("tfa-user", user.id):
+        return rate_limit.too_many_attempts()
+    if not check_totp(user, code):
         return ErrorResponse(message="Invalid code")
 
     user.profile.is_tfa_enabled = False

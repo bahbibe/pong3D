@@ -2,6 +2,7 @@ import json
 
 import pyotp
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.test import TestCase
 
 from .models import Profile
@@ -22,6 +23,10 @@ def make_user(username, password=PASSWORD, **profile_fields):
 
 
 class AuthTestCase(TestCase):
+    def setUp(self):
+        super().setUp()
+        cache.clear()  # rate-limit counters
+
     def login(self, username, password=PASSWORD):
         response = self.client.post(
             "/api/auth/login/",
@@ -42,6 +47,7 @@ class AuthTestCase(TestCase):
 
 class TwoFactorTests(AuthTestCase):
     def setUp(self):
+        super().setUp()
         self.secret = pyotp.random_base32()
         self.user = make_user(
             "alice", is_tfa_enabled=True, tfa_secret=self.secret
@@ -182,6 +188,7 @@ class SettingsUpdateTests(AuthTestCase):
     NEW_PASSWORD = "Another-Strong-Pass-7"
 
     def setUp(self):
+        super().setUp()
         self.user = make_user("carol")
         self.login("carol")
 
@@ -297,6 +304,7 @@ class SettingsUpdateTests(AuthTestCase):
 
 class CrossOriginTests(AuthTestCase):
     def setUp(self):
+        super().setUp()
         make_user("dave")
 
     def test_auth_cookie_flags(self):
@@ -315,3 +323,134 @@ class CrossOriginTests(AuthTestCase):
     def test_unknown_host_is_rejected(self):
         response = self.client.get("/api/auth/me/", HTTP_HOST="evil.example")
         self.assertEqual(response.status_code, 400)
+
+
+class LoginRateLimitTests(AuthTestCase):
+    def setUp(self):
+        super().setUp()
+        make_user("erin")
+
+    def attempt(self, password, username="erin", ip="203.0.113.7"):
+        return self.client.post(
+            "/api/auth/login/",
+            data=json.dumps({"username": username, "password": password}),
+            content_type="application/json",
+            HTTP_X_FORWARDED_FOR=ip,
+        )
+
+    def test_account_is_locked_after_repeated_failures(self):
+        for _ in range(10):
+            self.assertEqual(self.attempt("wrong").status_code, 404)
+        # Locked: even the right password is refused for now.
+        self.assertEqual(self.attempt(PASSWORD).status_code, 429)
+
+    def test_lock_applies_across_ips(self):
+        for i in range(10):
+            self.attempt("wrong", ip=f"198.51.100.{i}")
+        self.assertEqual(self.attempt(PASSWORD, ip="192.0.2.1").status_code, 429)
+
+    def test_success_resets_the_account_counter(self):
+        for _ in range(9):
+            self.attempt("wrong")
+        self.assertEqual(self.attempt(PASSWORD).status_code, 200)
+        self.assertEqual(self.attempt("wrong").status_code, 404)
+        self.assertEqual(self.attempt(PASSWORD).status_code, 200)
+
+    def test_ip_is_locked_after_many_failures_on_many_accounts(self):
+        for i in range(30):
+            self.attempt("wrong", username=f"nobody{i}")
+        self.assertEqual(self.attempt(PASSWORD).status_code, 429)
+        # Another client is not affected.
+        self.assertEqual(self.attempt(PASSWORD, ip="192.0.2.50").status_code, 200)
+
+    def test_spoofed_forwarded_for_does_not_bypass_ip_limit(self):
+        # nginx appends the real client last; a client-set first entry is ignored.
+        for i in range(30):
+            self.attempt("wrong", username=f"nobody{i}", ip=f"10.0.0.{i}, 203.0.113.7")
+        self.assertEqual(self.attempt(PASSWORD).status_code, 429)
+
+
+class TwoFactorRateLimitTests(AuthTestCase):
+    def setUp(self):
+        super().setUp()
+        self.secret = pyotp.random_base32()
+        self.user = make_user("frank", is_tfa_enabled=True, tfa_secret=self.secret)
+
+    def test_verify_is_locked_after_five_wrong_codes(self):
+        self.login("frank")
+        for _ in range(5):
+            response = self.post_json("/api/auth/twofa/verify/", {"code": "000000"})
+            self.assertEqual(response.status_code, 400)
+        good = pyotp.TOTP(self.secret).now()
+        response = self.post_json("/api/auth/twofa/verify/", {"code": good})
+        self.assertEqual(response.status_code, 429)
+
+    def test_valid_code_resets_counter(self):
+        self.login("frank")
+        for _ in range(4):
+            self.post_json("/api/auth/twofa/verify/", {"code": "000000"})
+        good = pyotp.TOTP(self.secret).now()
+        self.assertEqual(
+            self.post_json("/api/auth/twofa/verify/", {"code": good}).status_code, 200
+        )
+        self.assertEqual(
+            self.post_json("/api/auth/twofa/disable/", {"code": "000000"}).status_code, 400
+        )
+
+
+class IntraUserTests(TestCase):
+    def intra(self, intra_id, login, **extra):
+        from .auth_views import find_or_create_intra_user, parse_intra_user
+
+        payload = {
+            "id": intra_id,
+            "login": login,
+            "email": f"{login}@student.42.fr",
+            "first_name": "In",
+            "last_name": "Tra",
+            "image": {"link": f"https://cdn.intra.42.fr/users/{login}.jpg"},
+        }
+        payload.update(extra)
+        return find_or_create_intra_user(parse_intra_user(payload))
+
+    def test_same_intra_id_returns_same_account(self):
+        first = self.intra(1001, "victim")
+        self.assertEqual(self.intra(1001, "victim").id, first.id)
+
+    def test_renamed_account_cannot_capture_another_login(self):
+        # Regression: lookup fell back to username, so an intra user who
+        # renamed themselves to "victim" got victim's first intra login.
+        attacker = self.intra(2002, "attacker")
+        attacker.username = "victim"
+        attacker.save()
+
+        victim = self.intra(3003, "victim")
+        self.assertNotEqual(victim.id, attacker.id)
+        self.assertTrue(victim.username.startswith("victim_"))
+        self.assertEqual(victim.profile.intra_id, 3003)
+
+    def test_local_account_with_same_name_is_not_used(self):
+        local = make_user("bob42")
+        user = self.intra(4004, "bob42")
+        self.assertNotEqual(user.id, local.id)
+        self.assertEqual(user.profile.auth_method, Profile.INTRA)
+
+    def test_legacy_intra_account_without_id_is_claimed_once(self):
+        legacy = make_user("oldtimer", auth_method=Profile.INTRA)
+        self.assertEqual(self.intra(5005, "oldtimer").id, legacy.id)
+        legacy.profile.refresh_from_db()
+        self.assertEqual(legacy.profile.intra_id, 5005)
+        # A different intra id with the same login does not get it.
+        self.assertNotEqual(self.intra(6006, "oldtimer").id, legacy.id)
+
+    def test_missing_picture_uses_default_avatar(self):
+        user = self.intra(7007, "nopic", image={"link": None})
+        self.assertEqual(str(user.profile.avatar), "avatars/profile_default.jpg")
+        self.assertFalse(user.has_usable_password())
+
+    def test_bad_payload_is_rejected(self):
+        from .auth_views import parse_intra_user
+
+        self.assertIsNone(parse_intra_user({"login": "x"}))
+        self.assertIsNone(parse_intra_user({"id": "1", "login": "x"}))
+        self.assertIsNone(parse_intra_user(None))
