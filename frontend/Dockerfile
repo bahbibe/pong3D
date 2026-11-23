@@ -1,7 +1,5 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache yarn
-
 WORKDIR /frontend
 
 COPY package.json /frontend
@@ -11,4 +9,6 @@ RUN yarn install --production=false
 
 EXPOSE 3001
 
-CMD [ "yarn", "dev" ]
+# Plain node: nodemon only restarts server.js, static files are read on
+# each request anyway.
+CMD [ "node", "server.js" ]
