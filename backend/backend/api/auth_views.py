@@ -13,6 +13,7 @@ from .models import Profile, Notification
 from django.shortcuts import redirect
 from django.contrib.auth.hashers import check_password
 from .auth_utils import is_authenticated, set_access_token
+from django.conf import settings
 from utils.responses import ErrorResponse, SuccessResponse
 import urllib.parse
 import requests
@@ -118,7 +119,7 @@ def register_user(request):
 @is_authenticated(allow_unverified_tfa=True)
 def logout_user(_):
     response = SuccessResponse(message="User logged out")
-    response.delete_cookie("access_token")
+    response.delete_cookie("access_token", samesite=settings.AUTH_COOKIE_SAMESITE)
     return response
 
 
@@ -227,7 +228,7 @@ def login_intra_callback(request):
         user.set_unusable_password()
         user.save()
 
-    response = redirect("https://localhost:1337/")
+    response = redirect(settings.FRONTEND_URL)
     return set_access_token(response, user, is_tfa_verified=False)
 
 

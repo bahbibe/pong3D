@@ -2,6 +2,19 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
+from django.core.exceptions import ImproperlyConfigured
+
+
+def env_bool(name, default=False):
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in ("1", "true", "yes", "on")
+
+
+def env_list(name, default=""):
+    return [item.strip() for item in os.getenv(name, default).split(",") if item.strip()]
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,12 +24,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-13)19b-v0$@n(qk$8(lq$er@s87=du*--uk7yh#_ja&w-h5kgv"
+# The key that used to be hardcoded here is in git history; never reuse it.
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY is not set (see .env.example).")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env_bool("DJANGO_DEBUG", default=False)
 
-ALLOWED_HOSTS = ["*"]
+# Also used by channels' AllowedHostsOriginValidator to check the Origin of
+# WebSocket handshakes, so "*" would let any site open sockets as the user.
+# "backend" is the Docker service name (Prometheus scrapes backend:8000).
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,backend")
 # Application definition
 
 INSTALLED_APPS = [
@@ -52,14 +71,17 @@ MIDDLEWARE = [
     "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
+# The frontend is served by nginx on the same origin as the API, so no CORS
+# is needed by default. Add extra origins (scheme://host:port, comma
+# separated) only for a frontend served elsewhere.
+CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS")
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "https://localhost:1337")
 
-CORS_ALLOW_ALL_ORIGINS = True
-
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:3000/",
-#     "http://localhost:5173/",
-# ]
+# nginx terminates TLS and sets X-Forwarded-Proto.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SESSION_COOKIE_SECURE = env_bool("AUTH_COOKIE_SECURE", default=True)
+CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
 
 ROOT_URLCONF = "ft_transcendence.urls"
 
@@ -148,6 +170,10 @@ STATICFILES_DIRS = [
     BASE_DIR / "avatars",
 ]
 
+# Avatars are saved under BASE_DIR/avatars/ (upload_to="avatars/") no matter
+# which directory the server was started from. nginx serves them at /avatars/.
+MEDIA_ROOT = BASE_DIR
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -156,4 +182,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 ACCESS_TOKEN_LIFETIME = timedelta(days=1)  # 1 day
+
+# Auth cookie (see api.auth_utils.set_access_token). Secure needs HTTPS;
+# browsers also accept it on http://localhost.
+AUTH_COOKIE_SECURE = SESSION_COOKIE_SECURE
+AUTH_COOKIE_SAMESITE = "Lax"
+
+# Where the intra OAuth callback sends the browser after login.
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://localhost:1337/")
 
