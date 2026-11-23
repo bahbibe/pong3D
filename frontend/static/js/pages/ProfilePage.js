@@ -155,12 +155,14 @@ class ProfilePage extends AbstractPage {
       const ratio = this.querySelector(".ratio");
       const gamesContainer = this.querySelector("#games-container");
 
-      const response = await fetch(`${BASE_URL}/game/history/`, {
+      const response = await fetch(`${BASE_URL}/api/game/history/`, {
         credentials: "include",
       });
+      if (!response.ok) return;
       const data = await response.json();
       const stats = data.data.stats;
-      const games = data.data.games;
+      // A game whose opponent account was deleted has no player to show.
+      const games = data.data.games.filter((game) => game.user && game.player);
 
       if (response.ok) {
         total.textContent = `${stats.total_games} Matches`;

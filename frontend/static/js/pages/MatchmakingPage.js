@@ -16,26 +16,15 @@ class MatchmakingPage extends AbstractPage {
     this.loader = this.querySelector(".loader") ;
     this.addEventListener('click', this);
     this.socket = new WebSocket(`${WSS_URL}/ws/matchmaking`);
-    this.socket.onopen = (event) =>
-    {
-      console.log("connected");
-    }
-    this.socket.onclose = (event) =>
-    {
-      console.log("connection closed");
-    }
-    this.socket.onmessage = (event) =>
-    {
-      let message = JSON.parse(event.data) ;
-      console.log(message);
-      if (message['type'] === 'game_found')
-        this.message.innerHTML = "Match Found!"
-        this.loader.style.display = "none"
-        setTimeout(() => {
-          navigateTo('/play/' + message['game_id']) ;
-        }, 2000);
-      
-    }
+    this.socket.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type !== "game_found") return;
+      this.message.textContent = "Match Found!";
+      this.loader.style.display = "none";
+      this.redirectTimer = setTimeout(() => {
+        navigateTo("/play/" + message.game_id);
+      }, 2000);
+    };
   }
 
   handleEvent(event) {
@@ -49,7 +38,8 @@ class MatchmakingPage extends AbstractPage {
   }
 
   disconnectedCallback() {
-    this.socket.close() ;
+    clearTimeout(this.redirectTimer);
+    this.socket.close();
   }
 }
 

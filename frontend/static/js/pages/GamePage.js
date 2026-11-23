@@ -30,8 +30,17 @@ class GamePage extends AbstractPage {
     this.animate = this.animate.bind(this);
     this.keyDown = this.keyDown.bind(this);
     this.keyUp = this.keyUp.bind(this);
+    this.onTouch = this.onTouch.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
+    this.onResize = this.onResize.bind(this);
   }
   connectedCallback() {
+    this.disposed = false;
+    if (!this.params.game_id) {
+      // /play without a game: nothing to connect to.
+      navigateTo("/matchmaking");
+      return;
+    }
     const template = document.getElementById("game-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
@@ -74,30 +83,21 @@ class GamePage extends AbstractPage {
     
     LoadGLTFByPath(this.scene)
       .then(() => {
+        // The user may have left the page while the model was loading.
+        if (this.disposed) return;
         this.retrieveListOfCameras(this.scene);
     })
     .then(() => {
-      // on window resize
-      window.addEventListener('resize', () => {
-        // update sizes
-        this.camera.aspect = window.innerWidth / window.innerHeight
-        this.camera.updateProjectionMatrix()
-        this.renderer.setSize(window.innerWidth, window.innerHeight)
-      })
-
-      console.log(this.params.tournament_id);
+      if (this.disposed) return;
+      window.addEventListener("resize", this.onResize);
 
       this.socket.onmessage = (event) => {
         let obj = JSON.parse(event.data);
-        console.log(obj.type) ;
-        console.log(obj);
 
         if (obj.type === "game over")
         {
-          
           if (this.params.tournament_id)
           {
-            console.log(`/tournament/${this.params.tournament_id}`);
             navigateTo(`/tournament/${this.params.tournament_id}`)
           }
           else
@@ -130,16 +130,17 @@ class GamePage extends AbstractPage {
         }
       };
 
-      this.socket.onopen = (event) => {
-        console.log("connected");
-      }
+      document.addEventListener("keydown", this.keyDown);
+      document.addEventListener("keyup", this.keyUp);
 
-      this.socket.onclose = (event) => {
-        console.log("connection closed");
+      // Touch: hold the left or right half of the screen to move.
+      this.canvas = this.querySelector("#game-canvas");
+      if (this.canvas) {
+        this.canvas.addEventListener("touchstart", this.onTouch, { passive: false });
+        this.canvas.addEventListener("touchmove", this.onTouch, { passive: false });
+        this.canvas.addEventListener("touchend", this.onTouchEnd);
+        this.canvas.addEventListener("touchcancel", this.onTouchEnd);
       }
-
-      document.onkeydown = this.keyDown;
-      document.onkeyup = this.keyUp;
     })
     .catch((error) => {
       console.error('Error loading JSON scene:', error);
@@ -161,6 +162,31 @@ class GamePage extends AbstractPage {
   // The server moves the paddle at a fixed speed while a direction is held.
   // Send only when the held direction changes ("left", "right" or "none").
   // Names follow the server protocol: ArrowLeft sends "right".
+  onResize() {
+    if (!this.camera || !this.renderer) return;
+    this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+  onTouch(e) {
+    e.preventDefault();
+    const touch = e.touches[e.touches.length - 1];
+    if (!touch) return;
+    const leftHalf = touch.clientX < window.innerWidth / 2;
+    // Same mapping as the arrow keys: left half = ArrowLeft.
+    this.right = leftHalf;
+    this.left = !leftHalf;
+    this.sendDirection();
+  }
+
+  onTouchEnd(e) {
+    if (e.touches.length > 0) return this.onTouch(e);
+    this.right = false;
+    this.left = false;
+    this.sendDirection();
+  }
+
   keyDown(e) {
     if (e.key === "ArrowLeft") this.right = true;
     else if (e.key === "ArrowRight") this.left = true;
@@ -205,6 +231,9 @@ class GamePage extends AbstractPage {
   }
 
   updateScore() {
+    // Free the previous canvas textures (GPU memory) before replacing them.
+    this.player1Score.material.map?.dispose();
+    this.player2Score.material.map?.dispose();
     this.player1Score.material.map = this.createTextTexture(`${this.score1Text}`);
     this.player2Score.material.map = this.createTextTexture(`${this.score2Text}`);
     this.player1Score.material.needsUpdate = true;
@@ -249,7 +278,15 @@ class GamePage extends AbstractPage {
   };
 
   disconnectedCallback() {
+    this.disposed = true;
+    if (!this.scene) return; // left before setup (e.g. /play without id)
     if (this.socket) this.socket.close();
+    if (this.canvas) {
+      this.canvas.removeEventListener("touchstart", this.onTouch);
+      this.canvas.removeEventListener("touchmove", this.onTouch);
+      this.canvas.removeEventListener("touchend", this.onTouchEnd);
+      this.canvas.removeEventListener("touchcancel", this.onTouchEnd);
+    }
 
     // Remove event listeners
     window.removeEventListener('resize', this.onResize);

@@ -42,7 +42,7 @@ export const showOverlay = () => {
 
 export const hideOverlay = () => {
   const showOverlay = document.querySelector("#overlay");
-  setInterval(() => showOverlay.style.display = "none", 100);
+  setTimeout(() => (showOverlay.style.display = "none"), 100);
 }
 
 export const renderNotifications = () => {

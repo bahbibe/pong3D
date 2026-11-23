@@ -140,14 +140,21 @@ const navigateTo = (url) => {
 };
 
 const getUser = async () => {
-  const data = await fetch(`${BASE_URL}/api/auth/me/`, {
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  const response = await data.json();
+  let response = null;
+  try {
+    const data = await fetch(`${BASE_URL}/api/auth/me/`, {
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    response = await data.json();
+  } catch (error) {
+    // Network error or non-JSON answer: treat as logged out instead of
+    // leaving a blank page.
+    console.error("Could not load the current user:", error);
+    return false;
+  }
   if (response && response.success === true) {
     window.user = response.data.user;
     window.notifications = response.data.notifications;
