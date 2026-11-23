@@ -1,3 +1,4 @@
+import { escapeHTML as esc } from "../escape.js";
 import { API } from "../API/API.js";
 import { WebSock } from "../ws/ws.js";
 
@@ -76,10 +77,8 @@ class ChatBox extends HTMLElement {
       e.preventDefault();
       const input = inputElement.querySelector("input");
       if (input.value.trim() === "") return;
-      const message = {
-        author: window.user.username,
-        content: input.value,
-      };
+      // The server sets the author from the session. Only send the text.
+      const message = { content: input.value };
       input.value = "";
       this.ws.send(message);
     });
@@ -92,13 +91,13 @@ class ChatBox extends HTMLElement {
     const stat = window.online_users && window.online_users.includes(friend.id.toString()) ? "Online" : "Offline";
     headerElement.innerHTML = `
     <div class="d-flex align-items-center">
-      <img src="${friend.profile.avatar}" class=" d-block img-cover img-fluid rounded-circle h-100" alt="avatar"/>
+      <img src="${esc(friend.profile.avatar)}" class=" d-block img-cover img-fluid rounded-circle h-100" alt="avatar"/>
     </div>
     <div class="chat-info d-flex flex-column flex-grow-1 justify-content-center">
-    <a href="/friend/${friend.profile.uuid}">
-      <span class="fs-5">${friend.username}</span>
+    <a href="/friend/${esc(friend.profile.uuid)}">
+      <span class="fs-5">${esc(friend.username)}</span>
       </a>
-      <span class="stat opacity-75 stat-${friend.id} ${stat === "Online" ? "online" : ""}"> 
+      <span class="stat opacity-75 stat-${esc(friend.id)} ${stat === "Online" ? "online" : ""}"> 
         <i class="fa-solid fa-circle"></i> <span class="friend-status">${stat}</span>
       </span>
     </div>
@@ -126,7 +125,7 @@ class ChatBox extends HTMLElement {
       ? (messageElement.className = "msg-sent")
       : (messageElement.className = "msg-received");
     messageElement.innerHTML = `
-      <p>${item.content}</p>
+      <p>${esc(item.content)}</p>
     `;
     return messageElement;
   }

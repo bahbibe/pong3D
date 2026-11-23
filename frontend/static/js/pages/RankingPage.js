@@ -1,3 +1,4 @@
+import { escapeHTML as esc } from "../escape.js";
 import { AbstractPage } from "./AbstarctPage.js";
 import { showOverlay, hideOverlay } from "../helpers.js";
 import { navigateTo } from "../router.js";
@@ -34,15 +35,15 @@ class RankingPage extends AbstractPage {
                 <td>
                 <a href="">
                   <div class="user-cell">
-                    <img src="${user.user.avatar}" alt="">
-                    <div class="username">${user.user.username}</div>
+                    <img src="${esc(user.user.avatar)}" alt="">
+                    <div class="username">${esc(user.user.username)}</div>
                   </div>
                 </a>
                 </td>
-                <td>${user.total_games}</td>
-                <td>${user.total_wins}</td>
-                <td>${user.total_losses}</td>
-                <td>${user.ratio}</td>
+                <td>${esc(user.total_games)}</td>
+                <td>${esc(user.total_wins)}</td>
+                <td>${esc(user.total_losses)}</td>
+                <td>${esc(user.ratio)}</td>
             </tr>
           `;
         });

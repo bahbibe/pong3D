@@ -1,4 +1,5 @@
 import { navigateTo, BASE_URL } from "./router.js";
+import { escapeHTML as esc } from "./escape.js";
 
 export const hideToast = () => {
   document.querySelector(`#toast-wrapper .toast`).classList.remove("show");
@@ -18,9 +19,13 @@ export const showToast = (isError, message, errors) => {
   }
   const errorsContentEl = errorsEl.querySelector(".toast-body");
   if (errors && Object.keys(errors).length > 0) {
-    message = Object.keys(errors).map(error => `<p>${error}: ${errors[error]}</p>`).join("");
+    // Error text can echo user input, so escape it.
+    errorsContentEl.innerHTML = Object.keys(errors)
+      .map((error) => `<p>${esc(error)}: ${esc(errors[error])}</p>`)
+      .join("");
+  } else {
+    errorsContentEl.textContent = message || "Something went wrong!. Please try again later";
   }
-  errorsContentEl.innerHTML = message || "Something went wrong!. Please try again later";
   errorsEl.classList.add("show");
   errorsEl.classList.remove("hide");
   // setTimeout(() => {

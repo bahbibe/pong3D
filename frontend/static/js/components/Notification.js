@@ -14,7 +14,7 @@ class Notification extends HTMLElement {
   }
   async render() {
     try {
-      this.querySelector("#notification-message").innerHTML = this.message;
+      this.querySelector("#notification-message").textContent = this.message ?? "";
       setTimeout(() => {
         this.parentNode.removeChild(this);
       }, 5000);

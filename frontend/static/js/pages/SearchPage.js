@@ -1,3 +1,4 @@
+import { escapeHTML as esc } from "../escape.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 import { BASE_URL } from "../router.js";
@@ -22,7 +23,7 @@ class SearchPage extends AbstractPage {
     try {
       console.log(this.SearchedUser);
       const response = await fetch(
-        `${BASE_URL}/api/auth/users/?q=${this.SearchedUser}`,
+        `${BASE_URL}/api/auth/users/?q=${encodeURIComponent(this.SearchedUser)}`,
         { credentials: "include" }
       );
       const data = await response.json();
@@ -31,12 +32,12 @@ class SearchPage extends AbstractPage {
         users.forEach((user) => {
           this.container.innerHTML += `
           <div class=" secondary-bg box-sh-1 p-2 text-center rounded  mx-auto mx-md-0  me-md-3 mb-3" style="width: 160px; height: 140px;">
-            <a class="font-monospace fw-bold" href='/friend/${user.profile.uuid}'>
+            <a class="font-monospace fw-bold" href='/friend/${esc(user.profile.uuid)}'>
               <div class="">
-                <img class="img-fluid ratio ratio-1x1 rounded rounded-circle" src="${user.profile.avatar}" alt="" width="100" height="100" style="width: 100px; height: 100px">
+                <img class="img-fluid ratio ratio-1x1 rounded rounded-circle" src="${esc(user.profile.avatar)}" alt="" width="100" height="100" style="width: 100px; height: 100px">
               </div>
               <div class="my-2">
-                <span class="font-monospace fw-bold">${user.username} </span>
+                <span class="font-monospace fw-bold">${esc(user.username)} </span>
               </div>
               </a>
             </div>

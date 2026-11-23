@@ -11,7 +11,7 @@ export class ErrorToast extends HTMLElement {
   }
 
   async render() {
-    this.querySelector(".toast-body").innerHTML = this.message;
+    this.querySelector(".toast-body").textContent = this.message ?? "";
   }
 
   disconnectedCallback() {
