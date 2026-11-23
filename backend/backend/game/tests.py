@@ -397,3 +397,33 @@ class DeleteUserTests(TransactionTestCase):
 
         tournament.delete()
         self.assertFalse(Tournament_Game.objects.exists())
+
+
+class LeaderboardTests(TransactionTestCase):
+    def test_counts_finished_games_and_handles_intra_avatars(self):
+        alice, bob = make_user("alice"), make_user("bob")
+        Profile.objects.filter(user=bob).update(avatar="https://cdn.intra.42.fr/users/bob.jpg")
+        Game.objects.create(player1=alice, player2=bob, player1_score=11, status=Game.FINISHED, winner=alice)
+        Game.objects.create(player1=alice, player2=bob, player2_score=11, status=Game.FINISHED, winner=bob)
+        Game.objects.create(player1=alice, player2=bob, player1_score=11, status=Game.FINISHED, winner=alice)
+        Game.objects.create(player1=alice, player2=bob)  # pending, ignored
+        self.client.cookies["access_token"] = token_for(alice)
+        response = self.client.get("/api/game/leaderboard/")
+        self.assertEqual(response.status_code, 200, response.content)
+        rows = {row["user"]["username"]: row for row in response.json()["data"]["users"]}
+        self.assertEqual((rows["alice"]["total_games"], rows["alice"]["total_wins"]), (3, 2))
+        self.assertEqual((rows["bob"]["total_games"], rows["bob"]["total_wins"]), (3, 1))
+        self.assertEqual(rows["bob"]["user"]["avatar"], "https://cdn.intra.42.fr/users/bob.jpg")
+        self.assertNotIn("email", rows["alice"]["user"])
+
+    def test_play_again_without_opponent(self):
+        alice = make_user("alice")
+        game = Game.objects.create(player1=alice, player2=None)
+        self.client.cookies["access_token"] = token_for(alice)
+        response = self.client.post(f"/api/game/play_again/{game.id}")
+        self.assertEqual(response.status_code, 400)
+
+    def test_unknown_tournament_games(self):
+        alice = make_user("alice")
+        self.client.cookies["access_token"] = token_for(alice)
+        self.assertEqual(self.client.get("/api/game/get_tournament_games/nope").status_code, 404)

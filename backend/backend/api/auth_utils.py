@@ -1,13 +1,17 @@
 import functools
 import jwt
+import logging
 import os
-from datetime import datetime
 from django.conf import settings
+from django.utils import timezone
 from django.http.request import HttpRequest
 from rest_framework import status
 from .models import User
 from utils.responses import ErrorResponse, SuccessResponse
 from .serializers import UserSerializer
+
+
+logger = logging.getLogger(__name__)
 
 
 def generate_token(payload):
@@ -17,7 +21,7 @@ def generate_token(payload):
 
 def set_access_token(response, user, is_tfa_verified):
     """Issue a new access token for `user` and store it in the auth cookie."""
-    access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
+    access_token_liftime = timezone.now() + settings.ACCESS_TOKEN_LIFETIME
     access_token = generate_token(
         {
             "id": user.id,
@@ -89,9 +93,12 @@ def is_authenticated(view=None, *, allow_unverified_tfa=False):
                 message="Invalid access token", status_code=status.HTTP_401_UNAUTHORIZED
             )
 
-        except Exception as e:
+        except Exception:
+            # Keep the traceback in the logs, not in the response.
+            logger.exception("unhandled error in %s", request.path)
             return ErrorResponse(
-                message=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+                message="Something went wrong!, Please try again later.",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
     return _decorator

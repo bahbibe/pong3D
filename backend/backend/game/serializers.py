@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Game, Tournament
-from api.serializers import UserSerializer
+from api.serializers import PublicUserSerializer
 import os
 from api.models import Profile
 
@@ -17,8 +17,8 @@ class GameStatsSerializer(serializers.ModelSerializer):
 
 
 class GameHistorySerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    player = UserSerializer(read_only=True)
+    user = PublicUserSerializer(read_only=True)
+    player = PublicUserSerializer(read_only=True)
     player_score = serializers.IntegerField()
     user_score = serializers.IntegerField()
     is_user_winner = serializers.BooleanField()
@@ -43,7 +43,8 @@ class LeaderboardSerializer(serializers.ModelSerializer):
     ratio = serializers.IntegerField()
 
     def get_user(self, obj):
-        avatar = obj.profile.avatar
+        # str(): `in` on an ImageFieldFile iterates the file (opens it).
+        avatar = str(obj.profile.avatar)
         avatar = (
             "cdn.intra.42.fr" in avatar and avatar or f"{os.getenv('API_URL')}/{avatar}"
         )
@@ -67,7 +68,7 @@ class LeaderboardSerializer(serializers.ModelSerializer):
 
 class TournamentSerializer(serializers.ModelSerializer):
     uuid = serializers.CharField()
-    owner = UserSerializer(read_only=True)
+    owner = PublicUserSerializer(read_only=True)
     spots = serializers.IntegerField(default=4)
     finished = serializers.BooleanField()
 
@@ -78,7 +79,7 @@ class TournamentSerializer(serializers.ModelSerializer):
 
 class TournamentParticipantsSerializer(serializers.ModelSerializer):
     tournament = TournamentSerializer()
-    player = UserSerializer(read_only=True)
+    player = PublicUserSerializer(read_only=True)
     t_round = serializers.IntegerField()
     ready = serializers.BooleanField()
 
@@ -95,8 +96,8 @@ class TournamentParticipantsSerializer(serializers.ModelSerializer):
 class GameSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     uuid = serializers.CharField()
-    player1 = UserSerializer(read_only=True)
-    player2 = UserSerializer(read_only=True)
+    player1 = PublicUserSerializer(read_only=True)
+    player2 = PublicUserSerializer(read_only=True)
     player1_score = serializers.IntegerField()
     player2_score = serializers.IntegerField()
 

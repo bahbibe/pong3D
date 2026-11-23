@@ -2,13 +2,11 @@ from rest_framework.decorators import api_view
 from .serializers import (
     RegisterUserSerializer,
     UserSerializer,
-    SetupProfileSerializer,
     LoginUserSerializer,
     NotificationSerializer,
 )
-from rest_framework import status, viewsets
+from rest_framework import status
 from django.contrib.auth.models import User
-from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Profile, Notification
 from django.shortcuts import redirect
 from django.contrib.auth.hashers import check_password
@@ -16,6 +14,7 @@ from .auth_utils import is_authenticated, set_access_token
 from . import rate_limit
 from django.conf import settings
 from utils.responses import ErrorResponse, SuccessResponse
+import secrets
 import urllib.parse
 from django.db import IntegrityError, transaction
 import requests
@@ -117,11 +116,6 @@ def find_or_create_intra_user(user_data):
         user.refresh_from_db()
     return user
 
-
-class RegisterUserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = SetupProfileSerializer
-    parser_classes = [MultiPartParser, FormParser]
 
 
 @api_view(["POST"])
@@ -237,14 +231,35 @@ def get_user(request):
     )
 
 
+INTRA_STATE_COOKIE = "intra_oauth_state"
+INTRA_STATE_MAX_AGE = 10 * 60
+
+
 @api_view(["GET"])
 def login_intra(request):
     client_id = os.getenv("INTRA_CLIENT_ID")
     callback_uri = urllib.parse.quote(
         f'{os.getenv("API_URL")}/api/auth/intra/callback/', safe=""
     )
-    auth_url = f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}&redirect_uri={callback_uri}&response_type=code"
-    return SuccessResponse(data={"url": auth_url})
+    # OAuth state: the callback only accepts a code if the browser also
+    # holds this value, so an attacker cannot log a victim into the
+    # attacker's account with their own code (login CSRF).
+    state = secrets.token_urlsafe(32)
+    auth_url = (
+        f"https://api.intra.42.fr/oauth/authorize?client_id={client_id}"
+        f"&redirect_uri={callback_uri}&response_type=code&state={state}"
+    )
+    response = SuccessResponse(data={"url": auth_url})
+    response.set_signed_cookie(
+        INTRA_STATE_COOKIE,
+        state,
+        salt=INTRA_STATE_COOKIE,
+        max_age=INTRA_STATE_MAX_AGE,
+        httponly=True,
+        secure=settings.AUTH_COOKIE_SECURE,
+        samesite="Lax",
+    )
+    return response
 
 
 @api_view(["GET"])
@@ -256,6 +271,19 @@ def login_intra_callback(request):
         return ErrorResponse(message=error)
     if not code:
         return ErrorResponse(message="No code found")
+
+    expected_state = request.get_signed_cookie(
+        INTRA_STATE_COOKIE,
+        default=None,
+        salt=INTRA_STATE_COOKIE,
+        max_age=INTRA_STATE_MAX_AGE,
+    )
+    received_state = request.GET.get("state") or ""
+    if not expected_state or not secrets.compare_digest(expected_state, received_state):
+        return ErrorResponse(
+            message="Login request expired or invalid, please try again.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
 
     try:
         intra_response = requests.post(
@@ -305,6 +333,7 @@ def login_intra_callback(request):
     user = find_or_create_intra_user(user_data)
 
     response = redirect(settings.FRONTEND_URL)
+    response.delete_cookie(INTRA_STATE_COOKIE, samesite="Lax")
     return set_access_token(response, user, is_tfa_verified=False)
 
 

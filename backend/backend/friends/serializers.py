@@ -1,6 +1,6 @@
 from .models import Friendship
 from api.models import User
-from api.serializers import UserSerializer
+from api.serializers import PublicUserSerializer
 from rest_framework import serializers
 
 
@@ -25,8 +25,8 @@ class AcceptFriendRequestSerializer(serializers.ModelSerializer):
 
 
 class FriendshipSerializer(serializers.ModelSerializer):
-    source_user = UserSerializer(read_only=True)
-    target_user = UserSerializer(read_only=True)
+    source_user = PublicUserSerializer(read_only=True)
+    target_user = PublicUserSerializer(read_only=True)
 
     class Meta:
         model = Friendship
@@ -34,8 +34,8 @@ class FriendshipSerializer(serializers.ModelSerializer):
 
 
 class ViewFriendshipSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    friend = UserSerializer(read_only=True)
+    user = PublicUserSerializer(read_only=True)
+    friend = PublicUserSerializer(read_only=True)
 
     class Meta:
         model = Friendship

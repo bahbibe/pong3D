@@ -487,3 +487,110 @@ class ProfileCreationTests(TestCase):
         )
         self.assertEqual(response.status_code, 200, response.content)
         self.assertEqual(Profile.objects.filter(user__username="gina").count(), 1)
+
+
+class PrivacyAndRobustnessTests(AuthTestCase):
+    def setUp(self):
+        super().setUp()
+        self.henry = make_user("henry")
+        self.other = make_user("ivy")
+        self.login("henry")
+
+    def test_search_hides_other_users_email(self):
+        users = self.client.get("/api/auth/users/?q=ivy").json()["data"]
+        self.assertEqual([u["username"] for u in users], ["ivy"])
+        self.assertNotIn("email", users[0])
+
+    def test_search_does_not_match_email(self):
+        users = self.client.get("/api/auth/users/?q=example.com").json()["data"]
+        self.assertEqual(users, [])
+
+    def test_search_excludes_blocked_users(self):
+        from friends.models import Friendship
+
+        Friendship.objects.create(
+            source_user=self.other, target_user=self.henry,
+            status=Friendship.BLOCKED, blocked_by=self.other,
+        )
+        users = self.client.get("/api/auth/users/?q=ivy").json()["data"]
+        self.assertEqual(users, [])
+
+    def test_profile_hides_email_and_handles_bad_uuid(self):
+        data = self.client.get(f"/api/auth/profile/{self.other.profile.uuid}/").json()["data"]
+        self.assertNotIn("email", data["user"])
+        self.assertEqual(self.client.get("/api/auth/profile/not-a-uuid/").status_code, 404)
+        self.assertEqual(self.client.get("/api/auth/user/abc/").status_code, 404)
+
+    def test_own_user_still_has_email(self):
+        self.assertEqual(self.me()["data"]["user"]["email"], "henry@example.com")
+
+    def test_notification_without_sender(self):
+        from .models import Notification
+
+        Notification.objects.create(user=self.henry, type="system", message="hello")
+        notifications = self.me()["data"]["notifications"]
+        self.assertIsNone(notifications[0]["sender"])
+
+    def test_unexpected_error_does_not_leak_details(self):
+        from unittest import mock
+
+        with mock.patch("api.views.blocked_user_ids", side_effect=RuntimeError("secret detail")):
+            with self.assertLogs("api.auth_utils", level="ERROR"):
+                response = self.client.get("/api/auth/users/")
+        self.assertEqual(response.status_code, 500)
+        self.assertNotIn("secret detail", response.content.decode())
+
+
+class IntraStateTests(AuthTestCase):
+    def test_login_url_carries_state_and_sets_cookie(self):
+        from urllib.parse import parse_qs, urlparse
+
+        response = self.client.get("/api/auth/intra/")
+        url = response.json()["data"]["url"]
+        state = parse_qs(urlparse(url).query)["state"][0]
+        self.assertGreaterEqual(len(state), 32)
+        self.assertIn("intra_oauth_state", response.cookies)
+
+    def test_callback_without_matching_state_is_refused(self):
+        from unittest import mock
+
+        with mock.patch("api.auth_views.requests.post") as post:
+            response = self.client.get("/api/auth/intra/callback/?code=abc&state=forged")
+            self.assertEqual(response.status_code, 400)
+            post.assert_not_called()
+
+        self.client.get("/api/auth/intra/")  # sets the cookie for another state
+        with mock.patch("api.auth_views.requests.post") as post:
+            response = self.client.get("/api/auth/intra/callback/?code=abc&state=forged")
+            self.assertEqual(response.status_code, 400)
+            post.assert_not_called()
+
+    def test_callback_with_matching_state_logs_in(self):
+        from unittest import mock
+        from urllib.parse import parse_qs, urlparse
+
+        url = self.client.get("/api/auth/intra/").json()["data"]["url"]
+        state = parse_qs(urlparse(url).query)["state"][0]
+        token = mock.Mock(status_code=200, json=lambda: {"access_token": "t"})
+        me = mock.Mock(status_code=200, json=lambda: {
+            "id": 4242, "login": "jdoe", "email": "jdoe@student.42.fr",
+            "first_name": "J", "last_name": "D", "image": {"link": None},
+        })
+        with mock.patch("api.auth_views.requests.post", return_value=token), \
+                mock.patch("api.auth_views.requests.get", return_value=me):
+            response = self.client.get(f"/api/auth/intra/callback/?code=abc&state={state}")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("access_token", response.cookies)
+        self.assertTrue(Profile.objects.filter(intra_id=4242).exists())
+
+    def test_intra_api_down_returns_502(self):
+        from unittest import mock
+        from urllib.parse import parse_qs, urlparse
+
+        import requests as requests_lib
+
+        url = self.client.get("/api/auth/intra/").json()["data"]["url"]
+        state = parse_qs(urlparse(url).query)["state"][0]
+        with mock.patch("api.auth_views.requests.post", side_effect=requests_lib.Timeout()):
+            response = self.client.get(f"/api/auth/intra/callback/?code=abc&state={state}")
+        self.assertEqual(response.status_code, 502)

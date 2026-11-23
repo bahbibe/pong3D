@@ -22,7 +22,7 @@ def get_friends(request):
     user = request.user
     friends = Friendship.objects.filter(
         (Q(source_user=user) | Q(target_user=user)) & Q(status="accepted")
-    )
+    ).select_related("source_user__profile", "target_user__profile")
     for friendship in friends:
         if friendship.source_user == user:
             friendship.user = friendship.source_user
@@ -43,7 +43,7 @@ def get_blocked_friends(request):
         (Q(source_user=user) | Q(target_user=user))
         & Q(status="blocked")
         & Q(blocked_by=user)
-    )
+    ).select_related("source_user__profile", "target_user__profile")
     for friendship in friends:
         if friendship.source_user == user:
             friendship.user = friendship.source_user
@@ -60,7 +60,9 @@ def get_blocked_friends(request):
 @is_authenticated
 def get_friends_request(request):
     user = request.user
-    friends_request = Friendship.objects.filter(target_user=user, status="pending")
+    friends_request = Friendship.objects.filter(target_user=user, status="pending").select_related(
+        "source_user__profile", "target_user__profile"
+    )
 
     for friendship in friends_request:
         if friendship.source_user == user:
@@ -80,7 +82,9 @@ def get_friends_request(request):
 @is_authenticated
 def get_sent_friends_request(request):
     user = request.user
-    friends_request = Friendship.objects.filter(source_user=user, status="pending")
+    friends_request = Friendship.objects.filter(source_user=user, status="pending").select_related(
+        "source_user__profile", "target_user__profile"
+    )
 
     for friendship in friends_request:
         if friendship.source_user == user:

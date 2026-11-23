@@ -33,22 +33,6 @@ class LoginUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ["email", "password", "username"]
 
-        def validate(self, data):
-            email = data.get("email")
-            username = data.get("username")
-            password = data.get("password")
-            if email is None and username is None:
-                raise serializers.ValidationError(
-                    "An email or username is required to log in."
-                )
-            if email is not None and username is not None:
-                raise serializers.ValidationError(
-                    "You can only use either email or username to log in."
-                )
-            if password is None:
-                raise serializers.ValidationError("A password is required to log in.")
-            return data
-
 
 class RegisterUserSerializer(serializers.ModelSerializer):
     username = username_field(required=True)
@@ -120,12 +104,21 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """The logged-in user's own data (includes email)."""
+
     profile = ProfileSerializer(read_only=True)
 
     class Meta:
         model = User
         depth = 1
         fields = ["id", "username", "email", "first_name", "last_name", "profile"]
+
+
+class PublicUserSerializer(UserSerializer):
+    """Another user as seen by others: same shape, no email."""
+
+    class Meta(UserSerializer.Meta):
+        fields = ["id", "username", "first_name", "last_name", "profile"]
 
 
 class UpdateSettingsSerializer(serializers.ModelSerializer):
@@ -165,6 +158,8 @@ class NotificationSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField()
 
     def get_sender(self, obj):
+        if obj.sender is None:  # system notification
+            return None
         avatar = str(obj.sender.profile.avatar)
         avatar_url = (
             "cdn.intra.42.fr" in avatar

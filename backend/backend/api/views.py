@@ -1,10 +1,12 @@
 from rest_framework.decorators import api_view
 from .serializers import (
     SetupProfileSerializer,
+    PublicUserSerializer,
     UserSerializer,
     UpdateSettingsSerializer,
 )
 from rest_framework import status
+import uuid as uuid_lib
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from .models import User, Profile, Notification
@@ -105,89 +107,87 @@ def update_settings(request):
     return SuccessResponse(data=UserSerializer(user).data)
 
 
+def parse_uuid(value):
+    try:
+        return uuid_lib.UUID(str(value))
+    except ValueError:
+        return None
+
+
+def user_not_found():
+    return ErrorResponse(message="User does not exist", status_code=status.HTTP_404_NOT_FOUND)
+
+
 @api_view(["GET"])
 @is_authenticated
 def get_profile(request, uuid):
-    try:
-        profile = Profile.objects.filter(uuid=uuid).first()
-        if not profile:
-            return ErrorResponse(
-                message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
-            )
+    profile_uuid = parse_uuid(uuid)
+    profile = (
+        Profile.objects.select_related("user").filter(uuid=profile_uuid).first()
+        if profile_uuid
+        else None
+    )
+    if not profile:
+        return user_not_found()
 
-        user = profile.user
-        if is_blocked(user, request.user):
-            return ErrorResponse(
-                message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
-            )
+    user = profile.user
+    if is_blocked(user, request.user):
+        return user_not_found()
 
-        games = Game.objects.filter(
-            Q(player1_id=user) | Q(player2_id=user), status=Game.FINISHED
-        ).order_by("-id")
-        total_games = games.count()
-        total_wins = games.filter(
-            Q(player1_id=user, player1_score__gt=F("player2_score"))
-            | Q(player2_id=user, player2_score__gt=F("player1_score"))
-        ).count()
-        total_losses = total_games - total_wins
-        ratio = (total_wins / total_games) * 100 if total_games > 0 else 0
+    games = (
+        Game.objects.filter(Q(player1_id=user) | Q(player2_id=user), status=Game.FINISHED)
+        .select_related("player1__profile", "player2__profile")
+        .order_by("-id")
+    )
+    total_games = games.count()
+    total_wins = games.filter(
+        Q(player1_id=user, player1_score__gt=F("player2_score"))
+        | Q(player2_id=user, player2_score__gt=F("player1_score"))
+    ).count()
+    total_losses = total_games - total_wins
+    ratio = (total_wins / total_games) * 100 if total_games > 0 else 0
 
-        stats = {
-            "total_games": total_games,
-            "total_wins": total_wins,
-            "total_losses": total_losses,
-            "ratio": ratio,
+    stats = {
+        "total_games": total_games,
+        "total_wins": total_wins,
+        "total_losses": total_losses,
+        "ratio": ratio,
+    }
+
+    for game in games:
+        if game.player1_id == user.id:
+            game.user = game.player1
+            game.user_score = game.player1_score
+            game.player = game.player2
+            game.player_score = game.player2_score
+            game.is_user_winner = game.player1_score > game.player2_score
+        else:
+            game.user = game.player2
+            game.user_score = game.player2_score
+            game.player = game.player1
+            game.player_score = game.player1_score
+            game.is_user_winner = game.player2_score > game.player1_score
+
+    return SuccessResponse(
+        data={
+            "user": PublicUserSerializer(user).data,
+            "stats": GameStatsSerializer(stats).data,
+            "history": GameHistorySerializer(games, many=True).data,
         }
-
-        for game in games:
-            if game.player1_id == user.id:
-                game.user = game.player1
-                game.user_score = game.player1_score
-                game.player = game.player2
-                game.player_score = game.player2_score
-                game.is_user_winner = game.player1_score > game.player2_score
-            else:
-                game.user = game.player2
-                game.user_score = game.player2_score
-                game.player = game.player1
-                game.player_score = game.player1_score
-                game.is_user_winner = game.player2_score > game.player1_score
-
-        return SuccessResponse(
-            data={
-                "user": UserSerializer(user).data,
-                "stats": GameStatsSerializer(stats).data,
-                "history": GameHistorySerializer(games, many=True).data,
-            }
-        )
-
-    except Exception as e:
-        return ErrorResponse(
-            message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
-        )
+    )
 
 
 @api_view(["GET"])
 @is_authenticated
 def get_profile_with_id(request, id):
-    try:
-        profile = Profile.objects.filter(id=id).first()
-        if not profile:
-            return ErrorResponse(
-                message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
-            )
-
-        user = profile.user
-        if is_blocked(user, request.user):
-            return ErrorResponse(
-                message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
-            )
-        return SuccessResponse(data=UserSerializer(user).data)
-
-    except Exception as e:
-        return ErrorResponse(
-            message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
-        )
+    profile = (
+        Profile.objects.select_related("user").filter(id=id).first()
+        if str(id).isdigit()
+        else None
+    )
+    if not profile or is_blocked(profile.user, request.user):
+        return user_not_found()
+    return SuccessResponse(data=PublicUserSerializer(profile.user).data)
 
 
 def is_blocked(user, target_user):
@@ -198,26 +198,32 @@ def is_blocked(user, target_user):
     ).exists()
 
 
+def blocked_user_ids(user):
+    """Ids of users on the other side of a block with `user` (either way)."""
+    pairs = Friendship.objects.filter(
+        Q(source_user=user) | Q(target_user=user), status=Friendship.BLOCKED
+    ).values_list("source_user_id", "target_user_id")
+    return {uid for pair in pairs for uid in pair if uid != user.id}
+
+
+MAX_SEARCH_RESULTS = 50
+
+
 @api_view(["GET"])
 @is_authenticated
 def get_users(request):
-    current_user = request.user
-    query = request.GET.get("q")
+    # Search by username only, and never return emails of other users.
+    users = (
+        User.objects.exclude(id__in=blocked_user_ids(request.user))
+        .select_related("profile")
+        .order_by("username")
+    )
+    query = (request.GET.get("q") or "").strip()
     if query:
-        users = User.objects.filter(
-            Q(username__icontains=query) | Q(email__icontains=query)
-        )
-
-        for user in users:
-            if is_blocked(current_user, user):
-                users = users.exclude(id=user.id)
-        return SuccessResponse(data=UserSerializer(users, many=True).data)
-
-    users = User.objects.all()
-    for user in users:
-        if is_blocked(current_user, user):
-            users = users.exclude(id=user.id)
-    return SuccessResponse(data=UserSerializer(users, many=True).data)
+        users = users.filter(username__icontains=query)
+    return SuccessResponse(
+        data=PublicUserSerializer(users[:MAX_SEARCH_RESULTS], many=True).data
+    )
 
 
 @api_view(["POST"])

@@ -15,6 +15,7 @@ from .models import Game
 from .models import Tournament, Tournament_Participants, Tournament_Game
 from friends.models import Friendship
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 from django.db.models import F
 from api.models import User
 from api.serializers import UserSerializer
@@ -99,23 +100,29 @@ def history(request):
 @api_view(["GET"])
 @is_authenticated
 def get_leaderboard(request):
-    users = User.objects.all()
+    # Two queries in total (was two per user): count finished games and
+    # wins per user in Python.
+    totals = {}
+    wins = {}
+    finished = Game.objects.filter(status=Game.FINISHED).values_list(
+        "player1_id", "player2_id", "winner_id"
+    )
+    for player1_id, player2_id, winner_id in finished:
+        for player_id in (player1_id, player2_id):
+            if player_id is not None:
+                totals[player_id] = totals.get(player_id, 0) + 1
+        if winner_id is not None:
+            wins[winner_id] = wins.get(winner_id, 0) + 1
+
+    users = list(User.objects.select_related("profile"))
     for user in users:
-        games = Game.objects.filter(
-            Q(player1_id=user) | Q(player2_id=user), status=Game.FINISHED
+        user.total_games = totals.get(user.id, 0)
+        user.total_wins = wins.get(user.id, 0)
+        user.total_losses = user.total_games - user.total_wins
+        user.ratio = (
+            (user.total_wins / user.total_games) * 100 if user.total_games else 0
         )
-        total_games = games.count()
-        total_wins = games.filter(
-            Q(player1_id=user, player1_score__gt=F("player2_score"))
-            | Q(player2_id=user, player2_score__gt=F("player1_score"))
-        ).count()
-        total_losses = total_games - total_wins
-        ratio = (total_wins / total_games) * 100 if total_games > 0 else 0
-        user.total_games = total_games
-        user.total_wins = total_wins
-        user.total_losses = total_losses
-        user.ratio = ratio
-    users = sorted(users, key=lambda x: x.ratio, reverse=True)
+    users.sort(key=lambda user: user.ratio, reverse=True)
 
     return SuccessResponse(
         data={
@@ -164,7 +171,10 @@ def get_tournaments(request):
 @api_view(["GET"])
 @is_authenticated
 def get_tournament_games(request, tournament_id):
-    tournament = Tournament.objects.get(uuid=tournament_id)
+    try:
+        tournament = Tournament.objects.get(uuid=tournament_id)
+    except (Tournament.DoesNotExist, ValidationError):
+        return ErrorResponse(message="Tournament not found", status_code=404)
     games = Tournament_Game.objects.select_related("game").filter(tournament=tournament)
     return SuccessResponse(
         data={"data": TournamentGameSerializer(games, many=True).data}
@@ -234,6 +244,8 @@ def play_again(request, game_id):
         prev_game = Game.objects.get((Q(player1=request.user) 
                     | Q(player2=request.user)), id=game_id)
         target_user = prev_game.player1 if prev_game.player2 == request.user else prev_game.player2
+        if target_user is None:
+            return ErrorResponse(message="This game has no opponent to invite.")
         source_user = request.user
         game = Game.objects.create(
             player1 = source_user,
