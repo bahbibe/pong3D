@@ -7,7 +7,6 @@ from .serializers import (
     SentFriendRequestSerializer,
     AcceptFriendRequestSerializer,
     FriendshipSerializer,
-    UpdateFriendshipSerializer,
     BlockUserSerializer,
 )
 from api.auth_utils import is_authenticated
@@ -165,8 +164,10 @@ def accept_friend_request(request):
         return ErrorResponse(serializer_errors=serializer.errors)
 
     source_user = serializer.validated_data["source_user"]
+    # Only a pending request can be accepted. Without this check a blocked
+    # user could "accept" an old request and undo the block.
     friendship = Friendship.objects.filter(
-        source_user=source_user, target_user=user
+        source_user=source_user, target_user=user, status=Friendship.PENDING
     ).first()
     if not friendship:
         return ErrorResponse(
@@ -198,82 +199,6 @@ def accept_friend_request(request):
             "ctx": "friend_request_accepted",
         },
     )
-
-    return SuccessResponse(data=FriendshipSerializer(friendship).data)
-
-
-@api_view(["PUT"])
-@is_authenticated
-def update_friendship_status(request):
-    user = request.user
-    serializer = UpdateFriendshipSerializer(data=request.data)
-
-    if not serializer.is_valid():
-        return ErrorResponse(serializer_errors=serializer.errors)
-
-    friend_id = serializer.validated_data["friend_id"]
-    friendship = Friendship.objects.filter(
-        Q(source_user=user, target_user=friend_id)
-        | Q(source_user=friend_id, target_user=user)
-    ).first()
-
-    if not friendship:
-        return ErrorResponse(
-            message="Friendship does not exist",
-            status_code=status.HTTP_404_NOT_FOUND,
-        )
-
-    if serializer.validated_data["status"] == "blocked":
-        friendship.status = "blocked"
-        friendship.blocked_by = user
-        friendship.save()
-        return SuccessResponse(data=FriendshipSerializer(friendship).data)
-
-    friendship.status = serializer.validated_data["status"]
-    friendship.save()
-
-    if (friendship.status == "accepted") and (friendship.source_user == user):
-        Notification.objects.create(
-            user_id=friend_id,
-            message="accepted your friend request",
-            type="friend_request_accepted",
-            sender_id=user.id,
-        )
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"user_{friend_id}",
-            {
-                "type": "send_notification",
-                "message": "accepted your friend request",
-                "user_id": friend_id,
-                "sender_id": user.id,
-                "sender_uuid": str(user.profile.uuid),
-                "sender_username": user.username,
-                "sender_avatar": str(user.profile.avatar),
-                "ctx": "friend_request_accepted",
-            },
-        )
-    elif (friendship.status == "accepted") and (friendship.target_user == user):
-        Notification.objects.create(
-            user_id=friendship.source_user.id,
-            message="accepted your friend request",
-            type="friend_request_accepted",
-            sender_id=user.id,
-        )
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"user_{friendship.source_user.id}",
-            {
-                "type": "send_notification",
-                "message": "accepted your friend request",
-                "user_id": friendship.source_user.id,
-                "sender_id": user.id,
-                "sender_uuid": str(user.profile.uuid),
-                "sender_username": user.username,
-                "sender_avatar": str(user.profile.avatar),
-                "ctx": "friend_request_accepted",
-            },
-        )
 
     return SuccessResponse(data=FriendshipSerializer(friendship).data)
 

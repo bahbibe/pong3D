@@ -4,7 +4,6 @@ from .views import (
     get_friends_request,
     send_friend_request,
     accept_friend_request,
-    update_friendship_status,
     block_user,
     unblock_user,
     get_sent_friends_request,
@@ -19,7 +18,6 @@ urlpatterns = [
     path("requests/", get_friends_request, name="get-friends-request"),
     path("sent-requests/", get_sent_friends_request, name="get-sent-friends-request"),
     path("accept/", accept_friend_request, name="accept-friend-request"),
-    path("update/", update_friendship_status, name="update-friendship-status"),
     path("block/", block_user, name="block-user"),
     path("unblock/", unblock_user, name="unblock-user"),
 ]

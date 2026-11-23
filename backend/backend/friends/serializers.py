@@ -42,19 +42,6 @@ class ViewFriendshipSerializer(serializers.ModelSerializer):
         fields = ["user", "friend", "status", "uuid"]
 
 
-class UpdateFriendshipSerializer(serializers.ModelSerializer):
-    # STATUS_CHOICES = ["blocked", "unblocked"]
-
-    friend_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(), required=True
-    )
-    status = serializers.ChoiceField(choices=Friendship.STATUSES, required=True)
-
-    class Meta:
-        model = Friendship
-        fields = ["status", "friend_id"]
-
-
 class BlockUserSerializer(serializers.ModelSerializer):
     user_id = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(), required=True
