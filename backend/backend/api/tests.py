@@ -293,3 +293,25 @@ class SettingsUpdateTests(AuthTestCase):
         )
         self.assertEqual(response.status_code, 400)
         self.assert_password(PASSWORD)
+
+
+class CrossOriginTests(AuthTestCase):
+    def setUp(self):
+        make_user("dave")
+
+    def test_auth_cookie_flags(self):
+        response = self.login("dave")
+        cookie = response.cookies["access_token"]
+        self.assertTrue(cookie["httponly"])
+        self.assertTrue(cookie["secure"])
+        self.assertEqual(cookie["samesite"], "Lax")
+
+    def test_foreign_origin_gets_no_cors_headers(self):
+        self.login("dave")
+        response = self.client.get("/api/auth/me/", HTTP_ORIGIN="https://evil.example")
+        self.assertNotIn("Access-Control-Allow-Origin", response.headers)
+        self.assertNotIn("Access-Control-Allow-Credentials", response.headers)
+
+    def test_unknown_host_is_rejected(self):
+        response = self.client.get("/api/auth/me/", HTTP_HOST="evil.example")
+        self.assertEqual(response.status_code, 400)

@@ -26,7 +26,12 @@ def set_access_token(response, user, is_tfa_verified):
         }
     )
     response.set_cookie(
-        "access_token", access_token, httponly=True, expires=access_token_liftime
+        "access_token",
+        access_token,
+        expires=access_token_liftime,
+        httponly=True,
+        secure=settings.AUTH_COOKIE_SECURE,
+        samesite=settings.AUTH_COOKIE_SAMESITE,
     )
     return response
 

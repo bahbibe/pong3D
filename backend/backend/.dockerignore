@@ -1,0 +1,9 @@
+# Build context is backend/backend (see backend/docker-compose.yml).
+# Keep secrets and user uploads out of the image.
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+avatars/*
+!avatars/profile_default.jpg
