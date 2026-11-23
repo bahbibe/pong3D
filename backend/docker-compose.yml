@@ -22,7 +22,9 @@ services:
     restart: always
     init: true
   db:
-    image: postgres:alpine
+    # Pinned: postgres 18+ images refuse a volume at /var/lib/postgresql/data,
+    # and a major upgrade needs pg_upgrade on the existing volume anyway.
+    image: postgres:16-alpine
     container_name: db
     volumes:
       - dbdata:/var/lib/postgresql/data
