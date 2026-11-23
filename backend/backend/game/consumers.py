@@ -1,59 +1,101 @@
 import json
-import uuid
-import asyncio
-import math
-import redis
+import logging
 
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .game_manager import GameManager, BotManager
-from .models import Game, Tournament, Tournament_Participants, Tournament_Game
+from .game_manager import (
+    DIRECTIONS,
+    WINNING_SCORE,
+    BotManager,
+    GameManager,
+    bot_group_name,
+)
+from .models import Game, Tournament, Tournament_Game
 from channels.db import database_sync_to_async
-from .serializers import TournamentGameSerializer, GameSerializer
-from django.db.models import Q, F
-from .views import invite_friend
+from .serializers import TournamentGameSerializer
+from django.db.models import Q
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from api.models import Notification
+
+logger = logging.getLogger(__name__)
+
+# Close codes (frontend treats 4001 as "log in again").
+CLOSE_UNAUTHORIZED = 4001
+CLOSE_FORBIDDEN = 4003
+CLOSE_NOT_FOUND = 4004
+
+
+def parse_message(text_data):
+    """Return the decoded JSON object, or None for anything else."""
+    if not text_data:
+        return None
+    try:
+        payload = json.loads(text_data)
+    except json.JSONDecodeError:
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def is_anonymous(user):
+    return user is None or user.is_anonymous
+
+
+async def reject(consumer, code):
+    """Accept then close, so the browser receives the close code."""
+    await consumer.accept()
+    await consumer.close(code=code)
+
 
 game_manager = GameManager()
 bot_manager = BotManager()
 
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        await self.accept()
-        self.user = self.scope["user"]
+        self.game = None
+        self.game_instance = None
+        self.player = None
+        self.joined_group = False
+        self.user = self.scope.get("user")
         self.game_id = self.scope["url_route"]["kwargs"]["game_id"]
-        self.player = 'player2'
-        self.game = await self.get_game()
+        self.tournament_id = self.scope["url_route"]["kwargs"].get("tournament_id")
+        # Accept only once the game instance exists, so the first client
+        # message always finds it.
 
+        if is_anonymous(self.user):
+            await reject(self, CLOSE_UNAUTHORIZED)
+            return
+
+        self.game = await self.get_game()
         if self.game is None:
-            print("game doesn't exist 2")
+            await reject(self, CLOSE_FORBIDDEN)
+            return
+
+        if (
+            self.game.player1_score >= WINNING_SCORE
+            or self.game.player2_score >= WINNING_SCORE
+        ):
+            # Finished game: do not start a new loop (it would end at once
+            # and run the end-of-game logic again).
+            await self.accept()
+            await self.send(text_data=json.dumps({"type": "game over"}))
             await self.close()
             return
 
-        try:
-            self.tournament_id = self.scope["url_route"]["kwargs"]["tournament_id"]
-            if self.tournament_id:
-                print("self.tournament_id:", self.tournament_id)
+        if self.tournament_id:
+            try:
                 await self.send_opponent_invite()
-        except Exception as error:
-            print("error", error)
+            except Exception:
+                logger.exception("could not send tournament invite")
 
-
-        
         await self.channel_layer.group_add(self.game_id, self.channel_name)
+        self.joined_group = True
 
-        # Check if the game instance already exists
         self.game_instance = await game_manager.get_game_instance(self.game_id)
         if not self.game_instance:
-            # Create a new game instance
-            print("gameinstance create")
-            await game_manager.create_game_instance(self.game)
-            self.game_instance = await game_manager.get_game_instance(self.game_id)
-        
-        if self.game and self.game_instance:
-            self.game_instance.set_paused(False)
-    
+            self.game_instance = await game_manager.create_game_instance(self.game)
+        self.game_instance.player_connected(self.player)
+        await self.accept()
+
     @database_sync_to_async
     def send_opponent_invite(self):
         source_user = self.user
@@ -82,85 +124,56 @@ class GameConsumer(AsyncWebsocketConsumer):
         )
     @database_sync_to_async
     def get_game(self):
+        """Load the game and set self.player. None if not one of its players."""
         try:
-            game = Game.objects.get(id=int(self.game_id))
-            if self.user == game.player1:
-                self.player = 'player1'
-            elif self.user == game.player2:
-                self.player = 'player2'
-            else:
-                return None
-            return game
-        except Game.DoesNotExist:
-            print("game doesn't exist")
+            game = Game.objects.select_related("player1", "player2").get(
+                id=int(self.game_id)
+            )
+        except (Game.DoesNotExist, ValueError):
             return None
+        if game.player1_id == self.user.id:
+            self.player = "player1"
+        elif game.player2_id == self.user.id:
+            self.player = "player2"
+        else:
+            return None
+        return game
 
     async def disconnect(self, close_code):
-        if self.game and self.game_instance:
-            self.game_instance.set_paused(True)
-        await self.channel_layer.group_discard(self.game_id, self.channel_name)
+        if self.game_instance is not None and self.player is not None:
+            self.game_instance.player_disconnected(self.player)
+        if self.joined_group:
+            await self.channel_layer.group_discard(self.game_id, self.channel_name)
 
-    # Receive message from WebSocket
-    async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message_type = text_data_json['type']
-
-        # print("receive type", message_type)
-
-        if not self.game_instance:
+    async def receive(self, text_data=None, bytes_data=None):
+        payload = parse_message(text_data)
+        if payload is None or self.game_instance is None:
             return
+        if payload.get("type") != "move":
+            return
+        direction = DIRECTIONS.get(payload.get("direction"))
+        if direction is None:
+            return
+        # player2 looks at the board from the other side.
+        side = 1 if self.player == "player1" else -1
+        self.game_instance.set_direction(self.player, direction * side)
 
-        side = -1
-        if self.game.player1 == self.user :
-            side = 1
-        if message_type == 'right':
-            self.game_instance.game_state[self.player] -= 5 * 0.015 * side
-        if message_type == 'left':
-            self.game_instance.game_state[self.player] += 5 * 0.015 * side
-
-        if self.game_instance.game_state[self.player] < -3:
-            self.game_instance.game_state[self.player] = -3
-        if self.game_instance.game_state[self.player] > 3:
-            self.game_instance.game_state[self.player] = 3
-        
-        if message_type == 'game_update':
-            # Update the game state based on the received data
-            await self.update_game_state(text_data_json)
-
-            # Broadcast the updated game state to all players in the game
-            await self.channel_layer.group_send(
-                self.game_group_name,
-                {
-                    'type': 'game_update_message',
-                    'game_state': text_data_json
-                }
-            )
-
-    # Broadcast game updates to all players in the game
     async def game_update_message(self, event):
-        game_state = event['game_state']
-        side = self.player
-        game_state['side'] = side
-        event['game_state'] = game_state
-        await self.send(text_data=json.dumps(event))
+        game_state = dict(event["game_state"], side=self.player)
+        await self.send(
+            text_data=json.dumps({"type": event["type"], "game_state": game_state})
+        )
 
     async def send_game_id(self, event):
-        game_id = event['game_id']
-        self.game_id = game_id
-        self.game_instance = await game_manager.get_game_instance(self.game_id)
-        # print(self.player, "sending game id")
         await self.join_game()
         await self.send(text_data=json.dumps(event))
-    
+
     async def send_game_end(self, event):
-        print("game_over")
-        await self.send(text_data=json.dumps({
-            'type': "game over"
-            }))
+        await self.send(text_data=json.dumps({"type": "game over"}))
         await game_manager.remove_game_instance(self.game_id)
+        self.game_instance = None
         await self.qualify_next_round()
-        print("game_end")
-    
+
     @database_sync_to_async
     def qualify_next_round(self):
         try:
@@ -197,17 +210,32 @@ class GameConsumer(AsyncWebsocketConsumer):
             pass
 
     async def join_game(self):
-        self.game_instance = await game_manager.get_game_instance(self.game_id)
-        self.game_instance.set_player_ready(self.player)
+        instance = await game_manager.get_game_instance(self.game_id)
+        if instance is not None and self.player is not None:
+            self.game_instance = instance
+            instance.set_player_ready(self.player)
 
 class TournamentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        await self.accept()
-        self.user = self.scope["user"]
+        self.t_round = None
+        self.tournament = None
+        self.joined_group = False
+        self.user = self.scope.get("user")
         self.tournament_id = self.scope["url_route"]["kwargs"]["tournament_id"]
 
+        if is_anonymous(self.user):
+            await reject(self, CLOSE_UNAUTHORIZED)
+            return
+
+        try:
+            self.games = await self.create_tournament_games()
+        except Tournament.DoesNotExist:
+            await reject(self, CLOSE_NOT_FOUND)
+            return
+
+        await self.accept()
         await self.channel_layer.group_add(self.tournament_id, self.channel_name)
-        self.games = await self.create_tournament_games()
+        self.joined_group = True
         self.t_round = await self.get_player_round()
         await self.set_game(True, self.t_round)
         await self.channel_layer.group_send(
@@ -264,17 +292,15 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         return TournamentGameSerializer(games, many=True).data
 
     async def disconnect(self, close_code):
-        await self.set_game(False, self.t_round)
-        await self.channel_layer.group_send(
-                self.tournament_id,
-                {
-                    'type': 'update',
-                }
-            )
-        await self.channel_layer.group_discard(self.tournament_id, self.channel_name)
+        if self.t_round is not None:
+            await self.set_game(False, self.t_round)
+        if self.joined_group:
+            await self.channel_layer.group_send(self.tournament_id, {"type": "update"})
+            await self.channel_layer.group_discard(self.tournament_id, self.channel_name)
 
-    async def receive(self, text_data):
-        print(text_data)
+    async def receive(self, text_data=None, bytes_data=None):
+        # Clients do not send anything on this socket.
+        return
     
     async def update(self, event):
         await self.send(text_data=json.dumps(event))
@@ -308,64 +334,54 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
 class GameBotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        await self.accept()
-        self.user = self.scope["user"]
-        self.player = 'player1'
+        self.bot_instance = None
+        self.group_name = None
+        self.player = "player1"
+        self.user = self.scope.get("user")
 
-        await self.channel_layer.group_add(f"{self.user.username}_bot", self.channel_name)
-
-        # Check if the game instance already exists
-        self.bot_instance = await bot_manager.get_bot_instance(self.user.id)
-        if not self.bot_instance:
-            # Create a new game instance
-            print("botinstance create")
-            await bot_manager.create_bot_instance(self.user)
-            self.bot_instance = await bot_manager.get_bot_instance((str(self.user.id)))         
-    
-    async def disconnect(self, close_code):
-        if self.user and self.bot_instance:
-            self.bot_instance.set_paused(True)
-            await bot_manager.remove_bot_instance(str(self.user.id))
-        await self.channel_layer.group_discard(f"{self.user.username}_bot", self.channel_name)
-
-    # Receive message from WebSocket
-    async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message_type = text_data_json['type']
-        if not self.bot_instance:
-            print("no bot instance")
+        if is_anonymous(self.user):
+            await reject(self, CLOSE_UNAUTHORIZED)
             return
-        side = 1
-        if message_type == 'right':
-            self.bot_instance.game_state[self.player] -= 5 * 0.015 * side
-        if message_type == 'left':
-            self.bot_instance.game_state[self.player] += 5 * 0.015 * side
 
-        if self.bot_instance.game_state[self.player] < -3:
-            self.bot_instance.game_state[self.player] = -3
-        if self.bot_instance.game_state[self.player] > 3:
-            self.bot_instance.game_state[self.player] = 3
+        self.group_name = bot_group_name(self.user.id)
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        self.bot_instance = await bot_manager.create_bot_instance(self.user)
+        await self.accept()
 
-    # Broadcast game updates to all players in the game
+    async def stop_own_instance(self):
+        # Another tab may have started a newer bot game; leave that one alone.
+        current = await bot_manager.get_bot_instance(self.user.id)
+        if current is not None and current is self.bot_instance:
+            await bot_manager.remove_bot_instance(self.user.id)
+        self.bot_instance = None
+
+    async def disconnect(self, close_code):
+        if self.bot_instance is not None:
+            await self.stop_own_instance()
+        if self.group_name is not None:
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def receive(self, text_data=None, bytes_data=None):
+        payload = parse_message(text_data)
+        if payload is None or self.bot_instance is None:
+            return
+        if payload.get("type") != "move":
+            return
+        direction = DIRECTIONS.get(payload.get("direction"))
+        if direction is None:
+            return
+        self.bot_instance.set_direction(self.player, direction)
+
     async def game_update_message(self, event):
-        game_state = event['game_state']
-        side = self.player
-        game_state['side'] = side
-        event['game_state'] = game_state
-        await self.send(text_data=json.dumps(event))
+        game_state = dict(event["game_state"], side=self.player)
+        await self.send(
+            text_data=json.dumps({"type": event["type"], "game_state": game_state})
+        )
 
     async def send_game_id(self, event):
-        self.bot_instance = await bot_manager.get_bot_instance(str(self.user.id))
-        await self.join_game()
         await self.send(text_data=json.dumps(event))
-    
-    async def send_game_end(self, event):
-        print("game_over")
-        await self.send(text_data=json.dumps({
-            'type': "game over"
-            }))
-        await bot_manager.remove_bot_instance(str(self.user.id))
-        print("game_end")
 
-    async def join_game(self):
-        self.bot_instance = await bot_manager.get_bot_instance(str(self.user.id))
+    async def send_game_end(self, event):
+        await self.send(text_data=json.dumps({"type": "game over"}))
+        if self.bot_instance is not None:
+            await self.stop_own_instance()

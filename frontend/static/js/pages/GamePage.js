@@ -38,6 +38,7 @@ class GamePage extends AbstractPage {
 
     this.left = false;
     this.right = false;
+    this.lastDirection = "none";
     this.score1Text = 0 ;
     this.score2Text = 0 ;
 
@@ -126,7 +127,6 @@ class GamePage extends AbstractPage {
           if (game.side == 'player2')
             this.camera.position.z = this.opposit_side_cam_pos;
           this.camera.lookAt(0, 0, 0);
-          this.newUpdate = true;
         }
       };
 
@@ -158,22 +158,31 @@ class GamePage extends AbstractPage {
     this.camera.lookAt(0, 0, 0)
   }
 
+  // The server moves the paddle at a fixed speed while a direction is held.
+  // Send only when the held direction changes ("left", "right" or "none").
+  // Names follow the server protocol: ArrowLeft sends "right".
   keyDown(e) {
-    e = e || window.event;
-
-    if (e.keyCode == '37')      // right arrow
-      this.right = true
-    else if (e.keyCode == '39') // left arrow
-      this.left = true
+    if (e.key === "ArrowLeft") this.right = true;
+    else if (e.key === "ArrowRight") this.left = true;
+    else return;
+    this.sendDirection();
   }
 
   keyUp(e) {
-    e = e || window.event;
+    if (e.key === "ArrowLeft") this.right = false;
+    else if (e.key === "ArrowRight") this.left = false;
+    else return;
+    this.sendDirection();
+  }
 
-    if (e.keyCode == '37')      // right arrow
-      this.right = false
-    else if (e.keyCode == '39') // left arrow
-      this.left = false
+  sendDirection() {
+    let direction = "none";
+    if (this.right && !this.left) direction = "right";
+    else if (this.left && !this.right) direction = "left";
+    if (direction === this.lastDirection) return;
+    if (!this.socket || this.socket.readyState !== WebSocket.OPEN) return;
+    this.lastDirection = direction;
+    this.socket.send(JSON.stringify({ type: "move", direction }));
   }
 
   createTextTexture(text) {
@@ -237,13 +246,6 @@ class GamePage extends AbstractPage {
   animate() {
     this.animationFrameId = requestAnimationFrame(this.animate);
     this.renderer.render(this.scene, this.camera);
-    if (!this.newUpdate)
-      return;
-    this.newUpdate = false;
-    if (this.right == true)
-      this.socket.send(JSON.stringify({ "type": 'right' }));
-    if (this.left == true)
-      this.socket.send(JSON.stringify({ "type": 'left' }));
   };
 
   disconnectedCallback() {
