@@ -718,12 +718,15 @@
               <label for="username" class="form-label fw-bold">email</label>
               <input type="text" name="email" id="email" class="form-control form-control-lg mb-2" placeholder="email"
                 value="" />
-              <label for="username" class="form-label fw-bold">Password</label>
+              <label for="password" class="form-label fw-bold">New Password</label>
               <input type="password" name="password" id="password" class="form-control form-control-lg mb-2"
-                placeholder="password" value="" />
-              <label for="username" class="form-label fw-bold">Confirm Password</label>
-              <input type="password" name="password" id="confirm_password" class="form-control form-control-lg mb-2"
-                placeholder="confirm password" value="" />
+                placeholder="new password" value="" autocomplete="new-password" />
+              <label for="confirm_password" class="form-label fw-bold">Confirm Password</label>
+              <input type="password" name="confirm_password" id="confirm_password" class="form-control form-control-lg mb-2"
+                placeholder="confirm password" value="" autocomplete="new-password" />
+              <label for="current_password" class="form-label fw-bold">Current Password</label>
+              <input type="password" name="current_password" id="current_password" class="form-control form-control-lg mb-2"
+                placeholder="needed to change email or password" value="" autocomplete="current-password" />
             </div>
             <div class="w-100 d-flex">
               <button type="button" id="disable-2fa" class="btn btn-outline-danger mx-auto d-none">Disable

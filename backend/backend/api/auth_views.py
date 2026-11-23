@@ -12,9 +12,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from .models import Profile, Notification
 from django.shortcuts import redirect
 from django.contrib.auth.hashers import check_password
-from .auth_utils import generate_token, is_authenticated
-from django.conf import settings
-from datetime import datetime
+from .auth_utils import is_authenticated, set_access_token
 from utils.responses import ErrorResponse, SuccessResponse
 import urllib.parse
 import requests
@@ -70,15 +68,8 @@ def login_user(request):
                 status_code=status.HTTP_404_NOT_FOUND,
             )
 
-        access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
-        access_token = generate_token(
-            {"id": user.id, "is_tfa_verified": False, "exp": access_token_liftime}
-        )
         response = SuccessResponse({"user": UserSerializer(user).data})
-        response.set_cookie(
-            "access_token", access_token, httponly=True, expires=access_token_liftime
-        )
-        return response
+        return set_access_token(response, user, is_tfa_verified=False)
 
     return ErrorResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
@@ -104,12 +95,6 @@ def register_user(request):
         if is_user_exists:
             return ErrorResponse(message="A user with this email already exists")
 
-        if (
-            serializer.validated_data["password"]
-            != serializer.validated_data["confirm_password"]
-        ):
-            return ErrorResponse(message="Passwords do not match")
-
         user = User.objects.create_user(
             username=serializer.validated_data["username"],
             email=serializer.validated_data["email"],
@@ -130,7 +115,7 @@ def register_user(request):
 
 
 @api_view(["POST"])
-@is_authenticated
+@is_authenticated(allow_unverified_tfa=True)
 def logout_user(_):
     response = SuccessResponse(message="User logged out")
     response.delete_cookie("access_token")
@@ -242,16 +227,8 @@ def login_intra_callback(request):
         user.set_unusable_password()
         user.save()
 
-    access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
-    access_token = generate_token(
-        {"id": user.id, "is_tfa_verified": False, "exp": access_token_liftime}
-    )
-
     response = redirect("https://localhost:1337/")
-    response.set_cookie(
-        "access_token", access_token, httponly=True, expires=access_token_liftime
-    )
-    return response
+    return set_access_token(response, user, is_tfa_verified=False)
 
 
 @api_view(["POST"])
@@ -304,14 +281,17 @@ def confirm_twofa(request):
 
     user.profile.is_tfa_enabled = True
     user.profile.save()
-    return SuccessResponse(message="2FA confirmed")
+    # The user just proved they hold the secret, so the current session counts
+    # as verified. Without this the next request would be sent back to 2FA.
+    response = SuccessResponse(message="2FA confirmed")
+    return set_access_token(response, user, is_tfa_verified=True)
 
 
 @api_view(["POST"])
-@is_authenticated
+@is_authenticated(allow_unverified_tfa=True)
 def verify_twofa(request):
     user = request.user
-    if not user.profile.is_tfa_enabled:
+    if not user.profile.is_tfa_enabled or not user.profile.tfa_secret:
         return ErrorResponse(message="2FA is not enabled")
 
     code = request.data.get("code")
@@ -322,23 +302,23 @@ def verify_twofa(request):
     if not is_code_valid:
         return ErrorResponse(message="Invalid code")
 
-    access_token_liftime = datetime.now() + settings.ACCESS_TOKEN_LIFETIME
-    access_token = generate_token(
-        {"id": user.id, "is_tfa_verified": True, "exp": access_token_liftime}
-    )
     response = SuccessResponse(message="Code is valid")
-    response.set_cookie(
-        "access_token", access_token, httponly=True, expires=access_token_liftime
-    )
-    return response
+    return set_access_token(response, user, is_tfa_verified=True)
 
 
 @api_view(["POST"])
 @is_authenticated
 def disable_twofa(request):
     user = request.user
-    if not user.profile.is_tfa_enabled:
+    if not user.profile.is_tfa_enabled or not user.profile.tfa_secret:
         return ErrorResponse(message="2FA is not enabled")
+
+    code = request.data.get("code")
+    if not code:
+        return ErrorResponse(message="No code found")
+
+    if not pyotp.TOTP(user.profile.tfa_secret).verify(str(code)):
+        return ErrorResponse(message="Invalid code")
 
     user.profile.is_tfa_enabled = False
     user.profile.tfa_secret = None

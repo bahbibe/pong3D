@@ -5,6 +5,8 @@ from .serializers import (
     UpdateSettingsSerializer,
 )
 from rest_framework import status
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from .models import User, Profile, Notification
 from django.db.models import Q, F
 from api.auth_utils import is_authenticated
@@ -47,44 +49,60 @@ def setup_profile(request):
 def update_settings(request):
     user = request.user
     serializer = UpdateSettingsSerializer(data=request.data)
-    if serializer.is_valid():
-        profile = user.profile
-        username = serializer.validated_data.get("username")
-        email = serializer.validated_data.get("email")
+    if not serializer.is_valid():
+        return ErrorResponse(serializer_errors=serializer.errors)
 
-        if (
-            username != user.username
-            and User.objects.filter(username=username).exists()
-        ):
-            return ErrorResponse(message="Username already exists")
+    data = serializer.validated_data
+    profile = user.profile
+    username = data.get("username")
+    email = data.get("email") or None
+    password = data.get("password") or None
+    current_password = data.get("current_password") or ""
 
-        if (
-            email != user.email
-            and User.objects.filter(
-                email=serializer.validated_data.get("email")
-            ).exists()
-        ):
-            return ErrorResponse(message="Email already exists")
+    is_email_change = email is not None and email != user.email
+    if password or is_email_change:
+        # Changing credentials needs proof that the caller is the account
+        # owner, not just someone holding the session cookie.
+        if profile.auth_method == Profile.INTRA or not user.has_usable_password():
+            return ErrorResponse(
+                message="Email and password are managed by 42 intra for this account."
+            )
+        if not user.check_password(current_password):
+            return ErrorResponse(
+                message="Current password is incorrect.",
+                serializer_errors={"current_password": ["Current password is incorrect."]},
+            )
 
-        profile.avatar = serializer.validated_data.get("avatar", profile.avatar)
-        user.username = serializer.validated_data.get("username", user.username)
-        user.email = (
-            serializer.validated_data.get("email", user.email)
-            if serializer.validated_data.get("email")
-            else user.email
-        )
+    if (
+        username
+        and username != user.username
+        and User.objects.filter(username=username).exists()
+    ):
+        return ErrorResponse(message="Username already exists")
 
-        (
-            user.set_password(serializer.validated_data.get("password"))
-            if serializer.validated_data.get("password")
-            else user.password
-        )
+    if is_email_change and User.objects.filter(email=email).exists():
+        return ErrorResponse(message="Email already exists")
 
-        profile.save()
-        user.save()
-        return SuccessResponse(data=UserSerializer(user).data)
+    if password:
+        try:
+            validate_password(password, user=user)
+        except DjangoValidationError as error:
+            return ErrorResponse(
+                message="Invalid password",
+                serializer_errors={"password": list(error.messages)},
+            )
 
-    return ErrorResponse(serializer_errors=serializer.errors)
+    profile.avatar = data.get("avatar", profile.avatar)
+    if username:
+        user.username = username
+    if is_email_change:
+        user.email = email
+    if password:
+        user.set_password(password)
+
+    profile.save()
+    user.save()
+    return SuccessResponse(data=UserSerializer(user).data)
 
 
 @api_view(["GET"])
