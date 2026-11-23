@@ -1,0 +1,27 @@
+from django.contrib import admin
+from django.urls import path, include
+from django.shortcuts import redirect
+from django.conf.urls.static import static
+from django.conf import settings
+from django.views.generic import RedirectView
+from django.urls import re_path
+# from django.conf.urls import url
+
+def redirect_to_api(request):
+    return redirect("api/")
+
+
+urlpatterns = [
+    path("", redirect_to_api),
+    path("api/chat/", include("chat.urls")),
+    path("api/auth/", include("api.urls")),
+    path("api/friends/", include("friends.urls")),
+    path("admin/", admin.site.urls),
+    path("api/game/", include("game.urls")),
+    path("", include("django_prometheus.urls")),
+]
+
+# urlpatterns += static("/avatars/", document_root=settings.BASE_DIR / "avatars/")
+# urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+
