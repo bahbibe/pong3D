@@ -118,9 +118,9 @@ class API {
   async create_tournament() {
     try {
       const response = await fetch(
-        `${BASE_URL}/api/game/create_tournament`,
+        `${BASE_URL}/api/game/create_tournament/`,
         {
-          method: "GET",
+          method: "POST",
           headers: {
             "content-type": "application/json",
           },
@@ -162,7 +162,7 @@ class API {
       const response = await fetch(
         `${BASE_URL}/api/game/invite_friend/${friendId}`,
         {
-          method: "GET",
+          method: "POST",
           headers: {
             "content-type": "application/json",
           },
@@ -185,7 +185,7 @@ class API {
       const response = await fetch(
         `${BASE_URL}/api/game/play_again/${game_id}`,
         {
-          method: "GET",
+          method: "POST",
           headers: {
             "content-type": "application/json",
           },

@@ -247,3 +247,56 @@ class TournamentConsumerTests(GameTestCase):
         )
         output = await communicator.receive_output(timeout=2)
         self.assertEqual(output.get("code"), 4004)
+
+
+class GameActionViewTests(TransactionTestCase):
+    def setUp(self):
+        from friends.models import Friendship
+
+        self.alice = make_user("alice")
+        self.bob = make_user("bob")
+        self.carol = make_user("carol")
+        Friendship.objects.create(
+            source_user=self.alice, target_user=self.bob, status=Friendship.ACCEPTED
+        )
+        Friendship.objects.create(
+            source_user=self.alice, target_user=self.carol, status=Friendship.PENDING
+        )
+        self.client.cookies["access_token"] = token_for(self.alice)
+
+    def test_state_changing_actions_reject_get(self):
+        game = Game.objects.create(player1=self.alice, player2=self.bob)
+        for url in [
+            "/api/game/create_tournament/",
+            f"/api/game/invite_friend/{self.bob.id}",
+            f"/api/game/play_again/{game.id}",
+        ]:
+            self.assertEqual(self.client.get(url).status_code, 405, url)
+        self.assertEqual(Game.objects.count(), 1)
+
+    def test_invite_friend_with_post(self):
+        response = self.client.post(f"/api/game/invite_friend/{self.bob.id}")
+        self.assertEqual(response.status_code, 200, response.content)
+        game = Game.objects.get(id=response.json()["data"]["game"]["id"])
+        self.assertEqual((game.player1_id, game.player2_id), (self.alice.id, self.bob.id))
+
+    def test_cannot_invite_non_friend(self):
+        response = self.client.post(f"/api/game/invite_friend/{self.carol.id}")
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Game.objects.count(), 0)
+
+    def test_invite_unknown_user(self):
+        response = self.client.post("/api/game/invite_friend/abc")
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_tournament_post_path_used_by_frontend(self):
+        # API.js must use the trailing slash: a POST to the slash-less URL
+        # is redirected and comes back as a GET.
+        api_js = (
+            __import__("pathlib").Path(__file__).resolve().parents[3]
+            / "frontend/static/js/API/API.js"
+        )
+        if api_js.exists():  # not present inside the backend container
+            self.assertIn("/api/game/create_tournament/`", api_js.read_text())
+        response = self.client.post("/api/game/create_tournament/")
+        self.assertEqual(response.status_code, 200, response.content)

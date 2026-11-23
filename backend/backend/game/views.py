@@ -21,7 +21,9 @@ from api.serializers import UserSerializer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from api.models import Notification
-# Create your views here.
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @api_view(["GET"])
@@ -120,7 +122,7 @@ def get_leaderboard(request):
     )
 
 
-@api_view(["GET"])
+@api_view(["POST"])
 @is_authenticated
 def create_tournament(request):
     tournament = Tournament.objects.create(
@@ -179,14 +181,19 @@ def get_game(request, game_id):
             message="Game not found",
         )
 
-@api_view(["GET"])
+@api_view(["POST"])
 @is_authenticated
 def invite_friend(request, friend_id):
+    source_user = request.user
+    target_user = User.objects.filter(id=friend_id).first() if str(friend_id).isdigit() else None
+    is_friend = target_user is not None and Friendship.objects.filter(
+        Q(source_user=target_user, target_user=source_user)
+        | Q(source_user=source_user, target_user=target_user),
+        status=Friendship.ACCEPTED,
+    ).exists()
+    if not is_friend:
+        return ErrorResponse(message="You can only invite your friends.")
     try:
-        source_user = request.user
-        target_user = User.objects.get(id=int(friend_id))
-        friendship = Friendship.objects.get((Q(source_user=target_user, target_user=source_user) 
-                    | Q(target_user=target_user, source_user=source_user)), blocked_by=None)
         game = Game.objects.create(
             player1 = source_user,
             player2 = target_user
@@ -214,13 +221,11 @@ def invite_friend(request, friend_id):
             },
         )
         return SuccessResponse(data={"game": GameSerializer(game).data})
-    except Exception as error:
-        print(error)
-        return ErrorResponse(
-            message = str(error),
-        )
+    except Exception:
+        logger.exception("could not create game invite")
+        return ErrorResponse(message="Could not create the game, please try again.")
 
-@api_view(["GET"])
+@api_view(["POST"])
 @is_authenticated
 def play_again(request, game_id):
     try:
@@ -255,8 +260,6 @@ def play_again(request, game_id):
             },
         )
         return SuccessResponse(data={"game": GameSerializer(game).data})
-    except Exception as error:
-        print(error)
-        return ErrorResponse(
-            message = str(error),
-        )
+    except Exception:
+        logger.exception("could not create game invite")
+        return ErrorResponse(message="Could not create the game, please try again.")
