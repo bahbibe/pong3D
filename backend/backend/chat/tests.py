@@ -137,6 +137,33 @@ class ChatConsumerTests(ChatTestCase):
         await alice.disconnect()
 
 
+class WebSocketOriginTests(ChatTestCase):
+    async def test_foreign_origin_is_refused(self):
+        communicator = WebsocketCommunicator(
+            application,
+            f"/ws/chat/{self.room}/",
+            headers=[
+                (b"origin", b"https://evil.example"),
+                (b"cookie", f"access_token={token_for(self.alice)}".encode()),
+            ],
+        )
+        connected, _ = await communicator.connect()
+        self.assertFalse(connected)
+
+    async def test_same_origin_is_accepted(self):
+        communicator = WebsocketCommunicator(
+            application,
+            f"/ws/chat/{self.room}/",
+            headers=[
+                (b"origin", b"https://localhost:1337"),
+                (b"cookie", f"access_token={token_for(self.alice)}".encode()),
+            ],
+        )
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+        await communicator.disconnect()
+
+
 class ChatTwoFactorTests(ChatTestCase):
     def setUp(self):
         super().setUp()

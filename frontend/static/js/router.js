@@ -21,8 +21,11 @@ import { Notifications } from "./ws/NotificationsSockets.js";
 import { TournamentDisplayPage } from "./pages/TournamentDisplayPage.js";
 import { ScorePage } from "./pages/ScorePage.js";
 
-export const BASE_URL = "http://localhost:8000";
-export const WSS_URL = "ws://localhost:8000"
+// The app is served by nginx on the same origin as the API and WebSockets
+// (https://localhost:1337). Relative URLs keep requests on that origin, so
+// TLS is used and no CORS is needed.
+export const BASE_URL = "";
+export const WSS_URL = `${location.protocol === "https:" ? "wss" : "ws"}://${location.host}`;
 
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");

@@ -14,6 +14,7 @@ Override the connection with TEST_POSTGRES_HOST/PORT/USER/PASSWORD/DB.
 import os
 
 os.environ.setdefault("JWT_SECRET", "test-jwt-secret-not-for-production")
+os.environ.setdefault("DJANGO_SECRET_KEY", "test-django-secret-not-for-production")
 
 from .settings import *  # noqa: E402,F401,F403
 
