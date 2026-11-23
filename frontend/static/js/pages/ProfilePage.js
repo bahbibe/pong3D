@@ -1,3 +1,4 @@
+import { escapeHTML as esc } from "../escape.js";
 import { hideToast, showOverlay, hideOverlay, showToast, renderNotifications } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
@@ -55,20 +56,16 @@ class ProfilePage extends AbstractPage {
             window.online_users &&
             window.online_users.includes(friend.friend.id.toString());
           this.container.innerHTML += `
-              <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;" id="friend-${friend.friend.id
-            }">
+              <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;" id="friend-${esc(friend.friend.id)}">
                 <div class="col-3 col-md-4">
                   <div class="d-flex align-items-center">
                     <div class="position-relative">
-                      <img src="${friend.friend.profile.avatar
-            }" class="img-fluid rounded-circle" width="35" style="width: 35px; height: 35px;" alt="user profile image">
+                      <img src="${esc(friend.friend.profile.avatar)}" class="img-fluid rounded-circle" width="35" style="width: 35px; height: 35px;" alt="user profile image">
                       <div class="user-status ${isOnline ? "online" : ""
             }"></div>
                     </div>
                     <div class="ps-2">
-                      <a href="friend/${friend.friend.profile.uuid
-            }"><span class="fw-bold text-capitalize" style="font-size: 14px;">${friend.friend.username
-            }</span></a>
+                      <a href="friend/${esc(friend.friend.profile.uuid)}"><span class="fw-bold text-capitalize" style="font-size: 14px;">${esc(friend.friend.username)}</span></a>
                     </div>
                   </div>
                 </div>
@@ -82,8 +79,7 @@ class ProfilePage extends AbstractPage {
                   <span id="ratio"><strong>100</strong></span>
                 </div>
                 <div class="col-3 col-md-2 text-end">
-                  <a data-id="${friend.friend.id
-            }" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
+                  <a data-id="${esc(friend.friend.id)}" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
                 </div> 
               </div>
           `;
@@ -110,14 +106,14 @@ class ProfilePage extends AbstractPage {
             <div class="row  p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;">
                   <div class="col-6">
                     <div class="d-flex align-items-center">
-                    <img src="${user.friend.profile.avatar}" class="img-fluid rounded-circle" width="35" style="width: 35px; height: 35px" alt="user profile image">
+                    <img src="${esc(user.friend.profile.avatar)}" class="img-fluid rounded-circle" width="35" style="width: 35px; height: 35px" alt="user profile image">
                       <div class="ps-2">
-                        <span class="fw-bold text-capitalize" style="font-size: 14px;">${user.friend.username}</span>
+                        <span class="fw-bold text-capitalize" style="font-size: 14px;">${esc(user.friend.username)}</span>
                       </div>
                     </div>
                   </div>
                   <div class="col-4 text-end">
-                    <button data-unblock="${user.friend.id}" role="button" class="btn btn-block bg-danger p-1">Unblock</button>
+                    <button data-unblock="${esc(user.friend.id)}" role="button" class="btn btn-block bg-danger p-1">Unblock</button>
                   </div> 
                 </div>
             `;
@@ -177,27 +173,22 @@ class ProfilePage extends AbstractPage {
               <div class="row mt-3 p-1 mb-1 glass-effect">
                   <div class="col-4 my-auto p-0">
                     <div class="d-md-flex align-items-center">
-                      <img src="${game.user.profile.avatar
-            }" class="img-fluid rounded-circle d-none d-md-block"
+                      <img src="${esc(game.user.profile.avatar)}" class="img-fluid rounded-circle d-none d-md-block"
                         width="40" style="width: 40px; height: 40px" alt="user profile image">
                       <div class="ps-2">
-                        <span class="fw-bold text-capitalize">${game.user.username
-            }</span>
+                        <span class="fw-bold text-capitalize">${esc(game.user.username)}</span>
                       </div>
                     </div>
                   </div>
                   <div class="col-2 col-md-2 my-auto text-center">
-                    <span class="result fw-bolder ">${game.user_score}:${game.player_score
-            }</span>
+                    <span class="result fw-bolder ">${esc(game.user_score)}:${esc(game.player_score)}</span>
                   </div>
                   <div class="col-4 my-auto p-0 text-center">
                     <div class="d-md-flex justify-content-center align-items-center">
                       <div class="pe-2">
-                        <span class="fw-bold text-capitalize">${game.player.username
-            }</span>
+                        <span class="fw-bold text-capitalize">${esc(game.player.username)}</span>
                       </div>
-                      <img src="${game.player.profile.avatar
-            }" class="img-fluid rounded-circle d-none d-md-block"
+                      <img src="${esc(game.player.profile.avatar)}" class="img-fluid rounded-circle d-none d-md-block"
                         width="40" style="width: 40px; height: 40px" alt="user profile image">
                     </div>
                   </div>
@@ -278,10 +269,10 @@ class mainNav extends AbstractPage {
           console.log();
           this.notification.innerHTML += `
           <div class="notification">
-                        <img src="${element.friend.profile.avatar}" alt="" />
+                        <img src="${esc(element.friend.profile.avatar)}" alt="" />
                         <div class="text">
                             <p>
-                                <a href="friend/${element.friend.profile.uuid}"><span class="name">${element.friend.username}</span> </a> has send a friend request
+                                <a href="friend/${esc(element.friend.profile.uuid)}"><span class="name">${esc(element.friend.username)}</span> </a> has send a friend request
                             </p>
                         </div>
                     </div>

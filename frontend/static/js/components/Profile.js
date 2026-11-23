@@ -18,7 +18,7 @@ class Profile extends HTMLElement {
   async render() {
     try {
       const user = await this.API.getUser();
-      this.querySelector("#profile-username").innerHTML = user.username;
+      this.querySelector("#profile-username").textContent = user.username;
       this.querySelector("#profile-avatar").src = user.profile.avatar;
     } catch (error) {
       console.error("Error rendering profile:", error);

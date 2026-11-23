@@ -158,10 +158,21 @@ class SettingsPage extends AbstractPage {
   }
 
   async disable2FA() {
+    // The server asks for a current code before it turns 2FA off.
+    const code = window.prompt("Enter the code from your authenticator app to disable 2FA");
+    if (code === null) return;
+    if (code.trim() === "") {
+      showToast(true, "Please enter the two factor code");
+      return;
+    }
     try {
       const response = await fetch(`${BASE_URL}/api/auth/twofa/disable/`, {
         method: "POST",
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code: code.trim() }),
       });
 
       const data = await response.json();

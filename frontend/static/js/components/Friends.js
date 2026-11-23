@@ -1,3 +1,4 @@
+import { escapeHTML as esc } from "../escape.js";
 import { API } from "../API/API.js";
 import { ChatBox } from "../components/ChatBox.js";
 
@@ -59,11 +60,11 @@ class Friends extends HTMLElement {
     friendElement.className = "contact p-2 mx-1 d-flex gap-2";
     friendElement.innerHTML = `
       <div class="d-flex align-items-center">
-          <img src="${item.friend.profile.avatar}" class="d-block img-cover img-fluid rounded-circle" alt="avatar"/>
+          <img src="${esc(item.friend.profile.avatar)}" class="d-block img-cover img-fluid rounded-circle" alt="avatar"/>
       </div>
       <div class="d-none d-md-block col-md-9 col-lg-10">
         <div class="last-msg d-flex flex-column h-100 justify-content-center">
-          <p class="m-0 fs-5">${item.friend.username}</p>
+          <p class="m-0 fs-5">${esc(item.friend.username)}</p>
           <p class="m-0 opacity-75">lore ipsum</p>
         </div>
       </div>

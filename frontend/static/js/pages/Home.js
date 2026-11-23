@@ -1,3 +1,4 @@
+import { escapeHTML as esc } from "../escape.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 import { BASE_URL } from "../router.js";
@@ -40,15 +41,15 @@ class Home extends AbstractPage {
                   <div class="col-2"><img src="/static/asset/images/rank${index + 1}.png" alt="badge Rank number one" width="30"></div>
                   <div class="col-4">
                     <div class="d-flex align-items-center">
-                      <img src="${user.user.avatar}" class="img-fluid rounded-circle d-none d-md-block" alt="user profile image" style="width=35px; height:35px">
+                      <img src="${esc(user.user.avatar)}" class="img-fluid rounded-circle d-none d-md-block" alt="user profile image" style="width=35px; height:35px">
                       <div class="ps-2">
-                        <span class="fw-bold text-capitalize" style="font-size: 14px;">${user.user.username}</span>
+                        <span class="fw-bold text-capitalize" style="font-size: 14px;">${esc(user.user.username)}</span>
                       </div>
                     </div>
                   </div>
-                  <div class="col-3 col-md-2 text-center text-md-left"><strong>${user.total_games}</strong></div>
-                  <div class="col-3 col-md-2 text-center text-md-left"><strong>${user.total_wins}</strong></div>
-                  <div class="col-2 d-none d-md-block text-center"><strong>${user.ratio}%</strong></div>
+                  <div class="col-3 col-md-2 text-center text-md-left"><strong>${esc(user.total_games)}</strong></div>
+                  <div class="col-3 col-md-2 text-center text-md-left"><strong>${esc(user.total_wins)}</strong></div>
+                  <div class="col-2 d-none d-md-block text-center"><strong>${esc(user.ratio)}%</strong></div>
               </div>
           `;
           }

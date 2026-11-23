@@ -7,7 +7,7 @@ set API_URL "http://localhost:8000/api/auth/register/"
 function register_user
     set -l username $argv[1]
     set -l email "$username@amine.com"
-    set -l password "Amine!123"
+    set -l password "Pong-Seed-Pass-42"
 
     # Create JSON payload with all required fields
     set -l json_data "{
