@@ -1,7 +1,7 @@
 import json
 import os
 
-import redis
+from redis import asyncio as aioredis
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import User
@@ -11,8 +11,9 @@ from game.models import Game
 QUEUE_KEY = "matchmaking:random"
 CLOSE_UNAUTHORIZED = 4001
 
-# Shared client. Tests replace it with an in-memory fake.
-r = redis.Redis(
+# Shared async client (sync calls would block the event loop).
+# Tests replace it with an in-memory fake.
+r = aioredis.Redis(
     host=os.getenv("REDIS_HOST", "redis"),
     port=int(os.getenv("REDIS_PORT") or 6379),
     decode_responses=True,
@@ -49,11 +50,11 @@ class Matchmaking(AsyncWebsocketConsumer):
 
         # Drop older entries of this user (other tab, missed disconnect)
         # so a user is never matched with themselves.
-        r.lrem(QUEUE_KEY, 0, self.user.id)
+        await r.lrem(QUEUE_KEY, 0, self.user.id)
 
         opponent = None
         while opponent is None:
-            raw_id = r.lpop(QUEUE_KEY)
+            raw_id = await r.lpop(QUEUE_KEY)
             if raw_id is None:
                 break
             candidate = await get_queued_user(raw_id)
@@ -61,7 +62,7 @@ class Matchmaking(AsyncWebsocketConsumer):
                 opponent = candidate
 
         if opponent is None:
-            r.rpush(QUEUE_KEY, self.user.id)
+            await r.rpush(QUEUE_KEY, self.user.id)
             self.queued = True
             await self.accept()
             return
@@ -77,7 +78,7 @@ class Matchmaking(AsyncWebsocketConsumer):
         if self.user is None or self.user.is_anonymous:
             return
         if self.queued:
-            r.lrem(QUEUE_KEY, 0, self.user.id)
+            await r.lrem(QUEUE_KEY, 0, self.user.id)
         await self.channel_layer.group_discard(
             f"matchmaking_{self.user.id}", self.channel_name
         )

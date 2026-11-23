@@ -2,61 +2,86 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import Notification
 from channels.db import database_sync_to_async
 import json
-import redis
 import os
+from redis import asyncio as aioredis
+
+# Close code the frontend treats as "log in again".
+CLOSE_UNAUTHORIZED = 4001
+
+# Hash user_id -> number of open status sockets. A user is online while the
+# count is above 0, so closing one of two tabs does not mark them offline.
+ONLINE_KEY = "online_counts"
+
+# Shared async client (sync redis calls would block the event loop that
+# also runs the game loops). Tests replace it with an in-memory fake.
+r = aioredis.Redis(
+    host=os.getenv("REDIS_HOST", "redis"),
+    port=int(os.getenv("REDIS_PORT") or 6379),
+    decode_responses=True,
+)
+
+
+async def online_user_ids():
+    counts = await r.hgetall(ONLINE_KEY)
+    return [user_id for user_id, count in counts.items() if int(count) > 0]
+
+
+async def reject_anonymous(consumer):
+    user = consumer.scope.get("user")
+    if user is None or user.is_anonymous:
+        await consumer.accept()
+        await consumer.close(code=CLOSE_UNAUTHORIZED)
+        return True
+    return False
 
 
 class FriendsStatusConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        self.user_id = None
+        if await reject_anonymous(self):
+            return
         self.user_id = self.scope["user"].id
         await self.accept()
-
-        self.redis = redis.Redis(host="redis", port=6379, db=0)
-
         await self.channel_layer.group_add("user_status", self.channel_name)
 
-        self.redis.sadd("online_users", self.user_id)
-
-        online_users = self.redis.smembers("online_users")
-        online_users_list = [user_id.decode("utf-8") for user_id in online_users]
-        await self.channel_layer.group_send(
-            "user_status",
-            {
-                "type": "user_status_update",
-                "user_id": self.user_id,
-                "status": "online",
-                "online_users": online_users_list,
-            },
-        )
+        count = await r.hincrby(ONLINE_KEY, self.user_id, 1)
+        online_users = await online_user_ids()
+        if count == 1:
+            # First socket of this user: tell everyone.
+            await self.broadcast("online", online_users)
+        else:
+            # Another tab: only this socket needs the current list.
+            await self.user_status_update(
+                {"user_id": self.user_id, "status": "online", "online_users": online_users}
+            )
 
     async def disconnect(self, close_code):
-        self.redis.srem("online_users", self.user_id)
+        if self.user_id is None:
+            return
+        count = await r.hincrby(ONLINE_KEY, self.user_id, -1)
+        if count <= 0:
+            await r.hdel(ONLINE_KEY, self.user_id)
+            await self.broadcast("offline", await online_user_ids())
+        await self.channel_layer.group_discard("user_status", self.channel_name)
 
-        online_users = self.redis.smembers("online_users")
-        online_users_list = [user_id.decode("utf-8") for user_id in online_users]
+    async def broadcast(self, status, online_users):
         await self.channel_layer.group_send(
             "user_status",
             {
                 "type": "user_status_update",
                 "user_id": self.user_id,
-                "status": "offline",
-                "online_users": online_users_list,
+                "status": status,
+                "online_users": online_users,
             },
         )
 
-        await self.channel_layer.group_discard("user_status", self.channel_name)
-
     async def user_status_update(self, event):
-        user_id = event["user_id"]
-        status = event["status"]
-        online_users = event["online_users"]
-
         await self.send(
             text_data=json.dumps(
                 {
-                    "user_id": user_id,
-                    "status": status,
-                    "online_users": online_users,
+                    "user_id": event["user_id"],
+                    "status": event["status"],
+                    "online_users": event["online_users"],
                     "type": "user_status",
                 }
             )
@@ -72,12 +97,16 @@ def create_notification(user_id, sender_id, message, type):
 
 class NotificationConusmer(AsyncWebsocketConsumer):
     async def connect(self):
+        self.user_id = None
+        if await reject_anonymous(self):
+            return
         self.user_id = self.scope["user"].id
+        await self.channel_layer.group_add(f"user_{self.user_id}", self.channel_name)
         await self.accept()
 
-        await self.channel_layer.group_add(f"user_{self.user_id}", self.channel_name)
-
     async def disconnect(self, close_code):
+        if self.user_id is None:
+            return
         await self.channel_layer.group_discard(
             f"user_{self.user_id}", self.channel_name
         )

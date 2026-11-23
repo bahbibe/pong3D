@@ -16,21 +16,24 @@ from . import consumers
 
 
 class FakeRedis:
-    """The few list commands the matchmaking consumer uses."""
+    """The few async list commands the matchmaking consumer uses."""
 
     def __init__(self):
         self.lists = {}
 
-    def lpop(self, key):
+    async def lpop(self, key):
         items = self.lists.get(key, [])
         return items.pop(0) if items else None
 
-    def rpush(self, key, value):
+    async def rpush(self, key, value):
         self.lists.setdefault(key, []).append(str(value))
 
-    def lrem(self, key, count, value):
+    async def lrem(self, key, count, value):
         items = self.lists.get(key, [])
         self.lists[key] = [item for item in items if item != str(value)]
+
+    def push_now(self, key, value):
+        self.lists.setdefault(key, []).append(str(value))
 
 
 def token_for(user):
@@ -103,8 +106,8 @@ class MatchmakingTests(TransactionTestCase):
         gone = self.users[5]
         gone_id = gone.id
         await database_sync_to_async(gone.delete)()
-        self.redis.rpush(consumers.QUEUE_KEY, "None")
-        self.redis.rpush(consumers.QUEUE_KEY, gone_id)
+        self.redis.push_now(consumers.QUEUE_KEY, "None")
+        self.redis.push_now(consumers.QUEUE_KEY, gone_id)
         a = await self.connect(self.users[0])
         self.assertEqual(self.queue(), [str(self.users[0].id)])
         self.assertEqual(await database_sync_to_async(Game.objects.count)(), 0)
