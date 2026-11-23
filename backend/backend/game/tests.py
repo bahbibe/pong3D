@@ -19,7 +19,9 @@ from .models import Game
 
 def make_user(username):
     user = User.objects.create_user(username=username, password="x-Strong-Pass-1")
-    Profile.objects.create(user=user, is_setup=True)
+    # Profile comes from the post_save signal.
+    Profile.objects.filter(user=user).update(is_setup=True)
+    user.refresh_from_db()
     return user
 
 
@@ -300,3 +302,98 @@ class GameActionViewTests(TransactionTestCase):
             self.assertIn("/api/game/create_tournament/`", api_js.read_text())
         response = self.client.post("/api/game/create_tournament/")
         self.assertEqual(response.status_code, 200, response.content)
+
+
+class GameStatusTests(TransactionTestCase):
+    def setUp(self):
+        self.alice = make_user("alice")
+        self.bob = make_user("bob")
+
+    def tearDown(self):
+        game_manager.stop_all()
+
+    async def test_finish_game_records_status_winner_and_time(self):
+        game = await database_sync_to_async(Game.objects.create)(
+            player1=self.alice, player2=self.bob, player1_score=11, player2_score=7
+        )
+        instance = gm.GameInstance(game, mock.AsyncMock())
+        instance.stop()
+        await instance.finish_game()
+        game = await database_sync_to_async(Game.objects.get)(pk=game.pk)
+        self.assertEqual(game.status, Game.FINISHED)
+        self.assertEqual(game.winner_id, self.alice.id)
+        self.assertIsNotNone(game.finished_at)
+
+    async def test_mark_playing(self):
+        game = await database_sync_to_async(Game.objects.create)(
+            player1=self.alice, player2=self.bob
+        )
+        instance = gm.GameInstance(game, mock.AsyncMock())
+        instance.stop()
+        await instance.mark_playing()
+        game = await database_sync_to_async(Game.objects.get)(pk=game.pk)
+        self.assertEqual(game.status, Game.PLAYING)
+
+    async def test_finished_status_blocks_restart_even_without_winning_score(self):
+        game = await database_sync_to_async(Game.objects.create)(
+            player1=self.alice, player2=self.bob, player1_score=3, status=Game.FINISHED
+        )
+        communicator = await ws_connect(f"/ws/game/{game.id}", self.alice)
+        message = json.loads(await communicator.receive_from(timeout=2))
+        self.assertEqual(message["type"], "game over")
+        self.assertEqual(game_manager.game_instances, {})
+
+    def test_stats_ignore_unplayed_games(self):
+        # Regression: an unplayed invite (0-0) counted as a loss for both.
+        Game.objects.create(player1=self.alice, player2=self.bob)  # pending invite
+        Game.objects.create(
+            player1=self.alice, player2=self.bob, player1_score=11, player2_score=5,
+            status=Game.FINISHED, winner=self.alice,
+        )
+        self.client.cookies["access_token"] = token_for(self.bob)
+        stats = self.client.get("/api/game/stats/").json()["data"]
+        self.assertEqual(stats["total_games"], 1)
+        self.assertEqual(stats["total_losses"], 1)
+        history = self.client.get("/api/game/history/").json()["data"]
+        self.assertEqual(len(history["games"]), 1)
+        profile = self.client.get(f"/api/auth/profile/{self.alice.profile.uuid}/").json()
+        self.assertEqual(profile["data"]["stats"]["total_wins"], 1)
+        self.assertEqual(profile["data"]["stats"]["total_games"], 1)
+
+    def test_data_migration_marks_old_finished_games(self):
+        import importlib
+
+        from django.apps import apps
+
+        migration = importlib.import_module(
+            "game.migrations.0010_game_status_and_safe_foreign_keys"
+        )
+        done = Game.objects.create(player1=self.alice, player2=self.bob, player1_score=4, player2_score=11)
+        open_game = Game.objects.create(player1=self.alice, player2=self.bob, player1_score=4)
+        migration.mark_finished_games(apps, None)
+        done.refresh_from_db()
+        open_game.refresh_from_db()
+        self.assertEqual((done.status, done.winner_id), (Game.FINISHED, self.bob.id))
+        self.assertEqual(open_game.status, Game.PENDING)
+
+
+class DeleteUserTests(TransactionTestCase):
+    def test_deleting_a_user_keeps_games_and_tournaments(self):
+        from .models import Tournament, Tournament_Game
+
+        alice, bob = make_user("alice"), make_user("bob")
+        game = Game.objects.create(player1=alice, player2=bob, status=Game.FINISHED, winner=alice)
+        tournament = Tournament.objects.create(owner=alice)
+        Tournament_Game.objects.create(tournament=tournament, game=game, t_round=1)
+
+        alice.delete()  # used to fail: DO_NOTHING foreign keys
+
+        game.refresh_from_db()
+        tournament.refresh_from_db()
+        self.assertIsNone(game.player1_id)
+        self.assertIsNone(game.winner_id)
+        self.assertEqual(game.player2_id, bob.id)
+        self.assertIsNone(tournament.owner_id)
+
+        tournament.delete()
+        self.assertFalse(Tournament_Game.objects.exists())

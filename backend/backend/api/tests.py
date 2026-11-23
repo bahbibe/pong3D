@@ -18,7 +18,9 @@ def make_user(username, password=PASSWORD, **profile_fields):
         first_name="Test",
         last_name="User",
     )
-    Profile.objects.create(user=user, is_setup=True, **profile_fields)
+    # Profile comes from the post_save signal.
+    Profile.objects.filter(user=user).update(is_setup=True, **profile_fields)
+    user.refresh_from_db()
     return user
 
 
@@ -454,3 +456,34 @@ class IntraUserTests(TestCase):
         self.assertIsNone(parse_intra_user({"login": "x"}))
         self.assertIsNone(parse_intra_user({"id": "1", "login": "x"}))
         self.assertIsNone(parse_intra_user(None))
+
+
+class ProfileCreationTests(TestCase):
+    def test_every_new_user_gets_a_profile(self):
+        user = User.objects.create_superuser("root", "root@example.com", "x-Strong-Pass-1")
+        self.assertTrue(Profile.objects.filter(user=user).exists())
+        self.assertFalse(user.profile.is_setup)
+
+    def test_backfill_migration_creates_missing_profiles(self):
+        import importlib
+
+        from django.apps import apps
+
+        user = User.objects.create_user("orphan", password="x-Strong-Pass-1")
+        Profile.objects.filter(user=user).delete()
+        migration = importlib.import_module("api.migrations.0015_backfill_missing_profiles")
+        migration.create_missing_profiles(apps, None)
+        self.assertTrue(Profile.objects.filter(user=user).exists())
+
+    def test_register_creates_user_and_profile(self):
+        response = self.client.post(
+            "/api/auth/register/",
+            data=json.dumps({
+                "username": "gina", "email": "gina@example.com",
+                "password": PASSWORD, "confirm_password": PASSWORD,
+                "first_name": "G", "last_name": "H",
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(Profile.objects.filter(user__username="gina").count(), 1)

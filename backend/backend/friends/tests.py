@@ -12,7 +12,9 @@ from .models import Friendship
 
 def make_user(username):
     user = User.objects.create_user(username=username, password="x-Strong-Pass-1")
-    Profile.objects.create(user=user, is_setup=True)
+    # Profile comes from the post_save signal.
+    Profile.objects.filter(user=user).update(is_setup=True)
+    user.refresh_from_db()
     return user
 
 

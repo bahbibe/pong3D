@@ -44,7 +44,9 @@ class MatchmakingTests(TransactionTestCase):
         self.users = []
         for i in range(12):
             user = User.objects.create_user(username=f"player{i}", password="x-Strong-Pass-1")
-            Profile.objects.create(user=user, is_setup=True)
+            # Profile comes from the post_save signal.
+            Profile.objects.filter(user=user).update(is_setup=True)
+            user.refresh_from_db()
             self.users.append(user)
         self.redis = FakeRedis()
         patcher = mock.patch.object(consumers, "r", self.redis)

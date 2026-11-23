@@ -27,7 +27,9 @@ def token_for(user, is_tfa_verified=True):
 
 def make_user(username, **profile_fields):
     user = User.objects.create_user(username=username, password="x-Strong-Pass-1")
-    Profile.objects.create(user=user, is_setup=True, **profile_fields)
+    # Profile comes from the post_save signal.
+    Profile.objects.filter(user=user).update(is_setup=True, **profile_fields)
+    user.refresh_from_db()
     return user
 
 

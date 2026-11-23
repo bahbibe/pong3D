@@ -121,9 +121,9 @@ def get_profile(request, uuid):
                 message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
             )
 
-        games = Game.objects.filter((Q(player1_id=user) | Q(player2_id=user))).order_by(
-            "-id"
-        )
+        games = Game.objects.filter(
+            Q(player1_id=user) | Q(player2_id=user), status=Game.FINISHED
+        ).order_by("-id")
         total_games = games.count()
         total_wins = games.filter(
             Q(player1_id=user, player1_score__gt=F("player2_score"))

@@ -17,7 +17,7 @@ from . import rate_limit
 from django.conf import settings
 from utils.responses import ErrorResponse, SuccessResponse
 import urllib.parse
-from django.db import transaction
+from django.db import IntegrityError, transaction
 import requests
 import os
 import random
@@ -112,7 +112,9 @@ def find_or_create_intra_user(user_data):
         profile_fields = {"auth_method": Profile.INTRA, "intra_id": user_data["id"]}
         if user_data["avatar"]:
             profile_fields["avatar"] = user_data["avatar"]
-        Profile.objects.create(user=user, **profile_fields)
+        # The post_save signal created the profile; fill in the intra fields.
+        Profile.objects.filter(user=user).update(**profile_fields)
+        user.refresh_from_db()
     return user
 
 
@@ -191,15 +193,19 @@ def register_user(request):
         if is_user_exists:
             return ErrorResponse(message="A user with this email already exists")
 
-        user = User.objects.create_user(
-            username=serializer.validated_data["username"],
-            email=serializer.validated_data["email"],
-            password=serializer.validated_data["password"],
-            first_name=serializer.validated_data["first_name"],
-            last_name=serializer.validated_data["last_name"],
-        )
-        Profile.objects.create(user=user)
-        user.save()
+        try:
+            # User and profile (post_save signal) are created together or not at all.
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=serializer.validated_data["username"],
+                    email=serializer.validated_data["email"],
+                    password=serializer.validated_data["password"],
+                    first_name=serializer.validated_data["first_name"],
+                    last_name=serializer.validated_data["last_name"],
+                )
+        except IntegrityError:
+            # Same username registered at the same moment.
+            return ErrorResponse(message="A user with this username already exists")
         return SuccessResponse(
             data=UserSerializer(user).data,
             message="You have been registered successfully. Please login to continue.",

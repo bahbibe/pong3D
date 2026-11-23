@@ -4,6 +4,7 @@ import logging
 import random
 import time
 
+from django.utils import timezone
 from channels.layers import get_channel_layer
 from .models import Game
 from channels.db import database_sync_to_async
@@ -63,6 +64,7 @@ class GameInstance:
         self.connected = {"player1": 0, "player2": 0}
         self.last_seen = time.monotonic()
         self.reset_pause = True
+        self.marked_playing = game.status == Game.PLAYING
         # Start the loop last, after every attribute it reads exists.
         self.game_loop_task = asyncio.create_task(self.game_loop())
         self.game_loop_task.add_done_callback(_log_task_exception)
@@ -98,11 +100,14 @@ class GameInstance:
                     await self.broadcast_state()
                     await asyncio.sleep(1)
                 if self.is_finished:
+                    await self.finish_game()
                     await self.broadcast_state()
                     await asyncio.sleep(1)
                     await self.send_game_end_notification()
                     return
                 if not self.paused and self.ready["player1"] and self.ready["player2"]:
+                    if not self.marked_playing:
+                        await self.mark_playing()
                     self.apply_paddle_moves()
                     if self.update_ball_position():
                         await self.save_scores()
@@ -148,6 +153,31 @@ class GameInstance:
         # Only the score columns: other code (tournament qualification) may
         # have changed the players of this row since it was loaded.
         self.game.save(update_fields=["player1_score", "player2_score"])
+
+    @database_sync_to_async
+    def mark_playing(self):
+        self.marked_playing = True
+        self.game.status = Game.PLAYING
+        self.game.save(update_fields=["status"])
+
+    @database_sync_to_async
+    def finish_game(self):
+        game = self.game
+        if game.player1_score > game.player2_score:
+            game.winner_id = game.player1_id
+        elif game.player2_score > game.player1_score:
+            game.winner_id = game.player2_id
+        game.status = Game.FINISHED
+        game.finished_at = timezone.now()
+        game.save(
+            update_fields=[
+                "player1_score",
+                "player2_score",
+                "status",
+                "winner",
+                "finished_at",
+            ]
+        )
 
     async def send_game_end_notification(self):
         await self.channel_layer.group_send(

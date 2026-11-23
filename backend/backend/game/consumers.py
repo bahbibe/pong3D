@@ -71,7 +71,8 @@ class GameConsumer(AsyncWebsocketConsumer):
             return
 
         if (
-            self.game.player1_score >= WINNING_SCORE
+            self.game.is_finished
+            or self.game.player1_score >= WINNING_SCORE
             or self.game.player2_score >= WINNING_SCORE
         ):
             # Finished game: do not start a new loop (it would end at once

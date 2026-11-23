@@ -30,9 +30,9 @@ logger = logging.getLogger(__name__)
 @is_authenticated
 def stats(request):
     user = request.user
-    games = Game.objects.filter((Q(player1_id=user) | Q(player2_id=user))).order_by(
-        "-id"
-    )
+    games = Game.objects.filter(
+        Q(player1_id=user) | Q(player2_id=user), status=Game.FINISHED
+    ).order_by("-id")
     total_games = games.count()
     total_wins = games.filter(
         Q(player1_id=user, player1_score__gt=F("player2_score"))
@@ -55,9 +55,9 @@ def stats(request):
 @is_authenticated
 def history(request):
     user = request.user
-    games = Game.objects.filter((Q(player1_id=user) | Q(player2_id=user))).order_by(
-        "-id"
-    )
+    games = Game.objects.filter(
+        Q(player1_id=user) | Q(player2_id=user), status=Game.FINISHED
+    ).order_by("-id")
 
     total_games = games.count()
     total_wins = games.filter(
@@ -101,7 +101,9 @@ def history(request):
 def get_leaderboard(request):
     users = User.objects.all()
     for user in users:
-        games = Game.objects.filter(Q(player1_id=user) | Q(player2_id=user))
+        games = Game.objects.filter(
+            Q(player1_id=user) | Q(player2_id=user), status=Game.FINISHED
+        )
         total_games = games.count()
         total_wins = games.filter(
             Q(player1_id=user, player1_score__gt=F("player2_score"))
