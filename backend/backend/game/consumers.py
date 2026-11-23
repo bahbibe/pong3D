@@ -10,6 +10,7 @@ from .game_manager import (
     bot_group_name,
 )
 from .models import Game, Tournament, Tournament_Game
+from . import tournament
 from channels.db import database_sync_to_async
 from .serializers import TournamentGameSerializer
 from django.db.models import Q
@@ -173,42 +174,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({"type": "game over"}))
         await game_manager.remove_game_instance(self.game_id)
         self.game_instance = None
-        await self.qualify_next_round()
-
-    @database_sync_to_async
-    def qualify_next_round(self):
-        try:
-            print("qualify1")
-            game = Tournament_Game.objects.get(game__id=self.game_id)
-            if game.game.player1 == self.user and game.game.player1_score < game.game.player2_score:
-                return
-            if game.game.player2 == self.user and game.game.player1_score > game.game.player2_score:
-                return
-            print("qualify2")
-            t_round = game.t_round
-            print("qualify3")
-            if t_round != 2:
-                print("not round 2")
-                return
-            print("qualify4")
-            final = Tournament_Game.objects.get(tournament__uuid=self.tournament_id, t_round=1)
-            print("qualify5")
-            games = Tournament_Game.objects.filter(tournament__uuid=self.tournament_id, t_round=2)
-            print("qualify6")
-            if game == games[0]:
-                print("game1")
-                final.game.player1 = self.user
-                final.game.save()
-            elif game == games[1]:
-                print("game2")
-                final.game.player2 = self.user
-                final.game.save()
-            else:
-                print("qualify next round error: *didnt find the games")
-            
-        except Exception as error:
-            print("qualify next round error:", error)
-            pass
 
     async def join_game(self):
         instance = await game_manager.get_game_instance(self.game_id)
@@ -261,32 +226,12 @@ class TournamentConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def set_game(self, join, t_round):
-        if t_round < 2:
+        if t_round < tournament.FIRST_ROUND:
             return
-        if not join:
-            game = Tournament_Game.objects.filter((Q(game__player1=self.user) | Q(game__player2=self.user)), tournament=self.tournament, t_round=t_round).first()
-            if game:
-                if game.game.player2 == None:
-                    game.game.player1 = None
-                if game.game.player1 == None:
-                    game.game.player2 = None
-                game.game.save()
-        print("tround dd ", t_round)
         if join:
-            # if already joined
-            if Tournament_Game.objects.filter((Q(game__player1=self.user) | Q(game__player2=self.user)), tournament=self.tournament, t_round=t_round).exists():
-                return
-            # get empty seats
-            game = Tournament_Game.objects.filter((Q(game__player1=None) | Q(game__player2=None)), tournament=self.tournament, t_round=t_round).order_by("id").first()
-            if game:
-                print("joining game")
-                if game.game.player1:
-                    game.game.player2 = self.user
-                else:
-                    game.game.player1 = self.user
-                game.game.save()
-            else:
-                print("didnt find spot")
+            tournament.take_seat(self.tournament, self.user, t_round)
+        else:
+            tournament.leave_seat(self.tournament, self.user, t_round)
 
     @database_sync_to_async
     def call_serializer(self, games):
@@ -312,22 +257,9 @@ class TournamentConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def create_tournament_games(self):
         self.tournament = Tournament.objects.get(uuid=self.tournament_id)
-        if not Tournament_Game.objects.filter(tournament=self.tournament).exists():
-            for i in range(1,3,1):
-                print("i",i)
-                for j in range(1,i+1,1):
-                    print("j",j)
-                    game = Game.objects.create(
-                                player1=None,
-                                player2=None,
-                    )
-                    Tournament_Game.objects.create(
-                        tournament=self.tournament,
-                        game=game,
-                        t_round=i
-                    )
+        tournament.ensure_bracket(self.tournament)
         return Tournament_Game.objects.filter(tournament=self.tournament)
-            
+
     def pairwise(self, iterable):
         "s -> (s0, s1), (s2, s3), (s4, s5), ..."
         a = iter(iterable)

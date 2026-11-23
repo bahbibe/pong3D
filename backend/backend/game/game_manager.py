@@ -7,6 +7,7 @@ import time
 from django.utils import timezone
 from channels.layers import get_channel_layer
 from .models import Game
+from .tournament import advance_winner
 from channels.db import database_sync_to_async
 
 logger = logging.getLogger(__name__)
@@ -178,6 +179,7 @@ class GameInstance:
                 "finished_at",
             ]
         )
+        advance_winner(game)
 
     async def send_game_end_notification(self):
         await self.channel_layer.group_send(

@@ -15,6 +15,8 @@ from .models import Game
 from .models import Tournament, Tournament_Participants, Tournament_Game
 from friends.models import Friendship
 from django.db.models import Q
+from django.db import transaction
+from .tournament import ensure_bracket
 from django.core.exceptions import ValidationError
 from django.db.models import F
 from api.models import User
@@ -134,12 +136,9 @@ def get_leaderboard(request):
 @api_view(["POST"])
 @is_authenticated
 def create_tournament(request):
-    tournament = Tournament.objects.create(
-        owner=request.user,
-    )
-    print(tournament.owner.id)
-    # start the tournament
-    # only if the request user is the tournament owner
+    with transaction.atomic():
+        tournament = Tournament.objects.create(owner=request.user)
+        ensure_bracket(tournament)
     return SuccessResponse(
         data={
             "message": "tournament created successfuly",
@@ -151,7 +150,7 @@ def create_tournament(request):
 @api_view(["GET"])
 @is_authenticated
 def get_tournaments(request):
-    tournaments = Tournament.objects.all()
+    tournaments = Tournament.objects.filter(finished=False)
     for tournament in tournaments:
         player1_spots = Tournament_Game.objects.filter(
             tournament=tournament, game__player1=None, t_round=2
