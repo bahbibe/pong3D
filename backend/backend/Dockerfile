@@ -16,5 +16,6 @@ EXPOSE 8000
 
 ENTRYPOINT [ "./entrypoint.sh" ]
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-# CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "ft_transcendence.asgi:application"]
+# Daphne without autoreload: runserver restarted the process on every file
+# change, which killed running games (they live in memory).
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "--proxy-headers", "ft_transcendence.asgi:application"]
