@@ -1,0 +1,128 @@
+.no-scroll::-webkit-scrollbar {
+  background: transparent; /* Chrome/Safari/Webkit */
+  width: 0px;
+}
+
+.no-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.chat-container {
+  height: 85vh;
+}
+
+.img-cover {
+  object-fit: cover;
+  object-position: center;
+  aspect-ratio: 1/1;
+}
+
+.blur {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 5px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  /* border: 1px solid rgba(255, 255, 255, 0.3); */
+}
+
+.msg-box {
+  /* background-color: #1a0f236e; */
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* parent */
+.send {
+  height: 60px;
+}
+
+.send-icon {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  color: var(--white);
+  background-color: var(--darker);
+  cursor: pointer;
+}
+.send-input {
+  border: none;
+  border-radius: 5px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  background-color: var(--darker);
+  color: var(--white);
+  margin: 5px;
+  padding: 5px;
+  width: 100%;
+}
+
+.send-input:focus {
+  outline: none;
+}
+
+.msg-received {
+  background-color: var(--primary);
+  display: flex;
+  align-items: center;
+  max-width: fit-content;
+  padding: 5px;
+  border-radius: 15px;
+  border-bottom-left-radius: 0;
+}
+.msg-received p {
+  margin: 5px;
+  padding: 0;
+}
+.msg-sent {
+  background-color: var(--darker);
+  display: flex;
+  justify-self: end;
+  max-width: fit-content;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 15px;
+  border-bottom-right-radius: 0;
+}
+.msg-sent p {
+  margin: 5px;
+  padding: 0;
+}
+
+.contact {
+  background-color: var(--darker);
+  overflow: hidden;
+  cursor: pointer;
+}
+.last-msg {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.challenge {
+  color: var(--white);
+  background-color: var(--secondary);
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  /* transition: background-color 0.3s; */
+
+
+}
+
+.challenge:hover {
+  background-color: var(--primary);
+}
+
+.active {
+  /* background-color: var(--secondary); */
+  border-left: 4px solid var(--secondary);
+}
+
+.msg-head {
+  height: 70px;
+  background-color: var(--darker);
+  border-radius: 5px;
+}
+
+

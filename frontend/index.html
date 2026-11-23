@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PONG</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+
+  <!-- !frontend awesome icons library -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- !google font link -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik+Glitch&family=VT323&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/static/css/index.css" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="shortcut icon" href="/static/favicon.svg" type="image/x-icon">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@v0.170.0/build/three.module.js",
+        "three/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/examples/jsm/"
+      }
+    }
+  </script>
+
+</head>
+
+<body class="styled-scrollbar">
+
+  <div id="app"></div>
+  <div id="toast-wrapper" class="position-absolute bottom-0 end-0">
+    <error-toast></error-toast>
+  </div>
+  <!--! Chat page -->
+  <template id="chat-page">
+    <!-- <section> -->
+    <main-nav></main-nav>
+    <div class=" chat-container p-3 container-md d-flex ">
+      <div class="side d-flex flex-column">
+        <div class=" chat-heading p-3 me-2 mb-2 blur">
+          <div class="px-2 d-flex gap-2 justify-content-center justify-content-md-start align-items-center ">
+            <i class=" fa-solid fa-user-group fs-3"> </i>
+            <span class="d-none d-md-flex fs-2"> Contacts</span>
+          </div>
+        </div>
+        <div class="friends-list  blur py-1 me-2">
+        </div>
+      </div>
+      <div class="chat-box blur col-10 col-md-8 p-0">
+        <div class=" d-flex justify-content-center align-items-center h-100">
+          <img src="/static/asset/images/no-message.png" class=" w-25 opacity-25" alt="chat image">
+        </div>
+      </div>
+    </div>
+    </div>
+    <!-- </section> -->
+  </template>
+
+  <!--! Home page -->
+  <template id="home-page">
+    <section class="m-2">
+      <div class="container-md">
+        <h1 class="vt323-regular display-1 text-center border-bottom fw-bold">PO-NG</h1>
+        <div class="pong-history row justify-content-between align-items-center p-3">
+          <h2 class="vt323-regular display-3 fw-bold mt-3">Pong History</h2>
+          <div class="image col-12 col-lg-6">
+            <img src="/static/asset/images/1970-pong.png" class="img-fluid">
+          </div>
+          <div class="description vt323-regular fs-4 p-3 col-12 col-lg-5">
+            <h2>1972: Birth of Atari Pong</h2>
+            <p>
+              The year 1972 marked a pivotal moment in gaming history with the release of "Pong" by Atari, developed by
+              Nolan Bushnell and Allan Alcorn.
+              It became the first commercially successful video game,
+              captivating audiences with its simple yet addictive gameplay. Pong simulated table tennis,
+              featuring two paddles and a bouncing ball, controlled by players using dials.
+              Its success sparked the arcade gaming revolution, laying the foundation for the industry we know today.
+            </p>
+            <a href="/login" class="join-btn btn btn-block bg-black text-white text-uppercase fs-3 px-4">join us</a>
+          </div>
+        </div>
+        <div class="developer row justify-content-between align-items-center">
+          <h2 class="vt323-regular display-3 divider col-12">Developers</h2>
+          <div class="description vt323-regular fs-4 p-3 col-12 col-lg-6">
+            <p>
+              The developers of this project are a group of students from 1337 School, who are passionate about
+              programming and game development.
+              They have worked together to create this project as part of their curriculum, showcasing their skills and
+              creativity.
+            </p>
+          </div>
+          <div class="image col-12 col-lg-5">
+            <img src="/static/asset/images/cluster.jpg" class="img-fluid">
+          </div>
+          <div class="team col-12 col-lg-6 p-3">
+          </div>
+        </div>
+        <div class="our-team mb-5 row d-flex justify-content-between">
+          <h2 class="vt323-regular display-3 divider">our team</h2>
+          <div class="team-member text-center col-12 mb-4 col-md-6 col-lg-3">
+            <img src="/static/asset/images/bmakhlou.jpeg" class="img-fluid rounded-circle" alt="team member"
+              width="200">
+            <h4 class="vt323-regular fs-3 m-0 p-0">Bilal Makhloufi</h4>
+            <p class="vt323-regular fs-4 m-0  p-0 text-info-emphasis text-capitalize">Front-end Developer</p>
+          </div>
+          <div class="team-member text-center col-12 mb-4 col-md-6 col-lg-3">
+            <img src="/static/asset/images/mahansal.JPG" class="img-fluid rounded-circle" alt="team member" width="200">
+            <h4 class="vt323-regular fs-3 m-0 p-0">Marwane Ahansal </h4>
+            <p class="vt323-regular fs-4 m-0  p-0 text-info-emphasis text-capitalize">fullstack Developer</p>
+          </div>
+          <div class="team-member text-center col-12 mb-4 col-md-6 col-lg-3">
+            <img src="/static/asset/images/bahbibe.JPG" class="img-fluid rounded-circle" alt="team member" width="200">
+            <h4 class="vt323-regular fs-3 m-0 p-0 ">Boubker Ahbibe</h4>
+            <p class="vt323-regular fs-4 m-0  p-0 text-info-emphasis text-capitalize">fullstack Developer</p>
+          </div>
+          <div class="team-member text-center col-12 mb-4 col-md-6 col-lg-3">
+            <img src="/static/asset/images/abeihaqi.JPG" class="img-fluid rounded-circle" alt="team member" width="200">
+            <h4 class="vt323-regular fs-3 m-0 p-0">Amine Beihaqi</h4>
+            <p class="vt323-regular fs-4 m-0  p-0 text-info-emphasis text-capitalize">fullstack Developer</p>
+          </div>
+
+        </div>
+
+        <div class="purpose mb-5">
+          <h3 class="vt323-regular  display-3 fw-bold mt-3">About pong and its purpose</h3>
+          <p class="vt323-regular fs-3">
+            "PO-NG" is an independent non-commercial project created for entertainment and educational purposes.
+            It is obviously inspired by the classic game "Pong" but it is indeed a completely separate creation.
+          </p>
+        </div>
+        <div class="footer border-top">
+          <p class="vt323-regular fs-3 text-center">© 2024 PONG. All rights reserved.</p>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!--! Login page -->
+  <template id="login-page">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
+    <section>
+      <div class="container-lg d-flex justify-content-center align-items-center text-black min-vh-100 font-monospace">
+        <div class="col-lg-8 col-md-6 flex-column pe-5 left-box text-color ">
+          <h1 class="rubik-glitch-regular title">PONG</h1>
+          <p class="fs-1 text-light  pe-xxl-5 fw-medium">
+            pong help you to enjoy the moment with your friend
+          </p>
+        </div>
+        <div class="col-12 col-md-8 col-lg-5  box-padding rounded right-box glass-effect">
+          <ul class="nav nav-pills nav-justified mb-3" id="ex1" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a href="#" class="nav-link activeBtn fw-bold text-uppercase" id="tab-login" role="tab"
+                aria-controls="pills-login" aria-selected="false" style="color: #fefefe;">Login</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a href="#" class="nav-link fw-bold text-uppercase" id="tab-register" role="tab"
+                aria-controls="pills-register" aria-selected="true" style="color: #fefefe;">Register</a>
+            </li>
+          </ul>
+          <div class="row align-items-center" id="login">
+            <div class="mb-4">
+              <h2 class="fw-bold" style="color: #110818;">Welcome Back</h2>
+            </div>
+            <form action="" method="post" id="login-form">
+              <div class="input-group mb-3">
+                <input type="email" class="form-control form-control-lg bg-light fs-6" placeholder="Email address"
+                  data-email required />
+              </div>
+              <div class="input-group mb-5">
+                <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password"
+                  data-password>
+              </div>
+
+              <div class="input-group mb-3">
+                <button class="btn btn-lg w-100 fw-bold text-uppercase glass-effect" data-login type="submit"
+                  style="color: var(--darker)">Login</button>
+              </div>
+              <div class="input-group mb-3">
+                <button class="btn btn-lg w-100 fw-bold text-uppercase glass-effect" type="button" id="intra"
+                  style="color: var(--darker)"><span class="me-2">Sign
+                    In with </span><img src="/static/asset/images/42.svg" style="width:20px ">
+                </button>
+              </div>
+            </form>
+          </div>
+          <div class="row align-items-center hidden" id="register">
+            <form action="" method="POST" id="register-form">
+              <div class="input-group mb-3">
+                <input type="text" class="form-control form-control-lg" placeholder="First name" id="firstName"
+                  required />
+              </div>
+              <div class="input-group mb-3">
+                <input type="text" class="form-control form-control-lg" placeholder="last name" id="lastName"
+                  required />
+              </div>
+              <div class="input-group mb-3">
+                <input type="text" class="form-control form-control-lg" placeholder="username" id="username" required
+                  name="username" />
+              </div>
+              <div class="input-group mb-3">
+                <input type="email" class="form-control form-control-lg bg-light fs-6" placeholder="Email address"
+                  id="email" required name="email" />
+              </div>
+              <div class="input-group mb-3">
+                <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Password"
+                  id="password" required />
+              </div>
+              <div class="input-group mb-3">
+                <input type="password" class="form-control form-control-lg bg-light fs-6" placeholder="Confirm Password"
+                  id="confirm-password" required />
+              </div>
+
+              <p class="lengthPassword d-none" style="font-size: 12px; color: red;">The password it must has At least 8
+                characters and at least one number</p>
+
+              <div class="input-group mb-3">
+                <button class="btn btn-lg w-100 fw-bold text-uppercase glass-effect" data-register
+                  style="color: var(--darker)">Register</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+  </template>
+
+  <!--! user Home page -->
+  <template id="user-home">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
+    <main-nav></main-nav>
+    <section>
+      <div class="container px-4 px-md-0">
+        <div class="row" style="color: var(--darker);">
+          <div class="d-flex  p-4  mt-4  rounded-1 font-monospace justify-content-between align-items-center"
+            style="background-color: #624E88;">
+            <div class="welcome" style="font-size: 1rem;">
+              <h1 class="m-0 text-capitalize">Welcome Back,<span id="firstName">Bilal</span></h1>
+              <p class="text-capitalize vt323-regular" style="font-size: 24px;">Embrace the opportunity to join our
+                world and savor every moment.</p>
+            </div>
+            <div class="welcome-img d-none d-md-block">
+              <img src="/static/asset/images/robots_welcome.svg" class="img-fluid" width="120" alt="a robots waving"
+                style="max-width: 100%;">
+            </div>
+          </div>
+        </div>
+        <div
+          class="row p-3 mt-5 Cards justify-content-evenly flex-column align-items-center align-items-md-stretch flex-md-row">
+          <h2 class="font-monospace">Games Modes</h2>
+
+          <div class="newCard d-flex align-items-center  mb-4 me-md-4">
+
+            <div class="content__ me-2" style="width: 50%;">
+              <h6 class="fw-bold text-uppercase" style="color: var(--darker);">AI</h6>
+              <p style="font-size: 13px;">Play against AI </p>
+              <a data-link href="/play/bot" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
+                Play
+              </a>
+            </div>
+            <div class="image " style="width: 50%;">
+              <img src="/static/asset/images/racket-ball.png" class="img-fluid" alt="">
+            </div>
+          </div>
+
+          <div class="newCard d-flex align-items-center  mb-4 me-md-4">
+
+            <div class="content__ me-2" style="width: 50%;">
+              <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Classic</h6>
+              <p style="font-size: 13px;">Find you a rival </p>
+              <a data-link href="/matchmaking" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
+                Play
+              </a>
+            </div>
+            <div class="image " style="width: 50%;">
+              <img src="/static/asset/images/racket-ball.png" class="img-fluid" alt="">
+            </div>
+          </div>
+
+          <div class="newCard d-flex align-items-center mb-4 me-md-4">
+
+            <div class="content__ me-2" style="width: 50%;">
+              <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Tournament</h6>
+              <p style="font-size: 13px;">Grind & win the trophy</p>
+              <a data-link href="/tournament" class="play px-3 py-1 fw-bold text-uppercase" data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
+                Play
+              </a>
+            </div>
+            <div class="image " style="width: 50%;">
+              <img src="/static/asset/images/throphy.png" class="img-fluid" alt="">
+            </div>
+          </div>
+
+          <div class="newCard d-flex align-items-center mb-4  me-md-4">
+
+            <div class="content__ me-2" style="width: 50%;">
+              <h6 class="fw-bold text-uppercase" style="color: var(--darker);">Friend</h6>
+              <p style="font-size: 13px;">Challenge your friend </p>
+              <a href="/profile" class="play px-3 py-1 fw-bold text-uppercase" data-link data-play style="color: var(--darker); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);">
+                Play
+              </a>
+            </div>
+            <div class="image " style="width: 50%;">
+              <img src="/static/asset/images/ping-pong-rackets-ball-isolated(1).png" class="img-fluid" alt="">
+            </div>
+          </div>
+        </div>
+        <div class="row justify-content-center p-3 mb-2">
+          <h2 class="font-monospace">Best Players</h2>
+          <div class="col-12 col-lg-10 glass-effect p-2" id="bestPlayer">
+            <div class="d-flex p-2  justify-content-between align-items-center mb-1">
+              <div class="col-2"><strong>Rank</strong></div>
+              <div class="col-4"><strong>Username</strong> </div>
+              <div class="col-3 col-md-2 text-center text-md-left"><strong>Total</strong></div>
+              <div class="col-3 col-md-2 text-center text-md-left"><strong>Wins</strong></div>
+              <div class="col-2 d-none d-md-block text-center"><strong>Ratio</strong></div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+    </div>
+  </template>
+
+  <!--! USER PROFILE  -->
+  <template id="user-profile">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
+    <section class="">
+      <main-nav></main-nav>
+      <div class="container-md px-4 mt-4">
+        <div class="row p-3  text-white  glass-effect">
+          <div class="col-12 col-md-6 col-lg-6 mx-auto">
+            <div class="d-lg-flex align-items-center  text-center text-lg-start pb-3 pb-lg-0">
+              <div class="profile-image">
+                <img src="/static/asset/images/profile.svg" class="rounded rounded-circle" width="120" height="120"
+                  alt="user profile image" id="user-img">
+              </div>
+              <div class="ps-0 ps-md-4 pt-4 pb-md-0">
+                <h4 class="m-0 fw-bold text-capitalize" id="fullName">bilal makhloufi</h4>
+                <span class="fw-medium text-capitalize" id="username">@bmakhlou</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="rank col-6  d-lg-flex d-none align-items-center justify-content-end">
+            <div class="match-ratio me-4">
+              <span class="d-block mb-1">
+                <i class="fa-solid fa-ranking-star fa-xl text-secondary"></i>
+              </span>
+              <span class="fw-bold"> <strong>100</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="row my-4">
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-lg-0">
+            <div class="status-card  work mx-auto">
+              <div class="img-section">
+                <svg xmlns="http://www.w3.org/2000/svg" height="77" width="76">
+                  <path fill-rule="nonzero" fill="#3F9CBB"
+                    d="m60.91 71.846 12.314-19.892c3.317-5.36 3.78-13.818-2.31-19.908l-26.36-26.36c-4.457-4.457-12.586-6.843-19.908-2.31L4.753 15.69c-5.4 3.343-6.275 10.854-1.779 15.35a7.773 7.773 0 0 0 7.346 2.035l7.783-1.945a3.947 3.947 0 0 1 3.731 1.033l22.602 22.602c.97.97 1.367 2.4 1.033 3.732l-1.945 7.782a7.775 7.775 0 0 0 2.037 7.349c4.49 4.49 12.003 3.624 15.349-1.782Zm-24.227-46.12-1.891-1.892-1.892 1.892a2.342 2.342 0 0 1-3.312-3.312l1.892-1.892-1.892-1.891a2.342 2.342 0 0 1 3.312-3.312l1.892 1.891 1.891-1.891a2.342 2.342 0 0 1 3.312 3.312l-1.891 1.891 1.891 1.892a2.342 2.342 0 0 1-3.312 3.312Zm14.19 14.19a2.343 2.343 0 1 1 3.315-3.312 2.343 2.343 0 0 1-3.314 3.312Zm0 7.096a2.343 2.343 0 0 1 3.313-3.312 2.343 2.343 0 0 1-3.312 3.312Zm7.096-7.095a2.343 2.343 0 1 1 3.312 0 2.343 2.343 0 0 1-3.312 0Zm0 7.095a2.343 2.343 0 0 1 3.312-3.312 2.343 2.343 0 0 1-3.312 3.312Z">
+                  </path>
+                </svg>
+              </div>
+
+              <div class="card-desc">
+                <div class="card-header">
+                  <div class="card-title">Played</div>
+
+                  <div class="card-menu">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                  </div>
+
+                </div>
+                <div class="card-stats total">0 Match</div>
+                <!-- <p class="recent">Last Week-36hrs</p> -->
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
+            <div class="status-card  work mx-auto">
+              <div class="img-section">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="77" width="76">
+                  <path fill-rule="nonzero" fill="#3F9CBB"
+                    d="M4.1 38.2C1.4 34.2 0 29.4 0 24.6C0 11 11 0 24.6 0L133.9 0c11.2 0 21.7 5.9 27.4 15.5l68.5 114.1c-48.2 6.1-91.3 28.6-123.4 61.9L4.1 38.2zm503.7 0L405.6 191.5c-32.1-33.3-75.2-55.8-123.4-61.9L350.7 15.5C356.5 5.9 366.9 0 378.1 0L487.4 0C501 0 512 11 512 24.6c0 4.8-1.4 9.6-4.1 13.6zM80 336a176 176 0 1 1 352 0A176 176 0 1 1 80 336zm184.4-94.9c-3.4-7-13.3-7-16.8 0l-22.4 45.4c-1.4 2.8-4 4.7-7 5.1L168 298.9c-7.7 1.1-10.7 10.5-5.2 16l36.3 35.4c2.2 2.2 3.2 5.2 2.7 8.3l-8.6 49.9c-1.3 7.6 6.7 13.5 13.6 9.9l44.8-23.6c2.7-1.4 6-1.4 8.7 0l44.8 23.6c6.9 3.6 14.9-2.2 13.6-9.9l-8.6-49.9c-.5-3 .5-6.1 2.7-8.3l36.3-35.4c5.6-5.4 2.5-14.8-5.2-16l-50.1-7.3c-3-.4-5.7-2.4-7-5.1l-22.4-45.4z" />
+                </svg>
+              </div>
+
+              <div class="card-desc">
+                <div class="card-header">
+                  <div class="card-title">Wins</div>
+
+                  <div class="card-menu">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                  </div>
+
+                </div>
+                <div class="card-stats wins">0 Match</div>
+                <!-- <p class="recent">Last Week-36hrs</p> -->
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
+            <div class="status-card  work mx-auto">
+              <div class="img-section">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="77" width="76">
+                  <path fill-rule="nonzero" fill="#3F9CBB"
+                    d="M459.1 52.4L442.6 6.5C440.7 2.6 436.5 0 432.1 0s-8.5 2.6-10.4 6.5L405.2 52.4l-46 16.8c-4.3 1.6-7.3 5.9-7.2 10.4c0 4.5 3 8.7 7.2 10.2l45.7 16.8 16.8 45.8c1.5 4.4 5.8 7.5 10.4 7.5s8.9-3.1 10.4-7.5l16.5-45.8 45.7-16.8c4.2-1.5 7.2-5.7 7.2-10.2c0-4.6-3-8.9-7.2-10.4L459.1 52.4zm-132.4 53c-12.5-12.5-32.8-12.5-45.3 0l-2.9 2.9C256.5 100.3 232.7 96 208 96C93.1 96 0 189.1 0 304S93.1 512 208 512s208-93.1 208-208c0-24.7-4.3-48.5-12.2-70.5l2.9-2.9c12.5-12.5 12.5-32.8 0-45.3l-80-80zM200 192c-57.4 0-104 46.6-104 104l0 8c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-8c0-75.1 60.9-136 136-136l8 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-8 0z" />
+                </svg>
+              </div>
+
+              <div class="card-desc">
+                <div class="card-header">
+                  <div class="card-title">Loses</div>
+
+                  <div class="card-menu">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                  </div>
+
+                </div>
+                <div class="card-stats losses">0 Match</div>
+                <!-- <p class="recent">Last Week-36hrs</p> -->
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="status-card  work mx-auto">
+              <div class="img-section">
+                <!-- <svg xmlns="http://www.w3.org/2000/svg" height="77" width="76"><path fill-rule="nonzero" fill="#3F9CBB" d="m60.91 71.846 12.314-19.892c3.317-5.36 3.78-13.818-2.31-19.908l-26.36-26.36c-4.457-4.457-12.586-6.843-19.908-2.31L4.753 15.69c-5.4 3.343-6.275 10.854-1.779 15.35a7.773 7.773 0 0 0 7.346 2.035l7.783-1.945a3.947 3.947 0 0 1 3.731 1.033l22.602 22.602c.97.97 1.367 2.4 1.033 3.732l-1.945 7.782a7.775 7.775 0 0 0 2.037 7.349c4.49 4.49 12.003 3.624 15.349-1.782Zm-24.227-46.12-1.891-1.892-1.892 1.892a2.342 2.342 0 0 1-3.312-3.312l1.892-1.892-1.892-1.891a2.342 2.342 0 0 1 3.312-3.312l1.892 1.891 1.891-1.891a2.342 2.342 0 0 1 3.312 3.312l-1.891 1.891 1.891 1.892a2.342 2.342 0 0 1-3.312 3.312Zm14.19 14.19a2.343 2.343 0 1 1 3.315-3.312 2.343 2.343 0 0 1-3.314 3.312Zm0 7.096a2.343 2.343 0 0 1 3.313-3.312 2.343 2.343 0 0 1-3.312 3.312Zm7.096-7.095a2.343 2.343 0 1 1 3.312 0 2.343 2.343 0 0 1-3.312 0Zm0 7.095a2.343 2.343 0 0 1 3.312-3.312 2.343 2.343 0 0 1-3.312 3.312Z"></path></svg> -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" height="77" width="76">
+                  <path fill-rule="nonzero" fill="#3F9CBB"
+                    d="M522.1 62.4c16.8-5.6 25.8-23.7 20.2-40.5S518.6-3.9 501.9 1.6l-113 37.7C375 15.8 349.3 0 320 0c-44.2 0-80 35.8-80 80c0 3 .2 5.9 .5 8.8L117.9 129.6c-16.8 5.6-25.8 23.7-20.2 40.5s23.7 25.8 40.5 20.2l135.5-45.2c4.5 3.2 9.3 5.9 14.4 8.2L288 480c0 17.7 14.3 32 32 32l192 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-160 0 0-294.7c21-9.2 37.2-27 44.2-49l125.9-42zM439.6 288L512 163.8 584.4 288l-144.9 0zM512 384c62.9 0 115.2-34 126-78.9c2.6-11-1-22.3-6.7-32.1L536.1 109.8c-5-8.6-14.2-13.8-24.1-13.8s-19.1 5.3-24.1 13.8L392.7 273.1c-5.7 9.8-9.3 21.1-6.7 32.1C396.8 350 449.1 384 512 384zM129.2 291.8L201.6 416 56.7 416l72.4-124.2zM3.2 433.1C14 478 66.3 512 129.2 512s115.2-34 126-78.9c2.6-11-1-22.3-6.7-32.1L153.2 237.8c-5-8.6-14.2-13.8-24.1-13.8s-19.1 5.3-24.1 13.8L9.9 401.1c-5.7 9.8-9.3 21.1-6.7 32.1z" />
+                </svg>
+              </div>
+
+              <div class="card-desc">
+                <div class="card-header">
+                  <div class="card-title">Ratio</div>
+
+                  <div class="card-menu">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                  </div>
+
+                </div>
+                <div class="card-stats ratio">0%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row justify-content-between">
+          <div class="col-12 col-lg-6">
+            <h3>Game history</h3>
+            <div class="row glass-effect p-1" style="height: 550px; overflow-y: auto">
+              <div class="profile-content" id="games-container">
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-lg-5">
+            <h3 class="mt-2">Friends</h3>
+            <div class="row mb-2 glass-effect p-2" style="height: 300px; overflow-y: auto">
+              <div id="friend-container">
+                <div class="row mb-2">
+                  <div class="col-3 col-md-4"><strong>Username</strong> </div>
+                  <div class="col-1 col-md-2"><strong>Total</strong></div>
+                  <div class="col-1 col-md-2"><strong>Wins</strong></div>
+                  <div class="col-2 d-none d-md-block"><strong>Ratio</strong></div>
+                  <div class="col-3 col-md-2 text-end"><strong>Game</strong></div>
+                </div>
+              </div>
+            </div>
+            <h3>Blocked Friends</h3>
+            <div class="row glass-effect p-2 mb-2" style="height: 200px; overflow-y: auto;">
+              <div id="blocked-container">
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </template>
+
+  <!-- !Friend PAGE -->
+  <template id="friend-page">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
+    <main-nav></main-nav>
+    <section>
+      <div class="container-md mt-4 px-4">
+        <div class="row p-1 p-md-3  text-white box-sh-1 secondary-bg">
+          <div class="col-12 col-md-6 col-lg-6 mx-auto">
+            <div class="d-md-flex align-items-center  text-center text-md-start pb-3 pb-lg-0">
+              <div class="profile-image">
+                <img src="/static/asset/images/profile.svg" class="img-fluid rounded rounded-circle" width="120"
+                  alt="user profile image" id="user-img">
+              </div>
+              <div class="ps-0 ps-md-4 pt-3 pb-md-0">
+                <h4 class="m-0 fw-bold text-capitalize" id="fullName">bilal makhloufi</h4>
+                <span class="fw-medium text-capitalize" id="username">@bmakhlou</span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="col-12 col-md-6  d-flex align-items-center justify-content-center  justify-content-md-end mb-2 mb-md-0">
+            <button class="d-flex align-items-center btn btn-block bg-primary  me-2 text-truncate text-white"
+              id="add-friend"> <i class="fa-solid fa-plus me-2"></i> Friend</button>
+            <a href="/chat" class="d-flex align-items-center btn btn-block text-white me-2"
+              style=" background-color: #BE8CE4;"><i class="fa-solid fa-message me-2"></i>Message</a>
+            <button class="d-flex align-items-center btn btn-block text-white shadow" aria-label="Block" id="block"> <i
+                class="fa-solid fa-lg fa-triangle-exclamation"></i></button>
+          </div>
+        </div>
+        <div class="row my-4">
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
+            <div class="status-card  work mx-auto">
+              <div class="img-section">
+                <svg xmlns="http://www.w3.org/2000/svg" height="77" width="76">
+                  <path fill-rule="nonzero" fill="#3F9CBB"
+                    d="m60.91 71.846 12.314-19.892c3.317-5.36 3.78-13.818-2.31-19.908l-26.36-26.36c-4.457-4.457-12.586-6.843-19.908-2.31L4.753 15.69c-5.4 3.343-6.275 10.854-1.779 15.35a7.773 7.773 0 0 0 7.346 2.035l7.783-1.945a3.947 3.947 0 0 1 3.731 1.033l22.602 22.602c.97.97 1.367 2.4 1.033 3.732l-1.945 7.782a7.775 7.775 0 0 0 2.037 7.349c4.49 4.49 12.003 3.624 15.349-1.782Zm-24.227-46.12-1.891-1.892-1.892 1.892a2.342 2.342 0 0 1-3.312-3.312l1.892-1.892-1.892-1.891a2.342 2.342 0 0 1 3.312-3.312l1.892 1.891 1.891-1.891a2.342 2.342 0 0 1 3.312 3.312l-1.891 1.891 1.891 1.892a2.342 2.342 0 0 1-3.312 3.312Zm14.19 14.19a2.343 2.343 0 1 1 3.315-3.312 2.343 2.343 0 0 1-3.314 3.312Zm0 7.096a2.343 2.343 0 0 1 3.313-3.312 2.343 2.343 0 0 1-3.312 3.312Zm7.096-7.095a2.343 2.343 0 1 1 3.312 0 2.343 2.343 0 0 1-3.312 0Zm0 7.095a2.343 2.343 0 0 1 3.312-3.312 2.343 2.343 0 0 1-3.312 3.312Z">
+                  </path>
+                </svg>
+              </div>
+
+              <div class="card-desc">
+                <div class="card-header">
+                  <div class="card-title">Played</div>
+
+                  <div class="card-menu">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                  </div>
+
+                </div>
+                <div class="card-stats total">0 Match</div>
+                <!-- <p class="recent">Last Week-36hrs</p> -->
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
+            <div class="status-card  work mx-auto">
+              <div class="img-section">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="77" width="76">
+                  <path fill-rule="nonzero" fill="#3F9CBB"
+                    d="M4.1 38.2C1.4 34.2 0 29.4 0 24.6C0 11 11 0 24.6 0L133.9 0c11.2 0 21.7 5.9 27.4 15.5l68.5 114.1c-48.2 6.1-91.3 28.6-123.4 61.9L4.1 38.2zm503.7 0L405.6 191.5c-32.1-33.3-75.2-55.8-123.4-61.9L350.7 15.5C356.5 5.9 366.9 0 378.1 0L487.4 0C501 0 512 11 512 24.6c0 4.8-1.4 9.6-4.1 13.6zM80 336a176 176 0 1 1 352 0A176 176 0 1 1 80 336zm184.4-94.9c-3.4-7-13.3-7-16.8 0l-22.4 45.4c-1.4 2.8-4 4.7-7 5.1L168 298.9c-7.7 1.1-10.7 10.5-5.2 16l36.3 35.4c2.2 2.2 3.2 5.2 2.7 8.3l-8.6 49.9c-1.3 7.6 6.7 13.5 13.6 9.9l44.8-23.6c2.7-1.4 6-1.4 8.7 0l44.8 23.6c6.9 3.6 14.9-2.2 13.6-9.9l-8.6-49.9c-.5-3 .5-6.1 2.7-8.3l36.3-35.4c5.6-5.4 2.5-14.8-5.2-16l-50.1-7.3c-3-.4-5.7-2.4-7-5.1l-22.4-45.4z" />
+                </svg>
+              </div>
+
+              <div class="card-desc">
+                <div class="card-header">
+                  <div class="card-title">Wins</div>
+
+                  <div class="card-menu">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                  </div>
+
+                </div>
+                <div class="card-stats wins">0 Match</div>
+                <!-- <p class="recent">Last Week-36hrs</p> -->
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
+            <div class="status-card  work mx-auto">
+              <div class="img-section">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="77" width="76">
+                  <path fill-rule="nonzero" fill="#3F9CBB"
+                    d="M459.1 52.4L442.6 6.5C440.7 2.6 436.5 0 432.1 0s-8.5 2.6-10.4 6.5L405.2 52.4l-46 16.8c-4.3 1.6-7.3 5.9-7.2 10.4c0 4.5 3 8.7 7.2 10.2l45.7 16.8 16.8 45.8c1.5 4.4 5.8 7.5 10.4 7.5s8.9-3.1 10.4-7.5l16.5-45.8 45.7-16.8c4.2-1.5 7.2-5.7 7.2-10.2c0-4.6-3-8.9-7.2-10.4L459.1 52.4zm-132.4 53c-12.5-12.5-32.8-12.5-45.3 0l-2.9 2.9C256.5 100.3 232.7 96 208 96C93.1 96 0 189.1 0 304S93.1 512 208 512s208-93.1 208-208c0-24.7-4.3-48.5-12.2-70.5l2.9-2.9c12.5-12.5 12.5-32.8 0-45.3l-80-80zM200 192c-57.4 0-104 46.6-104 104l0 8c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-8c0-75.1 60.9-136 136-136l8 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-8 0z" />
+                </svg>
+              </div>
+
+              <div class="card-desc">
+                <div class="card-header">
+                  <div class="card-title">Loses</div>
+
+                  <div class="card-menu">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                  </div>
+
+                </div>
+                <div class="card-stats losses">0 Match</div>
+                <!-- <p class="recent">Last Week-36hrs</p> -->
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6 col-lg-3 mb-4 mb-md-0">
+            <div class="status-card  work mx-auto">
+              <div class="img-section">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" height="77" width="76">
+                  <path fill-rule="nonzero" fill="#3F9CBB"
+                    d="M522.1 62.4c16.8-5.6 25.8-23.7 20.2-40.5S518.6-3.9 501.9 1.6l-113 37.7C375 15.8 349.3 0 320 0c-44.2 0-80 35.8-80 80c0 3 .2 5.9 .5 8.8L117.9 129.6c-16.8 5.6-25.8 23.7-20.2 40.5s23.7 25.8 40.5 20.2l135.5-45.2c4.5 3.2 9.3 5.9 14.4 8.2L288 480c0 17.7 14.3 32 32 32l192 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-160 0 0-294.7c21-9.2 37.2-27 44.2-49l125.9-42zM439.6 288L512 163.8 584.4 288l-144.9 0zM512 384c62.9 0 115.2-34 126-78.9c2.6-11-1-22.3-6.7-32.1L536.1 109.8c-5-8.6-14.2-13.8-24.1-13.8s-19.1 5.3-24.1 13.8L392.7 273.1c-5.7 9.8-9.3 21.1-6.7 32.1C396.8 350 449.1 384 512 384zM129.2 291.8L201.6 416 56.7 416l72.4-124.2zM3.2 433.1C14 478 66.3 512 129.2 512s115.2-34 126-78.9c2.6-11-1-22.3-6.7-32.1L153.2 237.8c-5-8.6-14.2-13.8-24.1-13.8s-19.1 5.3-24.1 13.8L9.9 401.1c-5.7 9.8-9.3 21.1-6.7 32.1z" />
+                </svg>
+              </div>
+
+              <div class="card-desc">
+                <div class="card-header">
+                  <div class="card-title">Ratio</div>
+
+                  <div class="card-menu">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                  </div>
+
+                </div>
+                <div class="card-stats ratio">0%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-4 mb-2 justify-content-between">
+          <div class="col-12 p-3 glass-effect mb-3 mb-lg-0 justify-content-center" style="min-height: 47vh;">
+            <h2 class="text-white">Game History</h2>
+            <div class="row justify-content-center">
+              <div class="col-12 col-md-9" id="friend-history"></div>
+
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- !Ranking page -->
+  <template id="ranking-page">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
+    <section>
+      <main-nav></main-nav>
+      <div class="container-md font-monospace">
+        <h1 class="display-1 my-5">Leaderboard</h1>
+
+
+        <div class="table-responsive">
+          <table class="mytable">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Users</th>
+                <th scope="col">Total</th>
+                <th scope="col">Wins</th>
+                <th scope="col" class="">Loses</th>
+                <th scope="col">Ratio</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+  </template>
+
+  <!-- ! Settings page -->
+  <template id="settings-page">
+    <div class="overlay" id="overlay">
+      <div class="custom-loader"></div>
+    </div>
+    <section>
+      <main-nav></main-nav>
+      <div class="container">
+        <div class="d-flex flex-column align-items-center justify-content-center">
+          <form id="settings-form" action="" class="col-10 col-md-5  ">
+            <div class="avatar-wrapper">
+              <img class="profile-pic" src="" />
+              <input class="file-upload d-none" name="avatar" type="file" accept="image/*" />
+            </div>
+            <div class="w-100 d-flex align-items-center mb-4">
+              <button type="button" class="mx-auto upload-button btn btn-light">Upload</button>
+            </div>
+            <div class="mb-3">
+              <label for="username" class="form-label fw-bold">Username</label>
+              <input type="text" name="username" id="username" class="form-control form-control-lg  mb-2"
+                placeholder="username" value="" />
+              <label for="username" class="form-label fw-bold">email</label>
+              <input type="text" name="email" id="email" class="form-control form-control-lg mb-2" placeholder="email"
+                value="" />
+              <label for="username" class="form-label fw-bold">Password</label>
+              <input type="password" name="password" id="password" class="form-control form-control-lg mb-2"
+                placeholder="password" value="" />
+              <label for="username" class="form-label fw-bold">Confirm Password</label>
+              <input type="password" name="password" id="confirm_password" class="form-control form-control-lg mb-2"
+                placeholder="confirm password" value="" />
+            </div>
+            <div class="w-100 d-flex">
+              <button type="button" id="disable-2fa" class="btn btn-outline-danger mx-auto d-none">Disable
+                2FA</button>
+              <button type="button" id="enable-2fa" class="btn btn-outline-light mx-auto">Enable 2FA</button>
+              <form id="towfamodalform">
+                <div class="modal fade" id="twoFaModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                  role="dialog" aria-labelledby="twoFaModalTitle" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content text-bg-dark">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="twoFaModalTitle">Enable 2FA</h5>
+                        <button type="button" class="close btn btn-dark" data-bs-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body text-bg-dark">
+                        <div class="d-none d-flex flex-column justify-content-center">
+                          <img src="" alt="Qr code" id="qr-code" class="align-self-center"
+                            style="width: 300px; height: 300px;">
+                          <div class="mt-3">
+                            <label for="code" class="form-label">Two Factor Code</label>
+                            <input type="text" name="code" id="twofa-code" class="form-control form-control-lg "
+                              placeholder="code" value="" />
+                            <div class="form-text d-none text-danger">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="modal-footer text-bg-dark">
+                        <button type="button" class="btn btn-primary" id="confirm-2fa">Confirm</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+            </div>
+
+            <div class="input-group mt-4">
+              <button type="submit" class="btn btn-lg btn-primary w-100 fs-6 fw-bold">Update</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- ! Setup page -->
+  <template id="setup-page">
+    <section class="d-flex">
+      <div class="container">
+        <div class="d-flex flex-column align-items-center justify-content-center">
+          <h2 class="mt-5 text-center">Just a few more steps left</h2>
+          <h2 class="mb-2 text-center">to start enjoying the PONG game!</h2>
+          <form action="POST" class="col-10 col-md-5">
+            <div class="avatar-wrapper">
+              <img class="profile-pic" src="" />
+              <input class="file-upload d-none" name="avatar" type="file" accept="image/*" />
+            </div>
+            <div class="w-100 d-flex align-items-center mb-4">
+              <button type="button" class="mx-auto upload-button btn btn-light">Upload</button>
+            </div>
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input type="text" name="username" id="username" class="form-control form-control-lg "
+                placeholder="username" value="" />
+            </div>
+            <!--! ability to enable or disable 2fa from here  -->
+            <div class="w-100 d-flex">
+              <button type="button" id="disable-2fa" class="btn btn-outline-danger mx-auto d-none">Disable
+                2FA</button>
+              <button type="button" id="enable-2fa" class="btn btn-outline-light mx-auto">Enable 2FA</button>
+              <form id="towfamodalform">
+                <div class="modal fade" id="twoFaModal" data-bs-backdrop="static" data-bs-keyboard="false"
+                  tabindex="-1" role="dialog" aria-labelledby="twoFaModalTitle" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content text-bg-dark">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="twoFaModalTitle">Enable 2FA</h5>
+                        <button type="button" class="close btn btn-dark" data-bs-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body text-bg-dark">
+                        <div class="d-none d-flex flex-column justify-content-center">
+                          <img src="" alt="Qr code" id="qr-code" class="align-self-center"
+                            style="width: 300px; height: 300px;">
+                          <div class="mt-3">
+                            <label for="code" class="form-label">Two Factor Code</label>
+                            <input type="text" name="code" id="twofa-code" class="form-control form-control-lg "
+                              placeholder="code" value="" />
+                            <div class="form-text d-none text-danger">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="modal-footer text-bg-dark">
+                        <button type="button" class="btn btn-primary" id="confirm-2fa">Confirm</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+            </div>
+
+            <div class="input-group mt-4">
+              <button type="submit" class="btn btn-lg btn-primary w-100 fs-6 fw-bold">Let's play</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <!-- ! Two-Factor page -->
+  <template id="twofa-page">
+    <section class="d-flex">
+      <div class="main">
+        <main class="p-3">
+          <div class="container">
+            <div class="d-flex flex-column align-items-center justify-content-center">
+              <h2 class="my-5 text-center">Two Factor Authentication</h2>
+              <div class="col-10 col-md-5">
+                <div class="mb-3">
+                  <label for="code" class="form-label">Two Factor Code</label>
+                  <input type="text" name="code" id="twofa-code" class="form-control form-control-lg" placeholder="code"
+                    value="" />
+                  <div class="form-text d-none text-danger">
+                  </div>
+                </div>
+                <div class="input-group mt-4">
+                  <button id="verify-twofa" type="button"
+                    class="btn btn-lg btn-primary w-100 fs-6 fw-bold">Confirm</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </section>
+  </template>
+
+
+  <!-- ! Search page -->
+  <template id="search-page">
+    <section>
+      <main-nav></main-nav>
+      <div class="container p-3">
+        <div class="row flex-column flex-md-row mt-4" id="search-container"></div>
+      </div>
+    </section>
+  </template>
+
+
+  <!-- !not found page -->
+  <template id="not-found-page">
+    <section class="p-1">
+      <div class="container vt323-regular d-flex flex-column  justify-content-center text-center text-capitalize" style="height: 100dvh; width: 100vw;">
+        <h1 class="display-1 fw-bolder">404 Not Found</h1>
+        <p class="display-6">Sorry, the page you are looking for does not exist.</p>
+      </div>
+
+    </section>
+  </template>
+
+  <template id="notification">
+    <div id="notification-container">
+      <div class="notification">
+        <span id="notification-message"></span>
+        <button id="notification-close">X</button>
+      </div>
+    </div>
+  </template>
+
+  <!-- Game page -->
+  <template id="game-page">
+    <style>
+      canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+      }
+    </style>
+    <canvas id="game-canvas"></canvas>
+  </template>
+
+  <template id="matchmaking-page">
+    <link rel="stylesheet" href="/static/css/loader.css">
+    <section class="">
+      <main-nav class="position-absolute w-100"></main-nav>
+      <div class="d-flex min-vh-100 flex-column align-items-center justify-content-center">
+        <h1 id="loader-message" class="mx-auto"></h1>
+        <div class="loader mx-auto"></div>
+        <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--light); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);" href="/Home" data-link=>Leave</a>
+      </div>
+    </section>
+  </template>
+
+  <template id="score-page">
+    <main-nav></main-nav>
+    <style>
+      #score {
+        font-size: xx-large;
+      }
+
+      .player {
+        height: 100px;
+        width: 100px;
+        background-color: #624E88;
+        border: #fefefe 1px solid;
+        border-radius: 8px;
+      }
+
+      .player>img {
+        height: 100%;
+        width: 100%;
+        border-radius: 8px;
+      }
+    </style>
+    <div class="min-vh-100 d-flex align-items-center justify-content-evenly flex-column">
+      <div id="score" class="score d-flex w-100 align-items-center justify-content-evenly">
+        <div class="player player1 round-1"></div>
+        <span id="player1_score">0</span>
+        <span>-</span>
+        <span id="player2_score">0</span>
+        <div class="player player2 round-1"></div>
+      </div>
+      <div id="score" class="score d-flex w-100 align-items-center justify-content-evenly">
+        <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--light); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);" href="/matchmaking" data-link=>Play Random</a>
+
+        <a id="invite_game" class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--light); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);" href="" data-link=>Play Again<span></span></span></a>
+        <a class="play px-3 py-1 fw-bold text-uppercase" style="color: var(--light); background: rgba(255, 255, 255, 0.1);
+              border-radius: 5px;
+              box-shadow: 0 2px 20px rgba(0, 0, 0, 0.7);" href="/Home" data-link=>Leave</a>
+      </div>
+    </div>
+  </template>
+
+  <template id="tour-page">
+    <main-nav></main-nav>
+    <section>
+      <div class="container-md p-4 p-md-0">
+        <h1 class="display-1 my-5">Tournament</h1>
+        <div class="row align-items-center justify-content-evenly">
+          <div class="secondary-bg p-2 tourCard tourCardBgImg CardBgImg1 mb-3 mb-md-0">
+            <div class="overlay-card"></div>
+            <button id="create_tour" href="#" class="btn btn-block btn-primary" style="z-index: 10;">Create
+              Tournament</button>
+          </div>
+          <div class="secondary-bg tourCard tourCardBgImg CardBgImg2">
+            <div class="overlay-card"></div>
+            <button id="join_tour" href="#" class="btn btn-block btn-primary" style="z-index: 10;">Join
+              Tournament</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </template>
+  <template id="join-page">
+    <main-nav></main-nav>
+    <section>
+      <div class="container-md p-4">
+        <h1>Join a Tournament </h1>
+        <table class="table text-center mt-4">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Tournament Id</th>
+              <th scope="col">Players Number</th>
+              <th scope="col">Join a Tournament</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+
+
+      </div>
+    </section>
+  </template>
+
+  <template id="tournament-display-page">
+    <main-nav></main-nav>
+    <section>
+      <div class="theme theme-dark" style="overflow-x: auto;">
+        <div class="bracket disable-image">
+          <div class="column one">
+            <div class="round1 game1 match winner-bottom">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">1</span>
+                <span class="name"></span>
+                <span class="score">0</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+            <div class="round1 game1 match winner-bottom">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">4</span>
+                <span class="name"></span>
+                <span class="score">0</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+            <div class="round1 game2 match winner-bottom">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">2</span>
+                <span class="name"></span>
+                <span class="score">0</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+            <div class="round1 game2 match winner-bottom">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">3</span>
+                <span class="name"></span>
+                <span class="score">0</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+          </div>
+          <div class="column two">
+            <div class="round2 game3 match winner-bottom">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">1</span>
+                <span class="name"></span>
+                <span class="score">0</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+            <div class="round2 game3 match winner-bottom">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">2</span>
+                <span class="name"></span>
+                <span class="score">0</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+          </div>
+          <div class="column three">
+            <div class="winner match winner-bottom">
+              <div class="match-top team">
+                <span class="image"></span>
+                <span class="seed">5</span>
+                <span class="name"></span>
+                <span class="score">0</span>
+              </div>
+              <div class="match-lines">
+                <div class="line one"></div>
+                <div class="line two"></div>
+              </div>
+              <div class="match-lines alt">
+                <div class="line one"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </template>
+
+
+  <!-- !  components -->
+  <template id="nav">
+    <nav class="navbar navbar-expand-lg navbar-dark primary-bg border-bottom">
+      <div class="container-md">
+        <!-- Left elements -->
+        <div class="d-flex">
+          <!-- Brand -->
+          <a class="navbar-brand" href="#">
+            <img src="/static/asset/images/transistor-ping-pong.gif" alt="logo image" style="width: 40px; height: 40px;" loading="lazy" />
+          </a>
+        </div>
+        <!-- Left elements -->
+
+        <!-- Center elements -->
+        <!-- Search form -->
+        <form class="navbar-nav flex-row d-none d-md-flex input-group w-auto my-auto d-none d-sm-flex">
+          <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+          <span class="input-group-text border-0  d-lg-flex">
+            <i class="fas fa-search"></i>
+          </span>
+        </form>
+        <!-- Center elements -->
+
+        <!-- Right elements -->
+        <ul class="navbar-nav flex-row">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-sm-flex align-items-sm-center" href="#" id="navbarDropdown"
+              role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" href="#">
+              <img src="/static/asset/images/profile.svg" class="rounded-circle" style="width: 40px; height: 40px;" alt="user profile image"
+                loading="lazy" />
+              <strong class="d-none d-sm-block ms-1">bmakhlou</strong>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
+              <li>
+                <a class="sidebar-link" href="/profile">
+                  <i class="fa-solid fa-user me-1"></i>
+                  Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="/profile">
+                  <i class="fa-solid fa-user-group me-1"></i>
+                  friends
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="/ranking">
+                  <i class="fa-solid fa-ranking-star me-1"></i>
+                  Leader Board
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="settings">
+                  <i class="fa-solid fa-gear me-1"></i>
+                  settings
+                </a>
+              </li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">
+                  <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
+                  Exit
+                </a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+        <!-- Right elements -->
+      </div>
+    </nav>
+  </template>
+
+  <template id="aside-nav">
+    <aside id="sidebar" class="sidebar-toggle">
+      <div class="sidebar-logo mb-4">
+        <a href="/home" data-link>
+          <img src="/static/asset/images/transistor-ping-pong.gif" width="60" alt="">
+        </a>
+      </div>
+      <ul class="sidebar-nav p-0 font-monospace" aria-labelledby="navbarDropdown">
+        <li>
+          <a class="sidebar-link" href="/home" id="home" data-link>
+            <i class="fa-solid fa-house me-1"></i>
+            Home
+          </a>
+        </li>
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="/profile" id="profile" data-link>
+            <i class="fa-solid fa-user me-1"></i>
+            Profile
+          </a>
+        </li>
+        <li>
+          <a class="sidebar-link" href="/ranking" id="ranking" data-link>
+            <i class="fa-solid fa-ranking-star me-1"></i>
+            Leaderboard
+          </a>
+        </li>
+        <li>
+          <a class="sidebar-link" href="/chat" id="chat" data-link>
+            <i class="fa-regular fa-comment-dots me-1"></i>
+            Chat
+          </a>
+        </li>
+      </ul>
+      <div class="sidebar-footer font-monospace">
+        <a class="sidebar-link" href="/settings" id="settings" data-link>
+          <i class="fa-solid fa-gear me-1"></i>
+          Settings
+        </a>
+        <search-bar class=" d-lg-none mb-1"></search-bar>
+        <a class="sidebar-link border-top" href="#" id="logout">
+          <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
+          Exit
+        </a>
+      </div>
+    </aside>
+  </template>
+
+  <template id="search-bar">
+    <form class="input-group" id="search">
+      <input class="form-control" type="search" placeholder="Search" aria-label="Search" data-search />
+      <button class="input-group-text  d-lg-flex">
+        <i class="fas fa-search"></i>
+      </button>
+    </form>
+  </template>
+
+  <template id="main-nav">
+    <nav class="navbar navbar-expand d-flex justify-content-between">
+      <a href="/home" data-link>
+        <img src="/static/asset/images/transistor-ping-pong.gif" width="60" alt="">
+      </a>
+      <search-bar class="d-none d-md-flex"></search-bar>
+
+      <div class="d-flex align-items-center">
+        <div class="dropdown" id="notification-wrapper">
+          <button class="nav-link dropdown-toggle notification-ui_icon me-4" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa fa-bell fs-5"></i>
+            <span class="counter" data-count>0</span>
+          </button>
+          <div class="dropdown-menu notification-ui_dd" aria-labelledby="navbarDropdown">
+            <div class="notification-ui_dd-header">
+              <h3 class="text-center">Notification</h3>
+            </div>
+            <div class="notification-ui_dd-content">
+            </div>
+            <div class="notification-ui_dd-footer">
+              <button class="btn btn-success btn-block w-100 py-2" id="notification-btn">Mark all as unread</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <div class="user d-flex align-items-center mb-2 rounded-pill secondary-bg px-3 py-2 shadow "
+            style="cursor: pointer;">
+            <img src="/static/asset/images/profile.svg" class="rounded-circle" style="width: 40px; height: 40px;" alt="user profile image"
+              loading="lazy" id="nav-user-img" />
+            <strong class="d-none d-sm-block ms-2" id="nav-username" style="cursor: pointer;">bmakhlou</strong>
+          </div>
+          <ul class="dropdown-content ">
+            <li>
+              <a class="" href="/home" id="home" data-link>
+                <i class="fa-solid fa-house me-1"></i>
+                Home
+              </a>
+            </li>
+            <li>
+              <a href="/profile" id="profile" data-link>
+                <i class="fa-solid fa-user me-1"></i>
+                Profile
+              </a>
+            </li>
+            <li>
+              <a href="/ranking" id="ranking" data-link>
+                <i class="fa-solid fa-ranking-star me-1"></i>
+                Leaderboard
+              </a>
+            </li>
+            <li>
+              <a class="" href="/chat" id="chat" data-link>
+                <i class="fa-regular fa-comment-dots me-1"></i>
+                Chat
+              </a>
+            </li>
+            <li>
+              <a class="" href="/settings" id="settings" data-link>
+                <i class="fa-solid fa-gear me-1"></i>
+                Settings
+              </a>
+            </li>
+            <li>
+              <a class="" href="#" id="logout">
+                <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
+                Exit
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </nav>
+  </template>
+
+  <!--! Error Toast -->
+  <template id="error-toast">
+    <div class="position-absolute bottom-0 end-0 p-3" style="z-index: 1000;">
+      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto"></strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+
+  <script type="module" src="/static/js/index.js"></script>
+
+</body>
+
+</html>
