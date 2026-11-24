@@ -217,7 +217,7 @@ def invite_friend(request, friend_id):
             player1 = source_user,
             player2 = target_user
         )
-        Notification.objects.create(
+        notification = Notification.objects.create(
             user_id=target_user.id,
             message="invated you to a game",
             type="game_invite",
@@ -229,6 +229,7 @@ def invite_friend(request, friend_id):
             f"user_{target_user.id}",
             {
                 "type": "send_notification",
+                "notification_uuid": str(notification.uuid),
                 "message": "invated you to a game",
                 "user_id": target_user.id,
                 "sender_id": source_user.id,
@@ -258,7 +259,7 @@ def play_again(request, game_id):
             player1 = source_user,
             player2 = target_user
         )
-        Notification.objects.create(
+        notification = Notification.objects.create(
             user_id=target_user.id,
             message="invated you to a game",
             type="game_invite",
@@ -270,6 +271,7 @@ def play_again(request, game_id):
             f"user_{target_user.id}",
             {
                 "type": "send_notification",
+                "notification_uuid": str(notification.uuid),
                 "message": "invated you to a game",
                 "user_id": target_user.id,
                 "sender_id": source_user.id,

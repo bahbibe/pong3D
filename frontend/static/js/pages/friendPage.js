@@ -187,6 +187,7 @@ class FriendPage extends AbstractPage {
       method: "GET",
       credentials: "include",
     });
+    if (!response.ok) return; // e.g. logged out meanwhile
     const data = await response.json();
     for (const friend of data.data) {
       if (friend.friend.profile.uuid === this.userId.uuid) {
@@ -203,6 +204,7 @@ class FriendPage extends AbstractPage {
       method: "GET",
       credentials: "include",
     });
+    if (!response.ok) return; // e.g. logged out meanwhile
     const data = await response.json();
     for (const friend of data.data) {
       if (friend.friend.profile.uuid === this.userId.uuid) {
@@ -219,6 +221,7 @@ class FriendPage extends AbstractPage {
       method: "GET",
       credentials: "include",
     });
+    if (!response.ok) return; // e.g. logged out meanwhile
     const data = await response.json();
     const rqts = data.data;
     for (const rqt of rqts) {

@@ -898,3 +898,31 @@ class UniqueEmailMigrationTests(TransactionTestCase):
         emails = dict(User.objects.filter(id__in=[oldest.id, newer.id, other.id])
                       .values_list("username", "email"))
         self.assertEqual(emails, {"d1": "dup@example.com", "d2": "", "d3": "solo@example.com"})
+
+
+class MarkNotificationReadTests(AuthTestCase):
+    def setUp(self):
+        super().setUp()
+        from .models import Notification
+
+        self.user = make_user("nora")
+        self.other = make_user("otto")
+        self.mine = Notification.objects.create(user=self.user, message="m", type="t")
+        self.theirs = Notification.objects.create(user=self.other, message="m", type="t")
+        self.login("nora")
+
+    def mark(self, value):
+        return self.client.post(f"/api/auth/notifications/mark_as_read/{value}/")
+
+    def test_marks_own_notification(self):
+        self.assertEqual(self.mark(self.mine.uuid).status_code, 200)
+        self.mine.refresh_from_db()
+        self.assertTrue(self.mine.is_read)
+
+    def test_other_users_notification_is_not_found(self):
+        self.assertEqual(self.mark(self.theirs.uuid).status_code, 404)
+        self.theirs.refresh_from_db()
+        self.assertFalse(self.theirs.is_read)
+
+    def test_malformed_uuid_is_not_found(self):
+        self.assertEqual(self.mark("not-a-uuid").status_code, 404)

@@ -120,3 +120,38 @@ class RevokedTokenSocketTests(TransactionTestCase):
         self.assertTrue(connected)
         output = await communicator.receive_output(timeout=2)
         self.assertEqual(output.get("code"), 4001)
+
+
+class NotificationSocketTests(TransactionTestCase):
+    def setUp(self):
+        self.alice = make_user("alice")
+        self.bob = make_user("bob")
+
+    async def test_pushed_notification_carries_its_uuid(self):
+        from channels.db import database_sync_to_async
+        from django.test import Client
+        from .models import Notification
+
+        communicator = WebsocketCommunicator(
+            application,
+            "/ws/notifications/",
+            headers=[(b"origin", b"http://localhost"),
+                     (b"cookie", f"access_token={token_for(self.alice)}".encode())],
+        )
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+
+        def bob_sends_request():
+            client = Client()
+            client.cookies["access_token"] = token_for(self.bob)
+            return client.post(
+                "/api/friends/send/",
+                data=json.dumps({"target_user": self.alice.id}),
+                content_type="application/json",
+            ).status_code
+
+        self.assertEqual(await database_sync_to_async(bob_sends_request)(), 200)
+        message = json.loads(await communicator.receive_from(timeout=2))
+        stored = await database_sync_to_async(Notification.objects.get)(user=self.alice)
+        self.assertEqual(message["uuid"], str(stored.uuid))
+        await communicator.disconnect()

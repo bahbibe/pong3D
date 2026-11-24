@@ -102,7 +102,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     def send_opponent_invite(self):
         source_user = self.user
         target_user = self.game.player1 if self.user != self.game.player1 else self.game.player2
-        Notification.objects.create(
+        notification = Notification.objects.create(
             user_id=target_user.id,
             message="Tourament game ready",
             type="game_invite",
@@ -114,6 +114,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             f"user_{target_user.id}",
             {
                 "type": "send_notification",
+                "notification_uuid": str(notification.uuid),
                 "message": "Tourament game ready",
                 "user_id": target_user.id,
                 "sender_id": source_user.id,

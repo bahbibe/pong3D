@@ -1,56 +1,35 @@
-import { WSS_URL } from "../router.js";
+import { openReconnectingSocket } from "./reconnecting.js";
+
+const setOnline = (userId, online) => {
+  const friend = document.querySelector(`#friend-${userId}`);
+  if (friend) friend.querySelector(".user-status")?.classList.toggle("online", online);
+
+  const chatFriendStatus = document.querySelector(`.stat-${userId}`);
+  if (chatFriendStatus) {
+    chatFriendStatus.classList.toggle("online", online);
+    const label = chatFriendStatus.querySelector(".friend-status");
+    if (label) label.textContent = online ? "Online" : "Offline";
+  }
+};
+
+const onMessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data.type !== "user_status") return;
+  window.online_users = data.online_users;
+  if (data.status === "offline") {
+    setOnline(data.user_id, false);
+  } else if (data.status === "online") {
+    // The server sends the full list: refresh every friend shown.
+    for (const userId of data.online_users) setOnline(userId, true);
+  }
+};
 
 export const FriendsStatus = () => {
-  if (!window.socket) {
-    const socket = new WebSocket(`${WSS_URL}/ws/status/`);
-    window.socket = socket;
-  }
-
-  socket.onopen = () => {
-    // console.log("connected to friends status websocket");
-  }
-
-  socket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    if (data.type === "user_status") {
-      if (data.status === "offline") {
-        window.online_users = data.online_users;
-        const friend = document.querySelector(`#friend-${data.user_id}`);
-        const chatFriendStatus = document.querySelector(`.stat-${data.user_id}`);
-
-        if (friend)
-          friend.querySelector(".user-status").classList.remove("online");
-
-        if (chatFriendStatus) {
-          chatFriendStatus.classList.remove("online");
-          chatFriendStatus.querySelector(".friend-status").textContent = "Offline";
-        }
-      } else if (data.status === "online") {
-        const online_users = data.online_users;
-        window.online_users = online_users;
-
-        for (const user of online_users) {
-          const friend = document.querySelector(`#friend-${user}`);
-          const chatFriendStatus = document.querySelector(`.stat-${data.user_id}`);
-
-          if (friend)
-            friend.querySelector(".user-status").classList.add("online");
-
-          if (chatFriendStatus) {
-            chatFriendStatus.classList.add("online");
-            chatFriendStatus.querySelector(".friend-status").textContent = "Online";
-          }
-        }
-      }
-    }
-  }
-
-  socket.onerror = (event) => {
-    console.log("error", event);
-  }
-
-  socket.onclose = () => {
-    window.socket = null;
-    console.log("closed");
-  }
-}
+  if (window.socket) return;
+  window.socket = openReconnectingSocket("/ws/status/", {
+    onMessage,
+    onStop: () => {
+      window.socket = null;
+    },
+  });
+};

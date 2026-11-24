@@ -301,6 +301,9 @@ class mainNav extends AbstractPage {
   }
 
   async logout(e) {
+    // The link is href="#": following it fires popstate, and the router
+    // would render the page again while the logout request is running.
+    if (e) e.preventDefault();
     try {
       const url = `${BASE_URL}/api/auth/logout/`;
       const response = await fetch(url, {

@@ -249,10 +249,16 @@ def mark_all_notifications_as_read(request):
 @api_view(["POST"])
 @is_authenticated
 def mark_notification_as_read(request, uuid):
-    user = request.user
-    notification = Notification.objects.filter(uuid=uuid, user=user).first()
+    notification_uuid = parse_uuid(uuid)
+    notification = (
+        Notification.objects.filter(uuid=notification_uuid, user=request.user).first()
+        if notification_uuid
+        else None
+    )
     if not notification:
-        return ErrorResponse(message="Notification does not exist")
+        return ErrorResponse(
+            message="Notification does not exist", status_code=status.HTTP_404_NOT_FOUND
+        )
     notification.is_read = True
-    notification.save()
+    notification.save(update_fields=["is_read"])
     return SuccessResponse(message="Notification marked as read")

@@ -143,7 +143,7 @@ def send_friend_request(request):
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
-    Notification.objects.create(
+    notification = Notification.objects.create(
         user_id=target_user.id,
         message="sent you a friend request",
         type="friend_request",
@@ -155,6 +155,7 @@ def send_friend_request(request):
         f"user_{target_user.id}",
         {
             "type": "send_notification",
+            "notification_uuid": str(notification.uuid),
             "message": "sent you a friend request",
             "user_id": target_user.id,
             "sender_id": source_user.id,
@@ -191,7 +192,7 @@ def accept_friend_request(request):
     friendship.status = "accepted"
     friendship.save()
 
-    Notification.objects.create(
+    notification = Notification.objects.create(
         user_id=source_user.id,
         message="accepted your friend request",
         type="friend_request_accepted",
@@ -203,6 +204,7 @@ def accept_friend_request(request):
         f"user_{source_user.id}",
         {
             "type": "send_notification",
+            "notification_uuid": str(notification.uuid),
             "message": "accepted your friend request",
             "user_id": source_user.id,
             "sender_id": user.id,

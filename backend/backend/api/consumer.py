@@ -124,6 +124,8 @@ class NotificationConusmer(AsyncWebsocketConsumer):
         await self.send(
             text_data=json.dumps(
                 {
+                    # Lets the client mark this one notification as read.
+                    "uuid": event.get("notification_uuid"),
                     "message": message,
                     "type": "notification",
                     "ctx": ctx,

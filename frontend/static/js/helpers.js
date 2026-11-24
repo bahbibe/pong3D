@@ -77,45 +77,49 @@ export const renderNotifications = () => {
     const btn = notif.querySelector("button");
     const isGameInvite = notification.ctx == "game_invite" || notification.type == "game_invite";
 
-    img.src = notification.sender.avatar;
-    username.textContent = notification.sender.username;
+    // System notifications have no sender.
+    const sender = notification.sender || {};
+    img.src = sender.avatar || "";
+    img.alt = sender.username ? `${sender.username}'s avatar` : "";
+    username.textContent = sender.username || "";
     if (isGameInvite) {
       btn.textContent = "Play Game";
       btn.dataset.game_id = notification.game_id;
-    } else {
+    } else if (sender.uuid) {
       btn.textContent = "View Profile";
-      btn.dataset.id = notification.sender.uuid;
+      btn.dataset.id = sender.uuid;
+    } else {
+      btn.remove();
     }
-    // btn.dataset.notification_id = notification.uuid;
+    if (notification.uuid) notif.dataset.uuid = notification.uuid;
     message.textContent = notification.message;
     notificationsEl.insertAdjacentHTML("beforeend", notif.outerHTML);
   });
 
   const buttonsList = notificationsEl.querySelectorAll(".notification-list button");
   buttonsList.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      // markNotificationAsRead(btn.dataset.notification_id);
+    btn.addEventListener("click", async () => {
+      const uuid = btn.closest(".notification-list")?.dataset.uuid;
+      if (uuid) await markNotificationAsRead(uuid);
       if (btn.dataset.game_id) {
-        console.log("Viewing game");
         navigateTo(`/play/${btn.dataset.game_id}`);
         return;
       }
-      console.log("Viewing profile");
       navigateTo(`/friend/${btn.dataset.id}`);
     });
   });
 }
 
-// const markNotificationAsRead = async (notification_uuid) => {
-//   try {
-//     fetch(
-//       `${BASE_URL}/api/auth/notifications/mark_as_read/${notification_uuid}/`,
-//       {
-//         method: "POST",
-//         credentials: "include",
-//       }
-//     );
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
+// Mark one notification as read on the server and drop it from the list.
+const markNotificationAsRead = async (uuid) => {
+  window.notifications = (window.notifications || []).filter((n) => n.uuid !== uuid);
+  renderNotifications();
+  try {
+    await fetch(`${BASE_URL}/api/auth/notifications/mark_as_read/${encodeURIComponent(uuid)}/`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch (error) {
+    console.error("Could not mark the notification as read:", error);
+  }
+};
