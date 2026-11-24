@@ -6,10 +6,10 @@ COMPOSE := docker compose -f compose.yaml -f compose.$(ENV).yaml
 TEST_COMPOSE := docker compose -f compose.test.yaml
 
 .DEFAULT_GOAL := help
-.PHONY: help env dev prod up down restart logs ps test
+.PHONY: help env dev prod up down restart logs ps test tools tools-down
 
 help: ## List the targets
-	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  make %-8s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  make %-11s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 env: ## Create .env (random secrets; keeps an existing one)
 	@sh infra/scripts/gen-env.sh
@@ -27,8 +27,14 @@ up: .env
 	$(COMPOSE) up -d --build --remove-orphans
 	@echo "Up: https://localhost:1337  (make logs to follow, make down to stop)"
 
-down: ## Stop and remove the containers (data volumes are kept)
-	$(COMPOSE) down --remove-orphans
+down: ## Stop and remove the containers, tools included (volumes are kept)
+	$(COMPOSE) --profile tools down --remove-orphans
+
+tools: .env ## Start adminer :8080, grafana :3000, prometheus :9090 (127.0.0.1)
+	$(COMPOSE) --profile tools up -d adminer prometheus grafana
+
+tools-down: ## Stop the tools only
+	$(COMPOSE) --profile tools rm -sf adminer prometheus grafana
 
 restart: ## Restart a service: make restart s=backend
 	$(COMPOSE) restart $(s)

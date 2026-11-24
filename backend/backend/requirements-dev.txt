@@ -1,0 +1,3 @@
+# Dev image only (compose.dev.yaml builds with DEV=1).
+# Restarts daphne when a .py file changes.
+watchfiles==1.3.0

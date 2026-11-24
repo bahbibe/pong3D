@@ -1,5 +1,6 @@
 # Shared services. Run through the Makefile, which adds compose.dev.yaml or
-# compose.prod.yaml on top (make dev / make prod).
+# compose.prod.yaml on top (make dev / make prod). adminer, prometheus and
+# grafana are in the "tools" profile: off unless you run `make tools`.
 name: pong3d
 
 services:
@@ -42,6 +43,7 @@ services:
     init: true
 
   adminer:
+    profiles: [tools]  # make tools
     image: adminer:6.3.0
     ports:
       - "127.0.0.1:8080:8080"
@@ -52,6 +54,7 @@ services:
     init: true
 
   prometheus:
+    profiles: [tools]  # make tools
     image: prom/prometheus:v3.16.0
     ports:
       - "127.0.0.1:9090:9090"
@@ -63,6 +66,7 @@ services:
     init: true
 
   grafana:
+    profiles: [tools]  # make tools
     image: grafana/grafana:13.3.1
     ports:
       # Default login is admin/admin; keep it local.

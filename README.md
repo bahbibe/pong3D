@@ -22,10 +22,12 @@ set `INTRA_CLIENT_ID` and `INTRA_CLIENT_SECRET` in `.env`, and register
 
 | Target | What it does |
 | --- | --- |
-| `make dev` | Dev stack: code bind-mounted, nginx serves `./frontend` live |
+| `make dev` | Dev stack: code bind-mounted, backend restarts on `.py` changes, nginx serves `./frontend` live |
 | `make prod` | Prod-like stack: images only, avatars in a named volume |
-| `make down` | Stop and remove the containers (volumes are kept) |
-| `make restart s=backend` | Restart one service (the backend does not reload Python changes by itself) |
+| `make down` | Stop and remove the containers, tools included (volumes are kept) |
+| `make tools` | Start adminer (8080), grafana (3000), prometheus (9090) on 127.0.0.1 |
+| `make tools-down` | Stop the tools only |
+| `make restart s=backend` | Restart one service |
 | `make logs [s=backend]` | Follow logs |
 | `make ps` | List the containers |
 | `make test` | Backend tests against a throwaway Postgres, cleaned up afterwards |
@@ -33,7 +35,7 @@ set `INTRA_CLIENT_ID` and `INTRA_CLIENT_SECRET` in `.env`, and register
 
 ## Layout
 
-- `compose.yaml`: shared services (db, redis, backend, nginx, adminer, prometheus, grafana).
+- `compose.yaml`: shared services (db, redis, backend, nginx; adminer, prometheus and grafana in the `tools` profile).
   `compose.dev.yaml` and `compose.prod.yaml` go on top; `compose.test.yaml` is for `make test`.
 - `backend/backend/`: Django project (`api`, `friends`, `chat`, `game`, `matchmaking`).
 - `frontend/`: `index.html` and `static/` (served by nginx; three.js is vendored in `static/vendor`).
@@ -41,8 +43,19 @@ set `INTRA_CLIENT_ID` and `INTRA_CLIENT_SECRET` in `.env`, and register
 - `infra/prometheus/`, `infra/scripts/`.
 
 nginx serves everything on one origin: the frontend, `/api`, `/ws` and `/avatars`.
-Adminer (8080), Grafana (3000), Prometheus (9090) and the Django port
-(`BACKEND_PORT`, 8000 by default) are bound to 127.0.0.1 only.
+The tools (`make tools`) and the Django port (`BACKEND_PORT`, 8000 or the
+next free port) are bound to 127.0.0.1 only. Grafana's first login is admin/admin.
+
+## Dev loop
+
+- Frontend: edit files in `frontend/`, refresh the browser.
+- Backend: save a `.py` file; watchfiles restarts daphne in a few seconds
+  (`make logs s=backend`). Each restart drops running games, and the
+  browser's status/notification sockets reconnect by themselves. If changes
+  are not picked up (some Docker Desktop setups), add
+  `WATCHFILES_FORCE_POLLING=1` to `.env` and run `make dev` again.
+- New migration: `docker compose exec backend python manage.py makemigrations`,
+  then `make restart s=backend` (migrations run when the container starts).
 
 ## One backend replica only
 

@@ -1,8 +1,23 @@
 # Dev: code is bind-mounted. nginx serves ./frontend as it is on disk, so a
-# browser refresh shows frontend edits. The backend (daphne) does not reload
-# by itself yet: `make restart s=backend` after a Python change.
+# browser refresh shows frontend edits. The backend restarts by itself when
+# a .py file changes (running games are dropped on each restart).
 services:
   backend:
+    build:
+      args:
+        DEV: "1"
+    # watchfiles restarts the command on .py changes. reset_presence runs on
+    # each restart: the old process never ran its disconnect handlers, so its
+    # online counts would stay. Set WATCHFILES_FORCE_POLLING=1 in .env if
+    # changes are not seen (some Docker Desktop setups).
+    command:
+      - watchfiles
+      - --filter
+      - python
+      - >-
+        sh -c "python manage.py reset_presence
+        && exec daphne -b 0.0.0.0 -p 8000 --proxy-headers ft_transcendence.asgi:application"
+      - /backend
     volumes:
       - ./backend/backend:/backend
     ports:
