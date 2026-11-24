@@ -1,206 +1,67 @@
 import { navigateTo, BASE_URL } from "../router.js";
+
+/**
+ * Small wrapper around the backend API. Every method resolves to the
+ * response's `data` field, or to undefined when the request fails (the
+ * error is logged), which is what the pages expect.
+ */
 class API {
-  constructor() {}
-  async getFriends() {
+  async request(method, path, label) {
     try {
-      const response = await fetch(`${BASE_URL}/api/friends/`, {
-        method: "GET",
-        headers: {
-          "content-type": "application/json",
-        },
+      const response = await fetch(`${BASE_URL}${path}`, {
+        method,
+        headers: { "content-type": "application/json" },
         credentials: "include",
       });
-      if (!response.ok)
-        throw new Error(`API request failed with status: ${response.status}`);
-      const res = await response.json();
-      return res.data;
+      if (!response.ok) throw new Error(`API request failed with status: ${response.status}`);
+      const body = await response.json();
+      return body.data;
     } catch (error) {
-      console.error("Error Loading friends:", error);
+      console.error(`Error ${label}:`, error);
+      return undefined;
     }
+  }
+
+  async getFriends() {
+    return this.request("GET", "/api/friends/", "loading friends");
   }
 
   async getMessages(uuid) {
-    try {
-      const response = await fetch(`${BASE_URL}/api/chat/messages/${uuid}/`, {
-        method: "GET",
-        headers: {
-          "content-type": "application/json",
-        },
-        credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error(`API request failed with status: ${response.status}`);
-      }
-      const res = await response.json();
-      return res.data.messages;
-    } catch (error) {
-      console.error("Error Loading DMs:", error);
-    }
+    const data = await this.request("GET", `/api/chat/messages/${uuid}/`, "loading DMs");
+    return data?.messages;
   }
+
   async getUser() {
-    try {
-      const response = await fetch(`${BASE_URL}/api/auth/me`, {
-        method: "GET",
-        headers: {
-          "content-type": "application/json",
-        },
-        credentials: "include",
-      });
-      if (!response.ok)
-        throw new Error(`API request failed with status: ${response.status}`);
-      const res = await response.json();
-      return res.data;
-    } catch (error) {
-      console.error("Error Loading profile:", error);
-    }
+    return this.request("GET", "/api/auth/me/", "loading profile");
   }
+
   async getTournaments() {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/game/get_tournaments`,
-        {
-          method: "GET",
-          headers: {
-            "content-type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!response.ok)
-        throw new Error(`API request failed with status: ${response.status}`);
-      const res = await response.json();
-      return res.data;
-    } catch (error) {
-      console.error("Error Loading profile:", error);
-    }
-  }
-  async getTournamentGames(tournament_id) {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/game/get_tournament_games/${tournament_id}`,
-        {
-          method: "GET",
-          headers: {
-            "content-type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!response.ok)
-        throw new Error(`API request failed with status: ${response.status}`);
-      const res = await response.json();
-      return res.data;
-    } catch (error) {
-      console.error("Error Loading profile:", error);
-    }
+    return this.request("GET", "/api/game/get_tournaments/", "loading tournaments");
   }
 
-  async getTournament(tournament_id) {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/game/get_participants/${tournament_id}`,
-        {
-          method: "GET",
-          headers: {
-            "content-type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!response.ok)
-        throw new Error(`API request failed with status: ${response.status}`);
-      const res = await response.json();
-      return res.data;
-    } catch (error) {
-      console.error("Error Loading profile:", error);
-    }
+  async getTournamentGames(tournamentId) {
+    return this.request(
+      "GET", `/api/game/get_tournament_games/${tournamentId}`, "loading tournament games"
+    );
   }
+
   async create_tournament() {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/game/create_tournament/`,
-        {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!response.ok)
-        throw new Error(`API request failed with status: ${response.status}`);
-      const res = await response.json();
-      return res.data;
-    } catch (error) {
-      console.error("Error creating tournament:", error);
-    }
+    return this.request("POST", "/api/game/create_tournament/", "creating tournament");
   }
 
-  async get_game(game_id) {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/game/get_game/${game_id}`,
-        {
-          method: "GET",
-          headers: {
-            "content-type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!response.ok)
-        throw new Error(`API request failed with status: ${response.status}`);
-      const res = await response.json();
-      return res.data;
-    } catch (error) {
-      console.error("Error creating tournament:", error);
-    }
+  async get_game(gameId) {
+    return this.request("GET", `/api/game/get_game/${gameId}`, "loading game");
   }
 
+  // invite_friend and play_again open the new game when it is created.
   async invite_friend(friendId) {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/game/invite_friend/${friendId}`,
-        {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!response.ok)
-        throw new Error(`API request failed with status: ${response.status}`);
-      const data = await response.json();
-      if (response.ok) {
-        navigateTo(`/play/${data.data.game.id}`);
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    const data = await this.request("POST", `/api/game/invite_friend/${friendId}`, "inviting friend");
+    if (data?.game) navigateTo(`/play/${data.game.id}`);
   }
 
-  async play_again(game_id) {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/api/game/play_again/${game_id}`,
-        {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-      if (!response.ok)
-        throw new Error(`API request failed with status: ${response.status}`);
-      const data = await response.json();
-      if (response.ok) {
-        navigateTo(`/play/${data.data.game.id}`);
-      }
-    } catch (error) {
-      console.log(error);
-    }
+  async play_again(gameId) {
+    const data = await this.request("POST", `/api/game/play_again/${gameId}`, "starting new game");
+    if (data?.game) navigateTo(`/play/${data.game.id}`);
   }
 }
 

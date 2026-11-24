@@ -299,7 +299,7 @@ class GameActionViewTests(TransactionTestCase):
             / "frontend/static/js/API/API.js"
         )
         if api_js.exists():  # not present inside the backend container
-            self.assertIn("/api/game/create_tournament/`", api_js.read_text())
+            self.assertRegex(api_js.read_text(), r"/api/game/create_tournament/[`\"']")
         response = self.client.post("/api/game/create_tournament/")
         self.assertEqual(response.status_code, 200, response.content)
 

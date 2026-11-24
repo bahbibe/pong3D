@@ -14,7 +14,6 @@ import {
   TwoFaPage,
   GamePage,
   MatchmakingPage,
-  blockedFriendsPage,
 } from "./pages/index.js";
 import { FriendsStatus } from "./ws/FriendsStatus.js";
 import { Notifications } from "./ws/NotificationsSockets.js";
@@ -75,12 +74,6 @@ const routes = [
     view: FriendPage,
     isProtected: true,
     page: "friend-page",
-  },
-  {
-    path: "/blocked",
-    view: FriendPage,
-    isProtected: true,
-    page: "blocked-page",
   },
   { path: "/play", view: GamePage, isProtected: true, page: "game-page" },
   {

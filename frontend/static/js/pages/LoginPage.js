@@ -5,6 +5,10 @@ import { AbstractPage } from "./AbstarctPage.js";
 
 import { BASE_URL } from "../router.js";
 
+// Same rule as the hint under the field: 8+ characters, a letter and a digit.
+// The server runs the full password checks.
+const PASSWORD_HINT = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
+
 class LoginPage extends AbstractPage {
   constructor() {
     super();
@@ -52,7 +56,7 @@ class LoginPage extends AbstractPage {
         });
     });
     
-    this.addEventListener('keydown', this);
+    this.addEventListener('input', this);
 
 
 }
@@ -66,21 +70,11 @@ class LoginPage extends AbstractPage {
     this.getData(e);
     this.postDats(e);
   }
-  onkeydown(e) {
-    if (e.target.id !== "password") {
-      console.log("not password", e.target.id);
-      return;
-    }
-    console.log("key down", e.target.id);
-    let regex = /^(?=.*[a-z])(?=.*\d).{8,15}$/;
-    console.log("password", e.target.value);
-    if (regex.test(e.target.value)) {
-      this.lengthPassword.style.color = "green";
-      this.isValidPassword = true;
-    }
-    else
-      this.lengthPassword.style.color = "red";
-
+  // Runs on every change (typing, paste, autofill), with the new value.
+  oninput(e) {
+    if (e.target.id !== "password") return;
+    this.isValidPassword = PASSWORD_HINT.test(e.target.value);
+    this.lengthPassword.style.color = this.isValidPassword ? "green" : "red";
   }
 
   getData(event) {
@@ -145,6 +139,7 @@ class LoginPage extends AbstractPage {
     }
 
     const url = `${BASE_URL}/api/auth/register/`
+    this.isValidPassword = PASSWORD_HINT.test(this.password.value);
     if (this.password.value !== this.confirmPassword.value || !this.isValidPassword) {
       console.log("passwords do not match");
       showToast("register-errors", "passwords do not match or password is not valid");
