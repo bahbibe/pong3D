@@ -72,5 +72,5 @@ services:
 
 volumes:
   dbdata:
-    # Same volume the old backend/docker-compose.yml used: dev data is kept.
+    # Fixed name, shared with the old two-stack setup: existing data is kept.
     name: dbdata

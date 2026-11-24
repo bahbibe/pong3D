@@ -1,4 +1,4 @@
-# Build context is backend/backend (see backend/docker-compose.yml).
+# Build context is backend/backend (see compose.yaml).
 # Keep secrets and user uploads out of the image.
 .env
 .env.*
