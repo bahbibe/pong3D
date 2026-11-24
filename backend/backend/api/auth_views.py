@@ -58,6 +58,14 @@ def check_totp(user, code):
     return False
 
 
+def email_taken(email, exclude_user=None):
+    """Emails are unique case-insensitively (index auth_user_email_ci_unique)."""
+    users = User.objects.filter(email__iexact=email)
+    if exclude_user is not None:
+        users = users.exclude(id=exclude_user.id)
+    return users.exists()
+
+
 def parse_intra_user(payload):
     """Pick the fields we need from /v2/me. None if the payload is unusable."""
     if not isinstance(payload, dict):
@@ -108,27 +116,49 @@ def find_or_create_intra_user(user_data):
         legacy.save(update_fields=["intra_id"])
         return legacy.user
 
-    username = user_data["username"]
-    while User.objects.filter(username=username).exists():
-        suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
-        username = f"{user_data['username']}_{suffix}"
+    # Emails are unique but never verified at registration. When the 42
+    # email is already used, create the intra account without an email
+    # instead of linking: someone could have registered the victim's 42
+    # email first, and linking would hand them the victim's account.
+    email = user_data["email"]
+    if email and email_taken(email):
+        email = ""
 
-    with transaction.atomic():
-        user = User.objects.create_user(
-            username=username,
-            email=user_data["email"],
-            first_name=user_data["first_name"],
-            last_name=user_data["last_name"],
-        )
-        user.set_unusable_password()
-        user.save()
-        profile_fields = {"auth_method": Profile.INTRA, "intra_id": user_data["id"]}
-        if user_data["avatar"]:
-            profile_fields["avatar"] = user_data["avatar"]
-        # The post_save signal created the profile; fill in the intra fields.
-        Profile.objects.filter(user=user).update(**profile_fields)
+    for _ in range(3):
+        username = user_data["username"]
+        while User.objects.filter(username=username).exists():
+            suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=6))
+            username = f"{user_data['username']}_{suffix}"
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    first_name=user_data["first_name"],
+                    last_name=user_data["last_name"],
+                )
+                user.set_unusable_password()
+                user.save()
+                profile_fields = {"auth_method": Profile.INTRA, "intra_id": user_data["id"]}
+                if user_data["avatar"]:
+                    profile_fields["avatar"] = user_data["avatar"]
+                # The post_save signal created the profile; fill in the intra fields.
+                Profile.objects.filter(user=user).update(**profile_fields)
+        except IntegrityError:
+            # Username or email taken at the same moment. A second login of
+            # the same intra user wins the intra_id race: return that account.
+            profile = (
+                Profile.objects.select_related("user")
+                .filter(intra_id=user_data["id"])
+                .first()
+            )
+            if profile:
+                return profile.user
+            email = ""
+            continue
         user.refresh_from_db()
-    return user
+        return user
+    raise IntegrityError("could not create the intra account")
 
 
 
@@ -159,7 +189,8 @@ def login_user(request):
         ):
             return rate_limit.too_many_attempts()
 
-        user = User.objects.filter(**{auth_field: login_value}).first()
+        lookup = "email__iexact" if auth_field == "email" else "username"
+        user = User.objects.filter(**{lookup: login_value}).first()
         is_password_valid = (
             user is not None
             and user.profile.auth_method != Profile.INTRA
@@ -194,11 +225,7 @@ def register_user(request):
         if is_user_exists:
             return ErrorResponse(message="A user with this username already exists")
 
-        is_user_exists = User.objects.filter(
-            email=serializer.validated_data["email"]
-        ).exists()
-
-        if is_user_exists:
+        if email_taken(serializer.validated_data["email"]):
             return ErrorResponse(message="A user with this email already exists")
 
         try:
@@ -212,8 +239,8 @@ def register_user(request):
                     last_name=serializer.validated_data["last_name"],
                 )
         except IntegrityError:
-            # Same username registered at the same moment.
-            return ErrorResponse(message="A user with this username already exists")
+            # Same username or email registered at the same moment.
+            return ErrorResponse(message="A user with this username or email already exists")
         return SuccessResponse(
             data=UserSerializer(user).data,
             message="You have been registered successfully. Please login to continue.",

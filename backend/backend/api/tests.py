@@ -786,3 +786,115 @@ class ResetPresenceCommandTests(TestCase):
         with mock.patch("redis.Redis", return_value=client):
             call_command("reset_presence", stdout=StringIO(), stderr=err)
         self.assertIn("redis unavailable", err.getvalue())
+
+
+class UniqueEmailTests(AuthTestCase):
+    def setUp(self):
+        super().setUp()
+        self.alice = make_user("alice")  # alice@example.com
+
+    def register(self, username, email):
+        return self.post_json("/api/auth/register/", {
+            "username": username, "email": email, "password": PASSWORD,
+            "confirm_password": PASSWORD, "first_name": "A", "last_name": "B",
+        })
+
+    def intra(self, intra_id, login, email):
+        from .auth_views import find_or_create_intra_user, parse_intra_user
+
+        return find_or_create_intra_user(parse_intra_user(
+            {"id": intra_id, "login": login, "email": email,
+             "first_name": "In", "last_name": "Tra", "image": {}}
+        ))
+
+    def test_database_refuses_same_email_in_another_case(self):
+        from django.db import IntegrityError, transaction
+
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            User.objects.create_user(username="other", email="ALICE@example.com")
+
+    def test_many_accounts_may_have_no_email(self):
+        User.objects.create_user(username="n1", email="")
+        User.objects.create_user(username="n2", email="")
+
+    def test_register_with_taken_email_in_another_case_is_refused(self):
+        response = self.register("alice2", "Alice@Example.com")
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(User.objects.filter(username="alice2").exists())
+
+    def test_login_by_email_ignores_case(self):
+        response = self.post_json(
+            "/api/auth/login/", {"email": "ALICE@example.com", "password": PASSWORD}
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+
+    def test_intra_login_with_taken_email_gets_separate_account_without_email(self):
+        user = self.intra(7007, "alice", "alice@EXAMPLE.com")
+        self.assertNotEqual(user.id, self.alice.id)
+        self.assertEqual(user.email, "")
+        self.assertEqual(user.profile.intra_id, 7007)
+        self.alice.refresh_from_db()
+        self.assertEqual(self.alice.email, "alice@example.com")
+        self.assertIsNone(self.alice.profile.intra_id)
+
+    def test_intra_email_taken_between_check_and_insert(self):
+        # The email check passes, then another request takes the email
+        # before the insert: the account is still created, without email.
+        from unittest import mock
+
+        with mock.patch("api.auth_views.email_taken", return_value=False):
+            user = self.intra(8008, "racer", "alice@example.com")
+        self.assertEqual((user.email, user.profile.intra_id), ("", 8008))
+
+    def test_intra_login_with_free_email_keeps_it(self):
+        user = self.intra(9009, "fresh", "fresh@student.42.fr")
+        self.assertEqual(user.email, "fresh@student.42.fr")
+
+    def test_settings_cannot_take_another_users_email(self):
+        from django.test.client import encode_multipart, BOUNDARY, MULTIPART_CONTENT
+
+        make_user("bob")
+        self.login("bob")
+        response = self.client.put(
+            "/api/auth/settings/update/",
+            data=encode_multipart(BOUNDARY, {
+                "username": "bob", "email": "ALICE@example.com",
+                "current_password": PASSWORD,
+            }),
+            content_type=MULTIPART_CONTENT,
+        )
+        self.assertEqual(response.status_code, 400, response.content)
+        self.assertEqual(User.objects.get(username="bob").email, "bob@example.com")
+
+    def test_settings_with_own_email_in_another_case_is_fine(self):
+        from django.test.client import encode_multipart, BOUNDARY, MULTIPART_CONTENT
+
+        self.login("alice")
+        response = self.client.put(
+            "/api/auth/settings/update/",
+            data=encode_multipart(BOUNDARY, {"username": "alice", "email": "ALICE@example.com"}),
+            content_type=MULTIPART_CONTENT,
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+
+
+class UniqueEmailMigrationTests(TransactionTestCase):
+    def test_migration_keeps_email_on_oldest_account(self):
+        from django.db import connection
+        from django.db.migrations.executor import MigrationExecutor
+
+        before = [("api", "0017_token_version_tfa_last_counter")]
+        executor = MigrationExecutor(connection)
+        after = executor.loader.graph.leaf_nodes()
+        executor.migrate(before)
+        OldUser = executor.loader.project_state(before).apps.get_model("auth", "User")
+        oldest = OldUser.objects.create(username="d1", email="dup@example.com")
+        newer = OldUser.objects.create(username="d2", email="DUP@example.com")
+        other = OldUser.objects.create(username="d3", email="solo@example.com")
+
+        executor = MigrationExecutor(connection)
+        executor.migrate(after)
+
+        emails = dict(User.objects.filter(id__in=[oldest.id, newer.id, other.id])
+                      .values_list("username", "email"))
+        self.assertEqual(emails, {"d1": "dup@example.com", "d2": "", "d3": "solo@example.com"})

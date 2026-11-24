@@ -12,6 +12,8 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from .models import User, Profile, Notification
 from django.db.models import Q, F
 from api.auth_utils import is_authenticated, revoke_tokens, set_access_token
+from api.auth_views import email_taken
+from django.db import IntegrityError, transaction
 from utils.responses import SuccessResponse, ErrorResponse
 from friends.models import Friendship
 from game.models import Game
@@ -61,7 +63,7 @@ def update_settings(request):
     password = data.get("password") or None
     current_password = data.get("current_password") or ""
 
-    is_email_change = email is not None and email != user.email
+    is_email_change = email is not None and email.lower() != user.email.lower()
     if password or is_email_change:
         # Changing credentials needs proof that the caller is the account
         # owner, not just someone holding the session cookie.
@@ -82,7 +84,7 @@ def update_settings(request):
     ):
         return ErrorResponse(message="Username already exists")
 
-    if is_email_change and User.objects.filter(email=email).exists():
+    if is_email_change and email_taken(email, exclude_user=user):
         return ErrorResponse(message="Email already exists")
 
     if password:
@@ -102,8 +104,13 @@ def update_settings(request):
     if password:
         user.set_password(password)
 
-    profile.save(update_fields=["avatar"])
-    user.save()
+    try:
+        with transaction.atomic():
+            profile.save(update_fields=["avatar"])
+            user.save()
+    except IntegrityError:
+        # Username or email taken by another request at the same moment.
+        return ErrorResponse(message="Username or email already exists")
     response = SuccessResponse(data=UserSerializer(user).data)
     if password:
         # Sign out every other session, then give this one a fresh token.
