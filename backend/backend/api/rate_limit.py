@@ -5,8 +5,8 @@ Only failed attempts are counted. When a counter is over its limit the
 endpoint answers 429 until the window ends, even for correct credentials,
 so guessing a password or a 6-digit TOTP code stops being practical.
 
-The default cache is per process (LocMemCache). That is enough while the
-backend runs as one process; use a shared cache (Redis) if it is scaled out.
+The cache is Redis (settings.CACHES), so counters survive a backend restart.
+Tests use LocMemCache.
 """
 
 from django.core.cache import cache

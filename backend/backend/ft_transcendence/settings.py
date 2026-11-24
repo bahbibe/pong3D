@@ -4,6 +4,8 @@ from datetime import timedelta
 
 from django.core.exceptions import ImproperlyConfigured
 
+from utils.redis_url import redis_url
+
 
 def env_bool(name, default=False):
     value = os.getenv(name)
@@ -119,13 +121,23 @@ TEMPLATES = [
 WSGI_APPLICATION = "ft_transcendence.wsgi.application"
 ASGI_APPLICATION = "ft_transcendence.asgi.application"
 
+# Redis: DB 0 for channels, presence and matchmaking; DB 1 for the cache.
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis", os.getenv("REDIS_PORT"))],
+            "hosts": [redis_url()],
         },
     },
+}
+
+# Shared by every request handler and kept across backend restarts (the
+# login and 2FA failure counters live here, see api/rate_limit.py).
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": redis_url(db=1),
+    }
 }
 
 

@@ -1,9 +1,8 @@
-import os
-
 import redis
 from django.core.management.base import BaseCommand
 
 from api.consumer import ONLINE_KEY
+from utils.redis_url import redis_url
 
 
 class Command(BaseCommand):
@@ -13,11 +12,7 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
-        client = redis.Redis(
-            host=os.getenv("REDIS_HOST", "redis"),
-            port=int(os.getenv("REDIS_PORT") or 6379),
-            socket_connect_timeout=5,
-        )
+        client = redis.Redis.from_url(redis_url(), socket_connect_timeout=5)
         try:
             client.delete(ONLINE_KEY)
         except redis.RedisError as error:

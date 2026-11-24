@@ -1,5 +1,4 @@
 import json
-import os
 
 from redis import asyncio as aioredis
 from channels.db import database_sync_to_async
@@ -7,17 +6,14 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import User
 
 from game.models import Game
+from utils.redis_url import redis_url
 
 QUEUE_KEY = "matchmaking:random"
 CLOSE_UNAUTHORIZED = 4001
 
 # Shared async client (sync calls would block the event loop).
 # Tests replace it with an in-memory fake.
-r = aioredis.Redis(
-    host=os.getenv("REDIS_HOST", "redis"),
-    port=int(os.getenv("REDIS_PORT") or 6379),
-    decode_responses=True,
-)
+r = aioredis.Redis.from_url(redis_url(), decode_responses=True)
 
 
 @database_sync_to_async

@@ -5,6 +5,8 @@ import json
 import os
 from redis import asyncio as aioredis
 
+from utils.redis_url import redis_url
+
 # Close code the frontend treats as "log in again".
 CLOSE_UNAUTHORIZED = 4001
 
@@ -14,11 +16,7 @@ ONLINE_KEY = "online_counts"
 
 # Shared async client (sync redis calls would block the event loop that
 # also runs the game loops). Tests replace it with an in-memory fake.
-r = aioredis.Redis(
-    host=os.getenv("REDIS_HOST", "redis"),
-    port=int(os.getenv("REDIS_PORT") or 6379),
-    decode_responses=True,
-)
+r = aioredis.Redis.from_url(redis_url(), decode_responses=True)
 
 
 async def online_user_ids():

@@ -770,7 +770,7 @@ class ResetPresenceCommandTests(TestCase):
         from django.core.management import call_command
 
         client = mock.Mock()
-        with mock.patch("redis.Redis", return_value=client):
+        with mock.patch("redis.Redis.from_url", return_value=client):
             call_command("reset_presence", stdout=StringIO())
         client.delete.assert_called_once_with("online_counts")
 
@@ -783,7 +783,7 @@ class ResetPresenceCommandTests(TestCase):
         client = mock.Mock()
         client.delete.side_effect = redis.ConnectionError("down")
         err = StringIO()
-        with mock.patch("redis.Redis", return_value=client):
+        with mock.patch("redis.Redis.from_url", return_value=client):
             call_command("reset_presence", stdout=StringIO(), stderr=err)
         self.assertIn("redis unavailable", err.getvalue())
 
