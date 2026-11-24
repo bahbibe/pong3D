@@ -147,11 +147,15 @@ TEMPLATES = [
 ASGI_APPLICATION = "config.asgi.application"
 
 # Redis: DB 0 for channels, presence and matchmaking; DB 1 for the cache.
+CHANNEL_LAYER_SOCKET_TIMEOUT = 15
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [redis_url()],
+            # channels_redis waits for messages with a blocking pop of up to
+            # 5 s. redis-py 8 cuts reads at 5 s by default, which closed idle
+            # sockets with "Timeout reading from redis". Keep it above 5 s.
+            "hosts": [{"address": redis_url(), "socket_timeout": CHANNEL_LAYER_SOCKET_TIMEOUT}],
         },
     },
 }

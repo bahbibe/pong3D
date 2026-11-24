@@ -121,3 +121,20 @@ class ModelStrTests(TestCase):
 
         user = make_user("strprofile")
         self.assertEqual(str(user.profile), f"Profile of user {user.id}")
+
+
+class ChannelLayerSettingsTests(SimpleTestCase):
+    """The real channel layer config (test_settings swaps in the in-memory one)."""
+
+    def test_socket_timeout_is_longer_than_the_blocking_pop(self):
+        # Equal or shorter: idle websockets close with "Timeout reading from redis".
+        from channels_redis.core import RedisChannelLayer
+        from channels_redis.utils import create_pool
+
+        from config import settings as base
+
+        (host,) = base.CHANNEL_LAYERS["default"]["CONFIG"]["hosts"]
+        pool = create_pool(host)
+        timeout = pool.connection_kwargs["socket_timeout"]
+        self.assertGreater(timeout, RedisChannelLayer.brpop_timeout)
+        self.assertEqual(timeout, base.CHANNEL_LAYER_SOCKET_TIMEOUT)

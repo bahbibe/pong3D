@@ -63,7 +63,7 @@ def start(user):
     secret = pyotp.random_base32()
     user.profile.tfa_secret = secret
     user.profile.save(update_fields=["tfa_secret"])
-    uri = pyotp.totp.TOTP(secret).provisioning_uri(user.username, issuer_name=ISSUER)
+    uri = pyotp.totp.TOTP(secret).provisioning_uri(name=user.username, issuer_name=ISSUER)
     qr = qrcode.QRCode(
         version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4
     )
