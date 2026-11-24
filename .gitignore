@@ -1,5 +1,12 @@
 # Local config made by `make env` (secrets).
 .env
 .env.tmp
+.env.pre-split
+env/dev/
+env/prod/
+*.env.new
+*.env.tmp
+# make backup output.
+backups/
 # Old frontend dependencies (the Express server is gone).
 frontend/node_modules/

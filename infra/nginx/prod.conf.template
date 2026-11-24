@@ -1,0 +1,33 @@
+# Prod. ${DOMAIN} and ${HSTS_MAX_AGE} are filled in at container start
+# (40-pong3d-site.sh); other $variables are nginx's.
+
+# Port 80: Let's Encrypt HTTP-01 challenges, everything else to HTTPS.
+server {
+    listen 80;
+    server_name ${DOMAIN};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ${DOMAIN};
+
+    # Let's Encrypt certificate, or a self-signed one until `make cert` ran
+    # (pong3d-select-cert picks which; "current" is a symlink).
+    ssl_certificate /etc/nginx/certs/current/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/current/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    set $hsts_header "max-age=${HSTS_MAX_AGE}";
+    include /etc/nginx/pong3d/common.conf;
+}

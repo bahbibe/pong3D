@@ -1,23 +1,48 @@
 # Shared services. Run through the Makefile, which adds compose.dev.yaml or
-# compose.prod.yaml on top (make dev / make prod). adminer, prometheus and
-# grafana are in the "tools" profile: off unless you run `make tools`.
+# compose.prod.yaml on top (make dev / make prod) and sets PONG3D_ENV, the
+# folder of the container env files: env/dev or env/prod (make env).
+# prometheus and grafana are in the "tools" profile (make tools).
 name: pong3d
 
 services:
   db:
     # Pinned: postgres 18+ images refuse a volume at /var/lib/postgresql/data,
     # and a major upgrade needs pg_upgrade on the existing volume anyway.
+    # The data volume is set by the dev/prod file.
     image: postgres:16-alpine
-    env_file: .env
-    volumes:
-      - dbdata:/var/lib/postgresql/data
+    env_file: env/${PONG3D_ENV:-dev}/db.env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
     restart: unless-stopped
     init: true
 
   redis:
     image: redis:8.10.3-alpine
+    env_file: env/${PONG3D_ENV:-dev}/redis.env
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\""]
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     restart: unless-stopped
     init: true
+
+  # One-off job on each `up`: apply the migrations, then exit. The backend
+  # starts only once it succeeded.
+  migrate:
+    build: ./backend/backend
+    env_file: env/${PONG3D_ENV:-dev}/app.env
+    entrypoint: []
+    command: ["python", "manage.py", "migrate", "--noinput"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
 
   backend:
     # ONE REPLICA ONLY. Running games, bot games and the matchmaking state
@@ -25,10 +50,21 @@ services:
     # between processes. Never scale this service; every restart or deploy
     # drops the games in progress.
     build: ./backend/backend
-    env_file: .env
+    env_file: env/${PONG3D_ENV:-dev}/app.env
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      # /healthz checks the database and Redis (not reachable through nginx).
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     restart: unless-stopped
     init: true
 
@@ -38,26 +74,14 @@ services:
       context: .
       dockerfile: infra/nginx/Dockerfile
     depends_on:
-      - backend
-    restart: unless-stopped
-    init: true
-
-  adminer:
-    profiles: [tools]  # make tools
-    image: adminer:6.3.0
-    ports:
-      - "127.0.0.1:8080:8080"
-    # Not the app .env: adminer does not need JWT or OAuth secrets.
-    environment:
-      ADMINER_DEFAULT_SERVER: db
+      backend:
+        condition: service_healthy
     restart: unless-stopped
     init: true
 
   prometheus:
     profiles: [tools]  # make tools
     image: prom/prometheus:v3.16.0
-    ports:
-      - "127.0.0.1:9090:9090"
     volumes:
       - ./infra/prometheus/:/etc/prometheus/:ro
     command:
@@ -68,13 +92,9 @@ services:
   grafana:
     profiles: [tools]  # make tools
     image: grafana/grafana:13.3.1
+    env_file: env/${PONG3D_ENV:-dev}/grafana.env
     ports:
-      # Default login is admin/admin; keep it local.
+      # Local only. On a server: ssh -L 3000:127.0.0.1:3000 <server>
       - "127.0.0.1:3000:3000"
     restart: unless-stopped
     init: true
-
-volumes:
-  dbdata:
-    # Fixed name, shared with the old two-stack setup: existing data is kept.
-    name: dbdata

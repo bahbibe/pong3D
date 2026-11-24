@@ -2,14 +2,29 @@
 # browser refresh shows frontend edits. The backend restarts by itself when
 # a .py file changes (running games are dropped on each restart).
 services:
+  db:
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
+  migrate:
+    build:
+      args:
+        DEV: "1"
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    volumes:
+      - ./backend/backend:/backend
+
   backend:
     build:
       args:
         DEV: "1"
+    # Runs as you, so files written into the bind mount (avatars,
+    # makemigrations output) belong to you, not to root or uid 10001.
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     # watchfiles restarts the command on .py changes. reset_presence runs on
     # each restart: the old process never ran its disconnect handlers, so its
-    # online counts would stay. Set WATCHFILES_FORCE_POLLING=1 in .env if
-    # changes are not seen (some Docker Desktop setups).
+    # online counts would stay. Set WATCHFILES_FORCE_POLLING=1 in
+    # env/dev/app.env if changes are not seen (some Docker Desktop setups).
     command:
       - watchfiles
       - --filter
@@ -26,9 +41,30 @@ services:
       - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
 
   nginx:
+    environment:
+      NGINX_SITE: dev
     ports:
       - "1337:1337"
     volumes:
       - ./frontend:/srv/frontend:ro
       # Uploaded avatars (written by the backend into the bind mount above).
       - ./backend/backend/avatars:/srv/avatars:ro
+
+  adminer:
+    profiles: [tools]  # make tools; dev only
+    image: adminer:6.3.0
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    restart: unless-stopped
+    init: true
+
+  prometheus:
+    ports:
+      - "127.0.0.1:9090:9090"
+
+volumes:
+  dbdata:
+    # Fixed name, shared with the old two-stack setup: existing data is kept.
+    name: dbdata
