@@ -27,10 +27,10 @@ In `/etc/ssh/sshd_config`: `PasswordAuthentication no`, then `systemctl reload s
 
 ## 2. GHCR images
 
-After the first CI run on main, open the two packages on GitHub
-(`pong3d-backend`, `pong3d-nginx` under your profile > Packages) and set
-their visibility to public once. Then the server pulls without logging in.
-To keep them private instead, run on the server as `deploy`:
+CI pushes `ghcr.io/bahbibe/pong3d-backend` and `pong3d-nginx`. They are
+linked to this public repository and public too, so the server pulls them
+without logging in (check: `docker pull ghcr.io/bahbibe/pong3d-backend:main`).
+If you make them private, log in on the server as `deploy`:
 `docker login ghcr.io -u <github user>` with a token that has `read:packages`.
 
 ## 3. GitHub settings
