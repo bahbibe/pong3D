@@ -145,3 +145,56 @@ class MarkNotificationReadTests(AuthTestCase):
 
     def test_malformed_uuid_is_not_found(self):
         self.assertEqual(self.mark("not-a-uuid").status_code, 404)
+
+    def test_not_found_message(self):
+        response = self.mark("not-a-uuid")
+        self.assertEqual(
+            response.json(), {"success": False, "message": "Notification does not exist"}
+        )
+
+    def test_mark_all_only_touches_own(self):
+        Notification.objects.create(user=self.user, message="m2", type="t")
+        response = self.client.post("/api/auth/notifications/mark_as_read/")
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Notification.objects.filter(user=self.user, is_read=False).exists())
+        self.theirs.refresh_from_db()
+        self.assertFalse(self.theirs.is_read)
+
+
+class UnreadOnMeTests(AuthTestCase):
+    """/api/auth/me/ lists unread notifications with their sender."""
+
+    def setUp(self):
+        super().setUp()
+        self.user = make_set_up_user("mera")
+        self.login("mera")
+
+    def add_from_new_sender(self, n):
+        sender = make_set_up_user(f"sender{n}")
+        Notification.objects.create(user=self.user, sender=sender, message="m", type="t")
+
+    def me_queries(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get("/api/auth/me/")
+        self.assertEqual(response.status_code, 200)
+        return response.json()["data"]["notifications"], len(ctx.captured_queries)
+
+    def test_query_count_does_not_grow_with_senders(self):
+        self.add_from_new_sender(1)
+        notifications, one = self.me_queries()
+        self.assertEqual(notifications[0]["sender"]["username"], "sender1")
+        for n in range(2, 5):
+            self.add_from_new_sender(n)
+        notifications, four = self.me_queries()
+        self.assertEqual(len(notifications), 4)
+        self.assertEqual(one, four)
+
+    def test_newest_first_and_system_notification(self):
+        self.add_from_new_sender(1)
+        Notification.objects.create(user=self.user, sender=None, message="sys", type="t")
+        notifications, _ = self.me_queries()
+        self.assertEqual(notifications[0]["message"], "sys")
+        self.assertIsNone(notifications[0]["sender"])

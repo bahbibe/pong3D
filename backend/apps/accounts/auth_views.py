@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import AllowAny
 
-from apps.notifications.models import Notification
+from apps.notifications import selectors as notification_selectors
 from apps.notifications.serializers import NotificationSerializer
 from core.errors import ServiceError
 from core.responses import ErrorResponse, SuccessResponse
@@ -71,7 +71,7 @@ def logout_user(request):
 
 @api_view(["GET"])
 def get_user(request):
-    unread = Notification.objects.filter(user=request.user, is_read=False).order_by("-created_at")
+    unread = notification_selectors.unread(request.user)
     return SuccessResponse(
         data={
             "user": UserSerializer(request.user).data,
