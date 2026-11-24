@@ -1,7 +1,6 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 
-from apps.accounts.auth_utils import is_authenticated
 from core.responses import ErrorResponse, SuccessResponse
 from core.uuids import parse_uuid
 
@@ -9,7 +8,6 @@ from .models import Notification
 
 
 @api_view(["POST"])
-@is_authenticated
 def mark_all_notifications_as_read(request):
     user = request.user
     Notification.objects.filter(user=user, is_read=False).update(is_read=True)
@@ -17,7 +15,6 @@ def mark_all_notifications_as_read(request):
 
 
 @api_view(["POST"])
-@is_authenticated
 def mark_notification_as_read(request, uuid):
     notification_uuid = parse_uuid(uuid)
     notification = (

@@ -108,13 +108,22 @@ SILENCED_SYSTEM_CHECKS = [
     "security.W021",
 ]
 
-# Only the JWT cookie authenticates API calls (api.auth_utils.is_authenticated).
-# DRF's defaults (Session + Basic) would otherwise run first in every
-# @api_view: Basic auth answered differently for a right and a wrong
-# password, a password oracle that skipped the login rate limit.
+# API authentication: the JWT access token cookie only (no session, no
+# Basic auth: Basic answered differently for a right and a wrong password,
+# a password oracle past the login rate limit). Every view needs a token
+# past the 2FA step unless it says otherwise (see apps/accounts/).
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "apps.accounts.authentication.JWTCookieAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": ["apps.accounts.permissions.IsTfaVerified"],
     "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.MultiPartParser",
+    ],
+    "EXCEPTION_HANDLER": "core.exceptions.handler",
 }
 
 ROOT_URLCONF = "config.urls"
@@ -246,6 +255,7 @@ LOGGING = {
     "loggers": {
         "apps": {"level": LOG_LEVEL},
         "config": {"level": LOG_LEVEL},
+        "core": {"level": LOG_LEVEL},
         "django.request": {"level": "ERROR"},
     },
 }

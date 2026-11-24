@@ -1,36 +1,26 @@
-import jwt
-from django.conf import settings
-from django.contrib.auth import get_user_model
 from channels.db import database_sync_to_async
-from apps.accounts.auth_utils import token_is_current
 
-User = get_user_model()
+from .authentication import COOKIE, InvalidToken, UnknownUser, is_tfa_verified, user_for_token
 
 
 @database_sync_to_async
-def get_user(decoded):
-    """
-    Return the user for a decoded token, or None.
-
-    A revoked token (old `ver`, see auth_utils.revoke_tokens) is refused.
-
-    A token issued before the 2FA step (`is_tfa_verified` False) does not
-    authenticate a user who has 2FA enabled, same rule as the HTTP decorator.
-    """
-    user = User.objects.select_related("profile").filter(id=decoded.get("id")).first()
-    if not user:
+def user_from_cookie(token):
+    """The token's user, or None. Same checks as the API
+    (authentication.JWTCookieAuthentication + permissions.IsTfaVerified):
+    a token issued before the 2FA step does not authenticate a user who has
+    2FA on."""
+    try:
+        user, claims = user_for_token(token)
+    except (InvalidToken, UnknownUser):
         return None
-    profile = getattr(user, "profile", None)
-    if profile is None or not token_is_current(decoded, user):
-        return None
-    if profile.is_tfa_enabled and decoded.get("is_tfa_verified") is not True:
+    if user.profile.is_tfa_enabled and not is_tfa_verified(claims):
         return None
     return user
 
 
 class WSAuthMiddleware:
     """
-    Authenticate WebSocket connections with the `access_token` cookie.
+    Authenticate WebSocket connections with the access token cookie.
 
     On any failure the connection goes on with the user set by the outer
     AuthMiddlewareStack (AnonymousUser), and each consumer closes it with
@@ -41,17 +31,11 @@ class WSAuthMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
-        access_token = scope.get("cookies", {}).get("access_token")
-        if access_token:
-            try:
-                decoded = jwt.decode(
-                    access_token, settings.JWT_SECRET, algorithms=["HS256"]
-                )
-                user = await get_user(decoded)
-                if user is not None:
-                    scope = dict(scope, user=user)
-            except jwt.InvalidTokenError:
-                pass
+        token = scope.get("cookies", {}).get(COOKIE)
+        if token:
+            user = await user_from_cookie(token)
+            if user is not None:
+                scope = dict(scope, user=user)
         return await self.app(scope, receive, send)
 
 

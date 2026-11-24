@@ -11,7 +11,8 @@ from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib.auth import get_user_model
 from .models import Profile
 from django.db.models import Q, F
-from apps.accounts.auth_utils import is_authenticated, revoke_tokens, set_access_token
+from apps.accounts.auth_utils import revoke_tokens, set_access_token
+from apps.accounts.authentication import is_tfa_verified
 from apps.accounts.auth_views import email_taken
 from django.db import IntegrityError, transaction
 from core.responses import SuccessResponse, ErrorResponse
@@ -24,7 +25,6 @@ User = get_user_model()
 
 
 @api_view(["POST"])
-@is_authenticated
 def setup_profile(request):
     user = request.user
     serializer = SetupProfileSerializer(data=request.data)
@@ -52,7 +52,6 @@ def setup_profile(request):
 
 
 @api_view(["PUT"])
-@is_authenticated
 def update_settings(request):
     user = request.user
     serializer = UpdateSettingsSerializer(data=request.data)
@@ -118,7 +117,7 @@ def update_settings(request):
     if password:
         # Sign out every other session, then give this one a fresh token.
         revoke_tokens(user)
-        set_access_token(response, user, is_tfa_verified=request.is_tfa_verified)
+        set_access_token(response, user, is_tfa_verified=is_tfa_verified(request.auth))
     return response
 
 
@@ -127,7 +126,6 @@ def user_not_found():
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_profile(request, uuid):
     profile_uuid = parse_uuid(uuid)
     profile = (
@@ -186,7 +184,6 @@ def get_profile(request, uuid):
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_profile_with_id(request, id):
     profile = (
         Profile.objects.select_related("user").filter(id=id).first()
@@ -218,7 +215,6 @@ MAX_SEARCH_RESULTS = 50
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_users(request):
     # Search by username only, and never return emails of other users.
     users = (

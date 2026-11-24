@@ -10,13 +10,11 @@ from .serializers import (
     FriendshipSerializer,
     BlockUserSerializer,
 )
-from apps.accounts.auth_utils import is_authenticated
 from core.responses import ErrorResponse, SuccessResponse
 from apps.notifications.services import notify
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_friends(request):
     user = request.user
     friends = Friendship.objects.filter(
@@ -35,7 +33,6 @@ def get_friends(request):
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_blocked_friends(request):
     user = request.user
     friends = Friendship.objects.filter(
@@ -56,7 +53,6 @@ def get_blocked_friends(request):
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_friends_request(request):
     user = request.user
     friends_request = Friendship.objects.filter(target_user=user, status="pending").select_related(
@@ -78,7 +74,6 @@ def get_friends_request(request):
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_sent_friends_request(request):
     user = request.user
     friends_request = Friendship.objects.filter(source_user=user, status="pending").select_related(
@@ -100,7 +95,6 @@ def get_sent_friends_request(request):
 
 
 @api_view(["POST"])
-@is_authenticated
 def send_friend_request(request):
     source_user = request.user
     serializer = SentFriendRequestSerializer(data=request.data)
@@ -146,7 +140,6 @@ def send_friend_request(request):
 
 
 @api_view(["POST"])
-@is_authenticated
 def accept_friend_request(request):
     user = request.user
     serializer = AcceptFriendRequestSerializer(data=request.data)
@@ -175,7 +168,6 @@ def accept_friend_request(request):
 
 
 @api_view(["POST"])
-@is_authenticated
 def block_user(request):
     user = request.user
     serializer = BlockUserSerializer(data=request.data)
@@ -216,7 +208,6 @@ def block_user(request):
 
 
 @api_view(["POST"])
-@is_authenticated
 def unblock_user(request):
     user = request.user
     serializer = BlockUserSerializer(data=request.data)

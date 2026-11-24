@@ -1,6 +1,5 @@
 from rest_framework.decorators import api_view
 from rest_framework import status
-from apps.accounts.auth_utils import is_authenticated
 from .models import Message
 from .serializers import MessageSerializer
 from .utils import get_chat_friendship
@@ -8,7 +7,6 @@ from core.responses import ErrorResponse, SuccessResponse
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_messages(request, conversation):
     friendship = get_chat_friendship(request.user, conversation)
     if friendship is None:

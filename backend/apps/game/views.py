@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
-from apps.accounts.auth_utils import is_authenticated
 from core.responses import SuccessResponse, ErrorResponse
 from .serializers import (
     GameHistorySerializer,
@@ -30,7 +29,6 @@ logger = logging.getLogger(__name__)
 
 
 @api_view(["GET"])
-@is_authenticated
 def stats(request):
     user = request.user
     games = Game.objects.filter(
@@ -55,7 +53,6 @@ def stats(request):
 
 
 @api_view(["GET"])
-@is_authenticated
 def history(request):
     user = request.user
     games = Game.objects.filter(
@@ -100,7 +97,6 @@ def history(request):
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_leaderboard(request):
     # Two queries in total (was two per user): count finished games and
     # wins per user in Python.
@@ -134,7 +130,6 @@ def get_leaderboard(request):
 
 
 @api_view(["POST"])
-@is_authenticated
 def create_tournament(request):
     with transaction.atomic():
         tournament = Tournament.objects.create(owner=request.user)
@@ -148,7 +143,6 @@ def create_tournament(request):
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_tournaments(request):
     # Free seats = empty player slots in the first round (t_round=2),
     # counted in the same query as the list.
@@ -176,7 +170,6 @@ def get_tournaments(request):
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_tournament_games(request, tournament_id):
     try:
         tournament = Tournament.objects.get(uuid=tournament_id)
@@ -189,7 +182,6 @@ def get_tournament_games(request, tournament_id):
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_game(request, game_id):
     try:
         game = Game.objects.get(id=game_id)
@@ -201,7 +193,6 @@ def get_game(request, game_id):
         )
 
 @api_view(["POST"])
-@is_authenticated
 def invite_friend(request, friend_id):
     source_user = request.user
     target_user = User.objects.filter(id=friend_id).first() if str(friend_id).isdigit() else None
@@ -224,7 +215,6 @@ def invite_friend(request, friend_id):
         return ErrorResponse(message="Could not create the game, please try again.")
 
 @api_view(["POST"])
-@is_authenticated
 def play_again(request, game_id):
     try:
         prev_game = Game.objects.get((Q(player1=request.user) 

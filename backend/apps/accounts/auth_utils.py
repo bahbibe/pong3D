@@ -1,20 +1,12 @@
-import functools
+"""Access tokens: issue, store in the cookie, revoke. Checking them is
+authentication.py (DRF) and ws_auth.py (websockets)."""
+
 import jwt
-import logging
 from django.conf import settings
-from django.utils import timezone
-from django.http.request import HttpRequest
-from rest_framework import status
 from django.db.models import F
-from django.contrib.auth import get_user_model
+from django.utils import timezone
+
 from .models import Profile
-from core.responses import ErrorResponse, SuccessResponse
-from .serializers import UserSerializer
-
-User = get_user_model()
-
-
-logger = logging.getLogger(__name__)
 
 
 def generate_token(payload):
@@ -53,77 +45,3 @@ def revoke_tokens(user):
 def token_is_current(decoded, user):
     """False for a token issued before the last revoke_tokens() call."""
     return decoded.get("ver", 0) == user.profile.token_version
-
-
-def is_authenticated(view=None, *, allow_unverified_tfa=False):
-    """
-    Decorator to check if the user is authenticated.
-
-    When the user has 2FA enabled, a token issued after the password step only
-    (`is_tfa_verified` False) is rejected, unless the view is explicitly marked
-    with `allow_unverified_tfa=True` (2FA verify and logout).
-
-    Usage: `@is_authenticated` or `@is_authenticated(allow_unverified_tfa=True)`.
-    """
-    if view is None:
-        return functools.partial(
-            is_authenticated, allow_unverified_tfa=allow_unverified_tfa
-        )
-
-    @functools.wraps(view)
-    def _decorator(request: HttpRequest, *args, **kwargs):
-        if "access_token" not in request.COOKIES:
-            return ErrorResponse(
-                message="No access token found",
-                status_code=status.HTTP_401_UNAUTHORIZED,
-            )
-
-        access_token = request.COOKIES["access_token"]
-        try:
-            decoded = jwt.decode(
-                access_token, settings.JWT_SECRET, algorithms=["HS256"]
-            )
-
-            user = (
-                User.objects.select_related("profile")
-                .filter(id=decoded.get("id"))
-                .first()
-            )
-            if not user:
-                return ErrorResponse(
-                    message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
-                )
-            if not token_is_current(decoded, user):
-                return ErrorResponse(
-                    message="Invalid access token",
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                )
-
-            request.user = user
-            is_tfa_verified = decoded.get("is_tfa_verified") is True
-            request.is_tfa_verified = is_tfa_verified
-            if (
-                user.profile.is_tfa_enabled
-                and not is_tfa_verified
-                and not allow_unverified_tfa
-            ):
-                return SuccessResponse(
-                    data={"user": UserSerializer(user).data, "is_tfa_verified": False},
-                    message="Two factor authentication is enabled",
-                )
-            return view(request, *args, **kwargs)
-
-        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
-            return ErrorResponse(
-                message="Invalid access token", status_code=status.HTTP_401_UNAUTHORIZED
-            )
-
-        except Exception:
-            # Keep the traceback in the logs, not in the response.
-            logger.exception("unhandled error in %s", request.path)
-            return ErrorResponse(
-                message="Something went wrong!, Please try again later.",
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-    return _decorator

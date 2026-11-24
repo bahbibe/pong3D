@@ -1,4 +1,6 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import AllowAny
+from apps.accounts.permissions import IsAuthenticated
 from .serializers import (
     RegisterUserSerializer,
     UserSerializer,
@@ -11,7 +13,7 @@ from django.contrib.auth import get_user_model
 from .models import Profile
 from django.shortcuts import redirect
 from django.contrib.auth.hashers import check_password
-from .auth_utils import is_authenticated, revoke_tokens, set_access_token
+from .auth_utils import revoke_tokens, set_access_token
 from django.db.models import Q
 from django.utils import timezone
 from . import rate_limit
@@ -166,6 +168,8 @@ def find_or_create_intra_user(user_data):
 
 
 @api_view(["POST"])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def login_user(request):
     serailizer = LoginUserSerializer(data=request.data)
 
@@ -218,6 +222,8 @@ def login_user(request):
 
 
 @api_view(["POST"])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def register_user(request):
     serializer = RegisterUserSerializer(data=request.data)
 
@@ -255,7 +261,7 @@ def register_user(request):
 
 
 @api_view(["POST"])
-@is_authenticated(allow_unverified_tfa=True)
+@permission_classes([IsAuthenticated])
 def logout_user(request):
     # Deleting the cookie is not enough: a copy of the token would stay valid
     # until it expires. Revoking ends every session of this user.
@@ -266,7 +272,6 @@ def logout_user(request):
 
 
 @api_view(["GET"])
-@is_authenticated
 def get_user(request):
     user = request.user
     serializer = UserSerializer(user)
@@ -283,6 +288,8 @@ INTRA_STATE_MAX_AGE = 10 * 60
 
 
 @api_view(["GET"])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def login_intra(request):
     client_id = os.getenv("INTRA_CLIENT_ID")
     callback_uri = urllib.parse.quote(
@@ -310,6 +317,8 @@ def login_intra(request):
 
 
 @api_view(["GET"])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def login_intra_callback(request):
     code = request.GET.get("code")
     error = request.GET.get("error")
@@ -385,7 +394,6 @@ def login_intra_callback(request):
 
 
 @api_view(["POST"])
-@is_authenticated
 def enable_twofa(request):
     user = request.user
     if user.profile.is_tfa_enabled:
@@ -417,7 +425,6 @@ def enable_twofa(request):
 
 
 @api_view(["POST"])
-@is_authenticated
 def confirm_twofa(request):
     user = request.user
     code = request.data.get("code")
@@ -441,7 +448,7 @@ def confirm_twofa(request):
 
 
 @api_view(["POST"])
-@is_authenticated(allow_unverified_tfa=True)
+@permission_classes([IsAuthenticated])
 def verify_twofa(request):
     user = request.user
     if not user.profile.is_tfa_enabled or not user.profile.tfa_secret:
@@ -461,7 +468,6 @@ def verify_twofa(request):
 
 
 @api_view(["POST"])
-@is_authenticated
 def disable_twofa(request):
     user = request.user
     if not user.profile.is_tfa_enabled or not user.profile.tfa_secret:

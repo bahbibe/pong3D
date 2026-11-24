@@ -201,7 +201,7 @@ class PrivacyAndRobustnessTests(AuthTestCase):
         from unittest import mock
 
         with mock.patch("apps.accounts.views.blocked_user_ids", side_effect=RuntimeError("secret detail")):
-            with self.assertLogs("apps.accounts.auth_utils", level="ERROR"):
+            with self.assertLogs("core.exceptions", level="ERROR"):
                 response = self.client.get("/api/auth/users/")
         self.assertEqual(response.status_code, 500)
         self.assertNotIn("secret detail", response.content.decode())
