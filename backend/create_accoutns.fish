@@ -1,7 +1,9 @@
 #!/usr/bin/env fish
 
 # Define the API endpoint
-set API_URL "http://localhost:8000/api/auth/register/"
+# Talks to the backend directly (BACKEND_PORT from .env, 8000 by default).
+set -q BACKEND_PORT; or set BACKEND_PORT 8000
+set API_URL "http://localhost:$BACKEND_PORT/api/auth/register/"
 
 # Function to register a single user
 function register_user

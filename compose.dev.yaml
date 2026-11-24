@@ -1,0 +1,19 @@
+# Dev: code is bind-mounted. nginx serves ./frontend as it is on disk, so a
+# browser refresh shows frontend edits. The backend (daphne) does not reload
+# by itself yet: `make restart s=backend` after a Python change.
+services:
+  backend:
+    volumes:
+      - ./backend/backend:/backend
+    ports:
+      # Direct access for the seed script and /admin. Set BACKEND_PORT in
+      # .env if 8000 is taken on your machine.
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
+
+  nginx:
+    ports:
+      - "1337:1337"
+    volumes:
+      - ./frontend:/srv/frontend:ro
+      # Uploaded avatars (written by the backend into the bind mount above).
+      - ./backend/backend/avatars:/srv/avatars:ro

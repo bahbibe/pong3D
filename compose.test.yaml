@@ -1,0 +1,33 @@
+# make test: the Django suite in the backend image against a throwaway
+# Postgres (tmpfs). Separate project, no host ports, removed afterwards.
+name: pong3d-test
+
+services:
+  test-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  tests:
+    build: ./backend/backend
+    # Skip entrypoint.sh (migrate + presence reset need the real stack).
+    entrypoint: []
+    environment:
+      DJANGO_SETTINGS_MODULE: ft_transcendence.test_settings
+      TEST_POSTGRES_HOST: test-db
+      TEST_POSTGRES_PORT: "5432"
+    command: >-
+      sh -c "python manage.py makemigrations --check --dry-run
+      && python manage.py test --noinput"
+    depends_on:
+      test-db:
+        condition: service_healthy

@@ -1,0 +1,76 @@
+# Shared services. Run through the Makefile, which adds compose.dev.yaml or
+# compose.prod.yaml on top (make dev / make prod).
+name: pong3d
+
+services:
+  db:
+    # Pinned: postgres 18+ images refuse a volume at /var/lib/postgresql/data,
+    # and a major upgrade needs pg_upgrade on the existing volume anyway.
+    image: postgres:16-alpine
+    env_file: .env
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    init: true
+
+  redis:
+    image: redis:8.10.3-alpine
+    restart: unless-stopped
+    init: true
+
+  backend:
+    # ONE REPLICA ONLY. Running games, bot games and the matchmaking state
+    # live in this process's memory: a second backend would split games
+    # between processes. Never scale this service; every restart or deploy
+    # drops the games in progress.
+    build: ./backend/backend
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+    init: true
+
+  nginx:
+    # Serves the frontend and proxies /api and /ws to the backend.
+    build:
+      context: .
+      dockerfile: infra/nginx/Dockerfile
+    depends_on:
+      - backend
+    restart: unless-stopped
+    init: true
+
+  adminer:
+    image: adminer:6.3.0
+    ports:
+      - "127.0.0.1:8080:8080"
+    # Not the app .env: adminer does not need JWT or OAuth secrets.
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    restart: unless-stopped
+    init: true
+
+  prometheus:
+    image: prom/prometheus:v3.16.0
+    ports:
+      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./infra/prometheus/:/etc/prometheus/:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    restart: unless-stopped
+    init: true
+
+  grafana:
+    image: grafana/grafana:13.3.1
+    ports:
+      # Default login is admin/admin; keep it local.
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped
+    init: true
+
+volumes:
+  dbdata:
+    # Same volume the old backend/docker-compose.yml used: dev data is kept.
+    name: dbdata

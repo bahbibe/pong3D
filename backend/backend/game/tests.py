@@ -294,11 +294,11 @@ class GameActionViewTests(TransactionTestCase):
     def test_create_tournament_post_path_used_by_frontend(self):
         # API.js must use the trailing slash: a POST to the slash-less URL
         # is redirected and comes back as a GET.
-        api_js = (
-            __import__("pathlib").Path(__file__).resolve().parents[3]
-            / "frontend/static/js/API/API.js"
-        )
-        if api_js.exists():  # not present inside the backend container
+        parents = __import__("pathlib").Path(__file__).resolve().parents
+        # The repo root is 3 levels up; inside the backend image there is no
+        # frontend (and fewer parent folders), so only the request is checked.
+        api_js = parents[3] / "frontend/static/js/API/API.js" if len(parents) > 3 else None
+        if api_js is not None and api_js.exists():
             self.assertRegex(api_js.read_text(), r"/api/game/create_tournament/[`\"']")
         response = self.client.post("/api/game/create_tournament/")
         self.assertEqual(response.status_code, 200, response.content)

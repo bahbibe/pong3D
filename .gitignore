@@ -1,0 +1,5 @@
+# Local config made by `make env` (secrets).
+.env
+.env.tmp
+# Old frontend dependencies (the Express server is gone).
+frontend/node_modules/

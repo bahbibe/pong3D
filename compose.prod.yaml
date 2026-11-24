@@ -1,0 +1,17 @@
+# Prod: images only, no bind mounts. Avatars live in a named volume shared
+# by the backend (writes) and nginx (serves). Still the self-signed cert on
+# port 1337 for now; real TLS on 80/443 comes later.
+services:
+  backend:
+    volumes:
+      - avatars:/backend/avatars
+
+  nginx:
+    ports:
+      - "1337:1337"
+    volumes:
+      - avatars:/srv/avatars:ro
+
+volumes:
+  # Filled from the backend image on first use (default avatar included).
+  avatars:

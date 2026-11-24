@@ -1,0 +1,5 @@
+# Used by BuildKit for infra/nginx/Dockerfile (context = repo root).
+*
+!infra/nginx/
+!frontend/index.html
+!frontend/static/

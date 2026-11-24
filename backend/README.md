@@ -36,20 +36,5 @@ Gameplay and user experience
 ## Server-Side Pong
 - [x] Major module: Replacing Basic Pong with Server-Side Pong and Implementing an API.
 - [ ] Major module: Enabling Pong Gameplay via CLI against Web Users with API Integration.
-## Running locally
 
-1. `cp backend/backend/.env.example backend/backend/.env` and fill it in. `DJANGO_SECRET_KEY` and `JWT_SECRET` are required.
-2. Start the backend stack first (it creates the shared network): `docker compose -f backend/docker-compose.yml up --build`
-3. Start the frontend: `docker compose -f frontend/docker-compose.yml up --build`
-4. Open https://localhost:1337. nginx serves the frontend, `/api`, `/ws` and `/avatars` on this one origin.
-
-Adminer (8080), Grafana (3000), Prometheus (9090) and the Django port (8000) are bound to 127.0.0.1 only.
-
-## Tests
-
-```bash
-docker run -d --rm --name pong3d-test-pg -p 127.0.0.1:55432:5432 \
-  -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test postgres:16-alpine
-cd backend/backend
-DJANGO_SETTINGS_MODULE=ft_transcendence.test_settings python manage.py test
-```
+Setup, running and tests: see the README at the repo root.

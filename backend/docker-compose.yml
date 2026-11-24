@@ -60,7 +60,7 @@ services:
     ports:
       - "127.0.0.1:9090:9090"
     volumes:
-      - ./prometheus/:/etc/prometheus/
+      - ../infra/prometheus/:/etc/prometheus/
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     networks:
@@ -79,7 +79,9 @@ services:
     init: true
   nginx:
     container_name: nginx
-    build: ./nginx
+    build:
+      context: ..
+      dockerfile: infra/nginx/Dockerfile
     ports:
       - "1337:1337"
       # - "80:80"
