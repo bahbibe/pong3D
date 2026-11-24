@@ -1,0 +1,68 @@
+# Monthly update PRs, minor and patch bumps grouped per ecosystem.
+# Security updates are separate and come as soon as an advisory is out
+# (turn on "Dependabot security updates" in the repository settings).
+#
+# Not covered, bump by hand: the uv version (0.11.32) in backend/Dockerfile,
+# the Makefile and ci.yml (change all three together), and pip-audit and
+# pre-commit in ci.yml.
+version: 2
+
+updates:
+  - package-ecosystem: uv
+    directory: /backend
+    schedule:
+      interval: monthly
+    # Wait a week after a release (time for a bad release to be pulled).
+    cooldown:
+      default-days: 7
+    groups:
+      python:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directories: [/backend, /infra/nginx]
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    ignore:
+      # The lock is for Python 3.12 (requires-python in pyproject.toml).
+      - dependency-name: python
+        update-types: [version-update:semver-major, version-update:semver-minor]
+    groups:
+      images:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    ignore:
+      # A new Postgres major needs a dump and restore of the volume.
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
+    groups:
+      compose-images:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        update-types: [minor, patch]
+
+  - package-ecosystem: pre-commit
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      hooks:
+        update-types: [minor, patch]

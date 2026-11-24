@@ -220,6 +220,11 @@ before building images.
 - Upgrade one package: `make lock ARGS="--upgrade-package django"`.
 - Upgrade everything within the ranges: `make lock ARGS=--upgrade`.
 
+Dependabot (`.github/dependabot.yml`) opens grouped update PRs once a
+month for uv, the Dockerfiles, the compose images, the Actions and the
+pre-commit hooks. Postgres majors and Python minors are skipped (they need
+a migration of their own).
+
 Commit `uv.lock` together with the change. `make lock` runs uv 0.11.32 in
 a container. To move to a newer uv, change that version in the Makefile,
 `backend/Dockerfile` and `.github/workflows/ci.yml` together.
