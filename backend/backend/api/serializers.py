@@ -17,6 +17,18 @@ def username_field(required):
     )
 
 
+MAX_AVATAR_BYTES = 2 * 1024 * 1024
+
+
+def check_avatar_size(image):
+    if image.size > MAX_AVATAR_BYTES:
+        raise serializers.ValidationError("Avatar must be 2 MB or smaller.")
+
+
+def avatar_field():
+    return serializers.ImageField(required=False, validators=[check_avatar_size])
+
+
 def check_password_strength(password, user):
     """Run AUTH_PASSWORD_VALIDATORS and turn errors into a serializer error."""
     try:
@@ -70,7 +82,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 
 class SetupProfileSerializer(serializers.ModelSerializer):
-    avatar = serializers.ImageField(required=False)
+    avatar = avatar_field()
     username = username_field(required=False)
 
     class Meta:
@@ -122,7 +134,7 @@ class PublicUserSerializer(UserSerializer):
 
 
 class UpdateSettingsSerializer(serializers.ModelSerializer):
-    avatar = serializers.ImageField(required=False)
+    avatar = avatar_field()
     username = username_field(required=False)
     email = serializers.EmailField(required=False, allow_blank=True)
     password = serializers.CharField(required=False, allow_blank=True, write_only=True)

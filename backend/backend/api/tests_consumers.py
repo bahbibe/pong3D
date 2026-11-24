@@ -96,3 +96,27 @@ class PresenceTests(TransactionTestCase):
         anon = await self.connect("/ws/notifications/")
         output = await anon.receive_output(timeout=2)
         self.assertEqual(output.get("code"), 4001)
+
+
+class RevokedTokenSocketTests(TransactionTestCase):
+    def setUp(self):
+        self.alice = make_user("alice")
+        patcher = mock.patch.object(consumer, "r", FakeRedis())
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    async def test_socket_with_revoked_token_is_rejected(self):
+        from channels.db import database_sync_to_async
+        from .auth_utils import revoke_tokens
+
+        token = token_for(self.alice)
+        await database_sync_to_async(revoke_tokens)(self.alice)
+        communicator = WebsocketCommunicator(
+            application,
+            "/ws/status/",
+            headers=[(b"origin", b"http://localhost"), (b"cookie", f"access_token={token}".encode())],
+        )
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+        output = await communicator.receive_output(timeout=2)
+        self.assertEqual(output.get("code"), 4001)

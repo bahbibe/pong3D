@@ -10,7 +10,9 @@ from django.contrib.auth.models import User
 from .models import Profile, Notification
 from django.shortcuts import redirect
 from django.contrib.auth.hashers import check_password
-from .auth_utils import is_authenticated, set_access_token
+from .auth_utils import is_authenticated, revoke_tokens, set_access_token
+from django.db.models import Q
+from django.utils import timezone
 from . import rate_limit
 from django.conf import settings
 from utils.responses import ErrorResponse, SuccessResponse
@@ -33,11 +35,23 @@ INTRA_TIMEOUT_SECONDS = 10
 def check_totp(user, code):
     """
     Check a TOTP code and count failures per user (rate_limit "tfa-user").
-    Returns False while the user is blocked, without checking the code.
+    Returns False while the user is blocked, without checking the code, and
+    for a code that was already accepted once.
     """
     if rate_limit.is_blocked("tfa-user", user.id):
         return False
-    if pyotp.TOTP(user.profile.tfa_secret).verify(str(code)):
+    profile = user.profile
+    totp = pyotp.TOTP(profile.tfa_secret)
+    now = timezone.now()
+    counter = totp.timecode(now)
+    # Each code works once: claim its time step atomically, so a code seen
+    # by someone else (shoulder surfing, a proxy log) cannot be replayed.
+    if totp.verify(str(code), for_time=now) and (
+        Profile.objects.filter(pk=profile.pk)
+        .filter(Q(tfa_last_counter__isnull=True) | Q(tfa_last_counter__lt=counter))
+        .update(tfa_last_counter=counter)
+    ):
+        profile.tfa_last_counter = counter
         rate_limit.reset("tfa-user", user.id)
         return True
     rate_limit.record_failure("tfa-user", user.id)
@@ -212,7 +226,10 @@ def register_user(request):
 
 @api_view(["POST"])
 @is_authenticated(allow_unverified_tfa=True)
-def logout_user(_):
+def logout_user(request):
+    # Deleting the cookie is not enough: a copy of the token would stay valid
+    # until it expires. Revoking ends every session of this user.
+    revoke_tokens(request.user)
     response = SuccessResponse(message="User logged out")
     response.delete_cookie("access_token", samesite=settings.AUTH_COOKIE_SAMESITE)
     return response
@@ -346,7 +363,7 @@ def enable_twofa(request):
 
     secret = pyotp.random_base32()
     user.profile.tfa_secret = secret
-    user.profile.save()
+    user.profile.save(update_fields=["tfa_secret"])
     tfa_code = pyotp.totp.TOTP(secret).provisioning_uri(
         user.username, issuer_name="ft_transcendence"
     )
@@ -386,7 +403,7 @@ def confirm_twofa(request):
         return ErrorResponse(message="Invalid code")
 
     user.profile.is_tfa_enabled = True
-    user.profile.save()
+    user.profile.save(update_fields=["is_tfa_enabled"])
     # The user just proved they hold the secret, so the current session counts
     # as verified. Without this the next request would be sent back to 2FA.
     response = SuccessResponse(message="2FA confirmed")
@@ -431,5 +448,5 @@ def disable_twofa(request):
 
     user.profile.is_tfa_enabled = False
     user.profile.tfa_secret = None
-    user.profile.save()
+    user.profile.save(update_fields=["is_tfa_enabled", "tfa_secret"])
     return SuccessResponse(message="2FA disabled successfully")

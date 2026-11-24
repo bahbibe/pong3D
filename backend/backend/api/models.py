@@ -28,6 +28,11 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     is_tfa_enabled = models.BooleanField(default=False)
     tfa_secret = models.CharField(max_length=255, null=True, blank=True)
+    # TOTP time step of the last accepted code. A code is only accepted once.
+    tfa_last_counter = models.BigIntegerField(null=True, blank=True)
+    # Stored in every access token. Bumping it (logout, password change)
+    # invalidates all tokens issued before.
+    token_version = models.IntegerField(default=0)
 
 
 class Notification(models.Model):

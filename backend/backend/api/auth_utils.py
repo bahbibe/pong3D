@@ -6,7 +6,8 @@ from django.conf import settings
 from django.utils import timezone
 from django.http.request import HttpRequest
 from rest_framework import status
-from .models import User
+from django.db.models import F
+from .models import User, Profile
 from utils.responses import ErrorResponse, SuccessResponse
 from .serializers import UserSerializer
 
@@ -26,6 +27,7 @@ def set_access_token(response, user, is_tfa_verified):
         {
             "id": user.id,
             "is_tfa_verified": is_tfa_verified,
+            "ver": user.profile.token_version,
             "exp": access_token_liftime,
         }
     )
@@ -38,6 +40,17 @@ def set_access_token(response, user, is_tfa_verified):
         samesite=settings.AUTH_COOKIE_SAMESITE,
     )
     return response
+
+
+def revoke_tokens(user):
+    """Invalidate every access token issued to `user` so far."""
+    Profile.objects.filter(user=user).update(token_version=F("token_version") + 1)
+    user.profile.refresh_from_db(fields=["token_version"])
+
+
+def token_is_current(decoded, user):
+    """False for a token issued before the last revoke_tokens() call."""
+    return decoded.get("ver", 0) == user.profile.token_version
 
 
 def is_authenticated(view=None, *, allow_unverified_tfa=False):
@@ -69,14 +82,24 @@ def is_authenticated(view=None, *, allow_unverified_tfa=False):
                 access_token, os.getenv("JWT_SECRET"), algorithms=["HS256"]
             )
 
-            user = User.objects.filter(id=decoded.get("id")).first()
+            user = (
+                User.objects.select_related("profile")
+                .filter(id=decoded.get("id"))
+                .first()
+            )
             if not user:
                 return ErrorResponse(
                     message="User does not exist", status_code=status.HTTP_404_NOT_FOUND
                 )
+            if not token_is_current(decoded, user):
+                return ErrorResponse(
+                    message="Invalid access token",
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                )
 
             request.user = user
             is_tfa_verified = decoded.get("is_tfa_verified") is True
+            request.is_tfa_verified = is_tfa_verified
             if (
                 user.profile.is_tfa_enabled
                 and not is_tfa_verified

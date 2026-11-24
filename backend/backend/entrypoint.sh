@@ -5,4 +5,7 @@ set -e
 # they would only exist inside this container and drift between machines.
 python3 manage.py migrate --noinput
 
+# Nobody is connected yet: drop online counts left over from a crash.
+python3 manage.py reset_presence
+
 exec "$@"

@@ -11,7 +11,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from .models import User, Profile, Notification
 from django.db.models import Q, F
-from api.auth_utils import is_authenticated
+from api.auth_utils import is_authenticated, revoke_tokens, set_access_token
 from utils.responses import SuccessResponse, ErrorResponse
 from friends.models import Friendship
 from game.models import Game
@@ -39,7 +39,7 @@ def setup_profile(request):
         profile.avatar = serializer.validated_data.get("avatar", profile.avatar)
         profile.is_setup = True
         user.username = serializer.validated_data.get("username", user.username)
-        profile.save()
+        profile.save(update_fields=["avatar", "is_setup"])
         user.save()
         return SuccessResponse(data=UserSerializer(user).data)
 
@@ -102,9 +102,14 @@ def update_settings(request):
     if password:
         user.set_password(password)
 
-    profile.save()
+    profile.save(update_fields=["avatar"])
     user.save()
-    return SuccessResponse(data=UserSerializer(user).data)
+    response = SuccessResponse(data=UserSerializer(user).data)
+    if password:
+        # Sign out every other session, then give this one a fresh token.
+        revoke_tokens(user)
+        set_access_token(response, user, is_tfa_verified=request.is_tfa_verified)
+    return response
 
 
 def parse_uuid(value):

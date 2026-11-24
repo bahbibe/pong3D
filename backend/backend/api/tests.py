@@ -4,6 +4,7 @@ import pyotp
 from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.test import TestCase, TransactionTestCase
+from django.utils import timezone
 
 from .models import Profile
 
@@ -99,6 +100,32 @@ class TwoFactorTests(AuthTestCase):
     def verified_login(self):
         self.login("alice")
         self.post_json("/api/auth/twofa/verify/", {"code": self.code()})
+        self.forget_used_code()
+
+    def forget_used_code(self):
+        # A code works once. Tests that need a second code inside the same
+        # 30 s step act as if the next step had started.
+        Profile.objects.filter(user=self.user).update(tfa_last_counter=None)
+
+    def test_code_is_accepted_only_once(self):
+        code = self.code()
+        self.login("alice")
+        first = self.post_json("/api/auth/twofa/verify/", {"code": code})
+        self.assertEqual(first.status_code, 200, first.content)
+
+        self.login("alice")
+        replay = self.post_json("/api/auth/twofa/verify/", {"code": code})
+        self.assertEqual(replay.status_code, 400)
+        self.assert_blocked_by_2fa(self.client.get("/api/auth/me/"))
+
+    def test_code_from_an_older_step_is_refused(self):
+        totp = pyotp.TOTP(self.secret)
+        Profile.objects.filter(user=self.user).update(
+            tfa_last_counter=totp.timecode(timezone.now())
+        )
+        self.login("alice")
+        response = self.post_json("/api/auth/twofa/verify/", {"code": self.code()})
+        self.assertEqual(response.status_code, 400)
 
     def test_disable_requires_a_code(self):
         self.verified_login()
@@ -612,8 +639,10 @@ class UniqueIntraIdMigrationTests(TransactionTestCase):
         from django.db.migrations.executor import MigrationExecutor
 
         before = [("api", "0015_backfill_missing_profiles")]
-        after = [("api", "0016_unique_intra_id")]
         executor = MigrationExecutor(connection)
+        # Forward to the latest state (not just 0016), so later tests and the
+        # current models find every column.
+        after = executor.loader.graph.leaf_nodes()
         executor.migrate(before)
         old_apps = executor.loader.project_state(before).apps
         OldUser = old_apps.get_model("auth", "User")
@@ -628,3 +657,132 @@ class UniqueIntraIdMigrationTests(TransactionTestCase):
 
         self.assertEqual(Profile.objects.get(id=ids[0]).intra_id, 55)
         self.assertIsNone(Profile.objects.get(id=ids[1]).intra_id)
+
+
+class TokenRevocationTests(AuthTestCase):
+    def setUp(self):
+        super().setUp()
+        self.user = make_user("dave")
+
+    def test_token_copied_before_logout_is_refused(self):
+        self.login("dave")
+        stolen = self.client.cookies["access_token"].value
+        self.assertEqual(self.client.post("/api/auth/logout/").status_code, 200)
+
+        self.client.cookies["access_token"] = stolen
+        response = self.client.get("/api/auth/me/")
+        self.assertEqual(response.status_code, 401)
+
+    def test_login_after_logout_works(self):
+        self.login("dave")
+        self.client.post("/api/auth/logout/")
+        self.login("dave")
+        self.assertEqual(self.client.get("/api/auth/me/").status_code, 200)
+
+    def test_password_change_ends_other_sessions_only(self):
+        from django.test import Client
+        from django.test.client import encode_multipart, BOUNDARY, MULTIPART_CONTENT
+
+        other = Client()
+        other.post(
+            "/api/auth/login/",
+            data=json.dumps({"username": "dave", "password": PASSWORD}),
+            content_type="application/json",
+        )
+        self.login("dave")
+        response = self.client.put(
+            "/api/auth/settings/update/",
+            data=encode_multipart(BOUNDARY, {
+                "username": "dave",
+                "password": "Another-Strong-Pass-7",
+                "confirm_password": "Another-Strong-Pass-7",
+                "current_password": PASSWORD,
+            }),
+            content_type=MULTIPART_CONTENT,
+        )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.assertEqual(self.client.get("/api/auth/me/").status_code, 200)
+        self.assertEqual(other.get("/api/auth/me/").status_code, 401)
+
+    def test_old_tokens_without_version_still_work_until_revoked(self):
+        # Tokens issued before this change have no "ver" claim.
+        from datetime import timedelta
+        from .auth_utils import generate_token, revoke_tokens
+
+        token = generate_token(
+            {"id": self.user.id, "is_tfa_verified": True,
+             "exp": timezone.now() + timedelta(hours=1)}
+        )
+        self.client.cookies["access_token"] = token
+        self.assertEqual(self.client.get("/api/auth/me/").status_code, 200)
+        revoke_tokens(self.user)
+        self.assertEqual(self.client.get("/api/auth/me/").status_code, 401)
+
+
+class AvatarSizeTests(AuthTestCase):
+    def setUp(self):
+        super().setUp()
+        self.user = make_user("erin")
+        self.login("erin")
+
+    def png(self, side):
+        import io
+        import os
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from PIL import Image
+
+        # Random pixels do not compress, so the file size follows `side`.
+        image = Image.frombytes("RGB", (side, side), os.urandom(side * side * 3))
+        buffer = io.BytesIO()
+        image.save(buffer, format="PNG")
+        return SimpleUploadedFile("a.png", buffer.getvalue(), content_type="image/png")
+
+    def test_large_avatar_is_refused(self):
+        avatar = self.png(1000)  # about 3 MB
+        self.assertGreater(avatar.size, 2 * 1024 * 1024)
+        response = self.client.post("/api/auth/setup/", {"username": "erin", "avatar": avatar})
+        self.assertEqual(response.status_code, 400, response.content)
+        self.assertIn("avatar", response.json()["errors"])
+        self.user.profile.refresh_from_db()
+        self.assertEqual(str(self.user.profile.avatar), "avatars/profile_default.jpg")
+
+    def test_small_avatar_is_saved(self):
+        import shutil
+        import tempfile
+        from django.test import override_settings
+
+        media = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, media, True)
+        with override_settings(MEDIA_ROOT=media):
+            response = self.client.post(
+                "/api/auth/setup/", {"username": "erin", "avatar": self.png(64)}
+            )
+        self.assertEqual(response.status_code, 200, response.content)
+        self.user.profile.refresh_from_db()
+        self.assertTrue(str(self.user.profile.avatar).startswith("avatars/"))
+        self.assertNotEqual(str(self.user.profile.avatar), "avatars/profile_default.jpg")
+
+
+class ResetPresenceCommandTests(TestCase):
+    def test_clears_online_counts(self):
+        from io import StringIO
+        from unittest import mock
+        from django.core.management import call_command
+
+        client = mock.Mock()
+        with mock.patch("redis.Redis", return_value=client):
+            call_command("reset_presence", stdout=StringIO())
+        client.delete.assert_called_once_with("online_counts")
+
+    def test_redis_down_does_not_fail_startup(self):
+        from io import StringIO
+        from unittest import mock
+        import redis
+        from django.core.management import call_command
+
+        client = mock.Mock()
+        client.delete.side_effect = redis.ConnectionError("down")
+        err = StringIO()
+        with mock.patch("redis.Redis", return_value=client):
+            call_command("reset_presence", stdout=StringIO(), stderr=err)
+        self.assertIn("redis unavailable", err.getvalue())
