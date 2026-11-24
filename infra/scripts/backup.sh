@@ -23,8 +23,13 @@ $COMPOSE exec -T db sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Fc' \
     > "$dir/db-$stamp.dump.part"
 mv "$dir/db-$stamp.dump.part" "$dir/db-$stamp.dump"
 
-$COMPOSE exec -T backend tar czf - -C /backend/avatars . \
-    > "$dir/avatars-$stamp.tgz.part"
+# Through the running backend, or a one-off container when it is down
+# (for example a deploy that failed halfway): same avatars volume.
+if [ -n "$($COMPOSE ps -q --status running backend 2>/dev/null)" ]; then
+    $COMPOSE exec -T backend tar czf - -C /backend/avatars .
+else
+    $COMPOSE run --rm -T --no-deps --entrypoint tar backend czf - -C /backend/avatars .
+fi > "$dir/avatars-$stamp.tgz.part"
 mv "$dir/avatars-$stamp.tgz.part" "$dir/avatars-$stamp.tgz"
 
 prune() { # prune PATTERN: delete all but the newest $keep files
