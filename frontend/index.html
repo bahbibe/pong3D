@@ -21,15 +21,10 @@
   <link rel="stylesheet" href="/static/css/index.css" />
   <link rel="stylesheet" href="/static/css/style.css" />
   <link rel="shortcut icon" href="/static/favicon.svg" type="image/x-icon">
-  <script type="importmap">
-    {
-      "imports": {
-        "three": "https://cdn.jsdelivr.net/npm/three@v0.170.0/build/three.module.js",
-        "three/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/",
-        "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.170.0/examples/jsm/"
-      }
-    }
-  </script>
+  <!-- three.js is served from static/vendor (CSP allows no third-party
+       scripts except the pinned Bootstrap bundle). If you edit this block,
+       update its sha256 in the nginx Content-Security-Policy. -->
+  <script type="importmap">{"imports": {"three": "/static/vendor/three-0.170.0/build/three.module.min.js", "three/addons/": "/static/vendor/three-0.170.0/examples/jsm/"}}</script>
 
 </head>
 
