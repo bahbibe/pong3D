@@ -4,3 +4,6 @@
 
 # style(backend): ruff format
 8718fd3c41a235d1f61c4371c01af967fe398bb5
+
+# style: trailing whitespace and final newlines
+cd2fe36b50da05ccd5fca6f8098a8646fb5547f8

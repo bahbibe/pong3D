@@ -39,12 +39,14 @@ jobs:
           python-version: "3.12"
           enable-cache: true
           cache-dependency-glob: backend/uv.lock
-      - name: Install dependencies (exactly uv.lock)
-        run: uv sync --locked --no-dev
+      - name: Install dependencies (exactly uv.lock, plus coverage)
+        run: uv sync --locked --no-dev --group test
       - name: Check for missing migrations
         run: uv run --no-sync python manage.py makemigrations --check --dry-run
-      - name: Run tests
-        run: uv run --no-sync python manage.py test --noinput
+      - name: Run tests with coverage
+        run: uv run --no-sync coverage run manage.py test --noinput
+      - name: Coverage report (fails below fail_under in pyproject.toml)
+        run: uv run --no-sync coverage report
 
   deploy-check:
     # manage.py check --deploy with prod-like settings (test_settings is not
@@ -75,6 +77,18 @@ jobs:
         run: |
           DJANGO_SECRET_KEY="$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))')" \
             uv run --no-sync python manage.py check --deploy --fail-level WARNING
+
+  lint:
+    # Ruff and the file hooks of .pre-commit-config.yaml, on every file.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d  # v10.4.0 (no moving major tag)
+        with:
+          version: "0.11.32"
+          python-version: "3.12"
+      - name: pre-commit
+        run: uvx pre-commit@4.7.0 run --all-files --show-diff-on-failure
 
   audit:
     # Known vulnerabilities in the locked runtime dependencies.
@@ -113,9 +127,9 @@ jobs:
 
   build:
     # Images for the server, tagged with the commit sha (and "main"). Only
-    # for pushes to main, after the tests, the deploy checks and the audit passed.
+    # for pushes to main, after the tests, the lint, the deploy checks and the audit passed.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [test, deploy-check, audit]
+    needs: [test, lint, deploy-check, audit]
     runs-on: ubuntu-latest
     permissions:
       contents: read

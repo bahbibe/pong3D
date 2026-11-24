@@ -64,7 +64,7 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
 - `infra/nginx/`: nginx image and config (`common.conf` is shared by `dev.conf` and `prod.conf.template`).
 - `infra/scripts/`: `gen-env.sh`, `backup.sh`, `restore.sh`, `deploy.sh`. `infra/prometheus/`.
 - `infra/ansible/`: server provisioning (Docker, deploy user, ssh, ufw, env files from the vault, backups cron, certificate).
-- `.github/workflows/`: `ci.yml` (tests, deploy checks, images to GHCR), `deploy.yml` (deploy over SSH).
+- `.github/workflows/`: `ci.yml` (tests with coverage, lint, deploy checks, images to GHCR), `deploy.yml` (deploy over SSH).
 
 nginx serves everything on one origin: the frontend, `/api`, `/ws` and `/avatars`.
 `/healthz`, `/metrics` and `/admin/` are not proxied. Startup is ordered by
@@ -190,6 +190,24 @@ cd backend
 uv sync     # .venv with the locked dependencies, dev group included
 DJANGO_SETTINGS_MODULE=config.test_settings uv run python manage.py test
 ```
+
+Coverage, as in CI: `uv sync --group test`, then
+`DJANGO_SETTINGS_MODULE=config.test_settings uv run coverage run manage.py test`
+and `uv run coverage report` (fails below `fail_under` in `pyproject.toml`).
+
+## Lint
+
+Ruff (lint and format, settings in `backend/pyproject.toml`) and a few file
+checks run through pre-commit. CI runs the same hooks on every file.
+
+```bash
+uvx pre-commit install           # once: runs the hooks on each commit
+uvx pre-commit run --all-files   # by hand
+```
+
+`.git-blame-ignore-revs` lists the formatting-only commits; run
+`git config blame.ignoreRevsFile .git-blame-ignore-revs` once so `git blame`
+skips them.
 
 ## Dependencies
 
