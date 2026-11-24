@@ -1,243 +1,72 @@
 from rest_framework.decorators import api_view
-from .models import Friendship
-from rest_framework import status
-from django.db import IntegrityError, transaction
-from django.db.models import Q
-from .serializers import (
-    ViewFriendshipSerializer,
-    SentFriendRequestSerializer,
-    AcceptFriendRequestSerializer,
-    FriendshipSerializer,
-    BlockUserSerializer,
-)
+
 from core.responses import ErrorResponse, SuccessResponse
-from apps.notifications.services import notify
+
+from . import selectors, services
+from .serializers import (
+    AcceptFriendRequestSerializer,
+    BlockUserSerializer,
+    FriendshipSerializer,
+    SentFriendRequestSerializer,
+    ViewFriendshipSerializer,
+)
+
+
+def _listing(rows):
+    return SuccessResponse(data=[ViewFriendshipSerializer(row).data for row in rows])
 
 
 @api_view(["GET"])
 def get_friends(request):
-    user = request.user
-    friends = Friendship.objects.filter(
-        (Q(source_user=user) | Q(target_user=user)) & Q(status="accepted")
-    ).select_related("source_user__profile", "target_user__profile")
-    for friendship in friends:
-        if friendship.source_user == user:
-            friendship.user = friendship.source_user
-            friendship.friend = friendship.target_user
-        else:
-            friendship.user = friendship.target_user
-            friendship.friend = friendship.source_user
-    friends = [ViewFriendshipSerializer(friendship).data for friendship in friends]
-
-    return SuccessResponse(data=friends)
+    return _listing(selectors.friends(request.user))
 
 
 @api_view(["GET"])
 def get_blocked_friends(request):
-    user = request.user
-    friends = Friendship.objects.filter(
-        (Q(source_user=user) | Q(target_user=user))
-        & Q(status="blocked")
-        & Q(blocked_by=user)
-    ).select_related("source_user__profile", "target_user__profile")
-    for friendship in friends:
-        if friendship.source_user == user:
-            friendship.user = friendship.source_user
-            friendship.friend = friendship.target_user
-        else:
-            friendship.user = friendship.target_user
-            friendship.friend = friendship.source_user
-    friends = [ViewFriendshipSerializer(friendship).data for friendship in friends]
-
-    return SuccessResponse(data=friends)
+    return _listing(selectors.blocked_by(request.user))
 
 
 @api_view(["GET"])
 def get_friends_request(request):
-    user = request.user
-    friends_request = Friendship.objects.filter(target_user=user, status="pending").select_related(
-        "source_user__profile", "target_user__profile"
-    )
-
-    for friendship in friends_request:
-        if friendship.source_user == user:
-            friendship.user = friendship.source_user
-            friendship.friend = friendship.target_user
-        else:
-            friendship.user = friendship.target_user
-            friendship.friend = friendship.source_user
-    friends_request = [
-        ViewFriendshipSerializer(friendship).data for friendship in friends_request
-    ]
-
-    return SuccessResponse(data=friends_request)
+    return _listing(selectors.received_requests(request.user))
 
 
 @api_view(["GET"])
 def get_sent_friends_request(request):
-    user = request.user
-    friends_request = Friendship.objects.filter(source_user=user, status="pending").select_related(
-        "source_user__profile", "target_user__profile"
-    )
-
-    for friendship in friends_request:
-        if friendship.source_user == user:
-            friendship.user = friendship.source_user
-            friendship.friend = friendship.target_user
-        else:
-            friendship.user = friendship.target_user
-            friendship.friend = friendship.source_user
-    friends_request = [
-        ViewFriendshipSerializer(friendship).data for friendship in friends_request
-    ]
-
-    return SuccessResponse(data=friends_request)
+    return _listing(selectors.sent_requests(request.user))
 
 
 @api_view(["POST"])
 def send_friend_request(request):
-    source_user = request.user
     serializer = SentFriendRequestSerializer(data=request.data)
-
     if not serializer.is_valid():
         return ErrorResponse(serializer_errors=serializer.errors)
-
-    target_user = serializer.validated_data["target_user"]
-    is_friendship_exist = (
-        Friendship.objects.filter(
-            source_user=source_user, target_user=target_user
-        ).exists()
-        or Friendship.objects.filter(
-            source_user=target_user, target_user=source_user
-        ).exists()
-    )
-    if source_user == target_user:
-        return ErrorResponse(
-            message="You cannot send a friend request to yourself",
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-
-    if is_friendship_exist:
-        return ErrorResponse(
-            message="Friendship already exists",
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-
-    try:
-        with transaction.atomic():
-            friendship = Friendship.objects.create(
-                source_user=source_user, target_user=target_user
-            )
-    except IntegrityError:
-        # The other user sent a request (or blocked) at the same moment.
-        return ErrorResponse(
-            message="Friendship already exists",
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-
-    notify(target_user, source_user, "friend_request", "sent you a friend request")
+    friendship = services.send_request(request.user, serializer.validated_data["target_user"])
     return SuccessResponse(data=FriendshipSerializer(friendship).data)
 
 
 @api_view(["POST"])
 def accept_friend_request(request):
-    user = request.user
     serializer = AcceptFriendRequestSerializer(data=request.data)
-
     if not serializer.is_valid():
         return ErrorResponse(serializer_errors=serializer.errors)
-
-    source_user = serializer.validated_data["source_user"]
-    # Only a pending request can be accepted. Without this check a blocked
-    # user could "accept" an old request and undo the block.
-    friendship = Friendship.objects.filter(
-        source_user=source_user, target_user=user, status=Friendship.PENDING
-    ).first()
-    if not friendship:
-        return ErrorResponse(
-            message="Friend request does not exist",
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-
-    friendship.status = "accepted"
-    friendship.save()
-
-    notify(source_user, user, "friend_request_accepted", "accepted your friend request")
-
+    friendship = services.accept_request(request.user, serializer.validated_data["source_user"])
     return SuccessResponse(data=FriendshipSerializer(friendship).data)
 
 
 @api_view(["POST"])
 def block_user(request):
-    user = request.user
     serializer = BlockUserSerializer(data=request.data)
-
     if not serializer.is_valid():
         return ErrorResponse(serializer_errors=serializer.errors)
-
-    if user == serializer.validated_data["user_id"]:
-        return ErrorResponse(
-            message="You cannot block yourself",
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-
-    user_id = serializer.validated_data["user_id"]
-    pair = Q(source_user=user, target_user=user_id) | Q(
-        source_user=user_id, target_user=user
-    )
-    friendship = Friendship.objects.filter(pair).first()
-
-    if not friendship:
-        try:
-            with transaction.atomic():
-                Friendship.objects.create(
-                    source_user=user,
-                    target_user=user_id,
-                    status="blocked",
-                    blocked_by=user,
-                )
-            return SuccessResponse(message="User blocked successfully")
-        except IntegrityError:
-            # A row for this pair was created meanwhile: block that one.
-            friendship = Friendship.objects.get(pair)
-
-    friendship.status = "blocked"
-    friendship.blocked_by = user
-    friendship.save()
+    services.block(request.user, serializer.validated_data["user_id"])
     return SuccessResponse(message="User blocked successfully")
 
 
 @api_view(["POST"])
 def unblock_user(request):
-    user = request.user
     serializer = BlockUserSerializer(data=request.data)
-
     if not serializer.is_valid():
         return ErrorResponse(serializer_errors=serializer.errors)
-
-    user_id = serializer.validated_data["user_id"]
-    friendship = Friendship.objects.filter(
-        Q(source_user=user, target_user=user_id)
-        | Q(source_user=user_id, target_user=user)
-    ).first()
-
-    if not friendship:
-        return ErrorResponse(
-            message="Friendship does not exist",
-            status_code=status.HTTP_404_NOT_FOUND,
-        )
-
-    if friendship.blocked_by != user:
-        return ErrorResponse(
-            message="User is not blocked by you",
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-
-    if friendship.status != "blocked":
-        return ErrorResponse(
-            message="User is not blocked",
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
-
-    friendship.delete()
+    services.unblock(request.user, serializer.validated_data["user_id"])
     return SuccessResponse(message="User unblocked successfully")

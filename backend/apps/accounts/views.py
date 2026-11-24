@@ -17,7 +17,7 @@ from apps.accounts.auth_views import email_taken
 from django.db import IntegrityError, transaction
 from core.responses import SuccessResponse, ErrorResponse
 from core.uuids import parse_uuid
-from apps.friends.models import Friendship
+from apps.friends.selectors import blocked_user_ids, is_blocked
 from apps.game.models import Game
 from apps.game.serializers import GameStatsSerializer, GameHistorySerializer
 
@@ -193,22 +193,6 @@ def get_profile_with_id(request, id):
     if not profile or is_blocked(profile.user, request.user):
         return user_not_found()
     return SuccessResponse(data=PublicUserSerializer(profile.user).data)
-
-
-def is_blocked(user, target_user):
-    return Friendship.objects.filter(
-        (Q(source_user=user) | Q(target_user=user))
-        & (Q(source_user=target_user) | Q(target_user=target_user))
-        & Q(status="blocked")
-    ).exists()
-
-
-def blocked_user_ids(user):
-    """Ids of users on the other side of a block with `user` (either way)."""
-    pairs = Friendship.objects.filter(
-        Q(source_user=user) | Q(target_user=user), status=Friendship.BLOCKED
-    ).values_list("source_user_id", "target_user_id")
-    return {uid for pair in pairs for uid in pair if uid != user.id}
 
 
 MAX_SEARCH_RESULTS = 50

@@ -191,10 +191,8 @@ def login_user(request):
         login_value = str(serailizer.validated_data.get(auth_field))
         account_key = f"{auth_field}:{login_value.lower()}"
         ip_key = rate_limit.client_ip(request)
-        if rate_limit.is_blocked("login-account", account_key) or rate_limit.is_blocked(
-            "login-ip", ip_key
-        ):
-            return rate_limit.too_many_attempts()
+        rate_limit.check("login-account", account_key)
+        rate_limit.check("login-ip", ip_key)
 
         lookup = "email__iexact" if auth_field == "email" else "username"
         user = User.objects.filter(**{lookup: login_value}).first()
@@ -434,8 +432,7 @@ def confirm_twofa(request):
     if not user.profile.tfa_secret:
         return ErrorResponse(message="2FA is not enabled")
 
-    if rate_limit.is_blocked("tfa-user", user.id):
-        return rate_limit.too_many_attempts()
+    rate_limit.check("tfa-user", user.id)
     if not check_totp(user, code):
         return ErrorResponse(message="Invalid code")
 
@@ -458,8 +455,7 @@ def verify_twofa(request):
     if not code:
         return ErrorResponse(message="No code found")
 
-    if rate_limit.is_blocked("tfa-user", user.id):
-        return rate_limit.too_many_attempts()
+    rate_limit.check("tfa-user", user.id)
     if not check_totp(user, code):
         return ErrorResponse(message="Invalid code")
 
@@ -477,8 +473,7 @@ def disable_twofa(request):
     if not code:
         return ErrorResponse(message="No code found")
 
-    if rate_limit.is_blocked("tfa-user", user.id):
-        return rate_limit.too_many_attempts()
+    rate_limit.check("tfa-user", user.id)
     if not check_totp(user, code):
         return ErrorResponse(message="Invalid code")
 

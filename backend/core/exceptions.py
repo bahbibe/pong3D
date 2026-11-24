@@ -10,6 +10,7 @@ import logging
 
 from rest_framework.views import exception_handler as drf_exception_handler
 
+from .errors import ServiceError
 from .responses import ErrorResponse, SuccessResponse
 
 logger = logging.getLogger(__name__)
@@ -23,6 +24,11 @@ def handler(exc, context):
     status_code = getattr(exc, "status_code", 500)
     if status_code < 400 and hasattr(exc, "data"):
         return SuccessResponse(data=exc.data, message=str(exc.detail), status_code=status_code)
+
+    if isinstance(exc, ServiceError):
+        return ErrorResponse(
+            message=str(exc.detail), status_code=exc.status_code, serializer_errors=exc.errors
+        )
 
     response = drf_exception_handler(exc, context)
     if response is None:

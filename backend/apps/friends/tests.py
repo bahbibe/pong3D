@@ -176,3 +176,68 @@ class FriendshipPairMigrationTests(TransactionTestCase):
             sorted(Friendship.objects.values_list("id", flat=True)),
             sorted([blocked.id, single.id]),
         )
+
+
+class OwnProfileWithBlocksTests(TestCase):
+    """Regression: is_blocked(me, me) matched any block involving me, so my
+    own profile answered 404 once I blocked someone or was blocked."""
+
+    def setUp(self):
+        self.alice = make_user("alice")
+        self.bob = make_user("bob")
+        self.carol = make_user("carol")
+        Friendship.objects.create(
+            source_user=self.alice, target_user=self.bob,
+            status=Friendship.BLOCKED, blocked_by=self.alice,
+        )
+        self.client.cookies["access_token"] = generate_token(
+            {"id": self.alice.id, "is_tfa_verified": True, "exp": datetime.now() + timedelta(hours=1)}
+        )
+
+    def profile(self, user):
+        return self.client.get(f"/api/auth/profile/{user.profile.uuid}/")
+
+    def test_own_profile_is_visible(self):
+        self.assertEqual(self.profile(self.alice).status_code, 200)
+        self.assertEqual(self.client.get(f"/api/auth/user/{self.alice.profile.id}/").status_code, 200)
+
+    def test_blocked_user_is_hidden_and_others_are_not(self):
+        self.assertEqual(self.profile(self.bob).status_code, 404)
+        self.assertEqual(self.profile(self.carol).status_code, 200)
+
+    def test_blocked_side_cannot_see_the_blocker(self):
+        self.client.cookies["access_token"] = generate_token(
+            {"id": self.bob.id, "is_tfa_verified": True, "exp": datetime.now() + timedelta(hours=1)}
+        )
+        self.assertEqual(self.profile(self.alice).status_code, 404)
+        # Being blocked must not hide bob's own profile either.
+        self.assertEqual(self.profile(self.bob).status_code, 200)
+
+
+class FriendServiceTests(TestCase):
+    """The services directly, without HTTP."""
+
+    def setUp(self):
+        self.alice = make_user("alice")
+        self.bob = make_user("bob")
+
+    def test_rules(self):
+        from core.errors import NotFound, ServiceError
+        from . import selectors, services
+
+        with self.assertRaisesMessage(ServiceError, "yourself"):
+            services.send_request(self.alice, self.alice)
+        services.send_request(self.alice, self.bob)
+        with self.assertRaisesMessage(ServiceError, "already exists"):
+            services.send_request(self.bob, self.alice)  # other direction too
+        services.accept_request(self.bob, self.alice)
+        self.assertTrue(selectors.are_friends(self.alice, self.bob))
+
+        services.block(self.bob, self.alice)
+        self.assertTrue(selectors.is_blocked(self.alice, self.bob))
+        self.assertFalse(selectors.is_blocked(self.alice, self.alice))
+        with self.assertRaisesMessage(ServiceError, "not blocked by you"):
+            services.unblock(self.alice, self.bob)
+        services.unblock(self.bob, self.alice)
+        with self.assertRaises(NotFound):
+            services.unblock(self.bob, self.alice)

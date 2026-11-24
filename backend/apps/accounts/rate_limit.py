@@ -10,9 +10,8 @@ Tests use LocMemCache.
 """
 
 from django.core.cache import cache
-from rest_framework import status
 
-from core.responses import ErrorResponse
+from core.errors import TooManyAttempts
 
 # scope: (max failures, window in seconds)
 LIMITS = {
@@ -58,8 +57,7 @@ def reset(scope, ident):
     cache.delete(_key(scope, ident))
 
 
-def too_many_attempts():
-    return ErrorResponse(
-        message="Too many failed attempts. Please wait a few minutes and try again.",
-        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-    )
+def check(scope, ident):
+    """Raise TooManyAttempts while `ident` is blocked for `scope`."""
+    if is_blocked(scope, ident):
+        raise TooManyAttempts()
