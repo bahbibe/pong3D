@@ -1,0 +1,7 @@
+# Automatic security updates (no automatic reboot).
+unattended_upgrades: true
+# Swap file size in MB; 0 = no swap file. Small VPSes run out of memory
+# while pulling images without it.
+swap_size_mb: 2048
+swap_file: /swapfile
+swappiness: 10

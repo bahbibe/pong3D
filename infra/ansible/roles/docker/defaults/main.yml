@@ -1,0 +1,5 @@
+# Container log rotation (json-file driver): at most docker_log_max_file
+# files of docker_log_max_size per container. Applies to containers created
+# after the change (the next deploy recreates them).
+docker_log_max_size: 10m
+docker_log_max_file: 3

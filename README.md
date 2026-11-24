@@ -36,10 +36,12 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
 | `make migrate` | Apply migrations now (they also run on every `make dev`/`make prod`) |
 | `make test` | Backend tests against a throwaway Postgres, cleaned up afterwards |
 | `make env` | Create the env files (prod: `ENV=prod DOMAIN=... ACME_EMAIL=...`) |
-| `make cert` | Prod: get the Let's Encrypt certificate (`STAGING=1` to try first) |
+| `make cert` | Prod: get the Let's Encrypt certificate (`STAGING=1`: dry run, saves nothing) |
 | `make backup` | Dump the database and the avatars to `backups/` (keeps 7) |
 | `make restore FILE=... [AVATARS=...]` | Restore a backup (replaces the database content) |
 | `make deploy SHA=...` | Server: deploy or roll back to a commit's images from GHCR |
+| `make provision` | From your machine: provision the server with Ansible (`make provision-check` = dry run) |
+| `make vault-new` / `make vault-edit` | Create / edit the encrypted Ansible vault with the prod secrets |
 
 ## Layout
 
@@ -53,6 +55,7 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
 - `frontend/`: `index.html` and `static/` (served by nginx; three.js is vendored in `static/vendor`).
 - `infra/nginx/`: nginx image and config (`common.conf` is shared by `dev.conf` and `prod.conf.template`).
 - `infra/scripts/`: `gen-env.sh`, `backup.sh`, `restore.sh`, `deploy.sh`. `infra/prometheus/`.
+- `infra/ansible/`: server provisioning (Docker, deploy user, ssh, ufw, env files from the vault, backups cron, certificate).
 - `.github/workflows/`: `ci.yml` (tests, deploy checks, images to GHCR), `deploy.yml` (deploy over SSH).
 
 nginx serves everything on one origin: the frontend, `/api`, `/ws` and `/avatars`.
@@ -77,16 +80,21 @@ healthchecks: db and redis, then the `migrate` job, then the backend
 
 ## Prod on a server
 
-Setup once: [infra/bootstrap-vps.md](infra/bootstrap-vps.md) (server, GitHub
-secrets, first deploy, certificate, backups cron). The server holds only the
-compose files, the scripts and `env/prod/`; it runs the images CI built.
+Setup: [infra/bootstrap-vps.md](infra/bootstrap-vps.md). In short, from your
+machine:
 
 ```bash
-make env ENV=prod DOMAIN=pong.example.org ACME_EMAIL=you@example.org
-make deploy SHA=<commit>  # normally done by the Deploy workflow
-make cert STAGING=1       # optional dry run against Let's Encrypt staging
-make cert                 # real certificate; nginx reloads with it
+cp infra/ansible/inventory/prod.yml.example infra/ansible/inventory/prod.yml   # fill in
+make vault-new        # encrypted prod secrets (committed; long vault password)
+make provision        # Docker, deploy user, ssh, ufw, swap, /srv/pong3d, env files, backup cron
+# GitHub: production environment secrets + DEPLOY_ENABLED=true, then run the Deploy workflow
+make provision        # again after the first deploy: gets the Let's Encrypt certificate
 ```
+
+The server holds only the compose files, the scripts and `env/prod/`; it runs
+the images CI built. On the server itself, `make deploy SHA=<commit>`,
+`make cert`, `make backup ENV=prod` and `make logs ENV=prod` work in
+`/srv/pong3d`.
 
 - certbot renews in its own container; nginx reloads every 6 hours to pick
   up new certificates.
@@ -129,11 +137,11 @@ make cert                 # real certificate; nginx reloads with it
 ### Backups
 
 `make backup ENV=prod` writes `backups/db-<time>.dump` and
-`backups/avatars-<time>.tgz` and keeps the newest 7 (`BACKUP_KEEP`). Nightly
-from cron:
+`backups/avatars-<time>.tgz` and keeps the newest 7 (`BACKUP_KEEP`). The
+Ansible `app` role installs it nightly in the deploy user's crontab:
 
 ```
-0 3 * * * cd /srv/pong3d && make backup ENV=prod >> backups/backup.log 2>&1
+0 3 * * * cd /srv/pong3d && BACKUP_KEEP=7 make backup ENV=prod >> backups/backup.log 2>&1
 ```
 
 `make restore ENV=prod FILE=backups/db-<time>.dump AVATARS=backups/avatars-<time>.tgz`

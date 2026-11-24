@@ -10,3 +10,7 @@ env/prod/
 backups/
 # Old frontend dependencies (the Express server is gone).
 frontend/node_modules/
+# Ansible: vault password files and leftovers (vault.yml itself is committed, encrypted).
+infra/ansible/.vault_pass*
+infra/ansible/group_vars/pong3d/vault.yml.*
+*.retry

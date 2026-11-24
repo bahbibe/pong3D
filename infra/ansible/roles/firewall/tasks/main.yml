@@ -1,0 +1,18 @@
+# Only SSH, HTTP and HTTPS from outside. Note: Docker publishes ports with
+# its own iptables rules, before ufw; the stack only publishes 80/443 (and
+# grafana on 127.0.0.1), so nothing else is reachable anyway.
+- name: Allow SSH, HTTP, HTTPS
+  community.general.ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - "{{ ssh_port | default(22) }}"
+    - "80"
+    - "443"
+
+- name: Deny other incoming traffic and enable ufw
+  community.general.ufw:
+    state: enabled
+    direction: incoming
+    policy: deny

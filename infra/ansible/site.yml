@@ -1,0 +1,57 @@
+# Provision the pong3D server: `make provision` from the repo root.
+#
+# Idempotent: run it again after changing a variable or the vault.
+# Deploys are not done here: the Deploy workflow (or `make deploy SHA=` on
+# the server) runs infra/scripts/deploy.sh. See infra/bootstrap-vps.md.
+- name: Provision the pong3D server
+  hosts: pong3d
+  become: true
+
+  pre_tasks:
+    - name: Read the first line of the vault file
+      delegate_to: localhost
+      become: false
+      run_once: true  # noqa: run-once[task]
+      ansible.builtin.command: head -n1 {{ playbook_dir }}/group_vars/pong3d/vault.yml
+      register: vault_head
+      changed_when: false
+      failed_when: false
+      check_mode: false  # read-only; also needed under --check
+
+    - name: The vault file must be encrypted (it is committed to a public repo)
+      ansible.builtin.assert:
+        that: vault_head.rc != 0 or vault_head.stdout.startswith('$ANSIBLE_VAULT;')
+        fail_msg: >-
+          group_vars/pong3d/vault.yml is not encrypted. Encrypt it now
+          (ansible-vault encrypt) and never commit it in clear text.
+        quiet: true
+
+    - name: Required settings are present
+      ansible.builtin.assert:
+        that:
+          - domain | default('') | length > 0
+          - acme_email | default('') | length > 0 or domain == 'localhost'
+          - deploy_authorized_keys | default([]) | length > 0
+          - vault_django_secret_key | default('') | length >= 32
+          - vault_jwt_secret | default('') | length >= 32
+          - vault_postgres_password | default('') | length >= 16
+          - vault_redis_password | default('') | length >= 16
+          - vault_grafana_admin_password | default('') | length >= 12
+        fail_msg: >-
+          Set domain, acme_email and deploy_authorized_keys in the inventory, and
+          create the vault (make vault-new). See infra/bootstrap-vps.md.
+        quiet: true
+
+  roles:
+    - role: base
+      tags: [base]
+    - role: deploy_user
+      tags: [users]
+    - role: ssh
+      tags: [ssh]
+    - role: firewall
+      tags: [firewall]
+    - role: docker
+      tags: [docker]
+    - role: app
+      tags: [app]

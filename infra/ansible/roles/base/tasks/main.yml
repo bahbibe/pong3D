@@ -1,0 +1,73 @@
+- name: Ubuntu only
+  ansible.builtin.assert:
+    that: ansible_distribution == 'Ubuntu'
+    fail_msg: "Tested on Ubuntu LTS only (found {{ ansible_distribution }})."
+    quiet: true
+
+- name: Base packages
+  ansible.builtin.apt:
+    name:
+      - acl            # lets Ansible run tasks as the deploy user
+      - ca-certificates
+      - cron
+      - curl
+      - gnupg
+      - make
+      - openssl
+      - tar
+      - ufw
+      - unattended-upgrades
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Unattended upgrades on
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    mode: "0644"
+  when: unattended_upgrades | bool
+
+- name: Unattended upgrades never reboot by themselves
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/52pong3d-unattended-upgrades
+    content: |
+      // Managed by Ansible (pong3D). Reboot by hand: a reboot drops running games.
+      Unattended-Upgrade::Automatic-Reboot "false";
+    mode: "0644"
+  when: unattended_upgrades | bool
+
+- name: Swap file
+  when: swap_size_mb | int > 0
+  block:
+    - name: Create and format the swap file
+      ansible.builtin.shell: |
+        set -e
+        fallocate -l {{ swap_size_mb }}M {{ swap_file }}
+        chmod 600 {{ swap_file }}
+        mkswap {{ swap_file }}
+      args:
+        creates: "{{ swap_file }}"
+
+    - name: Swap file in fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        line: "{{ swap_file }} none swap sw 0 0"
+        regexp: "^{{ swap_file }}\\s"
+
+    - name: Is the swap file active
+      ansible.builtin.command: swapon --show=NAME --noheadings
+      register: swap_active
+      changed_when: false
+
+    - name: Enable the swap file
+      ansible.builtin.command: "swapon {{ swap_file }}"
+      when: swap_file not in swap_active.stdout_lines
+      changed_when: true
+
+    - name: Swappiness
+      ansible.posix.sysctl:
+        name: vm.swappiness
+        value: "{{ swappiness }}"
+        sysctl_file: /etc/sysctl.d/60-pong3d.conf

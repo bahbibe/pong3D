@@ -1,0 +1,30 @@
+deploy_path: /srv/pong3d
+
+# Public site. domain and acme_email are required (inventory).
+domain: ""
+acme_email: ""
+http_port: 80
+https_port: 443
+# HSTS max-age (nginx and Django). 0 for localhost tests.
+hsts_max_age: "{{ 0 if domain == 'localhost' else 31536000 }}"
+hsts_include_subdomains: false
+
+image_prefix: ghcr.io/bahbibe
+
+# Nightly `make backup ENV=prod` from the deploy user's crontab.
+backup_cron: true
+backup_cron_hour: "3"
+backup_cron_minute: "0"
+backup_keep: 7
+
+# Ask Let's Encrypt for a certificate once the stack is deployed and there
+# is none yet. letsencrypt_staging: true = dry run against the staging
+# server (nothing saved), to check DNS and port 80 first.
+obtain_certificate: true
+letsencrypt_staging: false
+
+postgres_user: pong3d
+postgres_db: pong3d
+
+# 42 intra OAuth (optional). The secret comes from the vault.
+intra_client_id: "{{ vault_intra_client_id | default('') }}"

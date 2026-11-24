@@ -10,10 +10,10 @@ TEST_COMPOSE := docker compose -f compose.test.yaml
 TOOLS := prometheus grafana $(if $(filter dev,$(ENV)),adminer)
 
 .DEFAULT_GOAL := help
-.PHONY: help env dev prod up down restart logs ps migrate test tools tools-down cert backup restore deploy
+.PHONY: help env dev prod up down restart logs ps migrate test tools tools-down cert backup restore deploy provision provision-check vault-new vault-edit
 
 help: ## List the targets
-	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  make %-11s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  make %-16s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 env: ## Create .env and env/$(ENV)/*.env (prod: DOMAIN=... ACME_EMAIL=...)
 	@ENV=$(ENV) DOMAIN="$(DOMAIN)" ACME_EMAIL="$(ACME_EMAIL)" sh infra/scripts/gen-env.sh
@@ -57,12 +57,12 @@ test: ## Run the backend tests against a throwaway Postgres
 		$(TEST_COMPOSE) down -v --remove-orphans >/dev/null 2>&1; \
 		exit $$status
 
-cert: ## Prod: get the Let's Encrypt certificate for DOMAIN (STAGING=1 to test)
+cert: ## Prod: get the Let's Encrypt certificate for DOMAIN (STAGING=1: dry run, saves nothing)
 	@set -a; . env/prod/nginx.env; set +a; \
 	test -n "$$DOMAIN" -a -n "$$ACME_EMAIL" || { echo "Set DOMAIN and ACME_EMAIL in env/prod/nginx.env" >&2; exit 2; }; \
 	$(PROD_COMPOSE) run --rm --entrypoint certbot certbot certonly --webroot -w /var/www/certbot \
 		-d "$$DOMAIN" -m "$$ACME_EMAIL" --agree-tos --no-eff-email --non-interactive \
-		$(if $(STAGING),--staging) && \
+		$(if $(STAGING),--dry-run) && \
 	$(PROD_COMPOSE) exec nginx sh -c 'pong3d-select-cert && nginx -s reload'
 
 backup: ## Dump the database and avatars to backups/ (keeps 7)
@@ -73,3 +73,20 @@ restore: ## Restore: make restore FILE=backups/db-<time>.dump [AVATARS=...tgz]
 
 deploy: ## Server: deploy or roll back to a commit's images: make deploy SHA=<sha>
 	@sh infra/scripts/deploy.sh $(SHA)
+
+# --- Server provisioning (Ansible, run from your machine) -------------------
+# Inventory: infra/ansible/inventory/prod.yml. Vault password: asked, or
+# ANSIBLE_VAULT_PASSWORD_FILE. Extra arguments: ARGS="--tags app".
+ANSIBLE := cd infra/ansible && ansible-playbook site.yml $(if $(ANSIBLE_VAULT_PASSWORD_FILE),,--ask-vault-pass)
+
+provision: ## Provision the server with Ansible (infra/ansible, see infra/bootstrap-vps.md)
+	$(ANSIBLE) $(ARGS)
+
+provision-check: ## Dry run of make provision (shows what would change)
+	$(ANSIBLE) --check --diff $(ARGS)
+
+vault-new: ## Create the encrypted Ansible vault with random prod secrets
+	@sh infra/ansible/new-vault.sh
+
+vault-edit: ## Edit the Ansible vault (42 intra secret, passwords)
+	cd infra/ansible && ansible-vault edit group_vars/pong3d/vault.yml

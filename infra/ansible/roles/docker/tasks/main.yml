@@ -1,0 +1,44 @@
+- name: Require amd64 (CI builds linux/amd64 images)
+  ansible.builtin.assert:
+    that: ansible_architecture == 'x86_64'
+    fail_msg: >-
+      The images in GHCR are linux/amd64 only (found {{ ansible_architecture }}).
+      Use an x86_64 server, or add arm64 to the CI build.
+    quiet: true
+
+- name: Docker apt key
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    dest: /etc/apt/keyrings/docker.asc
+    mode: "0644"
+
+- name: Docker apt repository
+  ansible.builtin.apt_repository:
+    repo: >-
+      deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc]
+      https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    filename: docker
+    state: present
+
+- name: Docker Engine and Compose plugin
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    update_cache: true
+
+- name: Docker daemon settings (log rotation)
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    content: "{{ {'log-driver': 'json-file', 'log-opts': {'max-size': docker_log_max_size, 'max-file': docker_log_max_file | string}} | to_nice_json }}\n"
+    mode: "0644"
+  notify: Restart docker
+
+- name: Docker running and enabled
+  ansible.builtin.systemd_service:
+    name: docker
+    state: started
+    enabled: true

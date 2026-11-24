@@ -1,0 +1,19 @@
+# deploy_user's keys are installed before this runs (site.yml order), and
+# site.yml asserts there is at least one, so turning passwords off cannot
+# lock everyone out.
+- name: SSH hardening drop-in
+  ansible.builtin.copy:
+    dest: /etc/ssh/sshd_config.d/10-pong3d.conf
+    content: |
+      # Managed by Ansible (pong3D).
+      Port {{ ssh_port }}
+      PasswordAuthentication no
+      KbdInteractiveAuthentication no
+      PermitRootLogin {{ ssh_permit_root_login }}
+      X11Forwarding no
+    mode: "0644"
+  notify: Reload sshd
+
+- name: Check the sshd configuration
+  ansible.builtin.command: sshd -t
+  changed_when: false

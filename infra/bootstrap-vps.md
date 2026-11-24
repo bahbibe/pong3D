@@ -1,41 +1,69 @@
-# Server setup (once)
+# Server setup
 
-Any provider. Needs a Linux VPS (Ubuntu LTS here), a DNS name pointing at
-it, and ports 22, 80 and 443 reachable. The server never builds anything: it
-pulls the images CI pushed to GHCR.
+Any provider. Needs an x86_64 Linux VPS with Ubuntu 24.04 LTS, root SSH
+access with your key, a DNS name pointing at it, and ports 22, 80 and 443
+reachable. The server never builds anything: it pulls the images CI pushed
+to GHCR.
 
-## 1. Server
+Provisioning is done by the Ansible playbook in `infra/ansible/`, run from
+your machine. It is idempotent: run it again after changing a variable or
+a secret.
 
-As root (or with sudo):
+| Ansible role | What it does |
+| --- | --- |
+| `base` | packages, unattended security upgrades (no automatic reboot), swap file |
+| `deploy_user` | `deploy` user in the docker group, SSH keys only |
+| `ssh` | no passwords, root by key only |
+| `firewall` | ufw: only 22, 80, 443 in |
+| `docker` | Docker Engine + Compose plugin from Docker's apt repo, container log rotation |
+| `app` | `/srv/pong3d` (compose files, Makefile, scripts), `env/prod/*.env` from the vault, nightly backup cron, Let's Encrypt certificate once deployed |
+
+Deploys are not part of it: the Deploy workflow runs `infra/scripts/deploy.sh`.
+
+## 1. Your machine
+
+Ansible 2.15+ and its collections:
 
 ```bash
-# Docker Engine + Compose plugin: https://docs.docker.com/engine/install/ubuntu/
-apt-get install -y make
-
-# Deploy user, SSH key login only.
-adduser --disabled-password --gecos "" deploy
-usermod -aG docker deploy
-install -d -m 700 -o deploy -g deploy /home/deploy/.ssh
-# Put the public half of the deploy key (step 3) in /home/deploy/.ssh/authorized_keys
-install -d -o deploy -g deploy /srv/pong3d
-
-# Firewall.
-ufw allow OpenSSH && ufw allow 80/tcp && ufw allow 443/tcp && ufw enable
+ansible-galaxy collection install -r infra/ansible/requirements.yml
 ```
 
-In `/etc/ssh/sshd_config`: `PasswordAuthentication no`, then `systemctl reload ssh`.
+A key pair for deploys only (no passphrase), used by GitHub Actions:
 
-## 2. GHCR images
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/pong3d-deploy -C pong3d-deploy
+```
 
-CI pushes `ghcr.io/bahbibe/pong3d-backend` and `pong3d-nginx`. They are
-linked to this public repository and public too, so the server pulls them
-without logging in (check: `docker pull ghcr.io/bahbibe/pong3d-backend:main`).
-If you make them private, log in on the server as `deploy`:
-`docker login ghcr.io -u <github user>` with a token that has `read:packages`.
+## 2. Inventory and vault
 
-## 3. GitHub settings
+```bash
+cp infra/ansible/inventory/prod.yml.example infra/ansible/inventory/prod.yml
+# edit: ansible_host, domain, acme_email, deploy_authorized_keys
+#       (the content of ~/.ssh/pong3d-deploy.pub and your own public key)
 
-Make a key pair for deploys only (no passphrase): `ssh-keygen -t ed25519 -f pong3d-deploy -C pong3d-deploy`.
+make vault-new     # random prod secrets in infra/ansible/group_vars/pong3d/vault.yml, encrypted
+make vault-edit    # optional: vault_intra_client_id / vault_intra_client_secret
+```
+
+The vault file is committed, and the repository is **public**: pick a long
+random vault password (`openssl rand -base64 32`) and keep it in a password
+manager. The playbook refuses to run if the vault file is not encrypted. To
+avoid typing the password: `export ANSIBLE_VAULT_PASSWORD_FILE=~/.pong3d-vault-pass`
+(a file only you can read, never in the repo).
+
+Changing `vault_postgres_password` after the first deploy does not change the
+existing database user's password: run `ALTER USER` in the db container first.
+
+## 3. Provision
+
+```bash
+make provision-check   # dry run: what would change
+make provision         # do it
+```
+
+Extra arguments go through `ARGS`, for example `make provision ARGS="--tags app"`.
+
+## 4. GitHub settings
 
 Repository > Settings > Environments > New environment `production`
 (optionally with required reviewers). Its secrets:
@@ -44,7 +72,7 @@ Repository > Settings > Environments > New environment `production`
 | --- | --- |
 | `VPS_HOST` | server address |
 | `VPS_USER` | `deploy` |
-| `VPS_SSH_KEY` | content of `pong3d-deploy` (private key) |
+| `VPS_SSH_KEY` | content of `~/.ssh/pong3d-deploy` (private key) |
 | `VPS_KNOWN_HOSTS` | output of `ssh-keyscan -t ed25519 <host>`, compared with `ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub` on the server |
 
 Repository variables (Settings > Secrets and variables > Actions > Variables):
@@ -55,24 +83,28 @@ Repository variables (Settings > Secrets and variables > Actions > Variables):
 | `DEPLOY_PATH` | optional, default `/srv/pong3d` |
 | `VPS_SSH_PORT` | optional, default `22` |
 
-## 4. First deploy
+The GHCR images (`ghcr.io/bahbibe/pong3d-backend`, `pong3d-nginx`) are public,
+so the server pulls them without logging in.
 
-1. Actions > Deploy > Run workflow, sha = the latest commit of main. It
-   uploads the deploy files to `/srv/pong3d`, then stops: env files missing.
-2. On the server, as `deploy`:
-   ```bash
-   cd /srv/pong3d
-   make env ENV=prod DOMAIN=pong.example.org ACME_EMAIL=you@example.org
-   # optional: INTRA_CLIENT_ID / INTRA_CLIENT_SECRET in env/prod/app.env
-   ```
-3. Run the Deploy workflow again (or `make deploy SHA=<sha>` on the server).
-   The site answers on https with a temporary self-signed certificate.
-4. Certificate: `make cert STAGING=1` (dry run), then `make cert`.
-5. Nightly backup, `crontab -e` as `deploy`:
-   ```
-   0 3 * * * cd /srv/pong3d && make backup ENV=prod >> backups/backup.log 2>&1
-   ```
-6. 42 login: add `https://pong.example.org/api/auth/intra/callback/` to the intra app.
+## 5. First deploy and certificate
+
+1. Actions > Deploy > Run workflow, sha = the latest commit of main (or on
+   the server: `cd /srv/pong3d && make deploy SHA=<sha>`). The site answers on
+   https with a temporary self-signed certificate.
+2. `make provision` again: now that nginx runs, it gets the Let's Encrypt
+   certificate. To test first, set `letsencrypt_staging: true` in the
+   inventory: certbot then does a dry run against the staging server and
+   saves nothing; remove the setting and run again for the real one.
+3. 42 login: add `https://<domain>/api/auth/intra/callback/` to the intra app.
 
 From then on every push to main that passes CI is deployed. See the README
 ("Deploys and rollback") for rollbacks and limits.
+
+## Without Ansible
+
+The same by hand: Docker Engine + Compose plugin, a `deploy` user in the
+docker group with the deploy key, ufw (22, 80, 443), `/srv/pong3d` owned by
+`deploy`. Run the Deploy workflow once (it uploads the files, then stops:
+no env files), then on the server as `deploy`:
+`make env ENV=prod DOMAIN=... ACME_EMAIL=...`, deploy again, `make cert`, and
+add the backup cron line from the README.

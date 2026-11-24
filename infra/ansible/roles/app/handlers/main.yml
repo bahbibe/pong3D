@@ -1,0 +1,15 @@
+# Recreate the containers whose env changed, if a version is deployed
+# (deploy.sh writes IMAGE_TAG to .env). Before the first deploy there is
+# nothing to restart.
+- name: Apply env changes
+  become: true
+  become_user: "{{ deploy_user }}"
+  ansible.builtin.shell:
+    cmd: |
+      if grep -q '^IMAGE_TAG=' .env; then
+        PONG3D_ENV=prod docker compose -f compose.yaml -f compose.prod.yaml up -d --wait --wait-timeout 300
+        echo applied
+      fi
+    chdir: "{{ deploy_path }}"
+  register: env_applied
+  changed_when: "'applied' in env_applied.stdout"

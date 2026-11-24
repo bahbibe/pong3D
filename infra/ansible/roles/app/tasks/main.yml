@@ -1,0 +1,134 @@
+# The deploy folder: compose files, Makefile, scripts and env/prod/. No
+# source code; the server runs the images CI pushed to GHCR. The Deploy
+# workflow uploads the same files again on each deploy, from the commit it
+# deploys.
+- name: Repository root on the control machine
+  ansible.builtin.set_fact:
+    repo_root: "{{ (playbook_dir ~ '/../..') | realpath }}"
+
+- name: Deploy folders
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ deploy_path }}", mode: "0750" }
+    - { path: "{{ deploy_path }}/env", mode: "0750" }
+    - { path: "{{ deploy_path }}/env/prod", mode: "0700" }
+    - { path: "{{ deploy_path }}/infra", mode: "0750" }
+    - { path: "{{ deploy_path }}/backups", mode: "0700" }
+  loop_control:
+    label: "{{ item.path }}"
+
+- name: Compose files and Makefile
+  ansible.builtin.copy:
+    src: "{{ repo_root }}/{{ item }}"
+    dest: "{{ deploy_path }}/{{ item }}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0640"
+  loop: [Makefile, compose.yaml, compose.prod.yaml, .env.example]
+
+# Only the templates: env/dev and env/prod on the control machine hold
+# local secrets and must never be copied.
+- name: Env templates
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ deploy_path }}/env/"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0640"
+  with_fileglob: "{{ repo_root }}/env/*.example"
+
+- name: Scripts and prometheus config
+  ansible.builtin.copy:
+    src: "{{ repo_root }}/infra/{{ item }}/"
+    dest: "{{ deploy_path }}/infra/{{ item }}/"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: preserve
+  loop: [scripts, prometheus]
+
+- name: Container env files (from the vault)
+  ansible.builtin.template:
+    src: "{{ item }}.env.j2"
+    dest: "{{ deploy_path }}/env/prod/{{ item }}.env"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0600"
+  loop: [app, db, redis, grafana, nginx]
+  notify: Apply env changes
+  no_log: true
+
+- name: Compose variables in .env (IMAGE_TAG is written by deploy.sh)
+  ansible.builtin.lineinfile:
+    path: "{{ deploy_path }}/.env"
+    regexp: "^{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
+    create: true
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0600"
+  loop:
+    - { key: HTTP_PORT, value: "{{ http_port }}" }
+    - { key: HTTPS_PORT, value: "{{ https_port }}" }
+    - { key: IMAGE_PREFIX, value: "{{ image_prefix }}" }
+  notify: Apply env changes
+
+- name: Nightly backup
+  ansible.builtin.cron:
+    name: pong3d backup
+    user: "{{ deploy_user }}"
+    hour: "{{ backup_cron_hour }}"
+    minute: "{{ backup_cron_minute }}"
+    job: "cd {{ deploy_path }} && BACKUP_KEEP={{ backup_keep }} make backup ENV=prod >> backups/backup.log 2>&1"
+    state: "{{ 'present' if backup_cron | bool else 'absent' }}"
+
+# Apply changed env files now (not at the end of the play), so the
+# certificate step below sees the current stack.
+- name: Apply env changes now
+  ansible.builtin.meta: flush_handlers
+
+- name: Let's Encrypt certificate
+  when: obtain_certificate | bool and domain != 'localhost'
+  become: true
+  become_user: "{{ deploy_user }}"
+  environment:
+    PONG3D_ENV: prod
+  block:
+    - name: Is nginx running (the HTTP-01 challenge needs it)
+      ansible.builtin.command:
+        cmd: docker compose -f compose.yaml -f compose.prod.yaml ps -q --status running nginx
+        chdir: "{{ deploy_path }}"
+      register: nginx_running
+      changed_when: false
+
+    - name: Is there a certificate already
+      ansible.builtin.command:
+        cmd: >-
+          docker compose -f compose.yaml -f compose.prod.yaml run --rm --no-deps -T
+          --entrypoint test certbot -s /etc/letsencrypt/live/{{ domain }}/fullchain.pem
+        chdir: "{{ deploy_path }}"
+      register: cert_present
+      changed_when: false
+      failed_when: cert_present.rc not in [0, 1]
+      when: nginx_running.stdout | length > 0
+
+    - name: Get the certificate (make cert)
+      ansible.builtin.command:
+        cmd: "make cert{{ ' STAGING=1' if letsencrypt_staging | bool else '' }}"
+        chdir: "{{ deploy_path }}"
+      when:
+        - nginx_running.stdout | length > 0
+        - cert_present.rc == 1
+      changed_when: true
+
+    - name: Certificate postponed
+      ansible.builtin.debug:
+        msg: >-
+          The stack is not deployed yet, so there is no certificate. Deploy
+          (Deploy workflow, or make deploy SHA=<sha> in {{ deploy_path }}), then
+          run make provision again.
+      when: nginx_running.stdout | length == 0

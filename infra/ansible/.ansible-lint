@@ -1,0 +1,4 @@
+# deploy_user, deploy_path, ssh_port ... are shared by several roles on
+# purpose (one inventory, one server), so they carry no role prefix.
+skip_list:
+  - var-naming[no-role-prefix]

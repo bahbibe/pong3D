@@ -1,0 +1,4 @@
+ssh_port: 22
+# Keys only. Root may still log in with a key (the first provisioning run
+# usually connects as root); set to "no" once you use a sudo user.
+ssh_permit_root_login: prohibit-password

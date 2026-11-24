@@ -1,0 +1,30 @@
+# Copy to inventory/prod.yml and fill in. Nothing here is secret (secrets
+# live in group_vars/pong3d/vault.yml, encrypted).
+pong3d:
+  hosts:
+    prod:
+      ansible_host: 203.0.113.10
+      # First run: the provider's root login (with your SSH key). Later runs
+      # can use any sudo user.
+      ansible_user: root
+  vars:
+    domain: pong.example.org
+    acme_email: you@example.org
+
+    # Public keys allowed to log in as the deploy user: the GitHub Actions
+    # deploy key (secret VPS_SSH_KEY holds its private half) and your own.
+    deploy_authorized_keys:
+      - "ssh-ed25519 AAAA... pong3d-deploy"
+      - "ssh-ed25519 AAAA... you@laptop"
+
+    # Optional, defaults shown:
+    # deploy_path: /srv/pong3d
+    # swap_size_mb: 2048          # 0 = no swap file
+    # unattended_upgrades: true
+    # docker_log_max_size: 10m
+    # docker_log_max_file: 3
+    # backup_cron_hour: "3"
+    # backup_keep: 7
+    # letsencrypt_staging: false  # true for a dry run first
+    # hsts_include_subdomains: false
+    # intra_client_id: ""         # 42 OAuth app uid (secret is in the vault)

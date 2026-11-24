@@ -1,0 +1,17 @@
+# Shape of group_vars/pong3d/vault.yml. Do not fill this file: run
+# `make vault-new`, which writes random values and encrypts the result.
+# Edit later with `make vault-edit`.
+#
+# The vault is committed to a PUBLIC repository: use a long random vault
+# password (for example `openssl rand -base64 32`) and keep it in a password
+# manager. Anyone with the password and the repo has every prod secret.
+#
+# Changing vault_postgres_password later does not change the password of the
+# existing database user: run ALTER USER in the db container first.
+vault_django_secret_key: ""
+vault_jwt_secret: ""
+vault_postgres_password: ""
+vault_redis_password: ""
+vault_grafana_admin_password: ""
+vault_intra_client_id: ""
+vault_intra_client_secret: ""

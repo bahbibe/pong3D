@@ -1,0 +1,5 @@
+# Existing SSH sessions stay open on reload.
+- name: Reload sshd
+  ansible.builtin.systemd_service:
+    name: ssh
+    state: reloaded

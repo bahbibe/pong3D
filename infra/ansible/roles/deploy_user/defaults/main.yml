@@ -1,0 +1,6 @@
+# Unprivileged user that owns the app folder and runs docker compose. The
+# Deploy workflow logs in as this user.
+deploy_user: deploy
+# Public keys allowed to log in as deploy_user: the GitHub Actions deploy key
+# and your own. Set in the inventory.
+deploy_authorized_keys: []
