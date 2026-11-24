@@ -181,7 +181,7 @@ class ErrorShapeTests(TestCase):
     def test_unexpected_error_in_a_public_view_is_json(self):
         from unittest import mock
 
-        with mock.patch("apps.accounts.auth_views.rate_limit.check", side_effect=RuntimeError("boom")), \
+        with mock.patch("apps.accounts.services.rate_limit.check", side_effect=RuntimeError("boom")), \
                 self.assertLogs("core.exceptions", level="ERROR"):
             response = self.client.post("/api/auth/login/", data={"username": "x", "password": "y"},
                                         content_type="application/json")

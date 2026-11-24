@@ -200,7 +200,7 @@ class PrivacyAndRobustnessTests(AuthTestCase):
     def test_unexpected_error_does_not_leak_details(self):
         from unittest import mock
 
-        with mock.patch("apps.accounts.views.blocked_user_ids", side_effect=RuntimeError("secret detail")):
+        with mock.patch("apps.accounts.selectors.blocked_user_ids", side_effect=RuntimeError("secret detail")):
             with self.assertLogs("core.exceptions", level="ERROR"):
                 response = self.client.get("/api/auth/users/")
         self.assertEqual(response.status_code, 500)

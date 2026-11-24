@@ -1,144 +1,50 @@
-from rest_framework.decorators import api_view
-from .serializers import (
-    SetupProfileSerializer,
-    PublicUserSerializer,
-    UserSerializer,
-    UpdateSettingsSerializer,
-)
-from rest_framework import status
-from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError as DjangoValidationError
-from django.contrib.auth import get_user_model
-from .models import Profile
-from apps.accounts.auth_utils import revoke_tokens, set_access_token
-from apps.accounts.authentication import is_tfa_verified
-from apps.accounts.auth_views import email_taken
-from django.db import IntegrityError, transaction
-from core.responses import SuccessResponse, ErrorResponse
-from core.uuids import parse_uuid
-from apps.friends.selectors import blocked_user_ids, is_blocked
-from apps.game.selectors import finished_games, history as game_history, stats as game_stats
-from apps.game.serializers import GameStatsSerializer, GameHistorySerializer
+"""Profile setup, settings, profiles and user search. The rules live in
+services.py and selectors.py."""
 
-User = get_user_model()
+from rest_framework.decorators import api_view
+
+from apps.game.selectors import finished_games, history as game_history, stats as game_stats
+from apps.game.serializers import GameHistorySerializer, GameStatsSerializer
+from core.responses import ErrorResponse, SuccessResponse
+
+from . import selectors, services
+from .auth_utils import revoke_tokens, set_access_token
+from .authentication import is_tfa_verified
+from .serializers import (
+    PublicUserSerializer,
+    SetupProfileSerializer,
+    UpdateSettingsSerializer,
+    UserSerializer,
+)
 
 
 @api_view(["POST"])
 def setup_profile(request):
-    user = request.user
     serializer = SetupProfileSerializer(data=request.data)
-
-    if serializer.is_valid():
-        is_username_exists = (
-            User.objects.exclude(id=user.id)
-            .filter(username=serializer.validated_data.get("username"))
-            .exists()
-        )
-        if is_username_exists:
-            return ErrorResponse(
-                message="Username already exists, Please try another one."
-            )
-
-        profile = user.profile
-        profile.avatar = serializer.validated_data.get("avatar", profile.avatar)
-        profile.is_setup = True
-        user.username = serializer.validated_data.get("username", user.username)
-        profile.save(update_fields=["avatar", "is_setup"])
-        user.save()
-        return SuccessResponse(data=UserSerializer(user).data)
-
-    return ErrorResponse(serializer_errors=serializer.errors)
+    if not serializer.is_valid():
+        return ErrorResponse(serializer_errors=serializer.errors)
+    user = services.setup_profile(request.user, serializer.validated_data)
+    return SuccessResponse(data=UserSerializer(user).data)
 
 
 @api_view(["PUT"])
 def update_settings(request):
-    user = request.user
     serializer = UpdateSettingsSerializer(data=request.data)
     if not serializer.is_valid():
         return ErrorResponse(serializer_errors=serializer.errors)
-
-    data = serializer.validated_data
-    profile = user.profile
-    username = data.get("username")
-    email = data.get("email") or None
-    password = data.get("password") or None
-    current_password = data.get("current_password") or ""
-
-    is_email_change = email is not None and email.lower() != user.email.lower()
-    if password or is_email_change:
-        # Changing credentials needs proof that the caller is the account
-        # owner, not just someone holding the session cookie.
-        if profile.auth_method == Profile.INTRA or not user.has_usable_password():
-            return ErrorResponse(
-                message="Email and password are managed by 42 intra for this account."
-            )
-        if not user.check_password(current_password):
-            return ErrorResponse(
-                message="Current password is incorrect.",
-                serializer_errors={"current_password": ["Current password is incorrect."]},
-            )
-
-    if (
-        username
-        and username != user.username
-        and User.objects.filter(username=username).exists()
-    ):
-        return ErrorResponse(message="Username already exists")
-
-    if is_email_change and email_taken(email, exclude_user=user):
-        return ErrorResponse(message="Email already exists")
-
-    if password:
-        try:
-            validate_password(password, user=user)
-        except DjangoValidationError as error:
-            return ErrorResponse(
-                message="Invalid password",
-                serializer_errors={"password": list(error.messages)},
-            )
-
-    profile.avatar = data.get("avatar", profile.avatar)
-    if username:
-        user.username = username
-    if is_email_change:
-        user.email = email
-    if password:
-        user.set_password(password)
-
-    try:
-        with transaction.atomic():
-            profile.save(update_fields=["avatar"])
-            user.save()
-    except IntegrityError:
-        # Username or email taken by another request at the same moment.
-        return ErrorResponse(message="Username or email already exists")
+    user = request.user
+    password_changed = services.update_settings(user, serializer.validated_data)
     response = SuccessResponse(data=UserSerializer(user).data)
-    if password:
+    if password_changed:
         # Sign out every other session, then give this one a fresh token.
         revoke_tokens(user)
         set_access_token(response, user, is_tfa_verified=is_tfa_verified(request.auth))
     return response
 
 
-def user_not_found():
-    return ErrorResponse(message="User does not exist", status_code=status.HTTP_404_NOT_FOUND)
-
-
 @api_view(["GET"])
 def get_profile(request, uuid):
-    profile_uuid = parse_uuid(uuid)
-    profile = (
-        Profile.objects.select_related("user").filter(uuid=profile_uuid).first()
-        if profile_uuid
-        else None
-    )
-    if not profile:
-        return user_not_found()
-
-    user = profile.user
-    if is_blocked(user, request.user):
-        return user_not_found()
-
+    user = selectors.user_by_profile_uuid(uuid, viewer=request.user)
     games = list(finished_games(user))
     return SuccessResponse(
         data={
@@ -151,30 +57,12 @@ def get_profile(request, uuid):
 
 @api_view(["GET"])
 def get_profile_with_id(request, id):
-    profile = (
-        Profile.objects.select_related("user").filter(id=id).first()
-        if str(id).isdigit()
-        else None
-    )
-    if not profile or is_blocked(profile.user, request.user):
-        return user_not_found()
-    return SuccessResponse(data=PublicUserSerializer(profile.user).data)
-
-
-MAX_SEARCH_RESULTS = 50
+    user = selectors.user_by_profile_id(id, viewer=request.user)
+    return SuccessResponse(data=PublicUserSerializer(user).data)
 
 
 @api_view(["GET"])
 def get_users(request):
     # Search by username only, and never return emails of other users.
-    users = (
-        User.objects.exclude(id__in=blocked_user_ids(request.user))
-        .select_related("profile")
-        .order_by("username")
-    )
-    query = (request.GET.get("q") or "").strip()
-    if query:
-        users = users.filter(username__icontains=query)
-    return SuccessResponse(
-        data=PublicUserSerializer(users[:MAX_SEARCH_RESULTS], many=True).data
-    )
+    users = selectors.search_users(request.user, request.GET.get("q"))
+    return SuccessResponse(data=PublicUserSerializer(users, many=True).data)

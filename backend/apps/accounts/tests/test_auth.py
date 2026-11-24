@@ -117,7 +117,7 @@ class LoginRateLimitTests(AuthTestCase):
 
 class IntraUserTests(TestCase):
     def intra(self, intra_id, login, **extra):
-        from apps.accounts.auth_views import find_or_create_intra_user, parse_intra_user
+        from apps.accounts.intra import find_or_create_intra_user, parse_intra_user
 
         payload = {
             "id": intra_id,
@@ -166,7 +166,7 @@ class IntraUserTests(TestCase):
         self.assertFalse(user.has_usable_password())
 
     def test_bad_payload_is_rejected(self):
-        from apps.accounts.auth_views import parse_intra_user
+        from apps.accounts.intra import parse_intra_user
 
         self.assertIsNone(parse_intra_user({"login": "x"}))
         self.assertIsNone(parse_intra_user({"id": "1", "login": "x"}))
@@ -186,13 +186,13 @@ class IntraStateTests(AuthTestCase):
     def test_callback_without_matching_state_is_refused(self):
         from unittest import mock
 
-        with mock.patch("apps.accounts.auth_views.requests.post") as post:
+        with mock.patch("apps.accounts.intra.requests.post") as post:
             response = self.client.get("/api/auth/intra/callback/?code=abc&state=forged")
             self.assertEqual(response.status_code, 400)
             post.assert_not_called()
 
         self.client.get("/api/auth/intra/")  # sets the cookie for another state
-        with mock.patch("apps.accounts.auth_views.requests.post") as post:
+        with mock.patch("apps.accounts.intra.requests.post") as post:
             response = self.client.get("/api/auth/intra/callback/?code=abc&state=forged")
             self.assertEqual(response.status_code, 400)
             post.assert_not_called()
@@ -208,8 +208,8 @@ class IntraStateTests(AuthTestCase):
             "id": 4242, "login": "jdoe", "email": "jdoe@student.42.fr",
             "first_name": "J", "last_name": "D", "image": {"link": None},
         })
-        with mock.patch("apps.accounts.auth_views.requests.post", return_value=token), \
-                mock.patch("apps.accounts.auth_views.requests.get", return_value=me):
+        with mock.patch("apps.accounts.intra.requests.post", return_value=token), \
+                mock.patch("apps.accounts.intra.requests.get", return_value=me):
             response = self.client.get(f"/api/auth/intra/callback/?code=abc&state={state}")
         self.assertEqual(response.status_code, 302)
         self.assertIn("access_token", response.cookies)
@@ -223,7 +223,7 @@ class IntraStateTests(AuthTestCase):
 
         url = self.client.get("/api/auth/intra/").json()["data"]["url"]
         state = parse_qs(urlparse(url).query)["state"][0]
-        with mock.patch("apps.accounts.auth_views.requests.post", side_effect=requests_lib.Timeout()):
+        with mock.patch("apps.accounts.intra.requests.post", side_effect=requests_lib.Timeout()):
             response = self.client.get(f"/api/auth/intra/callback/?code=abc&state={state}")
         self.assertEqual(response.status_code, 502)
 
@@ -310,7 +310,7 @@ class UniqueEmailTests(AuthTestCase):
         })
 
     def intra(self, intra_id, login, email):
-        from apps.accounts.auth_views import find_or_create_intra_user, parse_intra_user
+        from apps.accounts.intra import find_or_create_intra_user, parse_intra_user
 
         return find_or_create_intra_user(parse_intra_user(
             {"id": intra_id, "login": login, "email": email,
@@ -352,7 +352,7 @@ class UniqueEmailTests(AuthTestCase):
         # before the insert: the account is still created, without email.
         from unittest import mock
 
-        with mock.patch("apps.accounts.auth_views.email_taken", return_value=False):
+        with mock.patch("apps.accounts.intra.email_taken", return_value=False):
             user = self.intra(8008, "racer", "alice@example.com")
         self.assertEqual((user.email, user.profile.intra_id), ("", 8008))
 
