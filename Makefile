@@ -10,7 +10,7 @@ TEST_COMPOSE := docker compose -f compose.test.yaml
 TOOLS := prometheus grafana $(if $(filter dev,$(ENV)),adminer)
 
 .DEFAULT_GOAL := help
-.PHONY: help env dev prod up down restart logs ps migrate test tools tools-down cert backup restore
+.PHONY: help env dev prod up down restart logs ps migrate test tools tools-down cert backup restore deploy
 
 help: ## List the targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  make %-11s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -24,7 +24,7 @@ env/%/app.env:
 dev: ## Build and start the dev stack on https://localhost:1337
 	@$(MAKE) --no-print-directory up ENV=dev
 
-prod: ## Build and start the prod stack (run `make env ENV=prod DOMAIN=...` first)
+prod: ## Build and start the prod stack from source (on a server: make deploy)
 	@$(MAKE) --no-print-directory up ENV=prod
 
 up: env/$(ENV)/app.env
@@ -70,3 +70,6 @@ backup: ## Dump the database and avatars to backups/ (keeps 7)
 
 restore: ## Restore: make restore FILE=backups/db-<time>.dump [AVATARS=...tgz]
 	@COMPOSE="$(COMPOSE)" FILE="$(FILE)" AVATARS="$(AVATARS)" sh infra/scripts/restore.sh
+
+deploy: ## Server: deploy or roll back to a commit's images: make deploy SHA=<sha>
+	@sh infra/scripts/deploy.sh $(SHA)

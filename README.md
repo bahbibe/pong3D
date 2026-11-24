@@ -26,7 +26,7 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
 | Target | What it does |
 | --- | --- |
 | `make dev` | Dev stack: code bind-mounted, backend restarts on `.py` changes, nginx serves `./frontend` live |
-| `make prod` | Prod stack: images only, ports 80/443, Let's Encrypt |
+| `make prod` | Prod stack built from source (local tries); a server uses `make deploy` |
 | `make down` | Stop and remove the containers, tools included (volumes are kept) |
 | `make tools` | Grafana (127.0.0.1:3000), Prometheus, and in dev adminer (127.0.0.1:8080) and Prometheus on 127.0.0.1:9090 |
 | `make tools-down` | Stop the tools only |
@@ -39,6 +39,7 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
 | `make cert` | Prod: get the Let's Encrypt certificate (`STAGING=1` to try first) |
 | `make backup` | Dump the database and the avatars to `backups/` (keeps 7) |
 | `make restore FILE=... [AVATARS=...]` | Restore a backup (replaces the database content) |
+| `make deploy SHA=...` | Server: deploy or roll back to a commit's images from GHCR |
 
 ## Layout
 
@@ -51,7 +52,8 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
 - `backend/backend/`: Django project (`api`, `friends`, `chat`, `game`, `matchmaking`).
 - `frontend/`: `index.html` and `static/` (served by nginx; three.js is vendored in `static/vendor`).
 - `infra/nginx/`: nginx image and config (`common.conf` is shared by `dev.conf` and `prod.conf.template`).
-- `infra/scripts/`: `gen-env.sh`, `backup.sh`, `restore.sh`. `infra/prometheus/`.
+- `infra/scripts/`: `gen-env.sh`, `backup.sh`, `restore.sh`, `deploy.sh`. `infra/prometheus/`.
+- `.github/workflows/`: `ci.yml` (tests, deploy checks, images to GHCR), `deploy.yml` (deploy over SSH).
 
 nginx serves everything on one origin: the frontend, `/api`, `/ws` and `/avatars`.
 `/healthz`, `/metrics` and `/admin/` are not proxied. Startup is ordered by
@@ -75,11 +77,13 @@ healthchecks: db and redis, then the `migrate` job, then the backend
 
 ## Prod on a server
 
-Any Linux box with Docker and ports 80/443 open, and a DNS name pointing at it.
+Setup once: [infra/bootstrap-vps.md](infra/bootstrap-vps.md) (server, GitHub
+secrets, first deploy, certificate, backups cron). The server holds only the
+compose files, the scripts and `env/prod/`; it runs the images CI built.
 
 ```bash
 make env ENV=prod DOMAIN=pong.example.org ACME_EMAIL=you@example.org
-make prod                 # starts with a temporary self-signed certificate
+make deploy SHA=<commit>  # normally done by the Deploy workflow
 make cert STAGING=1       # optional dry run against Let's Encrypt staging
 make cert                 # real certificate; nginx reloads with it
 ```
@@ -98,6 +102,29 @@ make cert                 # real certificate; nginx reloads with it
   taken, `HTTP_PORT=8088 HTTPS_PORT=8443 make prod` (then set `API_URL`,
   `FRONTEND_URL` and `CSRF_TRUSTED_ORIGINS` in `env/prod/app.env` to
   `https://localhost:8443`). Local prod has its own database volume.
+
+### Deploys and rollback
+
+- Every push to main runs CI: tests, `manage.py check --deploy`, then
+  `ghcr.io/bahbibe/pong3d-backend` and `pong3d-nginx` are pushed, tagged with
+  the commit sha (and `main`). The Deploy workflow then runs
+  `infra/scripts/deploy.sh <sha>` on the server over SSH (only when the
+  repository variable `DEPLOY_ENABLED` is `true`).
+- `deploy.sh`: backup, pull, migrations with the new image (if they fail,
+  nothing is replaced), then `up` and wait until healthy. If the new version
+  does not get healthy, it starts the previous one again and fails.
+  `deployed.log` lists what was deployed when.
+- Roll back by hand: Actions > Deploy > Run workflow with an older sha of
+  main (`gh workflow run deploy.yml -f sha=<sha>`), or `make deploy SHA=<sha>`
+  on the server. The images are still in GHCR; nothing is rebuilt. The
+  server keeps the last 5 versions locally.
+- **A rollback does not undo migrations.** Keep migrations working with the
+  previous release: add a column in one release, use it, drop the old one a
+  release later. If a migration has to be undone, restore the backup taken
+  right before that deploy (`make restore ENV=prod FILE=...`).
+- One backend replica: each deploy recreates it, so the site is down for a
+  few seconds and running games are dropped. No blue/green on purpose (two
+  backends cannot share game state).
 
 ### Backups
 

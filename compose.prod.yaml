@@ -1,16 +1,27 @@
 # Prod: images only, no bind mounts, nothing published except nginx's
 # HTTP/HTTPS ports. Let's Encrypt via certbot (make cert).
+#
+# App images: CI pushes ghcr.io/bahbibe/pong3d-{backend,nginx}:<commit sha>.
+# On the server, infra/scripts/deploy.sh <sha> sets IMAGE_TAG and pulls them.
+# Locally, `make prod` builds them from source and tags them :local.
+x-backend-image: &backend-image ${IMAGE_PREFIX:-ghcr.io/bahbibe}/pong3d-backend:${IMAGE_TAG:-local}
+
 services:
+  migrate:
+    image: *backend-image
+
   db:
     volumes:
       # Not the dev volume: a prod stack on a dev machine gets its own data.
       - pgdata:/var/lib/postgresql/data
 
   backend:
+    image: *backend-image
     volumes:
       - avatars:/backend/avatars
 
   nginx:
+    image: ${IMAGE_PREFIX:-ghcr.io/bahbibe}/pong3d-nginx:${IMAGE_TAG:-local}
     environment:
       NGINX_SITE: prod
     env_file: env/prod/nginx.env
