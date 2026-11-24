@@ -12,6 +12,7 @@ services:
       - ./backend:/backend
     depends_on:
       - db
+      - redis
     ports:
       # Local only (seed script, admin). Browsers go through nginx.
       - "127.0.0.1:8000:8000"
@@ -35,7 +36,7 @@ services:
     restart: always
     init: true
   adminer:
-    image: adminer
+    image: adminer:6.3.0
     container_name: adminer
     ports:
       - "127.0.0.1:8080:8080"
@@ -47,14 +48,14 @@ services:
     restart: always
     init: true
   redis:
-    image: redis:alpine
+    image: redis:8.10.3-alpine
     container_name: redis
     networks:
       - ft_transcendence
     restart: always
     init: true
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v3.16.0
     container_name: prometheus
     ports:
       - "127.0.0.1:9090:9090"
@@ -67,7 +68,7 @@ services:
     restart: always
     init: true
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:13.3.1
     container_name: grafana
     ports:
       # Default login is admin/admin; keep it local.
