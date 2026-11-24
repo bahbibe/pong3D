@@ -27,16 +27,16 @@ jobs:
           --health-retries 10
     defaults:
       run:
-        working-directory: backend/backend
+        working-directory: backend
     env:
-      DJANGO_SETTINGS_MODULE: ft_transcendence.test_settings
+      DJANGO_SETTINGS_MODULE: config.test_settings
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: backend/backend/requirements.txt
+          cache-dependency-path: backend/requirements.txt
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Check for missing migrations
@@ -50,9 +50,9 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend/backend
+        working-directory: backend
     env:
-      DJANGO_SETTINGS_MODULE: ft_transcendence.settings
+      DJANGO_SETTINGS_MODULE: config.settings
       DJANGO_DEBUG: "0"
       DJANGO_ALLOWED_HOSTS: example.org
       DJANGO_HSTS_SECONDS: "31536000"
@@ -64,7 +64,7 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
-          cache-dependency-path: backend/backend/requirements.txt
+          cache-dependency-path: backend/requirements.txt
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Deploy checks
@@ -104,8 +104,8 @@ jobs:
       matrix:
         include:
           - image: pong3d-backend
-            context: backend/backend
-            file: backend/backend/Dockerfile
+            context: backend
+            file: backend/Dockerfile
           - image: pong3d-nginx
             context: .
             file: infra/nginx/Dockerfile

@@ -79,7 +79,7 @@ deploy: ## Server: deploy or roll back to a commit's images: make deploy SHA=<sh
 # ANSIBLE_VAULT_PASSWORD_FILE. Extra arguments: ARGS="--tags app".
 ANSIBLE := cd infra/ansible && ansible-playbook site.yml $(if $(ANSIBLE_VAULT_PASSWORD_FILE),,--ask-vault-pass)
 
-provision: ## Provision the server with Ansible (infra/ansible, see infra/bootstrap-vps.md)
+provision: ## Provision the server with Ansible (infra/ansible, see docs/bootstrap-vps.md)
 	$(ANSIBLE) $(ARGS)
 
 provision-check: ## Dry run of make provision (shows what would change)

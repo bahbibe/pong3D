@@ -2,7 +2,7 @@
 #
 # Idempotent: run it again after changing a variable or the vault.
 # Deploys are not done here: the Deploy workflow (or `make deploy SHA=` on
-# the server) runs infra/scripts/deploy.sh. See infra/bootstrap-vps.md.
+# the server) runs infra/scripts/deploy.sh. See docs/bootstrap-vps.md.
 - name: Provision the pong3D server
   hosts: pong3d
   become: true
@@ -39,7 +39,7 @@
           - vault_grafana_admin_password | default('') | length >= 12
         fail_msg: >-
           Set domain, acme_email and deploy_authorized_keys in the inventory, and
-          create the vault (make vault-new). See infra/bootstrap-vps.md.
+          create the vault (make vault-new). See docs/bootstrap-vps.md.
         quiet: true
 
   roles:

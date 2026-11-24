@@ -35,7 +35,7 @@ services:
   # One-off job on each `up`: apply the migrations, then exit. The backend
   # starts only once it succeeded.
   migrate:
-    build: ./backend/backend
+    build: ./backend
     env_file: env/${PONG3D_ENV:-dev}/app.env
     entrypoint: []
     command: ["python", "manage.py", "migrate", "--noinput"]
@@ -49,7 +49,7 @@ services:
     # live in this process's memory: a second backend would split games
     # between processes. Never scale this service; every restart or deploy
     # drops the games in progress.
-    build: ./backend/backend
+    build: ./backend
     env_file: env/${PONG3D_ENV:-dev}/app.env
     depends_on:
       db:

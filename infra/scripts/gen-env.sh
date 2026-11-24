@@ -11,7 +11,7 @@
 #
 # Existing files are never overwritten. Passwords shared by two files (the
 # Postgres and Redis ones) are written to both. Dev reuses the values of the
-# old single .env (or backend/backend/.env): the existing dbdata volume was
+# old single .env (.env.pre-split): the existing dbdata volume was
 # created with that Postgres password.
 set -eu
 cd "$(dirname "$0")/../.."
@@ -93,9 +93,7 @@ fi
 # Old values to carry over (dev only: prod starts with fresh secrets).
 old=""
 if [ "$ENV" = dev ]; then
-    if [ -f .env.pre-split ]; then old=.env.pre-split
-    elif [ -f backend/backend/.env ]; then old=backend/backend/.env
-    fi
+    if [ -f .env.pre-split ]; then old=.env.pre-split; fi
 fi
 
 mkdir -p "$dir"

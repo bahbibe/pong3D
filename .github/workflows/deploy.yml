@@ -6,7 +6,7 @@ name: Deploy
 #     -f sha=<commit>`) to roll back to an older commit; no rebuild needed.
 #
 # Off until the repository variable DEPLOY_ENABLED is "true". Setup and the
-# secrets it needs: infra/bootstrap-vps.md.
+# secrets it needs: docs/bootstrap-vps.md.
 
 on:
   workflow_run:

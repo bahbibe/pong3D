@@ -1,0 +1,9 @@
+# Build context is backend/ (see compose.yaml).
+# Keep secrets and user uploads out of the image.
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+media/avatars/*
+!media/avatars/profile_default.jpg

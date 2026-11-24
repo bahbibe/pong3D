@@ -51,7 +51,13 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
 - `env/dev/`, `env/prod/` (made by `make env`, not in git): one file per container.
   `app.env` (backend, migrate), `db.env`, `redis.env`, `grafana.env`, and `nginx.env` in prod.
   The templates are `env/*.example`.
-- `backend/backend/`: Django project (`api`, `friends`, `chat`, `game`, `matchmaking`).
+- `backend/`: Django project.
+  - `config/`: settings, URLs, ASGI app, websocket routes, `/healthz`.
+  - `apps/`: `accounts` (users, auth, 2FA, notifications, presence), `friends`, `chat`, `game`, `matchmaking`.
+    The app labels are the old ones (`accounts` is still `api` in the database and migrations).
+  - `core/`: shared helpers (JSON responses, Redis URL).
+  - `media/avatars/`: uploaded avatars (a named volume in prod). Only the default one is in git.
+- `docs/`: server setup (`bootstrap-vps.md`), the subject's module checklist, a Postman collection of the API.
 - `frontend/`: `index.html` and `static/` (served by nginx; three.js is vendored in `static/vendor`).
 - `infra/nginx/`: nginx image and config (`common.conf` is shared by `dev.conf` and `prod.conf.template`).
 - `infra/scripts/`: `gen-env.sh`, `backup.sh`, `restore.sh`, `deploy.sh`. `infra/prometheus/`.
@@ -76,11 +82,13 @@ healthchecks: db and redis, then the `migrate` job, then the backend
 - New migration: `docker compose exec backend python manage.py makemigrations`,
   then `make migrate`.
 - The Django port (`BACKEND_PORT` in `.env`, 8000 or the next free port) is
-  on 127.0.0.1 for the seed script and `/admin`.
+  on 127.0.0.1 for `/admin`.
+- Demo accounts: `docker compose exec backend python manage.py create_demo_users`
+  (dev only: refuses to run when `DJANGO_ALLOWED_HOSTS` has a public name).
 
 ## Prod on a server
 
-Setup: [infra/bootstrap-vps.md](infra/bootstrap-vps.md). In short, from your
+Setup: [docs/bootstrap-vps.md](docs/bootstrap-vps.md). In short, from your
 machine:
 
 ```bash
@@ -157,10 +165,10 @@ process's memory. Never run more than one backend container
 
 ## Moving from older setups
 
-- From the two-stack setup (`backend/docker-compose.yml` + `frontend/docker-compose.yml`):
-  `make env` reads `backend/backend/.env`, so the existing `dbdata` volume
-  (and your accounts) keep working. Remove the old containers once with
-  `docker rm -f backend db nginx redis adminer prometheus grafana frontend`.
+- The Django project moved from `backend/backend/` to `backend/`, and
+  uploaded avatars from `backend/backend/avatars/` to `backend/media/avatars/`.
+  Move your local uploads there if they are still in the old place. An old
+  `backend/backend/.env` is no longer read: `env/dev/` holds its values.
 - From the single root `.env`: `make env` moves it to `.env.pre-split` and
   writes `env/dev/*.env` from its values. Delete `.env.pre-split` once
   `make dev` works.
@@ -171,6 +179,6 @@ process's memory. Never run more than one backend container
 ```bash
 docker run -d --rm --name pong3d-test-pg -p 127.0.0.1:55432:5432 \
   -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test postgres:16-alpine
-cd backend/backend
-DJANGO_SETTINGS_MODULE=ft_transcendence.test_settings python manage.py test
+cd backend
+DJANGO_SETTINGS_MODULE=config.test_settings python manage.py test
 ```

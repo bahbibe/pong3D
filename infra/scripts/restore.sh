@@ -25,7 +25,7 @@ echo "Database restored from $FILE"
 
 if [ -n "$AVATARS" ]; then
     # The backend is stopped: unpack through a one-off container.
-    $COMPOSE run --rm -T --no-deps --entrypoint tar backend xzf - -C /backend/avatars \
+    $COMPOSE run --rm -T --no-deps --entrypoint tar backend xzf - -C /backend/media/avatars \
         < "$AVATARS"
     echo "Avatars restored from $AVATARS"
 fi

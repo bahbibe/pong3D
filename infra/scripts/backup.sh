@@ -26,9 +26,9 @@ mv "$dir/db-$stamp.dump.part" "$dir/db-$stamp.dump"
 # Through the running backend, or a one-off container when it is down
 # (for example a deploy that failed halfway): same avatars volume.
 if [ -n "$($COMPOSE ps -q --status running backend 2>/dev/null)" ]; then
-    $COMPOSE exec -T backend tar czf - -C /backend/avatars .
+    $COMPOSE exec -T backend tar czf - -C /backend/media/avatars .
 else
-    $COMPOSE run --rm -T --no-deps --entrypoint tar backend czf - -C /backend/avatars .
+    $COMPOSE run --rm -T --no-deps --entrypoint tar backend czf - -C /backend/media/avatars .
 fi > "$dir/avatars-$stamp.tgz.part"
 mv "$dir/avatars-$stamp.tgz.part" "$dir/avatars-$stamp.tgz"
 

@@ -12,7 +12,7 @@ services:
         DEV: "1"
     user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     volumes:
-      - ./backend/backend:/backend
+      - ./backend:/backend
 
   backend:
     build:
@@ -31,12 +31,12 @@ services:
       - python
       - >-
         sh -c "python manage.py reset_presence
-        && exec daphne -b 0.0.0.0 -p 8000 --proxy-headers ft_transcendence.asgi:application"
+        && exec daphne -b 0.0.0.0 -p 8000 --proxy-headers config.asgi:application"
       - /backend
     volumes:
-      - ./backend/backend:/backend
+      - ./backend:/backend
     ports:
-      # Direct access for the seed script and /admin. Set BACKEND_PORT in
+      # Direct access to /admin. Set BACKEND_PORT in
       # .env if 8000 is taken on your machine.
       - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
 
@@ -48,7 +48,7 @@ services:
     volumes:
       - ./frontend:/srv/frontend:ro
       # Uploaded avatars (written by the backend into the bind mount above).
-      - ./backend/backend/avatars:/srv/avatars:ro
+      - ./backend/media/avatars:/srv/avatars:ro
 
   adminer:
     profiles: [tools]  # make tools; dev only
