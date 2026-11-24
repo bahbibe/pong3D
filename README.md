@@ -53,7 +53,8 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
   The templates are `env/*.example`.
 - `backend/`: Django project.
   - `config/`: settings, URLs, ASGI app, websocket routes, `/healthz`.
-  - `apps/`: `accounts` (users, auth, 2FA, notifications, presence), `friends`, `chat`, `game`, `matchmaking`.
+  - `apps/`: `accounts` (users, auth, 2FA), `notifications` (stored and live, `notify()`),
+    `presence` (online status, in Redis), `friends`, `chat`, `game`, `matchmaking`.
     The app labels are the old ones (`accounts` is still `api` in the database and migrations).
   - `core/`: shared helpers (JSON responses, Redis URL).
   - `media/avatars/`: uploaded avatars (a named volume in prod). Only the default one is in git.
@@ -138,6 +139,11 @@ the images CI built. On the server itself, `make deploy SHA=<commit>`,
   previous release: add a column in one release, use it, drop the old one a
   release later. If a migration has to be undone, restore the backup taken
   right before that deploy (`make restore ENV=prod FILE=...`).
+  Moving a model to another app works the same way: state-only migrations,
+  the table keeps its name (see `apps/notifications/migrations/0001_initial.py`).
+  An older image run against it re-creates the old content type row;
+  `docker compose exec backend python manage.py remove_stale_contenttypes`
+  removes it, but it does no harm.
 - One backend replica: each deploy recreates it, so the site is down for a
   few seconds and running games are dropped. No blue/green on purpose (two
   backends cannot share game state).

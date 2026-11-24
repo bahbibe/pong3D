@@ -6,16 +6,16 @@ from .serializers import (
     UpdateSettingsSerializer,
 )
 from rest_framework import status
-import uuid as uuid_lib
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib.auth import get_user_model
-from .models import Profile, Notification
+from .models import Profile
 from django.db.models import Q, F
 from apps.accounts.auth_utils import is_authenticated, revoke_tokens, set_access_token
 from apps.accounts.auth_views import email_taken
 from django.db import IntegrityError, transaction
 from core.responses import SuccessResponse, ErrorResponse
+from core.uuids import parse_uuid
 from apps.friends.models import Friendship
 from apps.game.models import Game
 from apps.game.serializers import GameStatsSerializer, GameHistorySerializer
@@ -120,13 +120,6 @@ def update_settings(request):
         revoke_tokens(user)
         set_access_token(response, user, is_tfa_verified=request.is_tfa_verified)
     return response
-
-
-def parse_uuid(value):
-    try:
-        return uuid_lib.UUID(str(value))
-    except ValueError:
-        return None
 
 
 def user_not_found():
@@ -239,29 +232,3 @@ def get_users(request):
     return SuccessResponse(
         data=PublicUserSerializer(users[:MAX_SEARCH_RESULTS], many=True).data
     )
-
-
-@api_view(["POST"])
-@is_authenticated
-def mark_all_notifications_as_read(request):
-    user = request.user
-    Notification.objects.filter(user=user, is_read=False).update(is_read=True)
-    return SuccessResponse(message="All notifications marked as read")
-
-
-@api_view(["POST"])
-@is_authenticated
-def mark_notification_as_read(request, uuid):
-    notification_uuid = parse_uuid(uuid)
-    notification = (
-        Notification.objects.filter(uuid=notification_uuid, user=request.user).first()
-        if notification_uuid
-        else None
-    )
-    if not notification:
-        return ErrorResponse(
-            message="Notification does not exist", status_code=status.HTTP_404_NOT_FOUND
-        )
-    notification.is_read = True
-    notification.save(update_fields=["is_read"])
-    return SuccessResponse(message="Notification marked as read")

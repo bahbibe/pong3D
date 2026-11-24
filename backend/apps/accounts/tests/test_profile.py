@@ -191,7 +191,7 @@ class PrivacyAndRobustnessTests(AuthTestCase):
         self.assertEqual(self.me()["data"]["user"]["email"], "henry@example.com")
 
     def test_notification_without_sender(self):
-        from apps.accounts.models import Notification
+        from apps.notifications.models import Notification
 
         Notification.objects.create(user=self.henry, type="system", message="hello")
         notifications = self.me()["data"]["notifications"]
@@ -249,31 +249,3 @@ class AvatarSizeTests(AuthTestCase):
         self.user.profile.refresh_from_db()
         self.assertTrue(str(self.user.profile.avatar).startswith("avatars/"))
         self.assertNotEqual(str(self.user.profile.avatar), "avatars/profile_default.jpg")
-
-
-class MarkNotificationReadTests(AuthTestCase):
-    def setUp(self):
-        super().setUp()
-        from apps.accounts.models import Notification
-
-        self.user = make_user("nora")
-        self.other = make_user("otto")
-        self.mine = Notification.objects.create(user=self.user, message="m", type="t")
-        self.theirs = Notification.objects.create(user=self.other, message="m", type="t")
-        self.login("nora")
-
-    def mark(self, value):
-        return self.client.post(f"/api/auth/notifications/mark_as_read/{value}/")
-
-    def test_marks_own_notification(self):
-        self.assertEqual(self.mark(self.mine.uuid).status_code, 200)
-        self.mine.refresh_from_db()
-        self.assertTrue(self.mine.is_read)
-
-    def test_other_users_notification_is_not_found(self):
-        self.assertEqual(self.mark(self.theirs.uuid).status_code, 404)
-        self.theirs.refresh_from_db()
-        self.assertFalse(self.theirs.is_read)
-
-    def test_malformed_uuid_is_not_found(self):
-        self.assertEqual(self.mark("not-a-uuid").status_code, 404)

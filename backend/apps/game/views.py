@@ -21,9 +21,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import F
 from django.contrib.auth import get_user_model
 from apps.accounts.serializers import UserSerializer
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-from apps.accounts.models import Notification
+from apps.notifications.services import notify
 import logging
 
 User = get_user_model()
@@ -219,29 +217,7 @@ def invite_friend(request, friend_id):
             player1 = source_user,
             player2 = target_user
         )
-        notification = Notification.objects.create(
-            user_id=target_user.id,
-            message="invated you to a game",
-            type="game_invite",
-            sender_id=source_user.id,
-            game_id = game.id
-        )
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"user_{target_user.id}",
-            {
-                "type": "send_notification",
-                "notification_uuid": str(notification.uuid),
-                "message": "invated you to a game",
-                "user_id": target_user.id,
-                "sender_id": source_user.id,
-                "sender_uuid": str(source_user.profile.uuid),
-                "sender_username": source_user.username,
-                "sender_avatar": str(source_user.profile.avatar),
-                "ctx": "game_invite",
-                "game_id": game.id
-            },
-        )
+        notify(target_user, source_user, "game_invite", "invated you to a game", game_id=game.id)
         return SuccessResponse(data={"game": GameSerializer(game).data})
     except Exception:
         logger.exception("could not create game invite")
@@ -261,29 +237,7 @@ def play_again(request, game_id):
             player1 = source_user,
             player2 = target_user
         )
-        notification = Notification.objects.create(
-            user_id=target_user.id,
-            message="invated you to a game",
-            type="game_invite",
-            sender_id=source_user.id,
-            game_id = game.id
-        )
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"user_{target_user.id}",
-            {
-                "type": "send_notification",
-                "notification_uuid": str(notification.uuid),
-                "message": "invated you to a game",
-                "user_id": target_user.id,
-                "sender_id": source_user.id,
-                "sender_uuid": str(source_user.profile.uuid),
-                "sender_username": source_user.username,
-                "sender_avatar": str(source_user.profile.avatar),
-                "ctx": "game_invite",
-                "game_id": game.id
-            },
-        )
+        notify(target_user, source_user, "game_invite", "invated you to a game", game_id=game.id)
         return SuccessResponse(data={"game": GameSerializer(game).data})
     except Exception:
         logger.exception("could not create game invite")

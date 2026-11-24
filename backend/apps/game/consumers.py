@@ -14,9 +14,7 @@ from . import tournament
 from channels.db import database_sync_to_async
 from .serializers import TournamentGameSerializer
 from django.db.models import Q
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-from apps.accounts.models import Notification
+from apps.notifications.services import notify
 
 logger = logging.getLogger(__name__)
 
@@ -102,29 +100,14 @@ class GameConsumer(AsyncWebsocketConsumer):
     def send_opponent_invite(self):
         source_user = self.user
         target_user = self.game.player1 if self.user != self.game.player1 else self.game.player2
-        notification = Notification.objects.create(
-            user_id=target_user.id,
-            message="Tourament game ready",
-            type="game_invite",
-            sender_id=source_user.id,
-            game_id = f"{self.tournament_id}/{self.game.id}"
+        notify(
+            target_user,
+            source_user,
+            "game_invite",
+            "Tourament game ready",
+            game_id=f"{self.tournament_id}/{self.game.id}",
         )
-        notification_channel_layer = get_channel_layer()
-        async_to_sync(notification_channel_layer.group_send)(
-            f"user_{target_user.id}",
-            {
-                "type": "send_notification",
-                "notification_uuid": str(notification.uuid),
-                "message": "Tourament game ready",
-                "user_id": target_user.id,
-                "sender_id": source_user.id,
-                "sender_uuid": str(source_user.profile.uuid),
-                "sender_username": source_user.username,
-                "sender_avatar": str(source_user.profile.avatar),
-                "ctx": "game_invite",
-                "game_id": f"{self.tournament_id}/{self.game.id}"
-            },
-        )
+
     @database_sync_to_async
     def get_game(self):
         """Load the game and set self.player. None if not one of its players."""

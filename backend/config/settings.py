@@ -63,6 +63,8 @@ INSTALLED_APPS = [
     "apps.chat.apps.ChatConfig",
     "apps.game.apps.GameConfig",
     "apps.matchmaking.apps.MatchmakingConfig",
+    "apps.notifications.apps.NotificationsConfig",
+    "apps.presence.apps.PresenceConfig",
 ]
 
 

@@ -4,11 +4,11 @@ from unittest import mock
 
 from channels.testing import WebsocketCommunicator
 from django.contrib.auth.models import User
-from django.test import TransactionTestCase
+from django.test import TestCase, TransactionTestCase
 
 from config.asgi import application
 
-from apps.accounts import consumer
+from apps.presence import consumers as consumer
 from apps.accounts.auth_utils import generate_token
 from apps.accounts.models import Profile
 
@@ -92,11 +92,6 @@ class PresenceTests(TransactionTestCase):
         self.assertEqual(output.get("code"), 4001)
         self.assertEqual(await consumer.online_user_ids(), [])
 
-    async def test_anonymous_notification_socket_is_rejected(self):
-        anon = await self.connect("/ws/notifications/")
-        output = await anon.receive_output(timeout=2)
-        self.assertEqual(output.get("code"), 4001)
-
 
 class RevokedTokenSocketTests(TransactionTestCase):
     def setUp(self):
@@ -122,36 +117,26 @@ class RevokedTokenSocketTests(TransactionTestCase):
         self.assertEqual(output.get("code"), 4001)
 
 
-class NotificationSocketTests(TransactionTestCase):
-    def setUp(self):
-        self.alice = make_user("alice")
-        self.bob = make_user("bob")
+class ResetPresenceCommandTests(TestCase):
+    def test_clears_online_counts(self):
+        from io import StringIO
+        from unittest import mock
+        from django.core.management import call_command
 
-    async def test_pushed_notification_carries_its_uuid(self):
-        from channels.db import database_sync_to_async
-        from django.test import Client
-        from apps.accounts.models import Notification
+        client = mock.Mock()
+        with mock.patch("redis.Redis.from_url", return_value=client):
+            call_command("reset_presence", stdout=StringIO())
+        client.delete.assert_called_once_with("online_counts")
 
-        communicator = WebsocketCommunicator(
-            application,
-            "/ws/notifications/",
-            headers=[(b"origin", b"http://localhost"),
-                     (b"cookie", f"access_token={token_for(self.alice)}".encode())],
-        )
-        connected, _ = await communicator.connect()
-        self.assertTrue(connected)
+    def test_redis_down_does_not_fail_startup(self):
+        from io import StringIO
+        from unittest import mock
+        import redis
+        from django.core.management import call_command
 
-        def bob_sends_request():
-            client = Client()
-            client.cookies["access_token"] = token_for(self.bob)
-            return client.post(
-                "/api/friends/send/",
-                data=json.dumps({"target_user": self.alice.id}),
-                content_type="application/json",
-            ).status_code
-
-        self.assertEqual(await database_sync_to_async(bob_sends_request)(), 200)
-        message = json.loads(await communicator.receive_from(timeout=2))
-        stored = await database_sync_to_async(Notification.objects.get)(user=self.alice)
-        self.assertEqual(message["uuid"], str(stored.uuid))
-        await communicator.disconnect()
+        client = mock.Mock()
+        client.delete.side_effect = redis.ConnectionError("down")
+        err = StringIO()
+        with mock.patch("redis.Redis.from_url", return_value=client):
+            call_command("reset_presence", stdout=StringIO(), stderr=err)
+        self.assertIn("redis unavailable", err.getvalue())

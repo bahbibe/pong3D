@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from .models import Profile, Notification
+from .models import Profile
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
@@ -167,27 +167,3 @@ class UpdateSettingsSerializer(serializers.ModelSerializer):
                 {"confirm_password": "Passwords do not match"}
             )
         return data
-
-
-class NotificationSerializer(serializers.ModelSerializer):
-    sender = serializers.SerializerMethodField()
-
-    def get_sender(self, obj):
-        if obj.sender is None:  # system notification
-            return None
-        avatar = str(obj.sender.profile.avatar)
-        avatar_url = (
-            "cdn.intra.42.fr" in avatar
-            and avatar
-            or f"{os.getenv('API_URL')}/{avatar}"
-        )
-        return {
-            "id": obj.sender.id,
-            "username": obj.sender.username,
-            "avatar": avatar_url,
-            "uuid": str(obj.sender.profile.uuid),
-        }
-
-    class Meta:
-        model = Notification
-        fields = ["uuid", "type", "message", "is_read", "created_at", "sender", "game_id"]

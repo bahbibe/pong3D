@@ -17,8 +17,6 @@ from .views import (
     get_profile,
     get_users,
     get_profile_with_id,
-    mark_all_notifications_as_read,
-    mark_notification_as_read
 )
 
 
@@ -38,6 +36,4 @@ urlpatterns = [
     path("profile/<str:uuid>/", get_profile, name="get-profile"),
     path("user/<str:id>/", get_profile_with_id, name="get-profile-with-id"),
     path("users/", get_users, name="get-users"),
-    path("notifications/mark_as_read/", mark_all_notifications_as_read, name="mark-notifications-as-read"),
-    path("notifications/mark_as_read/<str:uuid>/", mark_notification_as_read, name="mark-notification-as-read"),
 ]

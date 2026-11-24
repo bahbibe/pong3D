@@ -4,31 +4,6 @@ from django.test import TestCase, TransactionTestCase
 from .helpers import AuthTestCase
 
 
-class ResetPresenceCommandTests(TestCase):
-    def test_clears_online_counts(self):
-        from io import StringIO
-        from unittest import mock
-        from django.core.management import call_command
-
-        client = mock.Mock()
-        with mock.patch("redis.Redis.from_url", return_value=client):
-            call_command("reset_presence", stdout=StringIO())
-        client.delete.assert_called_once_with("online_counts")
-
-    def test_redis_down_does_not_fail_startup(self):
-        from io import StringIO
-        from unittest import mock
-        import redis
-        from django.core.management import call_command
-
-        client = mock.Mock()
-        client.delete.side_effect = redis.ConnectionError("down")
-        err = StringIO()
-        with mock.patch("redis.Redis.from_url", return_value=client):
-            call_command("reset_presence", stdout=StringIO(), stderr=err)
-        self.assertIn("redis unavailable", err.getvalue())
-
-
 class CreateDemoUsersCommandTests(AuthTestCase):
     def run_command(self, **kwargs):
         from io import StringIO

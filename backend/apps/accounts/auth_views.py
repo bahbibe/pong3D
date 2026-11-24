@@ -3,11 +3,12 @@ from .serializers import (
     RegisterUserSerializer,
     UserSerializer,
     LoginUserSerializer,
-    NotificationSerializer,
 )
+from apps.notifications.models import Notification
+from apps.notifications.serializers import NotificationSerializer
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from .models import Profile, Notification
+from .models import Profile
 from django.shortcuts import redirect
 from django.contrib.auth.hashers import check_password
 from .auth_utils import is_authenticated, revoke_tokens, set_access_token

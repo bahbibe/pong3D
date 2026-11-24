@@ -12,9 +12,7 @@ from .serializers import (
 )
 from apps.accounts.auth_utils import is_authenticated
 from core.responses import ErrorResponse, SuccessResponse
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
-from apps.accounts.models import Notification
+from apps.notifications.services import notify
 
 
 @api_view(["GET"])
@@ -143,28 +141,7 @@ def send_friend_request(request):
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
-    notification = Notification.objects.create(
-        user_id=target_user.id,
-        message="sent you a friend request",
-        type="friend_request",
-        sender_id=source_user.id,
-    )
-
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        f"user_{target_user.id}",
-        {
-            "type": "send_notification",
-            "notification_uuid": str(notification.uuid),
-            "message": "sent you a friend request",
-            "user_id": target_user.id,
-            "sender_id": source_user.id,
-            "sender_uuid": str(source_user.profile.uuid),
-            "sender_username": source_user.username,
-            "sender_avatar": str(source_user.profile.avatar),
-            "ctx": "friend_request",
-        },
-    )
+    notify(target_user, source_user, "friend_request", "sent you a friend request")
     return SuccessResponse(data=FriendshipSerializer(friendship).data)
 
 
@@ -192,28 +169,7 @@ def accept_friend_request(request):
     friendship.status = "accepted"
     friendship.save()
 
-    notification = Notification.objects.create(
-        user_id=source_user.id,
-        message="accepted your friend request",
-        type="friend_request_accepted",
-        sender_id=user.id,
-    )
-
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        f"user_{source_user.id}",
-        {
-            "type": "send_notification",
-            "notification_uuid": str(notification.uuid),
-            "message": "accepted your friend request",
-            "user_id": source_user.id,
-            "sender_id": user.id,
-            "sender_uuid": str(user.profile.uuid),
-            "sender_username": user.username,
-            "sender_avatar": str(user.profile.avatar),
-            "ctx": "friend_request_accepted",
-        },
-    )
+    notify(source_user, user, "friend_request_accepted", "accepted your friend request")
 
     return SuccessResponse(data=FriendshipSerializer(friendship).data)
 

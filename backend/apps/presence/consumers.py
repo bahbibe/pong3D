@@ -1,14 +1,12 @@
-from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import Notification
-from channels.db import database_sync_to_async
+"""Online status of users (/ws/status/)."""
+
 import json
-import os
+
+from channels.generic.websocket import AsyncWebsocketConsumer
 from redis import asyncio as aioredis
 
+from apps.accounts.ws_auth import reject_anonymous
 from core.redis_url import redis_url
-
-# Close code the frontend treats as "log in again".
-CLOSE_UNAUTHORIZED = 4001
 
 # Hash user_id -> number of open status sockets. A user is online while the
 # count is above 0, so closing one of two tabs does not mark them offline.
@@ -22,15 +20,6 @@ r = aioredis.Redis.from_url(redis_url(), decode_responses=True)
 async def online_user_ids():
     counts = await r.hgetall(ONLINE_KEY)
     return [user_id for user_id, count in counts.items() if int(count) > 0]
-
-
-async def reject_anonymous(consumer):
-    user = consumer.scope.get("user")
-    if user is None or user.is_anonymous:
-        await consumer.accept()
-        await consumer.close(code=CLOSE_UNAUTHORIZED)
-        return True
-    return False
 
 
 class FriendsStatusConsumer(AsyncWebsocketConsumer):
@@ -81,58 +70,6 @@ class FriendsStatusConsumer(AsyncWebsocketConsumer):
                     "status": event["status"],
                     "online_users": event["online_users"],
                     "type": "user_status",
-                }
-            )
-        )
-
-
-@database_sync_to_async
-def create_notification(user_id, sender_id, message, type):
-    Notification.objects.create(
-        user_id=user_id, message=message, type=type, sender_id=sender_id
-    )
-
-
-class NotificationConusmer(AsyncWebsocketConsumer):
-    async def connect(self):
-        self.user_id = None
-        if await reject_anonymous(self):
-            return
-        self.user_id = self.scope["user"].id
-        await self.channel_layer.group_add(f"user_{self.user_id}", self.channel_name)
-        await self.accept()
-
-    async def disconnect(self, close_code):
-        if self.user_id is None:
-            return
-        await self.channel_layer.group_discard(
-            f"user_{self.user_id}", self.channel_name
-        )
-
-    async def send_notification(self, event):
-        message = event["message"]
-        ctx = event["ctx"]
-        avatar = (
-            "cdn.intra.42.fr" in event["sender_avatar"]
-            and event["sender_avatar"]
-            or f"{os.getenv('API_URL')}/{event['sender_avatar']}"
-        )
-        game_id = event["game_id"] if "game_id" in event else None
-
-        await self.send(
-            text_data=json.dumps(
-                {
-                    # Lets the client mark this one notification as read.
-                    "uuid": event.get("notification_uuid"),
-                    "message": message,
-                    "type": "notification",
-                    "ctx": ctx,
-                    "sender": {
-                        "uuid": event["sender_uuid"],
-                        "username": event["sender_username"],
-                        "avatar": avatar,
-                    },
-                    "game_id": game_id,
                 }
             )
         )

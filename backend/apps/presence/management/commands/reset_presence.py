@@ -1,7 +1,7 @@
 import redis
 from django.core.management.base import BaseCommand
 
-from apps.accounts.consumer import ONLINE_KEY
+from apps.presence.consumers import ONLINE_KEY
 from core.redis_url import redis_url
 
 

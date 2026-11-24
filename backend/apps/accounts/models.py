@@ -33,14 +33,3 @@ class Profile(models.Model):
     # Stored in every access token. Bumping it (logout, password change)
     # invalidates all tokens issued before.
     token_version = models.IntegerField(default=0)
-
-
-class Notification(models.Model):
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    type = models.CharField(max_length=255)
-    message = models.TextField()
-    is_read = models.BooleanField(default=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user")
-    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sender", null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    game_id = models.CharField(null=True)

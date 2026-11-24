@@ -53,3 +53,18 @@ class WSAuthMiddleware:
             except jwt.InvalidTokenError:
                 pass
         return await self.app(scope, receive, send)
+
+
+# Close code the frontend treats as "log in again".
+CLOSE_UNAUTHORIZED = 4001
+
+
+async def reject_anonymous(consumer):
+    """Accept then close with CLOSE_UNAUTHORIZED when nobody is logged in.
+    Returns True when the socket was rejected."""
+    user = consumer.scope.get("user")
+    if user is None or user.is_anonymous:
+        await consumer.accept()
+        await consumer.close(code=CLOSE_UNAUTHORIZED)
+        return True
+    return False

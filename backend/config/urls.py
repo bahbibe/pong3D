@@ -5,6 +5,7 @@ from .health import healthz
 
 urlpatterns = [
     path("api/chat/", include("apps.chat.urls")),
+    path("api/auth/notifications/", include("apps.notifications.urls")),
     path("api/auth/", include("apps.accounts.urls")),
     path("api/friends/", include("apps.friends.urls")),
     path("admin/", admin.site.urls),
