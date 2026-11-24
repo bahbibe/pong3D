@@ -510,3 +510,40 @@ class TournamentBracketTests(TransactionTestCase):
         await play(final, 11, 9)
         await database_sync_to_async(self.tournament.refresh_from_db)()
         self.assertTrue(self.tournament.finished)
+
+
+class TournamentListTests(TransactionTestCase):
+    def setUp(self):
+        from .models import Tournament
+        from .tournament import ensure_bracket, take_seat
+
+        self.players = [make_user(f"t{i}") for i in range(6)]
+        self.open = Tournament.objects.create(owner=self.players[0])
+        ensure_bracket(self.open)
+        take_seat(self.open, self.players[0], 2)
+        self.half = Tournament.objects.create(owner=self.players[1])
+        ensure_bracket(self.half)
+        for player in self.players[1:3]:
+            take_seat(self.half, player, 2)
+        Tournament.objects.create(owner=self.players[3], finished=True)
+        self.client.cookies["access_token"] = token_for(self.players[5])
+
+    def test_lists_open_tournaments_with_free_seats(self):
+        response = self.client.get("/api/game/get_tournaments/")
+        self.assertEqual(response.status_code, 200)
+        spots = {t["uuid"]: t["spots"] for t in response.json()["data"]["data"]}
+        self.assertEqual(spots, {str(self.open.uuid): 3, str(self.half.uuid): 2})
+
+    def test_query_count_does_not_grow_with_tournaments(self):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+        from .models import Tournament
+        from .tournament import ensure_bracket
+
+        with CaptureQueriesContext(connection) as small:
+            self.client.get("/api/game/get_tournaments/")
+        for player in self.players[3:6]:
+            ensure_bracket(Tournament.objects.create(owner=player))
+        with CaptureQueriesContext(connection) as big:
+            self.client.get("/api/game/get_tournaments/")
+        self.assertEqual(len(big), len(small))

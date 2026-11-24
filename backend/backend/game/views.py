@@ -14,7 +14,7 @@ from .serializers import (
 from .models import Game
 from .models import Tournament, Tournament_Participants, Tournament_Game
 from friends.models import Friendship
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.db import transaction
 from .tournament import ensure_bracket
 from django.core.exceptions import ValidationError
@@ -150,16 +150,24 @@ def create_tournament(request):
 @api_view(["GET"])
 @is_authenticated
 def get_tournaments(request):
-    tournaments = Tournament.objects.filter(finished=False)
-    for tournament in tournaments:
-        player1_spots = Tournament_Game.objects.filter(
-            tournament=tournament, game__player1=None, t_round=2
-        ).count()
-        player2_spots = Tournament_Game.objects.filter(
-            tournament=tournament, game__player2=None, t_round=2
-        ).count()
-        spots = player1_spots + player2_spots
-        tournament.spots = spots
+    # Free seats = empty player slots in the first round (t_round=2),
+    # counted in the same query as the list.
+    first_round = Q(tournament_game__t_round=2)
+    tournaments = (
+        Tournament.objects.filter(finished=False)
+        .select_related("owner__profile")
+        .annotate(
+            spots=Count(
+                "tournament_game",
+                filter=first_round & Q(tournament_game__game__player1=None),
+            )
+            + Count(
+                "tournament_game",
+                filter=first_round & Q(tournament_game__game__player2=None),
+            )
+        )
+        .order_by("id")
+    )
     return SuccessResponse(
         data={
             "data": TournamentSerializer(tournaments, many=True).data,
