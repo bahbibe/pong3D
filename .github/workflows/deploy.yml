@@ -42,7 +42,7 @@ jobs:
       SSH_PORT: ${{ vars.VPS_SSH_PORT || '22' }}
       IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0

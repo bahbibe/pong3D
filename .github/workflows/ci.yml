@@ -31,7 +31,7 @@ jobs:
     env:
       DJANGO_SETTINGS_MODULE: config.test_settings
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d  # v10.4.0 (no moving major tag)
         with:
           # Same uv as the Dockerfile and `make lock`.
@@ -63,7 +63,7 @@ jobs:
       DJANGO_HSTS_INCLUDE_SUBDOMAINS: "1"
       JWT_SECRET: ci-only-not-a-secret
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d  # v10.4.0 (no moving major tag)
         with:
           # Same uv as the Dockerfile and `make lock`.
@@ -82,7 +82,7 @@ jobs:
     # Ruff and the file hooks of .pre-commit-config.yaml, on every file.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d  # v10.4.0 (no moving major tag)
         with:
           version: "0.11.32"
@@ -97,7 +97,7 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d  # v10.4.0 (no moving major tag)
         with:
           version: "0.11.32"
@@ -114,7 +114,7 @@ jobs:
       run:
         working-directory: infra/ansible
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -145,7 +145,7 @@ jobs:
             context: .
             file: infra/nginx/Dockerfile
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
