@@ -34,7 +34,7 @@ class ScorePage extends AbstractPage {
       invite_to_play_button.onclick = (e) => {
         navigateTo('/play/bot') ;
       }
-      return 
+      return
     }
     this.API.get_game(this.params.game_id).then(res => {
       if (res.game.player1)

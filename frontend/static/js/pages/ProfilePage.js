@@ -80,7 +80,7 @@ class ProfilePage extends AbstractPage {
                 </div>
                 <div class="col-3 col-md-2 text-end">
                   <a data-id="${esc(friend.friend.id)}" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
-                </div> 
+                </div>
               </div>
           `;
         }
@@ -114,7 +114,7 @@ class ProfilePage extends AbstractPage {
                   </div>
                   <div class="col-4 text-end">
                     <button data-unblock="${esc(user.friend.id)}" role="button" class="btn btn-block bg-danger p-1">Unblock</button>
-                  </div> 
+                  </div>
                 </div>
             `;
       }

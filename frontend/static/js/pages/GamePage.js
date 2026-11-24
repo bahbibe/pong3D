@@ -53,7 +53,7 @@ class GamePage extends AbstractPage {
 
     this.scene = new THREE.Scene();
     this.game_url = `${WSS_URL}/ws/game/` + this.params.game_id ;
-    
+
     if (this.params.tournament_id)
       this.game_url = `${WSS_URL}/ws/game/` + this.params.tournament_id +'/' + this.params.game_id;
     this.socket = new WebSocket(this.game_url);
@@ -65,7 +65,7 @@ class GamePage extends AbstractPage {
       antialias: true,
       alpha: true
     });
-    
+
     //set up the renderer with the default settings for threejs.org/editor - revision r153
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -80,7 +80,7 @@ class GamePage extends AbstractPage {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
 
     // Load the GLTF model
-    
+
     LoadGLTFByPath(this.scene)
       .then(() => {
         // The user may have left the page while the model was loading.

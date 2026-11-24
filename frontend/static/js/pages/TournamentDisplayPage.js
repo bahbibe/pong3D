@@ -9,7 +9,7 @@ class TournamentDisplayPage extends AbstractPage {
   }
   connectedCallback() {
     console.log("connectedCallback");
-    
+
     this.socket = new WebSocket(`${WSS_URL}/ws/tournament/` + this.params.tournament_id);
     const template = document.getElementById("tournament-display-page");
     const clone = template.content.cloneNode(true);
@@ -17,7 +17,7 @@ class TournamentDisplayPage extends AbstractPage {
     this.socket.onmessage = e => {
       const res = JSON.parse(e.data)
       console.log(res);
-      
+
       this.API.getTournamentGames(this.params.tournament_id).then((res) => {
         this.games = res;
         console.log(this.games);
@@ -59,7 +59,7 @@ class TournamentDisplayPage extends AbstractPage {
           score2.innerHTML = game.game.player2_score ?? "0" ;
 
           console.log("winner", get_winner(game.game));
-          
+
           const winner = get_winner(game.game) ;
           if (winner == 0)
             slots[1]?.classList.replace('winner-top', 'winner-bottom')
@@ -125,11 +125,11 @@ class TournamentDisplayPage extends AbstractPage {
           const score2 = slots.querySelector('.score') ;
           score2.innerHTML = "" ;
         }
-        
+
       });
     };
   }
-  
+
   adoptedCallback() {
     console.log("Custom element moved to new page.");
   }

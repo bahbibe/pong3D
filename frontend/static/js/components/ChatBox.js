@@ -97,7 +97,7 @@ class ChatBox extends HTMLElement {
     <a href="/friend/${esc(friend.profile.uuid)}">
       <span class="fs-5">${esc(friend.username)}</span>
       </a>
-      <span class="stat opacity-75 stat-${esc(friend.id)} ${stat === "Online" ? "online" : ""}"> 
+      <span class="stat opacity-75 stat-${esc(friend.id)} ${stat === "Online" ? "online" : ""}">
         <i class="fa-solid fa-circle"></i> <span class="friend-status">${stat}</span>
       </span>
     </div>

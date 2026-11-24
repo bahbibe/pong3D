@@ -15,13 +15,13 @@ class RankingPage extends AbstractPage {
     this.appendChild(clone);
     this.render();
   }
-  
+
   async render() {
     try {
       const response = await fetch(`${BASE_URL}/api/game/leaderboard/`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
-        
+
       });
       const data = await response.json();
       console.log(data);

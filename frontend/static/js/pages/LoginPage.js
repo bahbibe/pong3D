@@ -55,7 +55,7 @@ class LoginPage extends AbstractPage {
           this.lengthPassword.classList.add("d-none");
         });
     });
-    
+
     this.addEventListener('input', this);
 
 

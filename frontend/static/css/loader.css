@@ -10,7 +10,7 @@
       linear-gradient(var(--text) 0 0) 100% 0/8px 50px,
       radial-gradient(farthest-side,var(--text) 90%,#0000) 0 5px/12px 12px content-box,
       var(--backgroud);
-    background-repeat: no-repeat; 
+    background-repeat: no-repeat;
     animation: l3 2s infinite linear;
   }
   @keyframes l3{
