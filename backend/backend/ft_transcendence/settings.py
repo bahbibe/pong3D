@@ -83,6 +83,21 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_SECURE = env_bool("AUTH_COOKIE_SECURE", default=True)
 CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
 
+# HSTS: 0 (off) by default. Browsers apply HSTS to a host on every port, so
+# turning it on for localhost would also force HTTPS on other local apps.
+# Set it (e.g. 31536000) for a real domain.
+SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_HSTS_SECONDS") or 0)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_HSTS_INCLUDE_SUBDOMAINS")
+
+SILENCED_SYSTEM_CHECKS = [
+    # SECURE_SSL_REDIRECT: nginx already redirects port 80 to HTTPS, and
+    # Django only sees plain HTTP from nginx and from in-container calls.
+    "security.W008",
+    # SECURE_HSTS_PRELOAD: asks browsers to hard-code HTTPS for the domain,
+    # which is hard to undo. Opt in by hand once the prod domain is final.
+    "security.W021",
+]
+
 ROOT_URLCONF = "ft_transcendence.urls"
 
 TEMPLATES = [
