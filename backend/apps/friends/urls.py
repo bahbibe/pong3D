@@ -1,15 +1,15 @@
 from django.urls import path
+
 from .views import (
-    get_friends,
-    get_friends_request,
-    send_friend_request,
     accept_friend_request,
     block_user,
-    unblock_user,
-    get_sent_friends_request,
     get_blocked_friends,
+    get_friends,
+    get_friends_request,
+    get_sent_friends_request,
+    send_friend_request,
+    unblock_user,
 )
-
 
 urlpatterns = [
     path("", get_friends, name="get-friends"),

@@ -1,9 +1,9 @@
 import json
 
-from redis import asyncio as aioredis
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth import get_user_model
+from redis import asyncio as aioredis
 
 from apps.game.models import Game
 from core.redis_url import redis_url

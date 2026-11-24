@@ -2,7 +2,8 @@ import pyotp
 from django.utils import timezone
 
 from apps.accounts.models import Profile
-from .helpers import make_user, AuthTestCase
+
+from .helpers import AuthTestCase, make_user
 
 
 class TwoFactorTests(AuthTestCase):

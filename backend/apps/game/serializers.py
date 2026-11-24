@@ -1,8 +1,10 @@
-from rest_framework import serializers
-from .models import Game, Tournament
-from apps.accounts.serializers import PublicUserSerializer
 import os
-from apps.accounts.models import Profile
+
+from rest_framework import serializers
+
+from apps.accounts.serializers import PublicUserSerializer
+
+from .models import Game, Tournament
 
 
 class GameStatsSerializer(serializers.ModelSerializer):

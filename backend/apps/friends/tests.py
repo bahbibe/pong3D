@@ -116,6 +116,7 @@ class FriendshipPairTests(TestCase):
         # her insert. Simulate that window by hiding the existing row from
         # the check.
         from unittest import mock
+
         from django.db.models.query import QuerySet
 
         Friendship.objects.create(source_user=self.bob, target_user=self.alice)
@@ -127,6 +128,7 @@ class FriendshipPairTests(TestCase):
 
     def test_block_during_crossed_insert_blocks_existing_row(self):
         from unittest import mock
+
         from django.db.models.query import QuerySet
 
         Friendship.objects.create(source_user=self.bob, target_user=self.alice)
@@ -231,6 +233,7 @@ class FriendServiceTests(TestCase):
 
     def test_rules(self):
         from core.errors import NotFound, ServiceError
+
         from . import selectors, services
 
         with self.assertRaisesMessage(ServiceError, "yourself"):

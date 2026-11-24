@@ -1,7 +1,9 @@
 import json
-from django.utils import timezone
-from channels.generic.websocket import AsyncWebsocketConsumer
+
 from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
+from django.utils import timezone
+
 from .models import Message
 from .utils import get_chat_friendship
 

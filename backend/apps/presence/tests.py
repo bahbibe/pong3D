@@ -6,11 +6,10 @@ from channels.testing import WebsocketCommunicator
 from django.contrib.auth.models import User
 from django.test import TestCase, TransactionTestCase
 
-from config.asgi import application
-
-from apps.presence import consumers as consumer
 from apps.accounts.auth_utils import generate_token
 from apps.accounts.models import Profile
+from apps.presence import consumers as consumer
+from config.asgi import application
 
 
 class FakeRedis:
@@ -102,6 +101,7 @@ class RevokedTokenSocketTests(TransactionTestCase):
 
     async def test_socket_with_revoked_token_is_rejected(self):
         from channels.db import database_sync_to_async
+
         from apps.accounts.auth_utils import revoke_tokens
 
         token = token_for(self.alice)
@@ -124,6 +124,7 @@ class ResetPresenceCommandTests(TestCase):
     def test_clears_online_counts(self):
         from io import StringIO
         from unittest import mock
+
         from django.core.management import call_command
 
         client = mock.Mock()
@@ -134,6 +135,7 @@ class ResetPresenceCommandTests(TestCase):
     def test_redis_down_does_not_fail_startup(self):
         from io import StringIO
         from unittest import mock
+
         import redis
         from django.core.management import call_command
 

@@ -32,9 +32,9 @@ def register(username, email, password, first_name, last_name):
                 first_name=first_name,
                 last_name=last_name,
             )
-    except IntegrityError:
+    except IntegrityError as error:
         # Same username or email registered at the same moment.
-        raise ServiceError("A user with this username or email already exists")
+        raise ServiceError("A user with this username or email already exists") from error
 
 
 def login(password, ip, email=None, username=None):
@@ -106,7 +106,9 @@ def update_settings(user, data):
         try:
             validate_password(password, user=user)
         except DjangoValidationError as error:
-            raise ServiceError("Invalid password", errors={"password": list(error.messages)})
+            raise ServiceError(
+                "Invalid password", errors={"password": list(error.messages)}
+            ) from None
 
     profile.avatar = data.get("avatar", profile.avatar)
     if username:
@@ -119,7 +121,7 @@ def update_settings(user, data):
         with transaction.atomic():
             profile.save(update_fields=["avatar"])
             user.save()
-    except IntegrityError:
+    except IntegrityError as error:
         # Username or email taken by another request at the same moment.
-        raise ServiceError("Username or email already exists")
+        raise ServiceError("Username or email already exists") from error
     return bool(password)

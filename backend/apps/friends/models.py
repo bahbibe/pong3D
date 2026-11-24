@@ -1,10 +1,10 @@
-from django.db import models
-from django.db.models.functions import Greatest, Least
-from django.conf import settings
 import uuid
 
+from django.conf import settings
+from django.db import models
+from django.db.models.functions import Greatest, Least
 
-# Create your models here.
+
 class Friendship(models.Model):
     PENDING = "pending"
     ACCEPTED = "accepted"
@@ -46,3 +46,6 @@ class Friendship(models.Model):
                 name="friendship_unique_pair",
             ),
         ]
+
+    def __str__(self):
+        return f"{self.source_user_id} -> {self.target_user_id} ({self.status})"

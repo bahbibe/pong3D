@@ -1,6 +1,5 @@
 import json
 from datetime import datetime, timedelta
-from unittest import mock
 
 from channels.testing import WebsocketCommunicator
 from django.contrib.auth.models import User
@@ -8,7 +7,8 @@ from django.test import TestCase, TransactionTestCase
 
 from apps.accounts.auth_utils import generate_token
 from apps.accounts.models import Profile
-from apps.accounts.tests.helpers import AuthTestCase, make_user as make_set_up_user
+from apps.accounts.tests.helpers import AuthTestCase
+from apps.accounts.tests.helpers import make_user as make_set_up_user
 from config.asgi import application
 
 from .models import Notification

@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from django.test import TestCase, TransactionTestCase
 
 from .helpers import AuthTestCase
 
@@ -7,6 +6,7 @@ from .helpers import AuthTestCase
 class CreateDemoUsersCommandTests(AuthTestCase):
     def run_command(self, **kwargs):
         from io import StringIO
+
         from django.core.management import call_command
 
         call_command("create_demo_users", stdout=StringIO(), **kwargs)

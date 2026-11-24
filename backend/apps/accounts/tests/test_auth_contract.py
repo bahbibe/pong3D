@@ -224,6 +224,7 @@ class ErrorShapeTests(TestCase):
 class WebsocketSameRulesTests(TransactionTestCase):
     def test_deleted_user_and_missing_profile_get_no_user(self):
         from asgiref.sync import async_to_sync
+
         from apps.accounts.models import Profile
         from apps.accounts.ws_auth import user_from_cookie
 

@@ -1,9 +1,11 @@
 import json
+
 from django.contrib.auth.models import User
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase
 
 from apps.accounts.models import Profile
-from .helpers import PASSWORD, make_user, AuthTestCase
+
+from .helpers import PASSWORD, AuthTestCase, make_user
 
 
 class SettingsUpdateTests(AuthTestCase):
@@ -16,7 +18,7 @@ class SettingsUpdateTests(AuthTestCase):
 
     def put(self, data):
         # Same encoding as the browser form (FormData -> multipart).
-        from django.test.client import encode_multipart, BOUNDARY, MULTIPART_CONTENT
+        from django.test.client import BOUNDARY, MULTIPART_CONTENT, encode_multipart
 
         return self.client.put(
             "/api/auth/settings/update/",
@@ -227,6 +229,7 @@ class AvatarSizeTests(AuthTestCase):
     def png(self, side):
         import io
         import os
+
         from django.core.files.uploadedfile import SimpleUploadedFile
         from PIL import Image
 
@@ -248,6 +251,7 @@ class AvatarSizeTests(AuthTestCase):
     def test_small_avatar_is_saved(self):
         import shutil
         import tempfile
+
         from django.test import override_settings
 
         media = tempfile.mkdtemp()

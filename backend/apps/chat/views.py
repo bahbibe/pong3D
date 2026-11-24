@@ -1,9 +1,11 @@
-from rest_framework.decorators import api_view
 from rest_framework import status
+from rest_framework.decorators import api_view
+
+from core.responses import ErrorResponse, SuccessResponse
+
 from .models import Message
 from .serializers import MessageSerializer
 from .utils import get_chat_friendship
-from core.responses import ErrorResponse, SuccessResponse
 
 
 @api_view(["GET"])

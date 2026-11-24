@@ -1,6 +1,7 @@
-from django.db import models
-from django.conf import settings
 import uuid
+
+from django.conf import settings
+from django.db import models
 
 
 class Profile(models.Model):
@@ -33,3 +34,6 @@ class Profile(models.Model):
     # Stored in every access token. Bumping it (logout, password change)
     # invalidates all tokens issued before.
     token_version = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"Profile of user {self.user_id}"

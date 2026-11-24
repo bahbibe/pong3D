@@ -67,10 +67,10 @@ def fetch_user_data(code):
         if response.status_code != 200:
             raise ServiceError("Failed to get user data", status.HTTP_401_UNAUTHORIZED)
         user_data = parse_intra_user(response.json())
-    except (requests.RequestException, ValueError):
+    except (requests.RequestException, ValueError) as error:
         raise ServiceError(
             "42 intra is not reachable, please try again later.", status.HTTP_502_BAD_GATEWAY
-        )
+        ) from error
     if user_data is None:
         raise ServiceError("Failed to get user data", status.HTTP_401_UNAUTHORIZED)
     return user_data

@@ -1,12 +1,14 @@
 import asyncio
 import json
 from unittest import mock
+
 from channels.db import database_sync_to_async
 
 from apps.game import game_manager as gm
 from apps.game.consumers import bot_manager, game_manager
 from apps.game.models import Game
-from .helpers import ws_connect, receive_until, wait_for, GameTestCase
+
+from .helpers import GameTestCase, receive_until, wait_for, ws_connect
 
 
 class GameConsumerAccessTests(GameTestCase):

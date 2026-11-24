@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User
-from django.test import TestCase, TransactionTestCase
+from django.test import TransactionTestCase
 
 from apps.accounts.models import Profile
 

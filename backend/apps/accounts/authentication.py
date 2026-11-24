@@ -57,9 +57,9 @@ class JWTCookieAuthentication(BaseAuthentication):
         try:
             return user_for_token(token)
         except InvalidToken:
-            raise AuthenticationFailed("Invalid access token")
+            raise AuthenticationFailed("Invalid access token") from None
         except UnknownUser:
-            raise NotFound("User does not exist")
+            raise NotFound("User does not exist") from None
 
     def authenticate_header(self, request):
         # Any value makes DRF answer 401 (not 403) when authentication fails.

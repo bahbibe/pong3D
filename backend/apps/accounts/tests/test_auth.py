@@ -1,10 +1,12 @@
 import json
+
 from django.contrib.auth.models import User
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase
 from django.utils import timezone
 
 from apps.accounts.models import Profile
-from .helpers import PASSWORD, make_user, AuthTestCase
+
+from .helpers import PASSWORD, AuthTestCase, make_user
 
 
 class RegisterValidationTests(AuthTestCase):
@@ -269,7 +271,7 @@ class TokenRevocationTests(AuthTestCase):
 
     def test_password_change_ends_other_sessions_only(self):
         from django.test import Client
-        from django.test.client import encode_multipart, BOUNDARY, MULTIPART_CONTENT
+        from django.test.client import BOUNDARY, MULTIPART_CONTENT, encode_multipart
 
         other = Client()
         other.post(
@@ -298,6 +300,7 @@ class TokenRevocationTests(AuthTestCase):
     def test_old_tokens_without_version_still_work_until_revoked(self):
         # Tokens issued before this change have no "ver" claim.
         from datetime import timedelta
+
         from apps.accounts.auth_utils import generate_token, revoke_tokens
 
         token = generate_token(
@@ -391,7 +394,7 @@ class UniqueEmailTests(AuthTestCase):
         self.assertEqual(user.email, "fresh@student.42.fr")
 
     def test_settings_cannot_take_another_users_email(self):
-        from django.test.client import encode_multipart, BOUNDARY, MULTIPART_CONTENT
+        from django.test.client import BOUNDARY, MULTIPART_CONTENT, encode_multipart
 
         make_user("bob")
         self.login("bob")
@@ -411,7 +414,7 @@ class UniqueEmailTests(AuthTestCase):
         self.assertEqual(User.objects.get(username="bob").email, "bob@example.com")
 
     def test_settings_with_own_email_in_another_case_is_fine(self):
-        from django.test.client import encode_multipart, BOUNDARY, MULTIPART_CONTENT
+        from django.test.client import BOUNDARY, MULTIPART_CONTENT, encode_multipart
 
         self.login("alice")
         response = self.client.put(

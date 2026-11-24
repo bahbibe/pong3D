@@ -1,15 +1,16 @@
 import asyncio
 import json
 from datetime import datetime, timedelta
+
 from channels.testing import WebsocketCommunicator
 from django.contrib.auth.models import User
 from django.test import TransactionTestCase
 
 from apps.accounts.auth_utils import generate_token
 from apps.accounts.models import Profile
-from config.asgi import application
 from apps.game.consumers import bot_manager, game_manager
 from apps.game.models import Game
+from config.asgi import application
 
 
 def make_user(username):

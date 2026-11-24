@@ -29,3 +29,6 @@ class Notification(models.Model):
         # Moved from the "api" app: the table keeps its name, so an older
         # image still works against the same database (rollback).
         db_table = "api_notification"
+
+    def __str__(self):
+        return f"{self.type} for user {self.user_id}"

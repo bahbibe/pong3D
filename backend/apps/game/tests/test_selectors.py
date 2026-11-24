@@ -42,6 +42,7 @@ class StatsAndHistoryTests(TestCase):
 
     def test_history_endpoint_query_count_does_not_grow_with_games(self):
         from datetime import datetime, timedelta
+
         from apps.accounts.auth_utils import generate_token
 
         self.client.cookies["access_token"] = generate_token(

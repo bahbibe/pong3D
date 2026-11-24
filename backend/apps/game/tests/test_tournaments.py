@@ -1,8 +1,10 @@
 from unittest import mock
+
 from channels.db import database_sync_to_async
 from django.test import TransactionTestCase
 
 from apps.game import game_manager as gm
+
 from .helpers import make_user, token_for
 
 
@@ -115,6 +117,7 @@ class TournamentListTests(TransactionTestCase):
     def test_query_count_does_not_grow_with_tournaments(self):
         from django.db import connection
         from django.test.utils import CaptureQueriesContext
+
         from apps.game.models import Tournament
         from apps.game.tournament import ensure_bracket
 

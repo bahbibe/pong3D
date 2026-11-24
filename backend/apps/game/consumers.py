@@ -1,7 +1,13 @@
 import json
 import logging
 
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.db.models import Q
+
+from apps.notifications.services import notify
+
+from . import tournament
 from .game_manager import (
     DIRECTIONS,
     WINNING_SCORE,
@@ -10,11 +16,7 @@ from .game_manager import (
     bot_group_name,
 )
 from .models import Game, Tournament, Tournament_Game
-from . import tournament
-from channels.db import database_sync_to_async
 from .serializers import TournamentGameSerializer
-from django.db.models import Q
-from apps.notifications.services import notify
 
 logger = logging.getLogger(__name__)
 
@@ -247,7 +249,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
     def pairwise(self, iterable):
         "s -> (s0, s1), (s2, s3), (s4, s5), ..."
         a = iter(iterable)
-        return zip(a, a)
+        return zip(a, a, strict=False)  # an odd last item is dropped
 
 
 class GameBotConsumer(AsyncWebsocketConsumer):

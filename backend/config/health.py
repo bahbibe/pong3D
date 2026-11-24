@@ -3,7 +3,8 @@
 import logging
 
 import redis
-from django.db import Error as DatabaseError, connection
+from django.db import Error as DatabaseError
+from django.db import connection
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 

@@ -3,7 +3,9 @@ services.py and selectors.py."""
 
 from rest_framework.decorators import api_view
 
-from apps.game.selectors import finished_games, history as game_history, stats as game_stats
+from apps.game.selectors import finished_games
+from apps.game.selectors import history as game_history
+from apps.game.selectors import stats as game_stats
 from apps.game.serializers import GameHistorySerializer, GameStatsSerializer
 from core.responses import ErrorResponse, SuccessResponse
 

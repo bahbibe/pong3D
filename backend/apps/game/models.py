@@ -1,7 +1,8 @@
-from django.db import models
-from django.conf import settings
-from django.utils import timezone
 import uuid
+
+from django.conf import settings
+from django.db import models
+from django.utils import timezone
 
 
 class Game(models.Model):
@@ -47,6 +48,9 @@ class Game(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     finished_at = models.DateTimeField(blank=True, null=True)
 
+    def __str__(self):
+        return f"Game {self.pk}: {self.player1_id} vs {self.player2_id} ({self.status})"
+
     @property
     def is_finished(self):
         return self.status == self.FINISHED
@@ -59,6 +63,9 @@ class Tournament(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
     )
     finished = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Tournament {self.uuid}"
 
 
 class Tournament_Participants(models.Model):
@@ -73,6 +80,9 @@ class Tournament_Participants(models.Model):
             "player",
         )
 
+    def __str__(self):
+        return f"Player {self.player_id} in tournament {self.tournament_id}"
+
 
 class Tournament_Game(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
@@ -86,3 +96,6 @@ class Tournament_Game(models.Model):
                 "game",
             ),
         )
+
+    def __str__(self):
+        return f"Game {self.game_id} of tournament {self.tournament_id} (round {self.t_round})"

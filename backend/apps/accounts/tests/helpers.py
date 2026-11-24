@@ -1,10 +1,10 @@
 import json
+
 from django.contrib.auth.models import User
 from django.core.cache import cache
-from django.test import TestCase, TransactionTestCase
+from django.test import TestCase
 
 from apps.accounts.models import Profile
-
 
 PASSWORD = "Correct-Horse-42"
 

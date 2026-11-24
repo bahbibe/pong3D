@@ -1,7 +1,9 @@
-from .models import Friendship
 from django.contrib.auth import get_user_model
-from apps.accounts.serializers import PublicUserSerializer
 from rest_framework import serializers
+
+from apps.accounts.serializers import PublicUserSerializer
+
+from .models import Friendship
 
 User = get_user_model()
 

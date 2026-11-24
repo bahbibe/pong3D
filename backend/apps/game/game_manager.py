@@ -4,11 +4,12 @@ import logging
 import random
 import time
 
-from django.utils import timezone
+from channels.db import database_sync_to_async
 from channels.layers import get_channel_layer
+from django.utils import timezone
+
 from .models import Game
 from .tournament import advance_winner
-from channels.db import database_sync_to_async
 
 logger = logging.getLogger(__name__)
 

@@ -1,10 +1,12 @@
+import os
+
 from django.contrib.auth import get_user_model
-from .models import Profile
-from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError as DjangoValidationError
-import os
+from rest_framework import serializers
+
+from .models import Profile
 
 User = get_user_model()
 
@@ -37,7 +39,7 @@ def check_password_strength(password, user):
     try:
         validate_password(password, user=user)
     except DjangoValidationError as error:
-        raise serializers.ValidationError({"password": list(error.messages)})
+        raise serializers.ValidationError({"password": list(error.messages)}) from None
 
 
 class LoginUserSerializer(serializers.ModelSerializer):

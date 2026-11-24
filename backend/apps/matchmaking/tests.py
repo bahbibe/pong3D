@@ -9,8 +9,8 @@ from django.test import TransactionTestCase
 
 from apps.accounts.auth_utils import generate_token
 from apps.accounts.models import Profile
-from config.asgi import application
 from apps.game.models import Game
+from config.asgi import application
 
 from . import consumers
 

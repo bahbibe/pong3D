@@ -37,9 +37,9 @@ def _invite(source_user, target_user):
     try:
         game = Game.objects.create(player1=source_user, player2=target_user)
         notify(target_user, source_user, "game_invite", "invated you to a game", game_id=game.id)
-    except Exception:
+    except Exception as error:
         logger.exception("could not create game invite")
-        raise ServiceError(COULD_NOT_CREATE)
+        raise ServiceError(COULD_NOT_CREATE) from error
     return game
 
 

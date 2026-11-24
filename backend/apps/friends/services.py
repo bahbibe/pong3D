@@ -18,9 +18,9 @@ def send_request(source_user, target_user):
     try:
         with transaction.atomic():
             friendship = Friendship.objects.create(source_user=source_user, target_user=target_user)
-    except IntegrityError:
+    except IntegrityError as error:
         # The other user sent a request (or blocked) at the same moment.
-        raise ServiceError("Friendship already exists")
+        raise ServiceError("Friendship already exists") from error
     notify(target_user, source_user, "friend_request", "sent you a friend request")
     return friendship
 

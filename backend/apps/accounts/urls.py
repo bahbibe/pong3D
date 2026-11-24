@@ -1,24 +1,24 @@
 from django.urls import path
+
 from .auth_views import (
-    login_user,
-    register_user,
+    confirm_twofa,
+    disable_twofa,
+    enable_twofa,
     get_user,
     login_intra,
     login_intra_callback,
+    login_user,
     logout_user,
-    enable_twofa,
-    confirm_twofa,
+    register_user,
     verify_twofa,
-    disable_twofa,
 )
 from .views import (
+    get_profile,
+    get_profile_with_id,
+    get_users,
     setup_profile,
     update_settings,
-    get_profile,
-    get_users,
-    get_profile_with_id,
 )
-
 
 urlpatterns = [
     path("register/", register_user, name="register"),

@@ -1,12 +1,14 @@
 import json
 from unittest import mock
+
 from channels.db import database_sync_to_async
 from django.test import TransactionTestCase
 
 from apps.accounts.models import Profile
 from apps.game import game_manager as gm
-from apps.game.consumers import bot_manager, game_manager
+from apps.game.consumers import game_manager
 from apps.game.models import Game
+
 from .helpers import make_user, token_for, ws_connect
 
 
