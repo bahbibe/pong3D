@@ -10,7 +10,6 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib.auth import get_user_model
 from .models import Profile
-from django.db.models import Q, F
 from apps.accounts.auth_utils import revoke_tokens, set_access_token
 from apps.accounts.authentication import is_tfa_verified
 from apps.accounts.auth_views import email_taken
@@ -18,7 +17,7 @@ from django.db import IntegrityError, transaction
 from core.responses import SuccessResponse, ErrorResponse
 from core.uuids import parse_uuid
 from apps.friends.selectors import blocked_user_ids, is_blocked
-from apps.game.models import Game
+from apps.game.selectors import finished_games, history as game_history, stats as game_stats
 from apps.game.serializers import GameStatsSerializer, GameHistorySerializer
 
 User = get_user_model()
@@ -140,45 +139,12 @@ def get_profile(request, uuid):
     if is_blocked(user, request.user):
         return user_not_found()
 
-    games = (
-        Game.objects.filter(Q(player1_id=user) | Q(player2_id=user), status=Game.FINISHED)
-        .select_related("player1__profile", "player2__profile")
-        .order_by("-id")
-    )
-    total_games = games.count()
-    total_wins = games.filter(
-        Q(player1_id=user, player1_score__gt=F("player2_score"))
-        | Q(player2_id=user, player2_score__gt=F("player1_score"))
-    ).count()
-    total_losses = total_games - total_wins
-    ratio = (total_wins / total_games) * 100 if total_games > 0 else 0
-
-    stats = {
-        "total_games": total_games,
-        "total_wins": total_wins,
-        "total_losses": total_losses,
-        "ratio": ratio,
-    }
-
-    for game in games:
-        if game.player1_id == user.id:
-            game.user = game.player1
-            game.user_score = game.player1_score
-            game.player = game.player2
-            game.player_score = game.player2_score
-            game.is_user_winner = game.player1_score > game.player2_score
-        else:
-            game.user = game.player2
-            game.user_score = game.player2_score
-            game.player = game.player1
-            game.player_score = game.player1_score
-            game.is_user_winner = game.player2_score > game.player1_score
-
+    games = list(finished_games(user))
     return SuccessResponse(
         data={
             "user": PublicUserSerializer(user).data,
-            "stats": GameStatsSerializer(stats).data,
-            "history": GameHistorySerializer(games, many=True).data,
+            "stats": GameStatsSerializer(game_stats(user, games)).data,
+            "history": GameHistorySerializer(game_history(user, games), many=True).data,
         }
     )
 
