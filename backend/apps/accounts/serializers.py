@@ -71,9 +71,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if data["password"] != data["confirm_password"]:
-            raise serializers.ValidationError(
-                {"confirm_password": "Passwords do not match"}
-            )
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match"})
         candidate = User(
             username=data["username"],
             email=data["email"],
@@ -141,12 +139,8 @@ class UpdateSettingsSerializer(serializers.ModelSerializer):
     username = username_field(required=False)
     email = serializers.EmailField(required=False, allow_blank=True)
     password = serializers.CharField(required=False, allow_blank=True, write_only=True)
-    confirm_password = serializers.CharField(
-        required=False, allow_blank=True, write_only=True
-    )
-    current_password = serializers.CharField(
-        required=False, allow_blank=True, write_only=True
-    )
+    confirm_password = serializers.CharField(required=False, allow_blank=True, write_only=True)
+    current_password = serializers.CharField(required=False, allow_blank=True, write_only=True)
 
     class Meta:
         model = Profile
@@ -163,7 +157,5 @@ class UpdateSettingsSerializer(serializers.ModelSerializer):
         password = data.get("password")
         confirm_password = data.get("confirm_password")
         if password and confirm_password is not None and password != confirm_password:
-            raise serializers.ValidationError(
-                {"confirm_password": "Passwords do not match"}
-            )
+            raise serializers.ValidationError({"confirm_password": "Passwords do not match"})
         return data

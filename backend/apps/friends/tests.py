@@ -187,11 +187,17 @@ class OwnProfileWithBlocksTests(TestCase):
         self.bob = make_user("bob")
         self.carol = make_user("carol")
         Friendship.objects.create(
-            source_user=self.alice, target_user=self.bob,
-            status=Friendship.BLOCKED, blocked_by=self.alice,
+            source_user=self.alice,
+            target_user=self.bob,
+            status=Friendship.BLOCKED,
+            blocked_by=self.alice,
         )
         self.client.cookies["access_token"] = generate_token(
-            {"id": self.alice.id, "is_tfa_verified": True, "exp": datetime.now() + timedelta(hours=1)}
+            {
+                "id": self.alice.id,
+                "is_tfa_verified": True,
+                "exp": datetime.now() + timedelta(hours=1),
+            }
         )
 
     def profile(self, user):
@@ -199,7 +205,9 @@ class OwnProfileWithBlocksTests(TestCase):
 
     def test_own_profile_is_visible(self):
         self.assertEqual(self.profile(self.alice).status_code, 200)
-        self.assertEqual(self.client.get(f"/api/auth/user/{self.alice.profile.id}/").status_code, 200)
+        self.assertEqual(
+            self.client.get(f"/api/auth/user/{self.alice.profile.id}/").status_code, 200
+        )
 
     def test_blocked_user_is_hidden_and_others_are_not(self):
         self.assertEqual(self.profile(self.bob).status_code, 404)

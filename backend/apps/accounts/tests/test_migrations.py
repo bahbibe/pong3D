@@ -47,6 +47,9 @@ class UniqueEmailMigrationTests(TransactionTestCase):
         executor = MigrationExecutor(connection)
         executor.migrate(after)
 
-        emails = dict(User.objects.filter(id__in=[oldest.id, newer.id, other.id])
-                      .values_list("username", "email"))
+        emails = dict(
+            User.objects.filter(id__in=[oldest.id, newer.id, other.id]).values_list(
+                "username", "email"
+            )
+        )
         self.assertEqual(emails, {"d1": "dup@example.com", "d2": "", "d3": "solo@example.com"})

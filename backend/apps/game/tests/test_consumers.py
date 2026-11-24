@@ -30,9 +30,9 @@ class GameConsumerAccessTests(GameTestCase):
         await self.assert_closed_with(communicator, 4003)
 
     async def test_finished_game_does_not_restart(self):
-        await database_sync_to_async(
-            Game.objects.filter(pk=self.game.pk).update
-        )(player1_score=11, player2_score=4)
+        await database_sync_to_async(Game.objects.filter(pk=self.game.pk).update)(
+            player1_score=11, player2_score=4
+        )
         communicator = await ws_connect(self.path, self.alice)
         message = json.loads(await communicator.receive_from(timeout=2))
         self.assertEqual(message["type"], "game over")
@@ -113,9 +113,7 @@ class GameInstanceUnitTests(GameTestCase):
         instance = gm.GameInstance(self.game, mock.AsyncMock())
         instance.stop()
         # Someone else changes the players of this row after it was loaded.
-        await database_sync_to_async(
-            Game.objects.filter(pk=self.game.pk).update
-        )(player2=self.eve)
+        await database_sync_to_async(Game.objects.filter(pk=self.game.pk).update)(player2=self.eve)
         instance.game_state["ball_position"] = [0, -4.95]
         instance.vel = [1, -1]
         self.assertTrue(instance.update_ball_position())
@@ -170,9 +168,7 @@ class BotConsumerTests(GameTestCase):
 
 class TournamentConsumerTests(GameTestCase):
     async def test_anonymous_is_rejected(self):
-        communicator = await ws_connect(
-            "/ws/tournament/12345678-1234-4123-8123-123456789012"
-        )
+        communicator = await ws_connect("/ws/tournament/12345678-1234-4123-8123-123456789012")
         output = await communicator.receive_output(timeout=2)
         self.assertEqual(output.get("code"), 4001)
 

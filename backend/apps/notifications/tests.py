@@ -56,8 +56,10 @@ class NotificationSocketTests(TransactionTestCase):
         communicator = WebsocketCommunicator(
             application,
             "/ws/notifications/",
-            headers=[(b"origin", b"http://localhost"),
-                     (b"cookie", f"access_token={token_for(self.alice)}".encode())],
+            headers=[
+                (b"origin", b"http://localhost"),
+                (b"cookie", f"access_token={token_for(self.alice)}".encode()),
+            ],
         )
         connected, _ = await communicator.connect()
         self.assertTrue(connected)
@@ -101,7 +103,9 @@ class NotifyTests(TransactionTestCase):
         communicator = await connect(self.alice)
         await database_sync_to_async(notify)(self.alice, None, "system", "maintenance")
         message = json.loads(await communicator.receive_from(timeout=2))
-        self.assertEqual((message["ctx"], message["sender"], message["game_id"]), ("system", None, None))
+        self.assertEqual(
+            (message["ctx"], message["sender"], message["game_id"]), ("system", None, None)
+        )
         await communicator.disconnect()
 
 

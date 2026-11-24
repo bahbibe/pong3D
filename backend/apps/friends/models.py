@@ -27,7 +27,11 @@ class Friendship(models.Model):
     )
     status = models.CharField(max_length=50, choices=STATUSES, default=PENDING)
     blocked_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="blocked_by"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="blocked_by",
     )
     created_at = models.DateTimeField(auto_now_add=True)
 

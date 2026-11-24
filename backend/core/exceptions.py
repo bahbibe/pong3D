@@ -34,7 +34,8 @@ def handler(exc, context):
     if response is None:
         request = context.get("request")
         logger.error(
-            "unhandled error in %s", getattr(request, "path", "?"),
+            "unhandled error in %s",
+            getattr(request, "path", "?"),
             exc_info=(type(exc), exc, exc.__traceback__),
         )
         return ErrorResponse(status_code=500)

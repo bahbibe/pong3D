@@ -45,9 +45,7 @@ class LeaderboardSerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         # str(): `in` on an ImageFieldFile iterates the file (opens it).
         avatar = str(obj.profile.avatar)
-        avatar = (
-            "cdn.intra.42.fr" in avatar and avatar or f"{os.getenv('API_URL')}/{avatar}"
-        )
+        avatar = "cdn.intra.42.fr" in avatar and avatar or f"{os.getenv('API_URL')}/{avatar}"
 
         return {
             "id": obj.id,

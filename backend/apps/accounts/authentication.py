@@ -35,12 +35,7 @@ def user_for_token(token):
     except jwt.InvalidTokenError as error:
         raise InvalidToken(str(error)) from error
 
-    user = (
-        get_user_model()
-        .objects.select_related("profile")
-        .filter(id=claims.get("id"))
-        .first()
-    )
+    user = get_user_model().objects.select_related("profile").filter(id=claims.get("id")).first()
     if user is None:
         raise UnknownUser()
     if getattr(user, "profile", None) is None or not token_is_current(claims, user):

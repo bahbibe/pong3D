@@ -107,8 +107,12 @@ class GameStatusTests(TransactionTestCase):
         # Regression: an unplayed invite (0-0) counted as a loss for both.
         Game.objects.create(player1=self.alice, player2=self.bob)  # pending invite
         Game.objects.create(
-            player1=self.alice, player2=self.bob, player1_score=11, player2_score=5,
-            status=Game.FINISHED, winner=self.alice,
+            player1=self.alice,
+            player2=self.bob,
+            player1_score=11,
+            player2_score=5,
+            status=Game.FINISHED,
+            winner=self.alice,
         )
         self.client.cookies["access_token"] = token_for(self.bob)
         stats = self.client.get("/api/game/stats/").json()["data"]
@@ -128,7 +132,9 @@ class GameStatusTests(TransactionTestCase):
         migration = importlib.import_module(
             "apps.game.migrations.0010_game_status_and_safe_foreign_keys"
         )
-        done = Game.objects.create(player1=self.alice, player2=self.bob, player1_score=4, player2_score=11)
+        done = Game.objects.create(
+            player1=self.alice, player2=self.bob, player1_score=4, player2_score=11
+        )
         open_game = Game.objects.create(player1=self.alice, player2=self.bob, player1_score=4)
         migration.mark_finished_games(apps, None)
         done.refresh_from_db()
@@ -163,9 +169,15 @@ class LeaderboardTests(TransactionTestCase):
     def test_counts_finished_games_and_handles_intra_avatars(self):
         alice, bob = make_user("alice"), make_user("bob")
         Profile.objects.filter(user=bob).update(avatar="https://cdn.intra.42.fr/users/bob.jpg")
-        Game.objects.create(player1=alice, player2=bob, player1_score=11, status=Game.FINISHED, winner=alice)
-        Game.objects.create(player1=alice, player2=bob, player2_score=11, status=Game.FINISHED, winner=bob)
-        Game.objects.create(player1=alice, player2=bob, player1_score=11, status=Game.FINISHED, winner=alice)
+        Game.objects.create(
+            player1=alice, player2=bob, player1_score=11, status=Game.FINISHED, winner=alice
+        )
+        Game.objects.create(
+            player1=alice, player2=bob, player2_score=11, status=Game.FINISHED, winner=bob
+        )
+        Game.objects.create(
+            player1=alice, player2=bob, player1_score=11, status=Game.FINISHED, winner=alice
+        )
         Game.objects.create(player1=alice, player2=bob)  # pending, ignored
         self.client.cookies["access_token"] = token_for(alice)
         response = self.client.get("/api/game/leaderboard/")

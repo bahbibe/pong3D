@@ -75,9 +75,7 @@ class ChatConsumerTests(ChatTestCase):
         alice = await self.connect(self.alice)
         bob = await self.connect(self.bob)
 
-        await alice.send_to(
-            text_data=json.dumps({"author": "bob", "content": "  hi <b>bob</b> "})
-        )
+        await alice.send_to(text_data=json.dumps({"author": "bob", "content": "  hi <b>bob</b> "}))
         received = json.loads(await bob.receive_from(timeout=2))
         self.assertEqual(received["author"], "alice")
         self.assertEqual(received["content"], "hi <b>bob</b>")

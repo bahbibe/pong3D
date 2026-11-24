@@ -18,7 +18,8 @@ class TournamentBracketTests(TransactionTestCase):
 
         return list(
             Tournament_Game.objects.filter(tournament=self.tournament, t_round=t_round)
-            .select_related("game").order_by("id")
+            .select_related("game")
+            .order_by("id")
         )
 
     def test_bracket_is_created_once(self):
@@ -43,9 +44,7 @@ class TournamentBracketTests(TransactionTestCase):
         for player in self.players:
             take_seat(self.tournament, player, 2)
         take_seat(self.tournament, self.players[0], 2)  # already seated
-        seated = [
-            (e.game.player1_id, e.game.player2_id) for e in self.entries(2)
-        ]
+        seated = [(e.game.player1_id, e.game.player2_id) for e in self.entries(2)]
         ids = [p.id for p in self.players]
         self.assertEqual(seated, [(ids[0], ids[1]), (ids[2], ids[3])])
 
@@ -82,7 +81,9 @@ class TournamentBracketTests(TransactionTestCase):
         await play(first_round[1].game, 2, 11)  # p3 wins
         final = (await database_sync_to_async(self.entries)(1))[0].game
         await database_sync_to_async(final.refresh_from_db)()
-        self.assertEqual((final.player1_id, final.player2_id), (self.players[0].id, self.players[3].id))
+        self.assertEqual(
+            (final.player1_id, final.player2_id), (self.players[0].id, self.players[3].id)
+        )
 
         await play(final, 11, 9)
         await database_sync_to_async(self.tournament.refresh_from_db)()

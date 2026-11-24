@@ -36,7 +36,9 @@ def healthz(request):
     checks = {"db": database_ok(), "redis": redis_ok()}
     healthy = all(checks.values())
     return JsonResponse(
-        {"status": "ok" if healthy else "down",
-         **{name: "ok" if ok else "down" for name, ok in checks.items()}},
+        {
+            "status": "ok" if healthy else "down",
+            **{name: "ok" if ok else "down" for name, ok in checks.items()},
+        },
         status=200 if healthy else 503,
     )

@@ -58,7 +58,9 @@ def get_tournaments(request):
 def get_tournament_games(request, tournament_id):
     tournament = services.get_tournament(tournament_id)
     return SuccessResponse(
-        data={"data": TournamentGameSerializer(selectors.tournament_games(tournament), many=True).data}
+        data={
+            "data": TournamentGameSerializer(selectors.tournament_games(tournament), many=True).data
+        }
     )
 
 

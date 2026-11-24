@@ -38,9 +38,7 @@ class AuthTestCase(TestCase):
         return response
 
     def post_json(self, url, data=None):
-        return self.client.post(
-            url, data=json.dumps(data or {}), content_type="application/json"
-        )
+        return self.client.post(url, data=json.dumps(data or {}), content_type="application/json")
 
     def me(self):
         return self.client.get("/api/auth/me/").json()

@@ -20,7 +20,11 @@ class AsgiImportTests(SimpleTestCase):
         }
         result = subprocess.run(
             [sys.executable, "-c", "import config.asgi"],
-            cwd="/", env=env, capture_output=True, text=True, timeout=60,
+            cwd="/",
+            env=env,
+            capture_output=True,
+            text=True,
+            timeout=60,
         )
         self.assertEqual(result.returncode, 0, result.stderr[-2000:])
 
@@ -38,8 +42,10 @@ class HealthzTests(TestCase):
         from unittest import mock
         import redis
 
-        with mock.patch("redis.Redis.ping", side_effect=redis.ConnectionError("down")), \
-                self.assertLogs("config.health", level="ERROR"):
+        with (
+            mock.patch("redis.Redis.ping", side_effect=redis.ConnectionError("down")),
+            self.assertLogs("config.health", level="ERROR"),
+        ):
             response = self.client.get("/healthz")
         self.assertEqual(response.status_code, 503)
         self.assertEqual(response.json()["redis"], "down")
@@ -48,9 +54,11 @@ class HealthzTests(TestCase):
         from unittest import mock
         from django.db import OperationalError
 
-        with mock.patch("redis.Redis.ping", return_value=True), mock.patch(
-            "config.health.connection.cursor", side_effect=OperationalError("down")
-        ), self.assertLogs("config.health", level="ERROR"):
+        with (
+            mock.patch("redis.Redis.ping", return_value=True),
+            mock.patch("config.health.connection.cursor", side_effect=OperationalError("down")),
+            self.assertLogs("config.health", level="ERROR"),
+        ):
             response = self.client.get("/healthz")
         self.assertEqual(response.status_code, 503)
         self.assertEqual(response.json()["db"], "down")

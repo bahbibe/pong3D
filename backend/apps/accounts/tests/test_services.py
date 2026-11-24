@@ -67,7 +67,9 @@ class FieldErrorShapeTests(AuthTestCase):
         self.login("fred")
         response = self.client.put(
             "/api/auth/settings/update/",
-            data=encode_multipart(BOUNDARY, {"password": "New-Strong-Pass-8", "current_password": "nope"}),
+            data=encode_multipart(
+                BOUNDARY, {"password": "New-Strong-Pass-8", "current_password": "nope"}
+            ),
             content_type=MULTIPART_CONTENT,
         )
         self.assertEqual(response.status_code, 400)

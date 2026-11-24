@@ -48,6 +48,7 @@ async def reject(consumer, code):
 game_manager = GameManager()
 bot_manager = BotManager()
 
+
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.game = None
@@ -112,9 +113,7 @@ class GameConsumer(AsyncWebsocketConsumer):
     def get_game(self):
         """Load the game and set self.player. None if not one of its players."""
         try:
-            game = Game.objects.select_related("player1", "player2").get(
-                id=int(self.game_id)
-            )
+            game = Game.objects.select_related("player1", "player2").get(id=int(self.game_id))
         except (Game.DoesNotExist, ValueError):
             return None
         if game.player1_id == self.user.id:
@@ -146,9 +145,7 @@ class GameConsumer(AsyncWebsocketConsumer):
 
     async def game_update_message(self, event):
         game_state = dict(event["game_state"], side=self.player)
-        await self.send(
-            text_data=json.dumps({"type": event["type"], "game_state": game_state})
-        )
+        await self.send(text_data=json.dumps({"type": event["type"], "game_state": game_state}))
 
     async def send_game_id(self, event):
         await self.join_game()
@@ -164,6 +161,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         if instance is not None and self.player is not None:
             self.game_instance = instance
             instance.set_player_ready(self.player)
+
 
 class TournamentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -189,16 +187,18 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         self.t_round = await self.get_player_round()
         await self.set_game(True, self.t_round)
         await self.channel_layer.group_send(
-                self.tournament_id,
-                {
-                    'type': 'update',
-                }
-            )
-        
+            self.tournament_id,
+            {
+                "type": "update",
+            },
+        )
+
     @database_sync_to_async
     def get_player_round(self):
         t_round = 2
-        games = Tournament_Game.objects.filter((Q(game__player1=self.user) | Q(game__player2=self.user)), tournament=self.tournament)
+        games = Tournament_Game.objects.filter(
+            (Q(game__player1=self.user) | Q(game__player2=self.user)), tournament=self.tournament
+        )
         for game in games:
             if game.game.player1 == self.user and game.game.player1_score > game.game.player2_score:
                 logger.debug("%s won a round", self.user)
@@ -231,7 +231,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         # Clients do not send anything on this socket.
         return
-    
+
     async def update(self, event):
         await self.send(text_data=json.dumps(event))
 
@@ -248,6 +248,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         "s -> (s0, s1), (s2, s3), (s4, s5), ..."
         a = iter(iterable)
         return zip(a, a)
+
 
 class GameBotConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -291,9 +292,7 @@ class GameBotConsumer(AsyncWebsocketConsumer):
 
     async def game_update_message(self, event):
         game_state = dict(event["game_state"], side=self.player)
-        await self.send(
-            text_data=json.dumps({"type": event["type"], "game_state": game_state})
-        )
+        await self.send(text_data=json.dumps({"type": event["type"], "game_state": game_state}))
 
     async def send_game_id(self, event):
         await self.send(text_data=json.dumps(event))

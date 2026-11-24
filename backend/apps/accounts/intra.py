@@ -104,9 +104,7 @@ def find_or_create_intra_user(user_data):
     intra user rename their account to someone's 42 login and receive that
     person's first login.
     """
-    profile = (
-        Profile.objects.select_related("user").filter(intra_id=user_data["id"]).first()
-    )
+    profile = Profile.objects.select_related("user").filter(intra_id=user_data["id"]).first()
     if profile:
         return profile.user
 
@@ -158,9 +156,7 @@ def find_or_create_intra_user(user_data):
             # Username or email taken at the same moment. A second login of
             # the same intra user wins the intra_id race: return that account.
             profile = (
-                Profile.objects.select_related("user")
-                .filter(intra_id=user_data["id"])
-                .first()
+                Profile.objects.select_related("user").filter(intra_id=user_data["id"]).first()
             )
             if profile:
                 return profile.user

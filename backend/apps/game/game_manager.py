@@ -72,10 +72,7 @@ class GameInstance:
 
     @property
     def is_finished(self):
-        return (
-            self.game.player1_score >= WINNING_SCORE
-            or self.game.player2_score >= WINNING_SCORE
-        )
+        return self.game.player1_score >= WINNING_SCORE or self.game.player2_score >= WINNING_SCORE
 
     async def broadcast_state(self):
         self.game_state["score"] = [self.game.player1_score, self.game.player2_score]
@@ -205,21 +202,37 @@ class GameInstance:
             self.reset_game()
             scored = True
 
-        if self.game_state["ball_position"][1] < -self.limit[1] + self.ball_padding:  # player 2 lost
+        if (
+            self.game_state["ball_position"][1] < -self.limit[1] + self.ball_padding
+        ):  # player 2 lost
             self.game.player1_score += 1
             self.reset_game()
             scored = True
 
-        if self.game_state["ball_position"][1] > 4.5 - self.player_padding[1] - self.ball_padding \
-        and self.game_state["ball_position"][1] < 4.5 + self.player_padding[1] + self.ball_padding:
-            if self.game_state["ball_position"][0] - self.ball_padding < self.game_state["player1"] + self.player_padding[0] \
-            and self.game_state["ball_position"][0] + self.ball_padding > self.game_state["player1"] - self.player_padding[0]:
+        if (
+            self.game_state["ball_position"][1] > 4.5 - self.player_padding[1] - self.ball_padding
+            and self.game_state["ball_position"][1]
+            < 4.5 + self.player_padding[1] + self.ball_padding
+        ):
+            if (
+                self.game_state["ball_position"][0] - self.ball_padding
+                < self.game_state["player1"] + self.player_padding[0]
+                and self.game_state["ball_position"][0] + self.ball_padding
+                > self.game_state["player1"] - self.player_padding[0]
+            ):
                 self.vel[1] = -1
 
-        if self.game_state["ball_position"][1] < -4.5 + self.player_padding[1] + self.ball_padding \
-        and self.game_state["ball_position"][1] > -4.5 - self.player_padding[1] - self.ball_padding:
-            if self.game_state["ball_position"][0] - self.ball_padding < self.game_state["player2"] + self.player_padding[0] \
-            and self.game_state["ball_position"][0] + self.ball_padding > self.game_state["player2"] - self.player_padding[0]:
+        if (
+            self.game_state["ball_position"][1] < -4.5 + self.player_padding[1] + self.ball_padding
+            and self.game_state["ball_position"][1]
+            > -4.5 - self.player_padding[1] - self.ball_padding
+        ):
+            if (
+                self.game_state["ball_position"][0] - self.ball_padding
+                < self.game_state["player2"] + self.player_padding[0]
+                and self.game_state["ball_position"][0] + self.ball_padding
+                > self.game_state["player2"] - self.player_padding[0]
+            ):
                 self.vel[1] = 1
         return scored
 
@@ -310,16 +323,25 @@ class BotInstance:
             while self.running:
                 if self.reset_pause:
                     self.reset_pause = False
-                    await self.channel_layer.group_send(self.group_name, {
-                        "type": "game_update_message",
-                        "game_state": self.game_state,
-                    })
+                    await self.channel_layer.group_send(
+                        self.group_name,
+                        {
+                            "type": "game_update_message",
+                            "game_state": self.game_state,
+                        },
+                    )
                     await asyncio.sleep(1)
-                if self.game.player1_score >= WINNING_SCORE or self.game.player2_score >= WINNING_SCORE:
-                    await self.channel_layer.group_send(self.group_name, {
-                        "type": "game_update_message",
-                        "game_state": self.game_state,
-                    })
+                if (
+                    self.game.player1_score >= WINNING_SCORE
+                    or self.game.player2_score >= WINNING_SCORE
+                ):
+                    await self.channel_layer.group_send(
+                        self.group_name,
+                        {
+                            "type": "game_update_message",
+                            "game_state": self.game_state,
+                        },
+                    )
                     await asyncio.sleep(1)
                     await self.send_game_end_notification()
                     return
@@ -328,15 +350,21 @@ class BotInstance:
                     self.update_ball_position()
                     self.move_bot_paddle()
                     self.game_state["score"] = [self.game.player1_score, self.game.player2_score]
-                    await self.channel_layer.group_send(self.group_name, {
-                        "type": "game_update_message",
-                        "game_state": self.game_state,
-                    })
+                    await self.channel_layer.group_send(
+                        self.group_name,
+                        {
+                            "type": "game_update_message",
+                            "game_state": self.game_state,
+                        },
+                    )
                 else:
-                    await self.channel_layer.group_send(self.group_name, {
-                        "type": "send_game_id",
-                        "game_id": self.group_name,
-                    })
+                    await self.channel_layer.group_send(
+                        self.group_name,
+                        {
+                            "type": "send_game_id",
+                            "game_id": self.group_name,
+                        },
+                    )
                     await asyncio.sleep(1)
                 await asyncio.sleep(TICK_SECONDS)
         finally:
@@ -361,17 +389,24 @@ class BotInstance:
         self.game_state["player1"] = clamp_paddle(self.game_state["player1"] + step)
 
     async def send_game_end_notification(self):
-        await self.channel_layer.group_send(self.group_name, {
-            "type": "send_game_end",
-            "game_id": self.group_name,
-        })
+        await self.channel_layer.group_send(
+            self.group_name,
+            {
+                "type": "send_game_end",
+                "game_id": self.group_name,
+            },
+        )
 
     def update_ball_position(self):
         self.game_state["speed"] += BALL_SPEED_ACCELERATION
         self.player_padding = [0.5, 0.1]
         self.ball_padding = 0.125
-        self.game_state["ball_position"][0] += self.game_state["ball_velocity"][0] * self.game_state["speed"]
-        self.game_state["ball_position"][1] += self.game_state["ball_velocity"][1] * self.game_state["speed"]
+        self.game_state["ball_position"][0] += (
+            self.game_state["ball_velocity"][0] * self.game_state["speed"]
+        )
+        self.game_state["ball_position"][1] += (
+            self.game_state["ball_velocity"][1] * self.game_state["speed"]
+        )
 
         if self.game_state["ball_position"][0] > self.limit[0] - self.ball_padding:
             self.game_state["ball_velocity"][0] *= -1
@@ -383,21 +418,37 @@ class BotInstance:
             self.ai.adjust_difficulty(False)
             self.reset_game()
 
-        if self.game_state["ball_position"][1] < -self.limit[1] + self.ball_padding:  # player 2 lost
+        if (
+            self.game_state["ball_position"][1] < -self.limit[1] + self.ball_padding
+        ):  # player 2 lost
             self.game.player1_score += 1  # add point to player 1
             self.ai.adjust_difficulty(True)
             self.reset_game()
 
-        if self.game_state["ball_position"][1] > 4.5 - self.player_padding[1] - self.ball_padding \
-        and self.game_state["ball_position"][1] < 4.5 + self.player_padding[1] + self.ball_padding:
-            if self.game_state["ball_position"][0] - self.ball_padding < self.game_state["player1"] + self.player_padding[0] \
-            and self.game_state["ball_position"][0] + self.ball_padding > self.game_state["player1"] - self.player_padding[0]:
+        if (
+            self.game_state["ball_position"][1] > 4.5 - self.player_padding[1] - self.ball_padding
+            and self.game_state["ball_position"][1]
+            < 4.5 + self.player_padding[1] + self.ball_padding
+        ):
+            if (
+                self.game_state["ball_position"][0] - self.ball_padding
+                < self.game_state["player1"] + self.player_padding[0]
+                and self.game_state["ball_position"][0] + self.ball_padding
+                > self.game_state["player1"] - self.player_padding[0]
+            ):
                 self.game_state["ball_velocity"][1] = -1
 
-        if self.game_state["ball_position"][1] < -4.5 + self.player_padding[1] + self.ball_padding \
-        and self.game_state["ball_position"][1] > -4.5 - self.player_padding[1] - self.ball_padding:
-            if self.game_state["ball_position"][0] - self.ball_padding < self.game_state["player2"] + self.player_padding[0] \
-            and self.game_state["ball_position"][0] + self.ball_padding > self.game_state["player2"] - self.player_padding[0]:
+        if (
+            self.game_state["ball_position"][1] < -4.5 + self.player_padding[1] + self.ball_padding
+            and self.game_state["ball_position"][1]
+            > -4.5 - self.player_padding[1] - self.ball_padding
+        ):
+            if (
+                self.game_state["ball_position"][0] - self.ball_padding
+                < self.game_state["player2"] + self.player_padding[0]
+                and self.game_state["ball_position"][0] + self.ball_padding
+                > self.game_state["player2"] - self.player_padding[0]
+            ):
                 self.game_state["ball_velocity"][1] = 1
 
     def move_bot_paddle(self):

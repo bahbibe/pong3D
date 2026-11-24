@@ -22,9 +22,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         if self.user_id is None:
             return
-        await self.channel_layer.group_discard(
-            f"user_{self.user_id}", self.channel_name
-        )
+        await self.channel_layer.group_discard(f"user_{self.user_id}", self.channel_name)
 
     async def send_notification(self, event):
         message = event["message"]

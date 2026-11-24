@@ -43,7 +43,9 @@ def history(user, games=None):
     games = list(finished_games(user) if games is None else games)
     for game in games:
         mine_first = game.player1_id == user.id
-        game.user, game.player = (game.player1, game.player2) if mine_first else (game.player2, game.player1)
+        game.user, game.player = (
+            (game.player1, game.player2) if mine_first else (game.player2, game.player1)
+        )
         game.user_score, game.player_score = (
             (game.player1_score, game.player2_score)
             if mine_first
@@ -85,7 +87,9 @@ def open_tournaments():
         Tournament.objects.filter(finished=False)
         .select_related("owner__profile")
         .annotate(
-            spots=Count("tournament_game", filter=first_round & Q(tournament_game__game__player1=None))
+            spots=Count(
+                "tournament_game", filter=first_round & Q(tournament_game__game__player1=None)
+            )
             + Count("tournament_game", filter=first_round & Q(tournament_game__game__player2=None))
         )
         .order_by("id")

@@ -13,7 +13,9 @@ class StatsAndHistoryTests(TestCase):
         self.bob = make_user("bob")
 
         def game(p1, p2, s1, s2, status=Game.FINISHED):
-            return Game.objects.create(player1=p1, player2=p2, player1_score=s1, player2_score=s2, status=status)
+            return Game.objects.create(
+                player1=p1, player2=p2, player1_score=s1, player2_score=s2, status=status
+            )
 
         game(self.alice, self.bob, 5, 3)  # alice wins as player1
         game(self.bob, self.alice, 1, 5)  # alice wins as player2
@@ -43,7 +45,11 @@ class StatsAndHistoryTests(TestCase):
         from apps.accounts.auth_utils import generate_token
 
         self.client.cookies["access_token"] = generate_token(
-            {"id": self.alice.id, "is_tfa_verified": True, "exp": datetime.now() + timedelta(hours=1)}
+            {
+                "id": self.alice.id,
+                "is_tfa_verified": True,
+                "exp": datetime.now() + timedelta(hours=1),
+            }
         )
         with self.assertNumQueries(2):  # the user with its profile (auth), the games with players
             self.assertEqual(self.client.get("/api/game/history/").status_code, 200)

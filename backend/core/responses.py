@@ -37,7 +37,7 @@ def ErrorResponse(
 
 
 def SuccessResponse(
-    data = {}, message: str = "Success", status_code=status.HTTP_200_OK
+    data={}, message: str = "Success", status_code=status.HTTP_200_OK
 ) -> JsonResponse:
     """
     Returns a JSON response with a data and a status code.

@@ -109,7 +109,10 @@ class RevokedTokenSocketTests(TransactionTestCase):
         communicator = WebsocketCommunicator(
             application,
             "/ws/status/",
-            headers=[(b"origin", b"http://localhost"), (b"cookie", f"access_token={token}".encode())],
+            headers=[
+                (b"origin", b"http://localhost"),
+                (b"cookie", f"access_token={token}".encode()),
+            ],
         )
         connected, _ = await communicator.connect()
         self.assertTrue(connected)

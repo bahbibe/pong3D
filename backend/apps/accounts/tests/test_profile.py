@@ -137,18 +137,25 @@ class ProfileCreationTests(TestCase):
 
         user = User.objects.create_user("orphan", password="x-Strong-Pass-1")
         Profile.objects.filter(user=user).delete()
-        migration = importlib.import_module("apps.accounts.migrations.0015_backfill_missing_profiles")
+        migration = importlib.import_module(
+            "apps.accounts.migrations.0015_backfill_missing_profiles"
+        )
         migration.create_missing_profiles(apps, None)
         self.assertTrue(Profile.objects.filter(user=user).exists())
 
     def test_register_creates_user_and_profile(self):
         response = self.client.post(
             "/api/auth/register/",
-            data=json.dumps({
-                "username": "gina", "email": "gina@example.com",
-                "password": PASSWORD, "confirm_password": PASSWORD,
-                "first_name": "G", "last_name": "H",
-            }),
+            data=json.dumps(
+                {
+                    "username": "gina",
+                    "email": "gina@example.com",
+                    "password": PASSWORD,
+                    "confirm_password": PASSWORD,
+                    "first_name": "G",
+                    "last_name": "H",
+                }
+            ),
             content_type="application/json",
         )
         self.assertEqual(response.status_code, 200, response.content)
@@ -175,8 +182,10 @@ class PrivacyAndRobustnessTests(AuthTestCase):
         from apps.friends.models import Friendship
 
         Friendship.objects.create(
-            source_user=self.other, target_user=self.henry,
-            status=Friendship.BLOCKED, blocked_by=self.other,
+            source_user=self.other,
+            target_user=self.henry,
+            status=Friendship.BLOCKED,
+            blocked_by=self.other,
         )
         users = self.client.get("/api/auth/users/?q=ivy").json()["data"]
         self.assertEqual(users, [])
@@ -200,7 +209,9 @@ class PrivacyAndRobustnessTests(AuthTestCase):
     def test_unexpected_error_does_not_leak_details(self):
         from unittest import mock
 
-        with mock.patch("apps.accounts.selectors.blocked_user_ids", side_effect=RuntimeError("secret detail")):
+        with mock.patch(
+            "apps.accounts.selectors.blocked_user_ids", side_effect=RuntimeError("secret detail")
+        ):
             with self.assertLogs("core.exceptions", level="ERROR"):
                 response = self.client.get("/api/auth/users/")
         self.assertEqual(response.status_code, 500)

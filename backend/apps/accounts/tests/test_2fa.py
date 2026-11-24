@@ -9,9 +9,7 @@ class TwoFactorTests(AuthTestCase):
     def setUp(self):
         super().setUp()
         self.secret = pyotp.random_base32()
-        self.user = make_user(
-            "alice", is_tfa_enabled=True, tfa_secret=self.secret
-        )
+        self.user = make_user("alice", is_tfa_enabled=True, tfa_secret=self.secret)
 
     def code(self):
         return pyotp.TOTP(self.secret).now()
@@ -150,9 +148,7 @@ class TwoFactorRateLimitTests(AuthTestCase):
         for _ in range(4):
             self.post_json("/api/auth/twofa/verify/", {"code": "000000"})
         good = pyotp.TOTP(self.secret).now()
-        self.assertEqual(
-            self.post_json("/api/auth/twofa/verify/", {"code": good}).status_code, 200
-        )
+        self.assertEqual(self.post_json("/api/auth/twofa/verify/", {"code": good}).status_code, 200)
         self.assertEqual(
             self.post_json("/api/auth/twofa/disable/", {"code": "000000"}).status_code, 400
         )

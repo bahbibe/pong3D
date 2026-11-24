@@ -42,9 +42,7 @@ class Matchmaking(AsyncWebsocketConsumer):
             await self.close(code=CLOSE_UNAUTHORIZED)
             return
 
-        await self.channel_layer.group_add(
-            f"matchmaking_{self.user.id}", self.channel_name
-        )
+        await self.channel_layer.group_add(f"matchmaking_{self.user.id}", self.channel_name)
 
         # Drop older entries of this user (other tab, missed disconnect)
         # so a user is never matched with themselves.
@@ -77,9 +75,7 @@ class Matchmaking(AsyncWebsocketConsumer):
             return
         if self.queued:
             await r.lrem(QUEUE_KEY, 0, self.user.id)
-        await self.channel_layer.group_discard(
-            f"matchmaking_{self.user.id}", self.channel_name
-        )
+        await self.channel_layer.group_discard(f"matchmaking_{self.user.id}", self.channel_name)
 
     async def receive(self, text_data=None, bytes_data=None):
         return

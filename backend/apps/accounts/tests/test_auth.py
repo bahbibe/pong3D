@@ -204,12 +204,21 @@ class IntraStateTests(AuthTestCase):
         url = self.client.get("/api/auth/intra/").json()["data"]["url"]
         state = parse_qs(urlparse(url).query)["state"][0]
         token = mock.Mock(status_code=200, json=lambda: {"access_token": "t"})
-        me = mock.Mock(status_code=200, json=lambda: {
-            "id": 4242, "login": "jdoe", "email": "jdoe@student.42.fr",
-            "first_name": "J", "last_name": "D", "image": {"link": None},
-        })
-        with mock.patch("apps.accounts.intra.requests.post", return_value=token), \
-                mock.patch("apps.accounts.intra.requests.get", return_value=me):
+        me = mock.Mock(
+            status_code=200,
+            json=lambda: {
+                "id": 4242,
+                "login": "jdoe",
+                "email": "jdoe@student.42.fr",
+                "first_name": "J",
+                "last_name": "D",
+                "image": {"link": None},
+            },
+        )
+        with (
+            mock.patch("apps.accounts.intra.requests.post", return_value=token),
+            mock.patch("apps.accounts.intra.requests.get", return_value=me),
+        ):
             response = self.client.get(f"/api/auth/intra/callback/?code=abc&state={state}")
         self.assertEqual(response.status_code, 302)
         self.assertIn("access_token", response.cookies)
@@ -271,12 +280,15 @@ class TokenRevocationTests(AuthTestCase):
         self.login("dave")
         response = self.client.put(
             "/api/auth/settings/update/",
-            data=encode_multipart(BOUNDARY, {
-                "username": "dave",
-                "password": "Another-Strong-Pass-7",
-                "confirm_password": "Another-Strong-Pass-7",
-                "current_password": PASSWORD,
-            }),
+            data=encode_multipart(
+                BOUNDARY,
+                {
+                    "username": "dave",
+                    "password": "Another-Strong-Pass-7",
+                    "confirm_password": "Another-Strong-Pass-7",
+                    "current_password": PASSWORD,
+                },
+            ),
             content_type=MULTIPART_CONTENT,
         )
         self.assertEqual(response.status_code, 200, response.content)
@@ -289,8 +301,11 @@ class TokenRevocationTests(AuthTestCase):
         from apps.accounts.auth_utils import generate_token, revoke_tokens
 
         token = generate_token(
-            {"id": self.user.id, "is_tfa_verified": True,
-             "exp": timezone.now() + timedelta(hours=1)}
+            {
+                "id": self.user.id,
+                "is_tfa_verified": True,
+                "exp": timezone.now() + timedelta(hours=1),
+            }
         )
         self.client.cookies["access_token"] = token
         self.assertEqual(self.client.get("/api/auth/me/").status_code, 200)
@@ -304,18 +319,33 @@ class UniqueEmailTests(AuthTestCase):
         self.alice = make_user("alice")  # alice@example.com
 
     def register(self, username, email):
-        return self.post_json("/api/auth/register/", {
-            "username": username, "email": email, "password": PASSWORD,
-            "confirm_password": PASSWORD, "first_name": "A", "last_name": "B",
-        })
+        return self.post_json(
+            "/api/auth/register/",
+            {
+                "username": username,
+                "email": email,
+                "password": PASSWORD,
+                "confirm_password": PASSWORD,
+                "first_name": "A",
+                "last_name": "B",
+            },
+        )
 
     def intra(self, intra_id, login, email):
         from apps.accounts.intra import find_or_create_intra_user, parse_intra_user
 
-        return find_or_create_intra_user(parse_intra_user(
-            {"id": intra_id, "login": login, "email": email,
-             "first_name": "In", "last_name": "Tra", "image": {}}
-        ))
+        return find_or_create_intra_user(
+            parse_intra_user(
+                {
+                    "id": intra_id,
+                    "login": login,
+                    "email": email,
+                    "first_name": "In",
+                    "last_name": "Tra",
+                    "image": {},
+                }
+            )
+        )
 
     def test_database_refuses_same_email_in_another_case(self):
         from django.db import IntegrityError, transaction
@@ -367,10 +397,14 @@ class UniqueEmailTests(AuthTestCase):
         self.login("bob")
         response = self.client.put(
             "/api/auth/settings/update/",
-            data=encode_multipart(BOUNDARY, {
-                "username": "bob", "email": "ALICE@example.com",
-                "current_password": PASSWORD,
-            }),
+            data=encode_multipart(
+                BOUNDARY,
+                {
+                    "username": "bob",
+                    "email": "ALICE@example.com",
+                    "current_password": PASSWORD,
+                },
+            ),
             content_type=MULTIPART_CONTENT,
         )
         self.assertEqual(response.status_code, 400, response.content)

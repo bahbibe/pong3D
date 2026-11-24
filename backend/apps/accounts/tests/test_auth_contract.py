@@ -60,8 +60,12 @@ class AuthContractTests(TestCase):
 
     def token(self, user_id, verified=True, ver=0):
         return generate_token(
-            {"id": user_id, "is_tfa_verified": verified, "ver": ver,
-             "exp": timezone.now() + timedelta(hours=1)}
+            {
+                "id": user_id,
+                "is_tfa_verified": verified,
+                "ver": ver,
+                "exp": timezone.now() + timedelta(hours=1),
+            }
         )
 
     def call(self, path, method, token=None):
@@ -95,8 +99,11 @@ class AuthContractTests(TestCase):
 
     def test_expired_token(self):
         expired = generate_token(
-            {"id": self.user.id, "is_tfa_verified": True,
-             "exp": timezone.now() - timedelta(minutes=1)}
+            {
+                "id": self.user.id,
+                "is_tfa_verified": True,
+                "exp": timezone.now() - timedelta(minutes=1),
+            }
         )
         for path, method in self.protected():
             with self.subTest(path=path, method=method):
@@ -155,8 +162,12 @@ class ErrorShapeTests(TestCase):
     def setUp(self):
         self.user = make_user("shape")
         self.client.cookies["access_token"] = generate_token(
-            {"id": self.user.id, "is_tfa_verified": True, "ver": 0,
-             "exp": timezone.now() + timedelta(hours=1)}
+            {
+                "id": self.user.id,
+                "is_tfa_verified": True,
+                "ver": 0,
+                "exp": timezone.now() + timedelta(hours=1),
+            }
         )
 
     def test_401_says_how_to_authenticate(self):
@@ -168,11 +179,15 @@ class ErrorShapeTests(TestCase):
     def test_wrong_method(self):
         response = self.client.get("/api/friends/send/")
         self.assertEqual(response.status_code, 405)
-        self.assertEqual(response.json(), {"success": False, "message": 'Method "GET" not allowed.'})
+        self.assertEqual(
+            response.json(), {"success": False, "message": 'Method "GET" not allowed.'}
+        )
         self.assertIn("POST", response["Allow"])
 
     def test_malformed_json(self):
-        response = self.client.post("/api/friends/send/", data="{not json", content_type="application/json")
+        response = self.client.post(
+            "/api/friends/send/", data="{not json", content_type="application/json"
+        )
         self.assertEqual(response.status_code, 400)
         body = response.json()
         self.assertIs(body["success"], False)
@@ -181,10 +196,15 @@ class ErrorShapeTests(TestCase):
     def test_unexpected_error_in_a_public_view_is_json(self):
         from unittest import mock
 
-        with mock.patch("apps.accounts.services.rate_limit.check", side_effect=RuntimeError("boom")), \
-                self.assertLogs("core.exceptions", level="ERROR"):
-            response = self.client.post("/api/auth/login/", data={"username": "x", "password": "y"},
-                                        content_type="application/json")
+        with (
+            mock.patch("apps.accounts.services.rate_limit.check", side_effect=RuntimeError("boom")),
+            self.assertLogs("core.exceptions", level="ERROR"),
+        ):
+            response = self.client.post(
+                "/api/auth/login/",
+                data={"username": "x", "password": "y"},
+                content_type="application/json",
+            )
         self.assertEqual(response.status_code, 500)
         self.assertEqual(response.json()["success"], False)
         self.assertNotIn("boom", response.content.decode())
@@ -196,7 +216,9 @@ class ErrorShapeTests(TestCase):
 
         Profile.objects.filter(user=self.user).delete()
         response = self.client.get("/api/auth/me/")
-        self.assertEqual((response.status_code, response.json()["message"]), (401, "Invalid access token"))
+        self.assertEqual(
+            (response.status_code, response.json()["message"]), (401, "Invalid access token")
+        )
 
 
 class WebsocketSameRulesTests(TransactionTestCase):
@@ -206,8 +228,14 @@ class WebsocketSameRulesTests(TransactionTestCase):
         from apps.accounts.ws_auth import user_from_cookie
 
         def token(user_id):
-            return generate_token({"id": user_id, "is_tfa_verified": True, "ver": 0,
-                                   "exp": timezone.now() + timedelta(hours=1)})
+            return generate_token(
+                {
+                    "id": user_id,
+                    "is_tfa_verified": True,
+                    "ver": 0,
+                    "exp": timezone.now() + timedelta(hours=1),
+                }
+            )
 
         user = make_user("wsrules")
         self.assertEqual(async_to_sync(user_from_cookie)(token(user.id)), user)
