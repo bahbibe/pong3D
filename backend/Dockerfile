@@ -1,14 +1,22 @@
-# Stage 1: Python dependencies in a virtualenv (copied into the runtime image).
+# Stage 1: Python dependencies in a virtualenv (copied into the runtime
+# image), installed from uv.lock exactly (no resolving at build time).
 FROM python:3.12.16-alpine3.24 AS deps
 
-ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1
+COPY --from=ghcr.io/astral-sh/uv:0.11.32 /uv /usr/local/bin/uv
+ENV UV_PROJECT_ENVIRONMENT=/venv \
+    UV_PYTHON_DOWNLOADS=never \
+    UV_PYTHON=/usr/local/bin/python3 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_NO_CACHE=1
 
-COPY requirements.txt requirements-dev.txt /tmp/
-RUN python -m venv /venv && /venv/bin/pip install -r /tmp/requirements.txt
+COPY pyproject.toml uv.lock /tmp/project/
+WORKDIR /tmp/project
 
-# DEV=1 (compose.dev.yaml) adds the reload tool. Prod and test images skip it.
+# DEV=1 (compose.dev.yaml) adds the dev group (the reload tool). Prod and
+# test images skip it.
 ARG DEV=0
-RUN if [ "$DEV" = "1" ]; then /venv/bin/pip install -r /tmp/requirements-dev.txt; fi
+RUN if [ "$DEV" = "1" ]; then uv sync --frozen; else uv sync --frozen --no-dev; fi
 
 
 # Stage 2: runtime.

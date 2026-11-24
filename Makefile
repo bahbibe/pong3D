@@ -8,9 +8,13 @@ COMPOSE := docker compose -f compose.yaml -f compose.$(ENV).yaml
 PROD_COMPOSE := PONG3D_ENV=prod docker compose -f compose.yaml -f compose.prod.yaml
 TEST_COMPOSE := docker compose -f compose.test.yaml
 TOOLS := prometheus grafana $(if $(filter dev,$(ENV)),adminer)
+# uv in a container (same version as the Dockerfile and CI): no local
+# Python or uv needed for `make lock`.
+UV := docker run --rm -u "$$(id -u):$$(id -g)" -v "$(CURDIR)/backend:/project" -w /project \
+	-e UV_CACHE_DIR=/tmp/uv-cache ghcr.io/astral-sh/uv:0.11.32-python3.12-alpine uv
 
 .DEFAULT_GOAL := help
-.PHONY: help env dev prod up down restart logs ps migrate test tools tools-down cert backup restore deploy provision provision-check vault-new vault-edit
+.PHONY: help env dev prod up down restart logs ps migrate test lock tools tools-down cert backup restore deploy provision provision-check vault-new vault-edit
 
 help: ## List the targets
 	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  make %-16s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -56,6 +60,9 @@ test: ## Run the backend tests against a throwaway Postgres
 	@$(TEST_COMPOSE) run --rm --build tests; status=$$?; \
 		$(TEST_COMPOSE) down -v --remove-orphans >/dev/null 2>&1; \
 		exit $$status
+
+lock: ## Update backend/uv.lock after editing pyproject.toml (one package: ARGS="--upgrade-package django")
+	$(UV) lock $(ARGS)
 
 cert: ## Prod: get the Let's Encrypt certificate for DOMAIN (STAGING=1: dry run, saves nothing)
 	@set -a; . env/prod/nginx.env; set +a; \

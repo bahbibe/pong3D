@@ -7,3 +7,4 @@ __pycache__/
 *.py[cod]
 media/avatars/*
 !media/avatars/profile_default.jpg
+.venv/

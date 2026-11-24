@@ -1,0 +1,43 @@
+[project]
+name = "pong3d-backend"
+version = "0"
+description = "pong3D Django backend (ASGI: daphne + channels)"
+# The image runs python:3.12 (Dockerfile); keep the lock on the same line.
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "channels>=4.3.2,<4.4",
+    "channels-redis==4.3.0",
+    "daphne==4.2.3",
+    # 5.2 is the LTS line; 5.1 no longer gets security fixes.
+    "Django>=5.2.19,<5.3",
+    "django-cors-headers==4.9.0",
+    "django-prometheus==2.5.0",
+    "djangorestframework==3.18.3",
+    "pillow==13.0.0",
+    "psycopg[binary]==3.1.18",
+    "PyJWT==2.15.1",
+    "pyOpenSSL==26.4.0",
+    "pyotp==2.9.0",
+    "qrcode==7.4.2",
+    "redis>=5,<6",
+    "requests>=2.32.3,<3",
+    "service-identity==24.1.0",
+]
+
+[dependency-groups]
+# Dev image only (compose.dev.yaml builds with DEV=1).
+dev = [
+    # Restarts daphne when a .py file changes.
+    "watchfiles==1.3.0",
+]
+
+[tool.uv]
+# An application, not a library: install the dependencies only.
+package = false
+# Not used directly (daphne pulls them in). Floors for known CVEs, checked
+# with pip-audit (CI).
+constraint-dependencies = [
+    "autobahn>=26.11.1",
+    "cryptography>=49.0.0",
+    "twisted>=26.10.0",
+]

@@ -35,6 +35,7 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
 | `make ps` | List the containers and their health |
 | `make migrate` | Apply migrations now (they also run on every `make dev`/`make prod`) |
 | `make test` | Backend tests against a throwaway Postgres, cleaned up afterwards |
+| `make lock [ARGS=...]` | Update `backend/uv.lock` after changing `backend/pyproject.toml` |
 | `make env` | Create the env files (prod: `ENV=prod DOMAIN=... ACME_EMAIL=...`) |
 | `make cert` | Prod: get the Let's Encrypt certificate (`STAGING=1`: dry run, saves nothing) |
 | `make backup` | Dump the database and the avatars to `backups/` (keeps 7) |
@@ -186,5 +187,21 @@ process's memory. Never run more than one backend container
 docker run -d --rm --name pong3d-test-pg -p 127.0.0.1:55432:5432 \
   -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test -e POSTGRES_DB=test postgres:16-alpine
 cd backend
-DJANGO_SETTINGS_MODULE=config.test_settings python manage.py test
+uv sync     # .venv with the locked dependencies, dev group included
+DJANGO_SETTINGS_MODULE=config.test_settings uv run python manage.py test
 ```
+
+## Dependencies
+
+`backend/pyproject.toml` lists the direct dependencies. `backend/uv.lock`
+pins every package, with hashes. The images and CI install exactly the
+lock (`uv sync --frozen` / `--locked`), and CI runs `pip-audit` on it
+before building images.
+
+- Add or change a dependency: edit `pyproject.toml`, then `make lock`.
+- Upgrade one package: `make lock ARGS="--upgrade-package django"`.
+- Upgrade everything within the ranges: `make lock ARGS=--upgrade`.
+
+Commit `uv.lock` together with the change. `make lock` runs uv 0.11.32 in
+a container. To move to a newer uv, change that version in the Makefile,
+`backend/Dockerfile` and `.github/workflows/ci.yml` together.
