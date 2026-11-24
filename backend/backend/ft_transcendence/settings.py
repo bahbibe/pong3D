@@ -100,6 +100,15 @@ SILENCED_SYSTEM_CHECKS = [
     "security.W021",
 ]
 
+# Only the JWT cookie authenticates API calls (api.auth_utils.is_authenticated).
+# DRF's defaults (Session + Basic) would otherwise run first in every
+# @api_view: Basic auth answered differently for a right and a wrong
+# password, a password oracle that skipped the login rate limit.
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+}
+
 ROOT_URLCONF = "ft_transcendence.urls"
 
 TEMPLATES = [

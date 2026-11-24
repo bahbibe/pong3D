@@ -926,3 +926,38 @@ class MarkNotificationReadTests(AuthTestCase):
 
     def test_malformed_uuid_is_not_found(self):
         self.assertEqual(self.mark("not-a-uuid").status_code, 404)
+
+
+class DrfDefaultAuthTests(AuthTestCase):
+    """Only the JWT cookie authenticates. DRF's default Session and Basic
+    authentication must not run: Basic answered differently for a right and
+    a wrong password, which let anyone guess passwords past the login rate
+    limit."""
+
+    def setUp(self):
+        super().setUp()
+        self.user = make_user("bob")
+
+    def basic(self, password):
+        import base64
+
+        token = base64.b64encode(f"bob:{password}".encode()).decode()
+        return self.client.get("/api/auth/me/", HTTP_AUTHORIZATION=f"Basic {token}")
+
+    def test_basic_auth_gives_no_password_oracle(self):
+        right = self.basic(PASSWORD)
+        wrong = self.basic("wrong-password")
+        self.assertEqual(right.status_code, 401)
+        self.assertEqual(wrong.status_code, 401)
+        self.assertEqual(right.json(), wrong.json())
+        self.assertEqual(right.json()["message"], "No access token found")
+
+    def test_basic_auth_with_a_wrong_password_does_not_block_the_cookie(self):
+        self.login("bob")
+        response = self.basic("wrong-password")
+        self.assertEqual(response.status_code, 200, response.content)
+
+    def test_admin_session_does_not_authenticate_the_api(self):
+        self.client.force_login(self.user)  # Django session, as the admin uses
+        response = self.client.get("/api/auth/me/")
+        self.assertEqual(response.status_code, 401)
