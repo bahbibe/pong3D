@@ -1,6 +1,7 @@
 from rest_framework.decorators import api_view
 from .models import Friendship
 from rest_framework import status
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 from .serializers import (
     ViewFriendshipSerializer,
@@ -130,9 +131,17 @@ def send_friend_request(request):
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
-    friendship = Friendship.objects.create(
-        source_user=source_user, target_user=target_user
-    )
+    try:
+        with transaction.atomic():
+            friendship = Friendship.objects.create(
+                source_user=source_user, target_user=target_user
+            )
+    except IntegrityError:
+        # The other user sent a request (or blocked) at the same moment.
+        return ErrorResponse(
+            message="Friendship already exists",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
 
     Notification.objects.create(
         user_id=target_user.id,
@@ -223,16 +232,24 @@ def block_user(request):
         )
 
     user_id = serializer.validated_data["user_id"]
-    friendship = Friendship.objects.filter(
-        Q(source_user=user, target_user=user_id)
-        | Q(source_user=user_id, target_user=user)
-    ).first()
+    pair = Q(source_user=user, target_user=user_id) | Q(
+        source_user=user_id, target_user=user
+    )
+    friendship = Friendship.objects.filter(pair).first()
 
     if not friendship:
-        Friendship.objects.create(
-            source_user=user, target_user=user_id, status="blocked", blocked_by=user
-        )
-        return SuccessResponse(message="User blocked successfully")
+        try:
+            with transaction.atomic():
+                Friendship.objects.create(
+                    source_user=user,
+                    target_user=user_id,
+                    status="blocked",
+                    blocked_by=user,
+                )
+            return SuccessResponse(message="User blocked successfully")
+        except IntegrityError:
+            # A row for this pair was created meanwhile: block that one.
+            friendship = Friendship.objects.get(pair)
 
     friendship.status = "blocked"
     friendship.blocked_by = user
