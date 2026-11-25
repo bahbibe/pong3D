@@ -275,28 +275,19 @@ class ProfilePage extends Page {
     }
   }
 
-  // Games, wins and ratio of every player come from the leaderboard (the
-  // friends API has none), and its order gives the rank.
   async loadFriends() {
     const [friends, board] = await Promise.all([
       this.api.get("/api/friends/"),
-      this.api.get("/api/game/leaderboard/"),
+      this.api.get("/api/game/leaderboard/?size=1"),
     ]);
-    const stats = new Map(
-      (board.ok ? board.data.users : []).map((row, index) => [
-        row.user.id,
-        { ...row, rank: index + 1 },
-      ]),
-    );
-    const rank = stats.get(session.user.id)?.rank;
+    const rank = board.ok ? board.data.me?.rank : null;
     this.querySelector("#profile-rank").textContent = rank ? `#${rank}` : "-";
     if (!toastOnError(friends)) return;
     const online = presence.get();
-    const none = { total_games: 0, total_wins: 0, ratio: 0 };
     render(
       this.querySelector("#friend-container"),
-      html`${friends.data.map(({ friend }) =>
-        friendRow(friend, stats.get(friend.id) || none, online.has(String(friend.id))),
+      html`${friends.data.map(({ friend, stats }) =>
+        friendRow(friend, stats, online.has(String(friend.id))),
       )}`,
     );
   }

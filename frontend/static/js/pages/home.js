@@ -137,7 +137,7 @@ const view = (user) => html`
 class HomePage extends Page {
   async mount() {
     this.render(view(session.user));
-    const result = await this.api.get("/api/game/leaderboard/");
+    const result = await this.api.get("/api/game/leaderboard/?size=3");
     if (!toastOnError(result)) return;
     const top = result.data.users.slice(0, 3).map(player);
     render(this.querySelector("#best-players"), html`${top}`);

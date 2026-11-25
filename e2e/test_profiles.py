@@ -48,11 +48,14 @@ def test_friend_stats_and_rank_are_real(user_page):
     row.wait_for()
     assert row.locator(".friend-total").inner_text().strip() == "3"
     assert row.locator(".friend-wins").inner_text().strip() == "2"
-    board = me.api("GET", "/api/game/leaderboard/").json()["data"]["users"]
-    friend_row = next(r for r in board if r["user"]["id"] == friend.id)
-    # The same ratio as the ranking page shows (the API sends an integer).
-    assert row.locator(".friend-ratio").inner_text().strip() == f"{friend_row['ratio']}%"
-    rank = next(i + 1 for i, r in enumerate(board) if r["user"]["id"] == me.id)
+    friend_stats = next(
+        row["stats"]
+        for row in me.api("GET", "/api/friends/").json()["data"]
+        if row["friend"]["id"] == friend.id
+    )
+    # The same ratio the ranking page shows (the API sends an integer).
+    assert row.locator(".friend-ratio").inner_text().strip() == f"{friend_stats['ratio']}%"
+    rank = me.api("GET", "/api/game/leaderboard/?size=1").json()["data"]["me"]["rank"]
     assert page.locator("#profile-rank").inner_text().strip() == f"#{rank}"
 
 

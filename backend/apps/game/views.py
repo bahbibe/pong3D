@@ -29,10 +29,37 @@ def history(request):
     )
 
 
+LEADERBOARD_PAGE_SIZE = 20
+LEADERBOARD_MAX_PAGE_SIZE = 100
+
+
+def _positive_int(value, default):
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return default
+    return number if number > 0 else default
+
+
 @api_view(["GET"])
 def get_leaderboard(request):
+    """?page= (from 1) and ?size= (default 20, at most 100). Every row has
+    its rank; "me" is the caller's rank and stats."""
+    size = min(
+        _positive_int(request.GET.get("size"), LEADERBOARD_PAGE_SIZE), LEADERBOARD_MAX_PAGE_SIZE
+    )
+    board = selectors.leaderboard_page(
+        _positive_int(request.GET.get("page"), 1), size, viewer=request.user
+    )
     return SuccessResponse(
-        data={"users": LeaderboardSerializer(selectors.leaderboard(), many=True).data}
+        data={
+            "users": LeaderboardSerializer(board["rows"], many=True).data,
+            "page": board["page"],
+            "pages": board["pages"],
+            "size": board["size"],
+            "total": board["total"],
+            "me": board["me"] and {**board["me"], "ratio": int(board["me"]["ratio"])},
+        }
     )
 
 

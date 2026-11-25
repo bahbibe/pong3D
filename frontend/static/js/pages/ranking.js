@@ -8,6 +8,11 @@ const view = () => html`
     <div class="container-md font-monospace">
       <h1 class="display-1 my-5">Leaderboard</h1>
 
+      <nav
+        class="ranking-pager d-flex justify-content-between align-items-center my-3"
+        aria-label="Leaderboard pages"
+      ></nav>
+
       <div class="table-responsive">
         <table class="mytable">
           <thead>
@@ -27,9 +32,9 @@ const view = () => html`
   </section>
 `;
 
-const row = (entry, index) => html`
+const row = (entry) => html`
   <tr>
-    <th scope="row">${index + 1}</th>
+    <th scope="row">${entry.rank}</th>
     <td>
       <div class="user-cell">
         <img src="${entry.user.avatar}" alt="" />
@@ -43,13 +48,35 @@ const row = (entry, index) => html`
   </tr>
 `;
 
-/** Every player, best ratio first. */
+const pageLink = (page, label, disabled) => html`
+  <li class="page-item ${disabled ? "disabled" : ""}">
+    <a class="page-link" href="/ranking?page=${page}" data-link aria-disabled="${disabled}"
+      >${label}</a
+    >
+  </li>
+`;
+
+const pager = (page, pages, me) => html`
+  <span class="your-rank">${me ? `Your rank: #${me.rank}` : ""}</span>
+  <ul class="pagination m-0">
+    ${pageLink(page - 1, "Previous", page <= 1)}
+    <li class="page-item disabled">
+      <span class="page-link page-position">${page} / ${pages}</span>
+    </li>
+    ${pageLink(page + 1, "Next", page >= pages)}
+  </ul>
+`;
+
+/** Every player, best ratio first, 20 per page (?page=). */
 class RankingPage extends Page {
   async mount() {
     this.render(view());
-    const result = await this.api.get("/api/game/leaderboard/");
+    const asked = Number.parseInt(this.query.get("page"), 10) || 1;
+    const result = await this.api.get(`/api/game/leaderboard/?page=${asked}`);
     if (!toastOnError(result)) return;
-    render(this.querySelector("tbody"), html`${result.data.users.map(row)}`);
+    const { users, page, pages, me } = result.data;
+    render(this.querySelector("tbody"), html`${users.map(row)}`);
+    render(this.querySelector(".ranking-pager"), pager(page, pages, me));
   }
 }
 

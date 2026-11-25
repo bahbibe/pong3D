@@ -125,3 +125,23 @@ def test_static_cache_headers():
     # The security headers are still there.
     response = requests.head(BASE + "/static/js/main.js", verify=False, timeout=10)
     assert response.headers["X-Content-Type-Options"] == "nosniff"
+
+
+def test_ranking_pages(user_page):
+    page, me = user_page, user_page.user
+    total = me.api("GET", "/api/game/leaderboard/?size=1").json()["data"]["total"]
+    for _ in range(max(0, 21 - total)):
+        register()
+    page.goto("/ranking", wait_until="networkidle")
+    first_rank = page.locator("ranking-page tbody tr th").first
+    assert first_rank.text_content() == "1"
+    assert page.locator("ranking-page tbody tr").count() == 20
+    assert page.locator(".page-position").text_content().startswith("1 / ")
+    assert page.locator(".your-rank").text_content().startswith("Your rank: #")
+    page.locator(".ranking-pager a", has_text="Next").click()
+    page.wait_for_url("**/ranking?page=2")
+    page.locator(".page-position", has_text="2 / ").wait_for()
+    assert first_rank.text_content() == "21"
+    page.go_back()
+    page.locator(".page-position", has_text="1 / ").wait_for()
+    assert first_rank.text_content() == "1"

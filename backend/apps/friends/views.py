@@ -1,5 +1,7 @@
 from rest_framework.decorators import api_view
 
+from apps.game import selectors as game_selectors
+from apps.game.serializers import GameStatsSerializer
 from core.responses import ErrorResponse, SuccessResponse
 
 from . import selectors, services
@@ -18,7 +20,18 @@ def _listing(rows):
 
 @api_view(["GET"])
 def get_friends(request):
-    return _listing(selectors.friends(request.user))
+    """Friends, each with their game stats (one more query for all of them)."""
+    rows = selectors.friends(request.user)
+    stats = game_selectors.stats_for(row.friend.id for row in rows)
+    return SuccessResponse(
+        data=[
+            {
+                **ViewFriendshipSerializer(row).data,
+                "stats": GameStatsSerializer(stats[row.friend.id]).data,
+            }
+            for row in rows
+        ]
+    )
 
 
 @api_view(["GET"])

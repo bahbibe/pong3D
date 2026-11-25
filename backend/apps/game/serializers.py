@@ -38,6 +38,7 @@ class GameHistorySerializer(serializers.ModelSerializer):
 
 
 class LeaderboardSerializer(serializers.ModelSerializer):
+    rank = serializers.IntegerField()
     user = serializers.SerializerMethodField()
     total_games = serializers.IntegerField()
     total_wins = serializers.IntegerField()
@@ -58,6 +59,7 @@ class LeaderboardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = [
+            "rank",
             "user",
             "total_games",
             "total_wins",

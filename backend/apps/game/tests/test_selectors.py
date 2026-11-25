@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from apps.game import selectors, services
@@ -56,8 +57,9 @@ class StatsAndHistoryTests(TestCase):
             self.assertEqual(self.client.get("/api/game/history/").status_code, 200)
 
     def test_leaderboard_order(self):
-        board = selectors.leaderboard()
-        self.assertEqual([u.username for u in board][:2], ["alice", "bob"])
+        order, _, _ = selectors.leaderboard_order()
+        users = {u.id: u.username for u in get_user_model().objects.all()}
+        self.assertEqual([users[i] for i in order][:2], ["alice", "bob"])
 
 
 class GameServiceTests(TestCase):

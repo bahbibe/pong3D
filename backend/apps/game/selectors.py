@@ -55,28 +55,77 @@ def history(user, games=None):
     return games
 
 
-def leaderboard():
-    """Every user with .total_games, .total_wins, .total_losses and .ratio,
-    best ratio first. Two queries in total: counts are done in Python."""
+def _counts(user_ids=None):
+    """Finished games and wins per user id, from one query. Only games of
+    `user_ids` when given."""
+    finished = Game.objects.filter(status=Game.FINISHED)
+    if user_ids is not None:
+        finished = finished.filter(Q(player1_id__in=user_ids) | Q(player2_id__in=user_ids))
     totals, wins = {}, {}
-    finished = Game.objects.filter(status=Game.FINISHED).values_list(
+    for player1_id, player2_id, winner_id in finished.values_list(
         "player1_id", "player2_id", "winner_id"
-    )
-    for player1_id, player2_id, winner_id in finished:
+    ):
         for player_id in (player1_id, player2_id):
             if player_id is not None:
                 totals[player_id] = totals.get(player_id, 0) + 1
         if winner_id is not None:
             wins[winner_id] = wins.get(winner_id, 0) + 1
+    return totals, wins
 
-    users = list(get_user_model().objects.select_related("profile"))
-    for user in users:
-        user.total_games = totals.get(user.id, 0)
-        user.total_wins = wins.get(user.id, 0)
-        user.total_losses = user.total_games - user.total_wins
-        user.ratio = _ratio(user.total_wins, user.total_games)
-    users.sort(key=lambda user: user.ratio, reverse=True)
-    return users
+
+def _stats_of(user_id, totals, wins):
+    games, won = totals.get(user_id, 0), wins.get(user_id, 0)
+    return {
+        "total_games": games,
+        "total_wins": won,
+        "total_losses": games - won,
+        "ratio": _ratio(won, games),
+    }
+
+
+def stats_for(user_ids):
+    """{user_id: stats} for these users, in one query (see stats())."""
+    ids = list(user_ids)
+    totals, wins = _counts(ids)
+    return {user_id: _stats_of(user_id, totals, wins) for user_id in ids}
+
+
+def leaderboard_order():
+    """Every user id, best first: ratio, then wins, then the oldest account.
+    Two queries; no user rows are loaded. Returns (ids, totals, wins)."""
+    totals, wins = _counts()
+    ids = get_user_model().objects.values_list("id", flat=True)
+
+    def key(user_id):
+        games, won = totals.get(user_id, 0), wins.get(user_id, 0)
+        return (-_ratio(won, games), -won, user_id)
+
+    return sorted(ids, key=key), totals, wins
+
+
+def leaderboard_page(page, size, viewer=None):
+    """One page of the leaderboard. Rows are users with .rank and the stats
+    attributes LeaderboardSerializer reads; only that page's users are
+    loaded. `page` is clamped to the existing pages. "me" is the viewer's
+    rank and stats."""
+    order, totals, wins = leaderboard_order()
+    total = len(order)
+    pages = max(1, -(-total // size))
+    page = min(max(page, 1), pages)
+    start = (page - 1) * size
+    ids = order[start : start + size]
+    users = get_user_model().objects.select_related("profile").in_bulk(ids)
+    rows = []
+    for offset, user_id in enumerate(ids):
+        user = users[user_id]
+        for field, value in _stats_of(user_id, totals, wins).items():
+            setattr(user, field, value)
+        user.rank = start + offset + 1
+        rows.append(user)
+    me = None
+    if viewer is not None and viewer.id in set(order):
+        me = {"rank": order.index(viewer.id) + 1, **_stats_of(viewer.id, totals, wins)}
+    return {"rows": rows, "page": page, "pages": pages, "size": size, "total": total, "me": me}
 
 
 def open_tournaments():
