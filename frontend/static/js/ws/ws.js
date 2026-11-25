@@ -18,16 +18,6 @@ class WebSock {
       }
     };
   }
-  async receive() {
-    return new Promise((resolve, reject) => {
-      this.socket.onmessage = (event) => {
-        resolve(event.data);
-      };
-      this.socket.onerror = (error) => {
-        reject(error);
-      };
-    });
-  }
   async send(data) {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify(data));

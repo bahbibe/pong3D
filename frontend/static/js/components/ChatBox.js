@@ -24,13 +24,12 @@ class ChatBox extends HTMLElement {
     this.render();
     this.ws = new WebSock(this.friendship.uuid);
     this.ws.connect();
-    this.receiveMessage();
+    this.ws.socket.addEventListener("message", (event) => {
+      this.addMessage(JSON.parse(event.data));
+    });
   }
   connectedCallback() {
     this.getMessages();
-    this.messages[this.messages.length - 1]
-      ? (window.lastMsg = this.messages[this.messages.length - 1])
-      : null;
   }
 
   disconnectedCallback() {
@@ -132,18 +131,11 @@ class ChatBox extends HTMLElement {
     await this.API.invite_friend(friend.id);
   }
 
-  async receiveMessage() {
-    try {
-      const message = await this.ws.receive();
-      if (!message) {
-        return;
-      }
-      this.querySelector(".msg-box").appendChild(this.createMessageElement(JSON.parse(message)));
-      this.msgBox.scrollTop = this.msgBox.scrollHeight;
-      await this.receiveMessage();
-    } catch (error) {
-      console.error("Error receiving message:", error);
-    }
+  addMessage(item) {
+    // The "Hello !!" placeholder goes once there is a message.
+    this.msgBox.querySelector("#empty")?.remove();
+    this.msgBox.appendChild(this.createMessageElement(item));
+    this.msgBox.scrollTop = this.msgBox.scrollHeight;
   }
 }
 

@@ -56,3 +56,23 @@ def test_message_goes_both_ways(browser, errors):
     )
     ctx_a.close()
     ctx_b.close()
+
+
+def test_contact_opens_the_right_conversation(browser, errors):
+    me, first, second = register(), register(), register()
+    befriend(me, first)
+    befriend(me, second)
+    ctx = new_context(browser, me)
+    page = errors.watch(ctx.new_page())
+    sockets = Sockets(page)
+    page.goto("/chat", wait_until="networkidle")
+    assert page.get_by_text("lore ipsum").count() == 0
+    open_chat_with(page, second, sockets)
+    page.locator("chat-box .msg-head", has_text=second.username).wait_for()
+    # Empty conversation: the placeholder goes with the first message.
+    page.locator("chat-box #empty").wait_for()
+    page.fill("chat-box .send-input", "first message")
+    page.press("chat-box .send-input", "Enter")
+    page.locator("chat-box .msg-sent", has_text="first message").wait_for()
+    assert page.locator("chat-box #empty").count() == 0
+    ctx.close()

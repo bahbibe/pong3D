@@ -26,9 +26,9 @@ class Friends extends HTMLElement {
       }
       clickedFriend.classList.add("active");
       this.activeElement = clickedFriend;
-      const friendItem = this.friends.find((item) => {
-        return item.friend.username === clickedFriend.querySelector("p").textContent;
-      });
+      const friendItem = this.friends.find(
+        (item) => String(item.friend.id) === clickedFriend.dataset.id,
+      );
       const chatBox = document.querySelector(".chat-box");
       chatBox.innerHTML = "";
       chatBox.appendChild(new ChatBox(friendItem));
@@ -56,6 +56,7 @@ class Friends extends HTMLElement {
   FriendElement(item) {
     const friendElement = document.createElement("div");
     friendElement.className = "contact p-2 mx-1 d-flex gap-2";
+    friendElement.dataset.id = item.friend.id;
     friendElement.innerHTML = `
       <div class="d-flex align-items-center">
           <img src="${esc(item.friend.profile.avatar)}" class="d-block img-cover img-fluid rounded-circle" alt="avatar"/>
@@ -63,7 +64,6 @@ class Friends extends HTMLElement {
       <div class="d-none d-md-block col-md-9 col-lg-10">
         <div class="last-msg d-flex flex-column h-100 justify-content-center">
           <p class="m-0 fs-5">${esc(item.friend.username)}</p>
-          <p class="m-0 opacity-75">lore ipsum</p>
         </div>
       </div>
     `;
