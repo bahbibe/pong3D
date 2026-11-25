@@ -145,3 +145,26 @@ def test_ranking_pages(user_page):
     page.go_back()
     page.locator(".page-position", has_text="1 / ").wait_for()
     assert first_rank.text_content() == "1"
+
+
+def test_everything_comes_from_this_site(user_page):
+    """No CDN: libraries and fonts are in static/vendor (the CSP allows no
+    other origin for them). Avatars may come from the 42 intra CDN."""
+    page = user_page
+    outside, fonts = [], []
+    page.on(
+        "request",
+        lambda r: (
+            not r.url.startswith(BASE)
+            and not r.url.startswith(("data:", "blob:", "https://cdn.intra.42.fr/"))
+            and outside.append(r.url)
+        ),
+    )
+    page.on("response", lambda r: r.url.endswith(".woff2") and fonts.append((r.url, r.status)))
+    for path in ("/home", "/profile", "/chat"):
+        page.goto(path, wait_until="networkidle")
+    assert outside == []
+    loaded = {url.rsplit("/", 1)[1] for url, status in fonts if status == 200}
+    assert "fa-solid-900.woff2" in loaded
+    assert any(name.startswith("poppins-") for name in loaded)
+    assert page.evaluate("document.fonts.check('16px Poppins')")

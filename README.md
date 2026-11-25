@@ -63,7 +63,7 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
 - `e2e/`: browser (Playwright) and websocket tests, run against a running stack.
 - `docs/`: server setup (`bootstrap-vps.md`), the subject's module checklist, a Postman collection of the API.
 - `frontend/`: the single-page app, no framework and no build step (see Frontend below).
-  `index.html` is the shell; `static/` is served by nginx (three.js is vendored in `static/vendor`).
+  `index.html` is the shell; `static/` is served by nginx (libraries and fonts in `static/vendor`).
 - `infra/nginx/`: nginx image and config (`common.conf` is shared by `dev.conf` and `prod.conf.template`).
 - `infra/scripts/`: `gen-env.sh`, `backup.sh`, `restore.sh`, `deploy.sh`. `infra/prometheus/`.
 - `infra/ansible/`: server provisioning (Docker, deploy user, ssh, ufw, env files from the vault, backups cron, certificate).
@@ -156,10 +156,11 @@ Rules the code follows:
   result is `{aborted: true}`), sockets close, timers clear.
 - **No global state** on `window`: the session and the stores hold it.
 
-There is no bundler: a new module is one more file. The Content-Security-Policy
-(`infra/nginx/common.conf`) only allows scripts from the site itself, the
-pinned Bootstrap bundle and the import map in `index.html` by hash: if you
-change the import map, update its sha256 there. Our JS and CSS are served
+There is no bundler: a new module is one more file. Libraries and fonts are
+vendored in `static/vendor` (three.js, Bootstrap, Font Awesome, the Google
+Fonts), so the Content-Security-Policy (`infra/nginx/common.conf`) allows
+scripts, styles and fonts from the site itself only, plus the import map in
+`index.html` by hash: if you change the import map, update its sha256 there. Our JS and CSS are served
 with `Cache-Control: no-cache` (revalidated on every load), so a deploy never
 mixes old and new modules.
 
