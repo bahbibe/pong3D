@@ -1,7 +1,7 @@
 import "../components/main-nav.js";
 import "./landing.js";
 import "./not-found.js";
-export { ChatPage } from "./ChatPage.js";
+import "./chat.js";
 import "./login.js";
 import "./profile.js";
 import "./ranking.js";
