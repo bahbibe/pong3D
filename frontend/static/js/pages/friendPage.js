@@ -1,3 +1,4 @@
+import { escapeHTML as esc } from "../escape.js";
 import { showOverlay, hideOverlay } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
@@ -76,7 +77,8 @@ class FriendPage extends AbstractPage {
 
         this.friend = res.data.user;
         const stats = res.data.stats;
-        const games = res.data.history;
+        // A game whose opponent account was deleted has no player to show.
+        const games = res.data.history.filter((game) => game.user && game.player);
 
         this.fullName.textContent = `${this.friend.first_name} ${this.friend.last_name}`;
         this.username.textContent = `@${this.friend.username}`;
@@ -87,42 +89,38 @@ class FriendPage extends AbstractPage {
         losses.textContent = `${stats.total_losses} Losses`;
         ratio.textContent = `${stats.ratio}%`;
 
-        for (const game of games) {
-          friendHistory.innerHTML += `
+        friendHistory.innerHTML = games
+          .map(
+            (game) => `
               <div class="row mt-3 p-1 mb-1 glass-effect">
                   <div class="col-4 my-auto p-0">
                     <div class="d-md-flex align-items-center">
-                      <img src="${
-                        game.user.profile.avatar
-                      }" class="img-fluid rounded-circle d-none d-md-block"
+                      <img src="${esc(game.user.profile.avatar)}" class="img-fluid rounded-circle d-none d-md-block"
                        style="width: 40px; height: 40px" alt="user profile image">
                       <div class="ps-2">
-                        <span class="fw-bold text-capitalize">${game.user.username}</span>
+                        <span class="fw-bold text-capitalize">${esc(game.user.username)}</span>
                       </div>
                     </div>
                   </div>
                   <div class="col-2 col-md-2 my-auto text-center">
-                    <span class="result fw-bolder ">${game.user_score}:${game.player_score}</span>
+                    <span class="result fw-bolder ">${esc(game.user_score)}:${esc(game.player_score)}</span>
                   </div>
                   <div class="col-4 my-auto p-0 text-center">
                     <div class="d-md-flex justify-content-center align-items-center">
                       <div class="pe-2">
-                        <span class="fw-bold text-capitalize">${game.player.username}</span>
+                        <span class="fw-bold text-capitalize">${esc(game.player.username)}</span>
                       </div>
-                      <img src="${
-                        game.player.profile.avatar
-                      }" class="img-fluid rounded-circle d-none d-md-block"
+                      <img src="${esc(game.player.profile.avatar)}" class="img-fluid rounded-circle d-none d-md-block"
                         style="width: 40px; height: 40px" alt="user profile image">
                     </div>
                   </div>
                   <div class="col-2 my-auto text-center" style="cursor:pointer;">
-                    <span class="result h3" aria-label="${
-                      game.is_user_winner ? "WIN" : "LOSE"
-                    }">${game.is_user_winner ? "🏆" : "😓"}</span>
+                    <span class="result h3" aria-label="${game.is_user_winner ? "WIN" : "LOSE"}">${game.is_user_winner ? "🏆" : "😓"}</span>
                   </div>
               </div>
-          `;
-        }
+          `,
+          )
+          .join("");
       }
     } catch (error) {
       console.error("Error Loading profile:", error);

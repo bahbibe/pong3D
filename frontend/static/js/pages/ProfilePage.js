@@ -41,19 +41,32 @@ class ProfilePage extends AbstractPage {
     });
   }
 
+  // Games, wins and ratio of every player, and their rank (the leaderboard is
+  // sorted). Map of user id to {total_games, total_wins, ratio, rank}.
+  async loadLeaderboard() {
+    const response = await fetch(`${BASE_URL}/api/game/leaderboard/`, { credentials: "include" });
+    if (!response.ok) return new Map();
+    const body = await response.json();
+    return new Map(body.data.users.map((row, index) => [row.user.id, { ...row, rank: index + 1 }]));
+  }
+
   async getFriend() {
+    showOverlay();
     try {
-      showOverlay();
-      const response = await fetch(`${BASE_URL}/api/friends/`, {
-        credentials: "include",
-      });
+      const [response, board] = await Promise.all([
+        fetch(`${BASE_URL}/api/friends/`, { credentials: "include" }),
+        this.loadLeaderboard(),
+      ]);
+      const myRank = board.get(window.user.id)?.rank;
+      this.querySelector("#profile-rank").textContent = myRank ? `#${myRank}` : "-";
       const data = await response.json();
-      if (response.ok) {
-        const friends = data.data;
-        for (const friend of friends) {
+      if (!response.ok) return;
+      this.container.innerHTML = data.data
+        .map((friend) => {
           const isOnline =
             window.online_users && window.online_users.includes(friend.friend.id.toString());
-          this.container.innerHTML += `
+          const stats = board.get(friend.friend.id) || { total_games: 0, total_wins: 0, ratio: 0 };
+          return `
               <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;" id="friend-${esc(friend.friend.id)}">
                 <div class="col-3 col-md-4">
                   <div class="d-flex align-items-center">
@@ -62,29 +75,30 @@ class ProfilePage extends AbstractPage {
                       <div class="user-status ${isOnline ? "online" : ""}"></div>
                     </div>
                     <div class="ps-2">
-                      <a href="friend/${esc(friend.friend.profile.uuid)}"><span class="fw-bold text-capitalize" style="font-size: 14px;">${esc(friend.friend.username)}</span></a>
+                      <a href="/friend/${esc(friend.friend.profile.uuid)}" data-link><span class="fw-bold text-capitalize" style="font-size: 14px;">${esc(friend.friend.username)}</span></a>
                     </div>
                   </div>
                 </div>
                 <div class="col-2 pe-2 ">
-                  <span id="total"><strong>100</strong></span>
+                  <span class="friend-total"><strong>${esc(stats.total_games)}</strong></span>
                 </div>
                 <div class="col-2 pe-2 ">
-                  <span id="wins"><strong>100</strong></span>
+                  <span class="friend-wins"><strong>${esc(stats.total_wins)}</strong></span>
                 </div>
                 <div class="col-2 pe-2 d-none d-md-block">
-                  <span id="ratio"><strong>100</strong></span>
+                  <span class="friend-ratio"><strong>${esc(stats.ratio)}%</strong></span>
                 </div>
                 <div class="col-3 col-md-2 text-end">
                   <a data-id="${esc(friend.friend.id)}" role="button" class="bg-success font-glitch text-white text-decoration-none p-1">PLAY</a>
                 </div>
               </div>
           `;
-        }
-        hideOverlay();
-      }
+        })
+        .join("");
     } catch (e) {
       console.error(e);
+    } finally {
+      hideOverlay();
     }
   }
 

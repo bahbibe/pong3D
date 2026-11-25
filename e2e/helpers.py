@@ -246,3 +246,25 @@ def nav_click(page, selector):
     """Click an entry of the user menu in the nav (it opens on hover)."""
     page.locator("main-nav .user").first.hover()
     page.locator(f"main-nav .dropdown-content {selector}").first.click()
+
+
+def finished_game(winner, loser, winner_score=5, loser_score=2):
+    """Store a finished game straight in the database (playing one takes a
+    minute). loser=None: the opponent account was deleted."""
+    loser_id = loser.id if loser is not None else "NULL"
+    sql(
+        "insert into game_game (uuid, player1_id, player2_id, player1_score, player2_score, "
+        "status, winner_id, created_at, finished_at) values (gen_random_uuid(), "
+        f"{winner.id}, {loser_id}, {winner_score}, {loser_score}, 'finished', {winner.id}, "
+        "now(), now())"
+    )
+
+
+def force_username(user, name):
+    """Set a username the API would refuse (to check that pages escape it)."""
+    sql(f"update auth_user set username = {sql_literal(name)} where id = {user.id}")
+    user.username = name
+
+
+def sql_literal(value):
+    return "'" + str(value).replace("'", "''") + "'"
