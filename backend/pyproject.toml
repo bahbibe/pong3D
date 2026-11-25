@@ -13,6 +13,8 @@ dependencies = [
     "django-cors-headers==4.9.0",
     "django-prometheus==2.5.0",
     "djangorestframework==3.18.3",
+    # OpenAPI schema (docs/openapi.yaml, make openapi).
+    "drf-spectacular==0.30.0",
     "pillow==13.0.0",
     "psycopg[binary]==3.3.9",
     "PyJWT==2.15.1",

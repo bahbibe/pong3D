@@ -5,24 +5,44 @@ import secrets
 
 from django.conf import settings
 from django.shortcuts import redirect
-from rest_framework import status
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+    inline_serializer,
+)
+from rest_framework import serializers, status
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import AllowAny
 
 from apps.notifications import selectors as notification_selectors
 from apps.notifications.serializers import NotificationSerializer
+from apps.notifications.serializers import NotificationSerializer as _Notification
 from core.errors import ServiceError
 from core.responses import ErrorResponse, SuccessResponse
+from core.schema import data_object, responses
 
 from . import intra, rate_limit, services, twofa
 from .auth_utils import revoke_tokens, set_access_token
 from .permissions import IsAuthenticated
 from .serializers import LoginUserSerializer, RegisterUserSerializer, UserSerializer
 
+CODE_REQUEST = inline_serializer(
+    "TwoFaCode", {"code": serializers.CharField(help_text="6 digits from the authenticator app")}
+)
+
 INTRA_STATE_COOKIE = "intra_oauth_state"
 INTRA_STATE_MAX_AGE = 10 * 60
 
 
+@extend_schema(
+    tags=["auth"],
+    summary="Log in with email or username and password; sets the access_token cookie",
+    request=LoginUserSerializer,
+    responses=responses(
+        "Login", data_object("LoginData", user=UserSerializer()), errors=(400, 404, 429)
+    ),
+)
 @api_view(["POST"])
 @authentication_classes([])
 @permission_classes([AllowAny])
@@ -41,6 +61,12 @@ def login_user(request):
     return set_access_token(response, user, is_tfa_verified=False)
 
 
+@extend_schema(
+    tags=["auth"],
+    summary="Create an account (log in afterwards)",
+    request=RegisterUserSerializer,
+    responses=responses("Register", UserSerializer, errors=(400,)),
+)
 @api_view(["POST"])
 @authentication_classes([])
 @permission_classes([AllowAny])
@@ -58,6 +84,12 @@ def register_user(request):
     )
 
 
+@extend_schema(
+    tags=["auth"],
+    summary="Log out: ends every session of the user and deletes the cookie",
+    request=None,
+    responses=responses("Logout"),
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def logout_user(request):
@@ -69,6 +101,19 @@ def logout_user(request):
     return response
 
 
+@extend_schema(
+    tags=["auth"],
+    summary="The current user and their unread notifications",
+    description=(
+        'With 2FA pending, answers 200 with message "Two factor authentication '
+        'is enabled" and data {user, is_tfa_verified: false}.'
+    ),
+    responses=responses(
+        "Me",
+        data_object("MeData", user=UserSerializer(), notifications=_Notification(many=True)),
+        errors=(401,),
+    ),
+)
 @api_view(["GET"])
 def get_user(request):
     unread = notification_selectors.unread(request.user)
@@ -80,6 +125,13 @@ def get_user(request):
     )
 
 
+@extend_schema(
+    tags=["auth"],
+    summary="Start a 42 intra login: the URL to send the browser to",
+    responses=responses(
+        "IntraLogin", data_object("IntraUrl", url=serializers.URLField()), errors=()
+    ),
+)
 @api_view(["GET"])
 @authentication_classes([])
 @permission_classes([AllowAny])
@@ -98,6 +150,21 @@ def login_intra(request):
     return response
 
 
+@extend_schema(
+    tags=["auth"],
+    summary="42 intra redirects here; logs in and redirects to the frontend",
+    parameters=[
+        OpenApiParameter("code", str, description="Authorization code from 42"),
+        OpenApiParameter("state", str, description="Must match the state cookie set by /intra/"),
+        OpenApiParameter("error", str, description="Set by 42 when the user refused"),
+    ],
+    responses={
+        302: OpenApiResponse(description="Logged in: redirect to the frontend"),
+        400: responses("_", errors=(400,))[400],
+        401: responses("_", errors=(401,))[401],
+        502: responses("_", errors=(502,))[502],
+    },
+)
 @api_view(["GET"])
 @authentication_classes([])
 @permission_classes([AllowAny])
@@ -123,11 +190,26 @@ def login_intra_callback(request):
     return set_access_token(response, user, is_tfa_verified=False)
 
 
+@extend_schema(
+    tags=["2fa"],
+    summary="Start enabling 2FA: a new secret as a QR code (confirm it next)",
+    request=None,
+    responses=responses(
+        "TwoFaEnable",
+        data_object("QrCode", image=serializers.CharField(help_text="data: URL of a PNG")),
+    ),
+)
 @api_view(["POST"])
 def enable_twofa(request):
     return SuccessResponse(message="2FA enables", data={"image": twofa.start(request.user)})
 
 
+@extend_schema(
+    tags=["2fa"],
+    summary="Turn 2FA on with a first valid code",
+    request=CODE_REQUEST,
+    responses=responses("TwoFaConfirm", errors=(400, 401, 429)),
+)
 @api_view(["POST"])
 def confirm_twofa(request):
     twofa.confirm(request.user, request.data.get("code"))
@@ -138,6 +220,12 @@ def confirm_twofa(request):
     )
 
 
+@extend_schema(
+    tags=["2fa"],
+    summary="Enter the 2FA code after login (works with a 2FA-pending token)",
+    request=CODE_REQUEST,
+    responses=responses("TwoFaVerify", errors=(400, 401, 429)),
+)
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def verify_twofa(request):
@@ -147,6 +235,12 @@ def verify_twofa(request):
     )
 
 
+@extend_schema(
+    tags=["2fa"],
+    summary="Turn 2FA off (needs a current code)",
+    request=CODE_REQUEST,
+    responses=responses("TwoFaDisable", errors=(400, 401, 429)),
+)
 @api_view(["POST"])
 def disable_twofa(request):
     twofa.disable(request.user, request.data.get("code"))

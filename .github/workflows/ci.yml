@@ -47,6 +47,11 @@ jobs:
         run: uv run --no-sync coverage run manage.py test --noinput
       - name: Coverage report (fails below fail_under in pyproject.toml)
         run: uv run --no-sync coverage report
+      - name: OpenAPI schema has no warnings and docs/openapi.yaml is up to date
+        run: |
+          uv run --no-sync python manage.py spectacular --validate --fail-on-warn --file "$RUNNER_TEMP/openapi.yaml"
+          diff -u ../docs/openapi.yaml "$RUNNER_TEMP/openapi.yaml" \
+            || { echo "docs/openapi.yaml is out of date: run make openapi and commit it"; exit 1; }
 
   deploy-check:
     # manage.py check --deploy with prod-like settings (test_settings is not

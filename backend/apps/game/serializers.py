@@ -1,5 +1,6 @@
 import os
 
+from drf_spectacular.utils import extend_schema_field, inline_serializer
 from rest_framework import serializers
 
 from apps.accounts.serializers import PublicUserSerializer
@@ -45,6 +46,16 @@ class LeaderboardSerializer(serializers.ModelSerializer):
     total_losses = serializers.IntegerField()
     ratio = serializers.IntegerField()
 
+    @extend_schema_field(
+        inline_serializer(
+            "LeaderboardUser",
+            {
+                "id": serializers.IntegerField(),
+                "username": serializers.CharField(),
+                "avatar": serializers.CharField(),
+            },
+        )
+    )
     def get_user(self, obj):
         # str(): `in` on an ImageFieldFile iterates the file (opens it).
         avatar = str(obj.profile.avatar)
@@ -77,22 +88,6 @@ class TournamentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tournament
         fields = ["uuid", "owner", "spots", "finished"]
-
-
-class TournamentParticipantsSerializer(serializers.ModelSerializer):
-    tournament = TournamentSerializer()
-    player = PublicUserSerializer(read_only=True)
-    t_round = serializers.IntegerField()
-    ready = serializers.BooleanField()
-
-    class Meta:
-        model = Tournament
-        fields = [
-            "tournament",
-            "player",
-            "t_round",
-            "ready",
-        ]
 
 
 class GameSerializer(serializers.ModelSerializer):

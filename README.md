@@ -36,6 +36,7 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
 | `make migrate` | Apply migrations now (they also run on every `make dev`/`make prod`) |
 | `make test` | Backend tests against a throwaway Postgres, cleaned up afterwards |
 | `make e2e [ARGS=...]` | Browser and websocket tests against the running stack (needs uv) |
+| `make openapi` | Write `docs/openapi.yaml` from the code (CI fails when it is out of date) |
 | `make lock [ARGS=...]` | Update `backend/uv.lock` after changing `backend/pyproject.toml` (`LOCK_DIR=e2e`: `e2e/uv.lock`) |
 | `make env` | Create the env files (prod: `ENV=prod DOMAIN=... ACME_EMAIL=...`) |
 | `make cert` | Prod: get the Let's Encrypt certificate (`STAGING=1`: dry run, saves nothing) |
@@ -61,7 +62,8 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
   - `core/`: shared helpers (JSON responses, Redis URL).
   - `media/avatars/`: uploaded avatars (a named volume in prod). Only the default one is in git.
 - `e2e/`: browser (Playwright) and websocket tests, run against a running stack.
-- `docs/`: server setup (`bootstrap-vps.md`), the subject's module checklist, a Postman collection of the API.
+- `docs/`: server setup (`bootstrap-vps.md`), the subject's module checklist, and `openapi.yaml`:
+  the API (OpenAPI 3, generated from the views; Postman, Insomnia and most clients import it).
 - `frontend/`: the single-page app, no framework and no build step (see Frontend below).
   `index.html` is the shell; `static/` is served by nginx (libraries and fonts in `static/vendor`).
 - `infra/nginx/`: nginx image and config (`common.conf` is shared by `dev.conf` and `prod.conf.template`).

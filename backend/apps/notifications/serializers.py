@@ -1,5 +1,6 @@
 import os
 
+from drf_spectacular.utils import extend_schema_field, inline_serializer
 from rest_framework import serializers
 
 from .models import Notification
@@ -15,6 +16,18 @@ def avatar_url(avatar):
 class NotificationSerializer(serializers.ModelSerializer):
     sender = serializers.SerializerMethodField()
 
+    @extend_schema_field(
+        inline_serializer(
+            "NotificationSender",
+            {
+                "id": serializers.IntegerField(),
+                "username": serializers.CharField(),
+                "avatar": serializers.CharField(),
+                "uuid": serializers.UUIDField(),
+            },
+            allow_null=True,
+        )
+    )
     def get_sender(self, obj):
         if obj.sender is None:  # system notification
             return None

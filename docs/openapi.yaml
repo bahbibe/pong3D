@@ -1,0 +1,2200 @@
+openapi: 3.0.3
+info:
+  title: pong3D API
+  version: '1'
+  description: 'Every response is JSON: {success, message, data}. Errors have success:
+    false, a message and, for invalid fields, errors (one message per field). Authentication
+    is the access_token cookie set by login; with 2FA on, the token only opens the
+    2FA endpoints until the code is verified (other endpoints answer 200 with data.is_tfa_verified
+    = false).'
+paths:
+  /api/auth/intra/:
+    get:
+      operationId: auth_intra_retrieve
+      summary: 'Start a 42 intra login: the URL to send the browser to'
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntraLoginResponse'
+          description: ''
+  /api/auth/intra/callback/:
+    get:
+      operationId: auth_intra_callback_retrieve
+      summary: 42 intra redirects here; logs in and redirects to the frontend
+      parameters:
+      - in: query
+        name: code
+        schema:
+          type: string
+        description: Authorization code from 42
+      - in: query
+        name: error
+        schema:
+          type: string
+        description: Set by 42 when the user refused
+      - in: query
+        name: state
+        schema:
+          type: string
+        description: Must match the state cookie set by /intra/
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '302':
+          description: 'Logged in: redirect to the frontend'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '502':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      summary: Log in with email or username and password; sets the access_token cookie
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginUserRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      summary: 'Log out: ends every session of the user and deletes the cookie'
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/me/:
+    get:
+      operationId: auth_me_retrieve
+      description: 'With 2FA pending, answers 200 with message "Two factor authentication
+        is enabled" and data {user, is_tfa_verified: false}.'
+      summary: The current user and their unread notifications
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MeResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/notifications/mark_as_read/:
+    post:
+      operationId: notifications_mark_all_read
+      summary: Mark every notification as read
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarkAllReadResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/notifications/mark_as_read/{uuid}/:
+    post:
+      operationId: notifications_mark_read
+      summary: Mark one notification as read
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+        required: true
+      tags:
+      - notifications
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarkReadResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/profile/{uuid}/:
+    get:
+      operationId: auth_profile_retrieve
+      summary: Another player's profile, stats and match history
+      parameters:
+      - in: path
+        name: uuid
+        schema:
+          type: string
+        required: true
+      tags:
+      - profile
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/register/:
+    post:
+      operationId: auth_register_create
+      summary: Create an account (log in afterwards)
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterUserRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/settings/update/:
+    put:
+      operationId: auth_settings_update_update
+      description: A new password ends every other session; this one gets a new cookie.
+      summary: Change username, email, password or avatar (multipart)
+      tags:
+      - profile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UpdateSettingsRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/setup/:
+    post:
+      operationId: auth_setup_create
+      summary: 'First setup: username and avatar (multipart)'
+      tags:
+      - profile
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetupProfileRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SetupResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/twofa/confirm/:
+    post:
+      operationId: auth_twofa_confirm_create
+      summary: Turn 2FA on with a first valid code
+      tags:
+      - 2fa
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TwoFaCodeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TwoFaCodeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TwoFaCodeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TwoFaConfirmResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/twofa/disable/:
+    post:
+      operationId: auth_twofa_disable_create
+      summary: Turn 2FA off (needs a current code)
+      tags:
+      - 2fa
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TwoFaCodeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TwoFaCodeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TwoFaCodeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TwoFaDisableResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/twofa/enable/:
+    post:
+      operationId: auth_twofa_enable_create
+      summary: 'Start enabling 2FA: a new secret as a QR code (confirm it next)'
+      tags:
+      - 2fa
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TwoFaEnableResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/twofa/verify/:
+    post:
+      operationId: auth_twofa_verify_create
+      summary: Enter the 2FA code after login (works with a 2FA-pending token)
+      tags:
+      - 2fa
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TwoFaCodeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TwoFaCodeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TwoFaCodeRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TwoFaVerifyResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '429':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/user/{id}/:
+    get:
+      operationId: auth_user_retrieve
+      summary: A player by user id
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - profile
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileByIdResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/auth/users/:
+    get:
+      operationId: auth_users_retrieve
+      summary: Search players by username (at most 50)
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Part of a username
+      tags:
+      - profile
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/chat/messages/{conversation}/:
+    get:
+      operationId: chat_messages_retrieve
+      description: Messages are sent over the /ws/chat/<conversation>/ websocket.
+      summary: Message history of a conversation (a friendship uuid)
+      parameters:
+      - in: path
+        name: conversation
+        schema:
+          type: string
+        description: Friendship uuid
+        required: true
+      tags:
+      - chat
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessagesResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/friends/:
+    get:
+      operationId: friends_retrieve
+      description: Friends, each with their game stats (one more query for all of
+        them).
+      summary: Friends, each with their game stats
+      tags:
+      - friends
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendsResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/friends/accept/:
+    post:
+      operationId: friends_accept_create
+      summary: Accept a friend request
+      tags:
+      - friends
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptFriendRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcceptFriendRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcceptFriendRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AcceptRequestResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/friends/block/:
+    post:
+      operationId: friends_block_create
+      summary: Block a user (also closes the chat)
+      tags:
+      - friends
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BlockUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BlockUserRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/friends/blocked/:
+    get:
+      operationId: friends_blocked_retrieve
+      summary: Users you blocked
+      tags:
+      - friends
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockedResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/friends/requests/:
+    get:
+      operationId: friends_requests_retrieve
+      summary: Friend requests you received
+      tags:
+      - friends
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceivedResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/friends/send/:
+    post:
+      operationId: friends_send_create
+      summary: Send a friend request
+      tags:
+      - friends
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SentFriendRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SentFriendRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SentFriendRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendRequestResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/friends/sent-requests/:
+    get:
+      operationId: friends_sent_requests_retrieve
+      summary: Friend requests you sent
+      tags:
+      - friends
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SentResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/friends/unblock/:
+    post:
+      operationId: friends_unblock_create
+      summary: Unblock a user you blocked
+      tags:
+      - friends
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BlockUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BlockUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BlockUserRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnblockResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/game/create_tournament/:
+    post:
+      operationId: game_create_tournament_create
+      summary: Create a tournament (4 players, the bracket is made on first join)
+      tags:
+      - tournaments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTournamentResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/game/get_game/{game_id}:
+    get:
+      operationId: game_get_game_retrieve
+      summary: One game
+      parameters:
+      - in: path
+        name: game_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - games
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/game/get_tournament_games/{tournament_id}:
+    get:
+      operationId: game_get_tournament_games_retrieve
+      summary: The games of a tournament's bracket
+      parameters:
+      - in: path
+        name: tournament_id
+        schema:
+          type: string
+        description: Tournament uuid
+        required: true
+      tags:
+      - tournaments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentGamesResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/game/get_tournaments/:
+    get:
+      operationId: game_get_tournaments_retrieve
+      summary: Open tournaments, with free seats
+      tags:
+      - tournaments
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentsResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/game/history/:
+    get:
+      operationId: game_history_retrieve
+      summary: Your finished games and stats
+      tags:
+      - games
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoryResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/game/invite_friend/{friend_id}:
+    post:
+      operationId: game_invite_friend_create
+      summary: New game against a friend; they get a notification
+      parameters:
+      - in: path
+        name: friend_id
+        schema:
+          type: integer
+        description: User id
+        required: true
+      tags:
+      - games
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/game/leaderboard/:
+    get:
+      operationId: game_leaderboard_retrieve
+      description: |-
+        ?page= (from 1) and ?size= (default 20, at most 100). Every row has
+        its rank; "me" is the caller's rank and stats.
+      summary: One page of the leaderboard, best ratio first, with your rank
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: From 1; past the end gives the last page
+      - in: query
+        name: size
+        schema:
+          type: integer
+        description: Default 20, at most 100
+      tags:
+      - games
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeaderboardResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/game/play_again/{game_id}:
+    post:
+      operationId: game_play_again_create
+      summary: New game against the opponent of one of your games
+      parameters:
+      - in: path
+        name: game_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - games
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayAgainResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+  /api/game/stats/:
+    get:
+      operationId: game_stats_retrieve
+      summary: Your game stats
+      tags:
+      - games
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatsResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: ''
+components:
+  schemas:
+    AcceptFriendRequestRequest:
+      type: object
+      properties:
+        source_user:
+          type: integer
+      required:
+      - source_user
+    AcceptRequestResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/Friendship'
+      required:
+      - data
+      - message
+      - success
+    AuthMethodEnum:
+      enum:
+      - email
+      - intra
+      type: string
+      description: |-
+        * `email` - email
+        * `intra` - intra
+    BlockResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - message
+      - success
+    BlockUserRequest:
+      type: object
+      properties:
+        user_id:
+          type: integer
+      required:
+      - user_id
+    BlockedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ViewFriendship'
+      required:
+      - data
+      - message
+      - success
+    CreateTournamentResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/CreatedTournament'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    CreatedTournament:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/Tournament'
+      required:
+      - data
+      - message
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+          description: One message per invalid field.
+      required:
+      - message
+      - success
+    FriendWithStats:
+      type: object
+      properties:
+        user:
+          type: object
+          additionalProperties: {}
+        friend:
+          type: object
+          additionalProperties: {}
+        status:
+          type: string
+        uuid:
+          type: string
+          format: uuid
+          description: Also the chat conversation id
+        stats:
+          $ref: '#/components/schemas/GameStats'
+      required:
+      - friend
+      - stats
+      - status
+      - user
+      - uuid
+    FriendsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/FriendWithStats'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    Friendship:
+      type: object
+      properties:
+        source_user:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        target_user:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+      required:
+      - source_user
+      - target_user
+    Game:
+      type: object
+      properties:
+        id:
+          type: integer
+        uuid:
+          type: string
+        player1:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        player2:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        player1_score:
+          type: integer
+        player2_score:
+          type: integer
+      required:
+      - id
+      - player1
+      - player1_score
+      - player2
+      - player2_score
+      - uuid
+    GameData:
+      type: object
+      properties:
+        game:
+          $ref: '#/components/schemas/Game'
+      required:
+      - game
+    GameHistory:
+      type: object
+      properties:
+        user:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        player:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        player_score:
+          type: integer
+        user_score:
+          type: integer
+        is_user_winner:
+          type: boolean
+      required:
+      - is_user_winner
+      - player
+      - player_score
+      - user
+      - user_score
+      - uuid
+    GameResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/GameData'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    GameStats:
+      type: object
+      properties:
+        total_games:
+          type: integer
+        total_wins:
+          type: integer
+        total_losses:
+          type: integer
+        ratio:
+          type: integer
+      required:
+      - ratio
+      - total_games
+      - total_losses
+      - total_wins
+    HistoryData:
+      type: object
+      properties:
+        games:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameHistory'
+        stats:
+          $ref: '#/components/schemas/GameStats'
+      required:
+      - games
+      - stats
+    HistoryResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/HistoryData'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    IntraLoginResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/IntraUrl'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    IntraUrl:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+      required:
+      - url
+    InviteResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/GameData'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    Leaderboard:
+      type: object
+      properties:
+        rank:
+          type: integer
+        user:
+          allOf:
+          - $ref: '#/components/schemas/LeaderboardUser'
+          readOnly: true
+        total_games:
+          type: integer
+        total_wins:
+          type: integer
+        total_losses:
+          type: integer
+        ratio:
+          type: integer
+      required:
+      - rank
+      - ratio
+      - total_games
+      - total_losses
+      - total_wins
+      - user
+    LeaderboardMe:
+      type: object
+      properties:
+        rank:
+          type: integer
+        total_games:
+          type: integer
+        total_wins:
+          type: integer
+        total_losses:
+          type: integer
+        ratio:
+          type: integer
+      required:
+      - rank
+      - ratio
+      - total_games
+      - total_losses
+      - total_wins
+    LeaderboardPage:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/Leaderboard'
+        page:
+          type: integer
+        pages:
+          type: integer
+        size:
+          type: integer
+        total:
+          type: integer
+        me:
+          allOf:
+          - $ref: '#/components/schemas/LeaderboardMe'
+          nullable: true
+      required:
+      - me
+      - page
+      - pages
+      - size
+      - total
+      - users
+    LeaderboardResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/LeaderboardPage'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    LeaderboardUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        avatar:
+          type: string
+      required:
+      - avatar
+      - id
+      - username
+    LoginData:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+      required:
+      - user
+    LoginResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/LoginData'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    LoginUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+        username:
+          type: string
+          minLength: 1
+      required:
+      - password
+    LogoutResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - message
+      - success
+    MarkAllReadResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - message
+      - success
+    MarkReadResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - message
+      - success
+    MeData:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+      required:
+      - notifications
+      - user
+    MeResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/MeData'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    Message:
+      type: object
+      properties:
+        author:
+          type: string
+          readOnly: true
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+      required:
+      - author
+      - content
+    MessageList:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+      required:
+      - messages
+    MessagesResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/MessageList'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    Notification:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        type:
+          type: string
+          maxLength: 255
+        message:
+          type: string
+        is_read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        sender:
+          allOf:
+          - $ref: '#/components/schemas/NotificationSender'
+          nullable: true
+          readOnly: true
+        game_id:
+          type: string
+          nullable: true
+      required:
+      - created_at
+      - message
+      - sender
+      - type
+      - uuid
+    NotificationSender:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        avatar:
+          type: string
+        uuid:
+          type: string
+          format: uuid
+      required:
+      - avatar
+      - id
+      - username
+      - uuid
+    PlayAgainResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/GameData'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    Profile:
+      type: object
+      properties:
+        avatar:
+          type: string
+        is_setup:
+          type: boolean
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+        auth_method:
+          $ref: '#/components/schemas/AuthMethodEnum'
+        is_tfa_enabled:
+          type: boolean
+      required:
+      - avatar
+      - uuid
+    ProfileByIdResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/PublicUser'
+      required:
+      - data
+      - message
+      - success
+    ProfileData:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/PublicUser'
+        stats:
+          $ref: '#/components/schemas/GameStats'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/GameHistory'
+      required:
+      - history
+      - stats
+      - user
+    ProfileResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ProfileData'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    PublicUser:
+      type: object
+      description: 'Another user as seen by others: same shape, no email.'
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        profile:
+          allOf:
+          - $ref: '#/components/schemas/Profile'
+          readOnly: true
+      required:
+      - id
+      - profile
+      - username
+    QrCode:
+      type: object
+      properties:
+        image:
+          type: string
+          description: 'data: URL of a PNG'
+      required:
+      - image
+    ReceivedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ViewFriendship'
+      required:
+      - data
+      - message
+      - success
+    RegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/User'
+      required:
+      - data
+      - message
+      - success
+    RegisterUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 150
+        confirm_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - confirm_password
+      - email
+      - first_name
+      - last_name
+      - password
+      - username
+    SendRequestResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/Friendship'
+      required:
+      - data
+      - message
+      - success
+    SentFriendRequestRequest:
+      type: object
+      properties:
+        target_user:
+          type: integer
+      required:
+      - target_user
+    SentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ViewFriendship'
+      required:
+      - data
+      - message
+      - success
+    SettingsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/User'
+      required:
+      - data
+      - message
+      - success
+    SetupProfileRequest:
+      type: object
+      properties:
+        avatar:
+          type: string
+          format: binary
+        username:
+          type: string
+          minLength: 1
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+    SetupResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/User'
+      required:
+      - data
+      - message
+      - success
+    StatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/GameStats'
+      required:
+      - data
+      - message
+      - success
+    StatusEnum:
+      enum:
+      - pending
+      - accepted
+      - rejected
+      - blocked
+      type: string
+      description: |-
+        * `pending` - pending
+        * `accepted` - accepted
+        * `rejected` - rejected
+        * `blocked` - blocked
+    Tournament:
+      type: object
+      properties:
+        uuid:
+          type: string
+        owner:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        spots:
+          type: integer
+          default: 4
+        finished:
+          type: boolean
+      required:
+      - finished
+      - owner
+      - uuid
+    TournamentGame:
+      type: object
+      properties:
+        tournament:
+          $ref: '#/components/schemas/Tournament'
+        game:
+          $ref: '#/components/schemas/Game'
+        t_round:
+          type: integer
+      required:
+      - game
+      - t_round
+      - tournament
+    TournamentGameList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TournamentGame'
+      required:
+      - data
+    TournamentGamesResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/TournamentGameList'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    TournamentList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tournament'
+      required:
+      - data
+    TournamentsResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/TournamentList'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    TwoFaCodeRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          description: 6 digits from the authenticator app
+      required:
+      - code
+    TwoFaConfirmResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - message
+      - success
+    TwoFaDisableResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - message
+      - success
+    TwoFaEnableResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/QrCode'
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - data
+      - message
+      - success
+    TwoFaVerifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - message
+      - success
+    UnblockResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+      required:
+      - message
+      - success
+    UpdateSettingsRequest:
+      type: object
+      properties:
+        avatar:
+          type: string
+          format: binary
+        username:
+          type: string
+          minLength: 1
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          oneOf:
+          - type: string
+            format: email
+          - type: string
+            maxLength: 0
+        password:
+          type: string
+          writeOnly: true
+        confirm_password:
+          type: string
+          writeOnly: true
+        current_password:
+          type: string
+          writeOnly: true
+    User:
+      type: object
+      description: The logged-in user's own data (includes email).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          title: Email address
+          oneOf:
+          - type: string
+            format: email
+            maxLength: 254
+          - type: string
+            maxLength: 0
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        profile:
+          allOf:
+          - $ref: '#/components/schemas/Profile'
+          readOnly: true
+      required:
+      - id
+      - profile
+      - username
+    UsersResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicUser'
+      required:
+      - data
+      - message
+      - success
+    ViewFriendship:
+      type: object
+      properties:
+        user:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        friend:
+          allOf:
+          - $ref: '#/components/schemas/PublicUser'
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        uuid:
+          type: string
+          format: uuid
+          readOnly: true
+      required:
+      - friend
+      - user
+      - uuid
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token

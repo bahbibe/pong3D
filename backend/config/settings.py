@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
+    "drf_spectacular",
     "channels",
     "django_prometheus",
     # Project apps (backend/apps/). Labels are unchanged: accounts is "api".
@@ -124,6 +125,25 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.MultiPartParser",
     ],
     "EXCEPTION_HANDLER": "core.exceptions.handler",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+# OpenAPI schema: `make openapi` writes docs/openapi.yaml (CI checks it is
+# up to date). Not served by the app.
+SPECTACULAR_SETTINGS = {
+    "TITLE": "pong3D API",
+    "DESCRIPTION": (
+        "Every response is JSON: {success, message, data}. Errors have "
+        "success: false, a message and, for invalid fields, errors (one "
+        "message per field). Authentication is the access_token cookie set "
+        "by login; with 2FA on, the token only opens the 2FA endpoints until "
+        "the code is verified (other endpoints answer 200 with "
+        "data.is_tfa_verified = false)."
+    ),
+    "VERSION": "1",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SCHEMA_PATH_PREFIX": "/api",
 }
 
 ROOT_URLCONF = "config.urls"

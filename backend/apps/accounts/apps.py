@@ -9,4 +9,4 @@ class AccountsConfig(AppConfig):
     label = "api"
 
     def ready(self):
-        from . import signals  # noqa: F401  (registers the post_save handler)
+        from . import schema, signals  # noqa: F401  (OpenAPI auth scheme, post_save handler)
