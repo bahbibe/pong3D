@@ -889,14 +889,6 @@
     </section>
   </template>
 
-  <template id="notification">
-    <div id="notification-container">
-      <div class="notification">
-        <span id="notification-message"></span>
-        <button id="notification-close">X</button>
-      </div>
-    </div>
-  </template>
 
   <!-- Game page -->
   <template id="game-page">
@@ -1134,125 +1126,7 @@
 
 
   <!-- !  components -->
-  <template id="nav">
-    <nav class="navbar navbar-expand-lg navbar-dark primary-bg border-bottom">
-      <div class="container-md">
-        <!-- Left elements -->
-        <div class="d-flex">
-          <!-- Brand -->
-          <a class="navbar-brand" href="#">
-            <img src="/static/asset/images/transistor-ping-pong.gif" alt="logo image" style="width: 40px; height: 40px;" loading="lazy" />
-          </a>
-        </div>
-        <!-- Left elements -->
 
-        <!-- Center elements -->
-        <!-- Search form -->
-        <form class="navbar-nav flex-row d-none d-md-flex input-group w-auto my-auto d-none d-sm-flex">
-          <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-          <span class="input-group-text border-0  d-lg-flex">
-            <i class="fas fa-search"></i>
-          </span>
-        </form>
-        <!-- Center elements -->
-
-        <!-- Right elements -->
-        <ul class="navbar-nav flex-row">
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-sm-flex align-items-sm-center" href="#" id="navbarDropdown"
-              role="button" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false" href="#">
-              <img src="/static/asset/images/profile.svg" class="rounded-circle" style="width: 40px; height: 40px;" alt="user profile image"
-                loading="lazy" />
-              <strong class="d-none d-sm-block ms-1">bmakhlou</strong>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDropdown">
-              <li>
-                <a class="sidebar-link" href="/profile">
-                  <i class="fa-solid fa-user me-1"></i>
-                  Profile
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="/profile">
-                  <i class="fa-solid fa-user-group me-1"></i>
-                  friends
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="/ranking">
-                  <i class="fa-solid fa-ranking-star me-1"></i>
-                  Leader Board
-                </a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="settings">
-                  <i class="fa-solid fa-gear me-1"></i>
-                  settings
-                </a>
-              </li>
-              <li>
-                <hr class="dropdown-divider">
-              </li>
-              <li>
-                <a class="dropdown-item" href="#">
-                  <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
-                  Exit
-                </a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-        <!-- Right elements -->
-      </div>
-    </nav>
-  </template>
-
-  <template id="aside-nav">
-    <aside id="sidebar" class="sidebar-toggle">
-      <div class="sidebar-logo mb-4">
-        <a href="/home" data-link>
-          <img src="/static/asset/images/transistor-ping-pong.gif" width="60" alt="pong3D home">
-        </a>
-      </div>
-      <ul class="sidebar-nav p-0 font-monospace" aria-labelledby="navbarDropdown">
-        <li>
-          <a class="sidebar-link" href="/home" id="home" data-link>
-            <i class="fa-solid fa-house me-1"></i>
-            Home
-          </a>
-        </li>
-        <li class="sidebar-item">
-          <a class="sidebar-link" href="/profile" id="profile" data-link>
-            <i class="fa-solid fa-user me-1"></i>
-            Profile
-          </a>
-        </li>
-        <li>
-          <a class="sidebar-link" href="/ranking" id="ranking" data-link>
-            <i class="fa-solid fa-ranking-star me-1"></i>
-            Leaderboard
-          </a>
-        </li>
-        <li>
-          <a class="sidebar-link" href="/chat" id="chat" data-link>
-            <i class="fa-regular fa-comment-dots me-1"></i>
-            Chat
-          </a>
-        </li>
-      </ul>
-      <div class="sidebar-footer font-monospace">
-        <a class="sidebar-link" href="/settings" id="settings" data-link>
-          <i class="fa-solid fa-gear me-1"></i>
-          Settings
-        </a>
-        <search-bar class=" d-lg-none mb-1"></search-bar>
-        <a class="sidebar-link border-top" href="#" id="logout">
-          <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
-          Exit
-        </a>
-      </div>
-    </aside>
-  </template>
 
   <template id="search-bar">
     <form class="input-group" id="search">

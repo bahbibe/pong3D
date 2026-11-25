@@ -12,19 +12,6 @@ class HomePage extends AbstractPage {
   }
 }
 
-class User extends AbstractPage {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    const template = document.getElementById("user-info");
-    const clone = template.content.cloneNode(true);
-    this.appendChild(clone);
-  }
-}
-
 window.customElements.define("home-page", HomePage);
-window.customElements.define("user-info", User);
 
 export { HomePage };

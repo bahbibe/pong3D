@@ -28,10 +28,6 @@ export const showToast = (isError, message, errors) => {
   }
   errorsEl.classList.add("show");
   errorsEl.classList.remove("hide");
-  // setTimeout(() => {
-  //   errorsEl.classList.remove("show");
-  //   errorsEl.classList.add("hide");
-  // }, 5000);
 };
 
 export const showOverlay = () => {
@@ -49,7 +45,6 @@ export const renderNotifications = () => {
   const notificationWrapper = document.getElementById("notification-wrapper");
   const notificationsEl = notificationWrapper.querySelector(".notification-ui_dd-content");
   const notificationCounter = notificationWrapper.querySelector("[data-count]");
-  // notificationCounter.textContent = notifications.filter((notification) => !notification.is_read).length;
   notificationCounter.textContent = notifications.length;
   notificationWrapper.querySelector("#notification-btn").classList.remove("disabled");
   if (notifications.length === 0) {

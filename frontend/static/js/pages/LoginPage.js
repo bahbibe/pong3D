@@ -1,6 +1,5 @@
 import { hideToast, showOverlay, hideOverlay, showToast } from "../helpers.js";
 import { navigateTo } from "../router.js";
-// import { FriendsStatus } from "../ws/FriendsStatus.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
 import { BASE_URL } from "../router.js";

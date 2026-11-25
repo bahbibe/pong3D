@@ -237,7 +237,6 @@ class mainNav extends AbstractPage {
     navUsername.textContent = `${user.username}`;
     navUserImg.src = `${user.profile.avatar}`;
 
-    // this.RequestFriends();
     this.notificationBtn = this.querySelector("#notification-btn");
     this.notificationBtn.addEventListener("click", () => {
       this.notification.innerHTML = `<p class="text-center my-2">No new notifications</p>`;
@@ -248,51 +247,6 @@ class mainNav extends AbstractPage {
     });
     renderNotifications();
     this.logoutBtn.addEventListener("click", this.logout);
-
-    // this.notification.addEventListener("click", (e) => {
-    //   const playButton = e.target.closest("[data-game]");
-    //   if (playButton) {
-    //     const game = playButton.dataset.game;
-    //     navigateTo(`/play/${game}`);
-    //   }
-    // });
-  }
-
-  handleEvent(event) {
-    this[`on${event.type}`](event);
-  }
-
-  // onclick(e) {
-  //   e.preventDefault();
-  //   if (e.target.id === "logout")
-  //     this.logout();
-  // }
-
-  RequestFriends() {
-    fetch(`${BASE_URL}/api/friends/requests/`, {
-      method: "GET",
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const friends = data.data;
-        this.notificationCounter.textContent = friends.length;
-        friends.forEach((element) => {
-          this.notification.innerHTML += `
-          <div class="notification">
-                        <img src="${esc(element.friend.profile.avatar)}" alt="" />
-                        <div class="text">
-                            <p>
-                                <a href="friend/${esc(element.friend.profile.uuid)}"><span class="name">${esc(element.friend.username)}</span> </a> has send a friend request
-                            </p>
-                        </div>
-                    </div>
-          `;
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
   }
 
   async markNotificationsAsRead() {

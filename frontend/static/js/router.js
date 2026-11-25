@@ -1,24 +1,10 @@
-// Pages Import
-import {
-  ChatPage,
-  HomePage,
-  NotFoundPage,
-  LoginPage,
-  ProfilePage,
-  RankingPage,
-  SettingsPage,
-  Home,
-  SearchPage,
-  FriendPage,
-  SetupPage,
-  TwoFaPage,
-  GamePage,
-  MatchmakingPage,
-} from "./pages/index.js";
+// Page modules define their custom elements when imported. Routes render
+// them by tag name (`page`).
+import "./pages/index.js";
 import { FriendsStatus } from "./ws/FriendsStatus.js";
 import { Notifications } from "./ws/NotificationsSockets.js";
-import { TournamentDisplayPage } from "./pages/TournamentDisplayPage.js";
-import { ScorePage } from "./pages/ScorePage.js";
+import "./pages/TournamentDisplayPage.js";
+import "./pages/ScorePage.js";
 
 // The app is served by nginx on the same origin as the API and WebSockets
 // (https://localhost:1337). Relative URLs keep requests on that origin, so
@@ -39,87 +25,74 @@ const getParams = (match) => {
 const routes = [
   {
     path: "/404",
-    view: NotFoundPage,
     isProtected: false,
     page: "not-found-page",
   },
-  { path: "/", view: HomePage, isProtected: false, page: "home-page" },
-  { path: "/login", view: LoginPage, isProtected: false, page: "login-page" },
-  { path: "/twofa", view: TwoFaPage, isProtected: true, page: "two-fa-page" },
+  { path: "/", isProtected: false, page: "home-page" },
+  { path: "/login", isProtected: false, page: "login-page" },
+  { path: "/twofa", isProtected: true, page: "two-fa-page" },
   {
     path: "/profile",
-    view: ProfilePage,
     isProtected: true,
     page: "user-profile",
   },
   {
     path: "/ranking",
-    view: RankingPage,
     isProtected: true,
     page: "ranking-page",
   },
   {
     path: "/settings",
-    view: SettingsPage,
     isProtected: true,
     page: "settings-page",
   },
-  { path: "/search", view: SearchPage, isProtected: true, page: "search-page" },
-  { path: "/home", view: Home, isProtected: true, page: "user-home" },
-  { path: "/chat", view: ChatPage, isProtected: true, page: "chat-page" },
+  { path: "/search", isProtected: true, page: "search-page" },
+  { path: "/home", isProtected: true, page: "user-home" },
+  { path: "/chat", isProtected: true, page: "chat-page" },
   {
     path: "/friend/:uuid",
-    view: FriendPage,
     isProtected: true,
     page: "friend-page",
   },
-  { path: "/play", view: GamePage, isProtected: true, page: "game-page" },
+  { path: "/play", isProtected: true, page: "game-page" },
   {
     path: "/matchmaking",
-    view: MatchmakingPage,
     isProtected: true,
     page: "matchmaking-page",
   },
   {
     path: "/play/:tournament_id/:game_id",
-    view: GamePage,
     isProtected: true,
     page: "game-page",
   },
   {
     path: "/play/:game_id",
-    view: GamePage,
     isProtected: true,
     page: "game-page",
   },
   {
     path: "/tournament/:tournament_id",
-    view: TournamentDisplayPage,
     isProtected: true,
     page: "tournament-display-page",
   },
   {
     path: "/score/:game_id",
-    view: ScorePage,
     isProtected: true,
     page: "score-page",
   },
   {
     path: "/tournament",
-    view: ScorePage,
     isProtected: true,
     page: "tour-page",
   },
-  { path: "/join", view: ScorePage, isProtected: true, page: "join-page" },
+  { path: "/join", isProtected: true, page: "join-page" },
   {
     path: "/chat/:roomId",
-    view: ChatPage,
     isProtected: true,
     page: "chat-page",
   },
   {
     path: "/setup",
-    view: SetupPage,
     isProtected: true,
     page: "setup-page",
   },

@@ -8,10 +8,6 @@ class ChatPage extends AbstractPage {
   connectedCallback() {
     const template = document.getElementById("chat-page");
     const clone = template.content.cloneNode(true);
-    // const rootElement = clone.firstElementChild;
-    // if (rootElement) {
-    //   rootElement.className = "vh-100 d-flex flex-column";
-    // }
     this.appendChild(clone);
     this.friendslist = document.querySelector(".friends-list");
     this.friendslist.appendChild(new Friends());
