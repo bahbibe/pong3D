@@ -107,7 +107,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             target_user,
             source_user,
             "game_invite",
-            "Tourament game ready",
+            "Tournament game ready",
             game_id=f"{self.tournament_id}/{self.game.id}",
         )
 
@@ -245,11 +245,6 @@ class TournamentConsumer(AsyncWebsocketConsumer):
         self.tournament = Tournament.objects.get(uuid=self.tournament_id)
         tournament.ensure_bracket(self.tournament)
         return TournamentGame.objects.filter(tournament=self.tournament)
-
-    def pairwise(self, iterable):
-        "s -> (s0, s1), (s2, s3), (s4, s5), ..."
-        a = iter(iterable)
-        return zip(a, a, strict=False)  # an odd last item is dropped
 
 
 class GameBotConsumer(AsyncWebsocketConsumer):

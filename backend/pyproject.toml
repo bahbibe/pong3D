@@ -72,7 +72,7 @@ omit = ["*/migrations/*", "*/tests/*", "*/tests.py", "config/test_settings.py"]
 concurrency = ["thread"]
 
 [tool.coverage.report]
-# Was 90% when added. CI fails below this.
-fail_under = 88
+# 96% after the game tests; CI fails below this.
+fail_under = 94
 show_missing = true
 skip_covered = true

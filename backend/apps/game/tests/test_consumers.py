@@ -180,3 +180,99 @@ class TournamentConsumerTests(GameTestCase):
         )
         output = await communicator.receive_output(timeout=2)
         self.assertEqual(output.get("code"), 4004)
+
+
+class TournamentSocketTests(GameTestCase):
+    def setUp(self):
+        super().setUp()
+        from apps.game.models import Tournament
+
+        self.tournament = Tournament.objects.create(owner=self.alice)
+
+    @database_sync_to_async
+    def first_round_players(self):
+        from apps.game.models import TournamentGame
+
+        games = TournamentGame.objects.filter(tournament=self.tournament, t_round=2).select_related(
+            "game"
+        )
+        return sorted(
+            uid for entry in games for uid in (entry.game.player1_id, entry.game.player2_id) if uid
+        )
+
+    async def test_joining_takes_a_seat_and_leaving_frees_it(self):
+        alice = await ws_connect(f"/ws/tournament/{self.tournament.uuid}", self.alice)
+        self.assertEqual(json.loads(await alice.receive_from(timeout=2))["type"], "update")
+        self.assertEqual(await self.first_round_players(), [self.alice.id])
+        bob = await ws_connect(f"/ws/tournament/{self.tournament.uuid}", self.bob)
+        # Alice hears that the bracket changed.
+        self.assertEqual(json.loads(await alice.receive_from(timeout=2))["type"], "update")
+        self.assertEqual(await self.first_round_players(), sorted([self.alice.id, self.bob.id]))
+        await bob.disconnect()
+        self.assertEqual(json.loads(await alice.receive_from(timeout=2))["type"], "update")
+        await alice.disconnect()
+
+    async def test_round_counts_wins(self):
+        from apps.game.consumers import TournamentConsumer
+
+        consumer = TournamentConsumer()
+        consumer.user = self.alice
+        consumer.tournament = self.tournament
+        await database_sync_to_async(self._won_first_round)()
+        self.assertEqual(await consumer.get_player_round(), 1)
+
+    def _won_first_round(self):
+        from apps.game.models import TournamentGame
+
+        game = Game.objects.create(
+            player1=self.alice, player2=self.bob, player1_score=3, status=Game.FINISHED
+        )
+        TournamentGame.objects.create(tournament=self.tournament, game=game, t_round=2)
+
+
+class GameEndTests(GameTestCase):
+    async def test_tournament_game_invites_the_opponent(self):
+        from apps.game.models import Tournament, TournamentGame
+        from apps.notifications.models import Notification
+
+        def setup():
+            tournament = Tournament.objects.create(owner=self.alice)
+            TournamentGame.objects.create(tournament=tournament, game=self.game, t_round=2)
+            return tournament
+
+        tournament = await database_sync_to_async(setup)()
+        alice = await ws_connect(f"/ws/game/{tournament.uuid}/{self.game.id}", self.alice)
+        await receive_until(alice, "game_update_message")
+        invite = await database_sync_to_async(
+            Notification.objects.filter(user=self.bob, sender=self.alice).first
+        )()
+        self.assertIsNotNone(invite)
+        self.assertEqual(invite.message, "Tournament game ready")
+        await alice.disconnect()
+
+    async def test_game_end_message_drops_the_loop(self):
+        alice = await ws_connect(self.path, self.alice)
+        instance = await wait_for_instance(self.game.id)
+        await game_manager.channel_layer.group_send(
+            str(self.game.id), {"type": "send_game_end", "game_id": str(self.game.id)}
+        )
+        self.assertEqual(await receive_until(alice, "game over"), {"type": "game over"})
+        await wait_for(instance.game_loop_task.done)
+        self.assertNotIn(str(self.game.id), game_manager.game_instances)
+        await alice.disconnect()
+
+    async def test_bot_game_end_stops_the_bot(self):
+        alice = await ws_connect("/ws/game/bot", self.alice)
+        instance = bot_manager.bot_instances[str(self.alice.id)]
+        await bot_manager.channel_layer.group_send(
+            instance.group_name, {"type": "send_game_end", "game_id": instance.group_name}
+        )
+        await receive_until(alice, "game over")
+        await wait_for(instance.game_loop_task.done)
+        self.assertEqual(bot_manager.bot_instances, {})
+        await alice.disconnect()
+
+
+async def wait_for_instance(game_id):
+    await wait_for(lambda: str(game_id) in game_manager.game_instances)
+    return game_manager.game_instances[str(game_id)]

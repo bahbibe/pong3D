@@ -44,6 +44,51 @@ def clamp_paddle(value):
     return max(-PADDLE_LIMIT, min(PADDLE_LIMIT, value))
 
 
+# Board: x from -3.5 to 3.5 (side walls), y from -5 to 5 (behind the paddles).
+BOARD_HALF_WIDTH = 3.5
+BOARD_HALF_LENGTH = 5
+BALL_RADIUS = 0.125
+# Paddles: player1 at y = 4.5, player2 at y = -4.5.
+PADDLE_Y = 4.5
+PADDLE_HALF_WIDTH = 0.5
+PADDLE_HALF_DEPTH = 0.1
+
+
+def _over_paddle(ball_x, paddle_x):
+    return (
+        ball_x - BALL_RADIUS < paddle_x + PADDLE_HALF_WIDTH
+        and ball_x + BALL_RADIUS > paddle_x - PADDLE_HALF_WIDTH
+    )
+
+
+def _at_paddle_depth(ball_y, paddle_y):
+    reach = PADDLE_HALF_DEPTH + BALL_RADIUS
+    return paddle_y - reach < ball_y < paddle_y + reach
+
+
+def step_ball(game_state, velocity, speed):
+    """Move the ball one tick. Side walls bounce it and paddles send it
+    back (`velocity` is changed in place). Returns who scored, "player1"
+    or "player2", or None."""
+    ball = game_state["ball_position"]
+    ball[0] += velocity[0] * speed
+    ball[1] += velocity[1] * speed
+
+    if abs(ball[0]) > BOARD_HALF_WIDTH - BALL_RADIUS:
+        velocity[0] *= -1
+
+    if ball[1] > BOARD_HALF_LENGTH - BALL_RADIUS:
+        return "player2"  # past player1
+    if ball[1] < -BOARD_HALF_LENGTH + BALL_RADIUS:
+        return "player1"  # past player2
+
+    if _at_paddle_depth(ball[1], PADDLE_Y) and _over_paddle(ball[0], game_state["player1"]):
+        velocity[1] = -1
+    if _at_paddle_depth(ball[1], -PADDLE_Y) and _over_paddle(ball[0], game_state["player2"]):
+        velocity[1] = 1
+    return None
+
+
 class GameInstance:
     def __init__(self, game, channel_layer, on_finish=None):
         self.game_id = str(game.id)
@@ -56,7 +101,6 @@ class GameInstance:
         }
         self.vel = [random.choice([-1, 1]), random.choice([-1, 1])]
         self.speed = BALL_SPEED
-        self.limit = [3.5, 5]
         self.channel_layer = channel_layer
         self.on_finish = on_finish
         self.running = True
@@ -186,56 +230,16 @@ class GameInstance:
 
     def update_ball_position(self):
         """Advance the ball one tick. Return True when a point was scored."""
-        scored = False
         self.speed += BALL_SPEED_ACCELERATION
-        self.player_padding = [0.5, 0.1]
-        self.ball_padding = 0.125
-        self.game_state["ball_position"][0] += self.vel[0] * self.speed
-        self.game_state["ball_position"][1] += self.vel[1] * self.speed
-
-        if self.game_state["ball_position"][0] > self.limit[0] - self.ball_padding:
-            self.vel[0] *= -1
-        if self.game_state["ball_position"][0] < -self.limit[0] + self.ball_padding:
-            self.vel[0] *= -1
-
-        if self.game_state["ball_position"][1] > self.limit[1] - self.ball_padding:  # player 1 lost
-            self.game.player2_score += 1
-            self.reset_game()
-            scored = True
-
-        if (
-            self.game_state["ball_position"][1] < -self.limit[1] + self.ball_padding
-        ):  # player 2 lost
+        scorer = step_ball(self.game_state, self.vel, self.speed)
+        if scorer is None:
+            return False
+        if scorer == "player1":
             self.game.player1_score += 1
-            self.reset_game()
-            scored = True
-
-        if (
-            self.game_state["ball_position"][1] > 4.5 - self.player_padding[1] - self.ball_padding
-            and self.game_state["ball_position"][1]
-            < 4.5 + self.player_padding[1] + self.ball_padding
-        ):
-            if (
-                self.game_state["ball_position"][0] - self.ball_padding
-                < self.game_state["player1"] + self.player_padding[0]
-                and self.game_state["ball_position"][0] + self.ball_padding
-                > self.game_state["player1"] - self.player_padding[0]
-            ):
-                self.vel[1] = -1
-
-        if (
-            self.game_state["ball_position"][1] < -4.5 + self.player_padding[1] + self.ball_padding
-            and self.game_state["ball_position"][1]
-            > -4.5 - self.player_padding[1] - self.ball_padding
-        ):
-            if (
-                self.game_state["ball_position"][0] - self.ball_padding
-                < self.game_state["player2"] + self.player_padding[0]
-                and self.game_state["ball_position"][0] + self.ball_padding
-                > self.game_state["player2"] - self.player_padding[0]
-            ):
-                self.vel[1] = 1
-        return scored
+        else:
+            self.game.player2_score += 1
+        self.reset_game()
+        return True
 
     def reset_game(self):
         self.game_state["ball_position"][0] = 0
@@ -305,7 +309,6 @@ class BotInstance:
             "speed": BALL_SPEED,  # initial ball speed
             "score": [0, 0],
         }
-        self.limit = [3.5, 5]  # board limit -3.5, 3.5 width -5, 5 lenght
         self.channel_layer = channel_layer
         self.on_finish = on_finish
         self.running = True
@@ -399,58 +402,20 @@ class BotInstance:
         )
 
     def update_ball_position(self):
+        """Advance the ball one tick; the AI gets better when it concedes."""
         self.game_state["speed"] += BALL_SPEED_ACCELERATION
-        self.player_padding = [0.5, 0.1]
-        self.ball_padding = 0.125
-        self.game_state["ball_position"][0] += (
-            self.game_state["ball_velocity"][0] * self.game_state["speed"]
+        scorer = step_ball(
+            self.game_state, self.game_state["ball_velocity"], self.game_state["speed"]
         )
-        self.game_state["ball_position"][1] += (
-            self.game_state["ball_velocity"][1] * self.game_state["speed"]
-        )
-
-        if self.game_state["ball_position"][0] > self.limit[0] - self.ball_padding:
-            self.game_state["ball_velocity"][0] *= -1
-        if self.game_state["ball_position"][0] < -self.limit[0] + self.ball_padding:
-            self.game_state["ball_velocity"][0] *= -1
-
-        if self.game_state["ball_position"][1] > self.limit[1] - self.ball_padding:  # player 1 lost
-            self.game.player2_score += 1  # add point to player 2
-            self.ai.adjust_difficulty(False)
-            self.reset_game()
-
-        if (
-            self.game_state["ball_position"][1] < -self.limit[1] + self.ball_padding
-        ):  # player 2 lost
-            self.game.player1_score += 1  # add point to player 1
+        if scorer is None:
+            return
+        if scorer == "player1":
+            self.game.player1_score += 1
             self.ai.adjust_difficulty(True)
-            self.reset_game()
-
-        if (
-            self.game_state["ball_position"][1] > 4.5 - self.player_padding[1] - self.ball_padding
-            and self.game_state["ball_position"][1]
-            < 4.5 + self.player_padding[1] + self.ball_padding
-        ):
-            if (
-                self.game_state["ball_position"][0] - self.ball_padding
-                < self.game_state["player1"] + self.player_padding[0]
-                and self.game_state["ball_position"][0] + self.ball_padding
-                > self.game_state["player1"] - self.player_padding[0]
-            ):
-                self.game_state["ball_velocity"][1] = -1
-
-        if (
-            self.game_state["ball_position"][1] < -4.5 + self.player_padding[1] + self.ball_padding
-            and self.game_state["ball_position"][1]
-            > -4.5 - self.player_padding[1] - self.ball_padding
-        ):
-            if (
-                self.game_state["ball_position"][0] - self.ball_padding
-                < self.game_state["player2"] + self.player_padding[0]
-                and self.game_state["ball_position"][0] + self.ball_padding
-                > self.game_state["player2"] - self.player_padding[0]
-            ):
-                self.game_state["ball_velocity"][1] = 1
+        else:
+            self.game.player2_score += 1
+            self.ai.adjust_difficulty(False)
+        self.reset_game()
 
     def move_bot_paddle(self):
         self.ai_action = self.ai.move_bot_paddle(self.game_state)
