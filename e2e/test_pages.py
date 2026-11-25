@@ -107,3 +107,21 @@ def test_links_navigate_without_reload(user_page):
     page.go_back()
     page.wait_for_url("**/home")
     page.locator("#app > user-home").wait_for()
+
+
+def test_static_cache_headers():
+    import requests
+
+    def cache_control(path):
+        response = requests.head(BASE + path, verify=False, timeout=10)
+        assert response.status_code == 200, path
+        return response.headers.get("Cache-Control", "")
+
+    # Modules are revalidated on every load, so a deploy never mixes versions.
+    assert cache_control("/static/js/router.js") == "no-cache"
+    assert cache_control("/static/css/index.css") == "no-cache"
+    assert "immutable" in cache_control("/static/vendor/three-0.170.0/build/three.module.min.js")
+    assert "max-age=86400" in cache_control("/static/scene.glb")
+    # The security headers are still there.
+    response = requests.head(BASE + "/static/js/router.js", verify=False, timeout=10)
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
