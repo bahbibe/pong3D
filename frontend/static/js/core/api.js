@@ -50,8 +50,10 @@ export const request = async (method, path, { body, signal, auth = true } = {}) 
     message: payload.message || (response.ok ? "" : FALLBACK),
     errors: payload.errors || {},
   };
-  if (auth && response.status === 401) onAuthProblem("unauthorized");
-  else if (auth && tfaPending) onAuthProblem("tfa");
+  // The handler redirects (login or 2FA page): no toast for these.
+  if (auth && response.status === 401) result.authProblem = "unauthorized";
+  else if (auth && tfaPending) result.authProblem = "tfa";
+  if (result.authProblem) onAuthProblem(result.authProblem);
   return result;
 };
 
@@ -70,7 +72,7 @@ export const api = {
 
 /** Show a failed result in the toast. Returns result.ok. */
 export const toastOnError = (result) => {
-  if (!result.ok && !result.aborted && result.status !== 401) {
+  if (!result.ok && !result.aborted && !result.authProblem) {
     toast.error(result.message || FALLBACK, result.errors);
   }
   return result.ok;

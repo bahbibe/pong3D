@@ -3,15 +3,10 @@ import { markRead } from "./services/notifications.js";
 
 export { hideToast, showToast } from "./core/toast.js";
 
-export const showOverlay = () => {
-  const showOverlay = document.querySelector("#overlay");
-  showOverlay.style.display = "block";
-};
+import { overlay } from "./core/overlay.js";
 
-export const hideOverlay = () => {
-  const showOverlay = document.querySelector("#overlay");
-  setTimeout(() => (showOverlay.style.display = "none"), 100);
-};
+export const showOverlay = () => overlay.show();
+export const hideOverlay = () => overlay.hide();
 
 export const renderNotifications = () => {
   const notifications = window.notifications || [];
