@@ -157,7 +157,8 @@ const getUser = async () => {
       window.path !== "/setup"
     ) {
       navigateTo("/twofa");
-      return true;
+      // navigateTo() renders /twofa itself: the caller must not render too.
+      return "redirected";
     }
     FriendsStatus();
     Notifications();
@@ -186,6 +187,7 @@ const router = async () => {
 
   // check if the route is protected
   let isLoggedIn = await getUser();
+  if (isLoggedIn === "redirected") return;
   if (match.route.isProtected && !isLoggedIn) {
     navigateTo("/login");
     return;
