@@ -1,0 +1,4 @@
+__pycache__/
+.venv/
+# Screenshots and traces of failed tests.
+test-results/

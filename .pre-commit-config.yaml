@@ -1,15 +1,15 @@
 # Install once: uvx pre-commit install
 # Run on everything: uvx pre-commit run --all-files (CI does the same).
-# Ruff reads its settings from backend/pyproject.toml.
+# Ruff reads its settings from backend/pyproject.toml (e2e/ extends it).
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.17.6
     hooks:
       - id: ruff-check
         args: [--fix]
-        files: ^backend/
+        files: ^(backend|e2e)/
       - id: ruff-format
-        files: ^backend/
+        files: ^(backend|e2e)/
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:

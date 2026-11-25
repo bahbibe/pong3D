@@ -90,6 +90,41 @@ jobs:
       - name: pre-commit
         run: uvx pre-commit@4.7.0 run --all-files --show-diff-on-failure
 
+  e2e:
+    # Browser and websocket tests (e2e/) against the dev stack built from
+    # this commit: pages, auth and 2FA, notifications, chat, games, reconnects.
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d  # v10.4.0 (no moving major tag)
+        with:
+          version: "0.11.32"
+          python-version: "3.12"
+          enable-cache: true
+          cache-dependency-glob: e2e/uv.lock
+      - name: Start the dev stack
+        run: make env && make dev
+      - name: Install the e2e dependencies and Chromium
+        working-directory: e2e
+        run: |
+          uv sync --locked
+          uv run --no-sync playwright install --with-deps chromium
+      - name: Run the e2e tests
+        working-directory: e2e
+        run: uv run --no-sync pytest
+      - name: Stack logs
+        if: failure()
+        run: |
+          mkdir -p e2e/test-results
+          docker compose -f compose.yaml -f compose.dev.yaml logs --no-color > e2e/test-results/compose.log 2>&1 || true
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: e2e-results
+          path: e2e/test-results/
+          retention-days: 7
+
   audit:
     # Known vulnerabilities in the locked runtime dependencies.
     runs-on: ubuntu-latest
@@ -127,9 +162,9 @@ jobs:
 
   build:
     # Images for the server, tagged with the commit sha (and "main"). Only
-    # for pushes to main, after the tests, the lint, the deploy checks and the audit passed.
+    # for pushes to main, after the tests, the lint, the e2e tests, the deploy checks and the audit passed.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [test, lint, deploy-check, audit]
+    needs: [test, lint, e2e, deploy-check, audit]
     runs-on: ubuntu-latest
     permissions:
       contents: read

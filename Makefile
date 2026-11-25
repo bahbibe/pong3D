@@ -10,14 +10,16 @@ TEST_COMPOSE := docker compose -f compose.test.yaml
 TOOLS := prometheus grafana $(if $(filter dev,$(ENV)),adminer)
 # uv in a container (same version as the Dockerfile and CI): no local
 # Python or uv needed for `make lock`.
-UV := docker run --rm -u "$$(id -u):$$(id -g)" -v "$(CURDIR)/backend:/project" -w /project \
+# LOCK_DIR=e2e locks the e2e tests instead of the backend.
+LOCK_DIR ?= backend
+UV := docker run --rm -u "$$(id -u):$$(id -g)" -v "$(CURDIR)/$(LOCK_DIR):/project" -w /project \
 	-e UV_CACHE_DIR=/tmp/uv-cache ghcr.io/astral-sh/uv:0.11.32-python3.12-alpine uv
 
 .DEFAULT_GOAL := help
-.PHONY: help env dev prod up down restart logs ps migrate test lock tools tools-down cert backup restore deploy provision provision-check vault-new vault-edit
+.PHONY: help env dev prod up down restart logs ps migrate test e2e lock tools tools-down cert backup restore deploy provision provision-check vault-new vault-edit
 
 help: ## List the targets
-	@awk 'BEGIN {FS = ":.*## "} /^[a-z-]+:.*## / {printf "  make %-16s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
+	@awk 'BEGIN {FS = ":.*## "} /^[a-z0-9-]+:.*## / {printf "  make %-16s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 env: ## Create .env and env/$(ENV)/*.env (prod: DOMAIN=... ACME_EMAIL=...)
 	@ENV=$(ENV) DOMAIN="$(DOMAIN)" ACME_EMAIL="$(ACME_EMAIL)" sh infra/scripts/gen-env.sh
@@ -61,7 +63,12 @@ test: ## Run the backend tests against a throwaway Postgres
 		$(TEST_COMPOSE) down -v --remove-orphans >/dev/null 2>&1; \
 		exit $$status
 
-lock: ## Update backend/uv.lock after editing pyproject.toml (one package: ARGS="--upgrade-package django")
+e2e: ## Browser and websocket tests against the running stack (make dev first; needs uv)
+	@command -v uv >/dev/null || { echo "make e2e needs uv on this machine: https://docs.astral.sh/uv/" >&2; exit 2; }
+	cd e2e && uv sync --frozen && uv run --no-sync playwright install chromium && \
+		E2E_COMPOSE="$(COMPOSE)" uv run --no-sync pytest $(ARGS)
+
+lock: ## Update backend/uv.lock after editing pyproject.toml (LOCK_DIR=e2e: the e2e lock; one package: ARGS="--upgrade-package django")
 	$(UV) lock $(ARGS)
 
 cert: ## Prod: get the Let's Encrypt certificate for DOMAIN (STAGING=1: dry run, saves nothing)

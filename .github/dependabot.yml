@@ -19,6 +19,16 @@ updates:
       python:
         update-types: [minor, patch]
 
+  - package-ecosystem: uv
+    directory: /e2e
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      e2e:
+        update-types: [minor, patch]
+
   - package-ecosystem: docker
     directories: [/backend, /infra/nginx]
     schedule:

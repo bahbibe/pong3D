@@ -35,7 +35,8 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
 | `make ps` | List the containers and their health |
 | `make migrate` | Apply migrations now (they also run on every `make dev`/`make prod`) |
 | `make test` | Backend tests against a throwaway Postgres, cleaned up afterwards |
-| `make lock [ARGS=...]` | Update `backend/uv.lock` after changing `backend/pyproject.toml` |
+| `make e2e [ARGS=...]` | Browser and websocket tests against the running stack (needs uv) |
+| `make lock [ARGS=...]` | Update `backend/uv.lock` after changing `backend/pyproject.toml` (`LOCK_DIR=e2e`: `e2e/uv.lock`) |
 | `make env` | Create the env files (prod: `ENV=prod DOMAIN=... ACME_EMAIL=...`) |
 | `make cert` | Prod: get the Let's Encrypt certificate (`STAGING=1`: dry run, saves nothing) |
 | `make backup` | Dump the database and the avatars to `backups/` (keeps 7) |
@@ -59,6 +60,7 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
     The app labels are the old ones (`accounts` is still `api` in the database and migrations).
   - `core/`: shared helpers (JSON responses, Redis URL).
   - `media/avatars/`: uploaded avatars (a named volume in prod). Only the default one is in git.
+- `e2e/`: browser (Playwright) and websocket tests, run against a running stack.
 - `docs/`: server setup (`bootstrap-vps.md`), the subject's module checklist, a Postman collection of the API.
 - `frontend/`: `index.html` and `static/` (served by nginx; three.js is vendored in `static/vendor`).
 - `infra/nginx/`: nginx image and config (`common.conf` is shared by `dev.conf` and `prod.conf.template`).
@@ -194,6 +196,26 @@ DJANGO_SETTINGS_MODULE=config.test_settings uv run python manage.py test
 Coverage, as in CI: `uv sync --group test`, then
 `DJANGO_SETTINGS_MODULE=config.test_settings uv run coverage run manage.py test`
 and `uv run coverage report` (fails below `fail_under` in `pyproject.toml`).
+
+## E2E tests
+
+`e2e/` drives the real stack: every page in Chromium, register/login/setup,
+settings and avatar upload, 2FA, notifications and presence, chat between two
+browsers, matchmaking and games, socket reconnects after a backend restart.
+
+```bash
+make dev
+make e2e                          # all of them (installs Chromium the first time)
+make e2e ARGS="-k chat -x"        # pytest arguments
+make e2e ARGS="--headed --slowmo 300"   # watch it
+```
+
+It needs uv on your machine. The tests create throwaway accounts in the dev
+database, read 2FA secrets from it and restart the backend once (through
+`docker compose`). Another stack: `E2E_BASE_URL=https://localhost:8443 make e2e ENV=prod`.
+Failed tests leave screenshots and traces in `e2e/test-results/`
+(`uv run playwright show-trace <file>`). CI runs them against the dev stack
+before building images.
 
 ## Lint
 
