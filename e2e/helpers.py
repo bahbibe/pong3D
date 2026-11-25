@@ -172,10 +172,16 @@ class Sockets:
         page.on("websocket", lambda ws: self.all.append(ws))
 
     def open(self, path):
-        return [ws for ws in self.all if ws.url.endswith(path) and not ws.is_closed()]
+        return [ws for ws in self.opened(path) if not ws.is_closed()]
 
     def opened(self, path):
-        return [ws for ws in self.all if ws.url.endswith(path)]
+        """Sockets whose URL path starts with `path` ("/ws/chat/" matches
+        every conversation)."""
+        return [ws for ws in self.all if self._route(ws.url).startswith(path)]
+
+    @staticmethod
+    def _route(url):
+        return "/" + url.split("://", 1)[1].split("/", 1)[1]
 
 
 def wait_until(check, timeout=30, interval=0.2, message="condition", page=None):

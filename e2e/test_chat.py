@@ -2,13 +2,25 @@
 
 import secrets
 
-from helpers import befriend, new_context, register, wait_until
+from helpers import Sockets, befriend, new_context, register, wait_until
 
 
-def open_chat_with(page, friend):
+def open_chat_with(page, friend, sockets):
+    """Open the conversation and wait until its socket is connected (the
+    message box shows before that)."""
+    before = len(sockets.opened("/ws/chat/"))
     page.goto("/chat", wait_until="networkidle")
     page.locator("friends-list .contact", has_text=friend.username).click()
     page.locator("chat-box .msg-box").wait_for()
+    wait_until(
+        lambda: (
+            len(sockets.opened("/ws/chat/")) > before
+            and any(not ws.is_closed() for ws in sockets.all if "/ws/chat/" in ws.url)
+        ),
+        timeout=10,
+        message="chat socket open",
+        page=page,
+    )
 
 
 def test_message_goes_both_ways(browser, errors):
@@ -16,8 +28,9 @@ def test_message_goes_both_ways(browser, errors):
     befriend(a, b)
     ctx_a, ctx_b = new_context(browser, a), new_context(browser, b)
     page_a, page_b = errors.watch(ctx_a.new_page()), errors.watch(ctx_b.new_page())
-    open_chat_with(page_a, b)
-    open_chat_with(page_b, a)
+    sockets_a, sockets_b = Sockets(page_a), Sockets(page_b)
+    open_chat_with(page_a, b, sockets_a)
+    open_chat_with(page_b, a, sockets_b)
 
     text = "hello " + secrets.token_hex(3)
     page_a.fill("chat-box .send-input", text)
@@ -34,7 +47,7 @@ def test_message_goes_both_ways(browser, errors):
     assert received.locator("b").count() == 0
 
     # History is loaded when the chat opens again.
-    open_chat_with(page_a, b)
+    open_chat_with(page_a, b, sockets_a)
     wait_until(
         lambda: page_a.locator("chat-box .msg-box", has_text=reply).count() == 1,
         timeout=5,
