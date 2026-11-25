@@ -24,8 +24,6 @@ class Profile(models.Model):
     # One account per intra user (login looks accounts up by intra_id).
     intra_id = models.IntegerField(null=True, blank=True, unique=True)
     is_setup = models.BooleanField(default=False)
-    total_wins = models.IntegerField(default=0)
-    total_losses = models.IntegerField(default=0)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     is_tfa_enabled = models.BooleanField(default=False)
     tfa_secret = models.CharField(max_length=255, null=True, blank=True)

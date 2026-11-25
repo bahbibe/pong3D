@@ -9,7 +9,7 @@ same moment cannot overwrite each other.
 from django.db import transaction
 from django.db.models import Q
 
-from .models import Game, Tournament, Tournament_Game
+from .models import Game, Tournament, TournamentGame
 
 FIRST_ROUND = 2
 FINAL = 1
@@ -20,11 +20,11 @@ def ensure_bracket(tournament):
     with transaction.atomic():
         # Lock the tournament row: the second caller waits, then sees the games.
         Tournament.objects.select_for_update().get(pk=tournament.pk)
-        if Tournament_Game.objects.filter(tournament=tournament).exists():
+        if TournamentGame.objects.filter(tournament=tournament).exists():
             return
         for t_round, count in ((FINAL, 1), (FIRST_ROUND, 2)):
             for _ in range(count):
-                Tournament_Game.objects.create(
+                TournamentGame.objects.create(
                     tournament=tournament, game=Game.objects.create(), t_round=t_round
                 )
 
@@ -38,7 +38,7 @@ def take_seat(tournament, user, t_round):
     with transaction.atomic():
         games = list(
             Game.objects.select_for_update()
-            .filter(tournament_game__tournament=tournament, tournament_game__t_round=t_round)
+            .filter(tournament_games__tournament=tournament, tournament_games__t_round=t_round)
             .order_by("id")
         )
         if any(user.id in (g.player1_id, g.player2_id) for g in games):
@@ -58,7 +58,7 @@ def leave_seat(tournament, user, t_round):
     """Free the seat of a player who leaves before an opponent arrived."""
     with transaction.atomic():
         entry = (
-            Tournament_Game.objects.select_related("game")
+            TournamentGame.objects.select_related("game")
             .filter(player_filter(user), tournament=tournament, t_round=t_round)
             .first()
         )
@@ -82,7 +82,7 @@ def advance_winner(game):
     tournament finished after the final. Runs once, server side, so it no
     longer depends on the winner's browser still being connected.
     """
-    entry = Tournament_Game.objects.filter(game=game).select_related("tournament").first()
+    entry = TournamentGame.objects.filter(game=game).select_related("tournament").first()
     if entry is None or game.winner_id is None:
         return
     with transaction.atomic():
@@ -90,11 +90,11 @@ def advance_winner(game):
             Tournament.objects.filter(pk=entry.tournament_id).update(finished=True)
             return
         first_round = list(
-            Tournament_Game.objects.filter(
+            TournamentGame.objects.filter(
                 tournament_id=entry.tournament_id, t_round=FIRST_ROUND
             ).order_by("id")
         )
-        final_entry = Tournament_Game.objects.filter(
+        final_entry = TournamentGame.objects.filter(
             tournament_id=entry.tournament_id, t_round=FINAL
         ).first()
         if final_entry is None or entry not in first_round:

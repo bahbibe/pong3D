@@ -68,34 +68,22 @@ class Tournament(models.Model):
         return f"Tournament {self.uuid}"
 
 
-class Tournament_Participants(models.Model):
-    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
-    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    t_round = models.IntegerField(default=3)  # round decrement with each win
-    ready = models.BooleanField(default=False)
-
-    class Meta:
-        unique_together = (
-            "tournament",
-            "player",
-        )
-
-    def __str__(self):
-        return f"Player {self.player_id} in tournament {self.tournament_id}"
-
-
-class Tournament_Game(models.Model):
-    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
-    game = models.ForeignKey(Game, on_delete=models.CASCADE, blank=True, null=True)
+class TournamentGame(models.Model):
+    tournament = models.ForeignKey(
+        Tournament, on_delete=models.CASCADE, related_name="tournament_games"
+    )
+    game = models.ForeignKey(
+        Game, on_delete=models.CASCADE, blank=True, null=True, related_name="tournament_games"
+    )
     t_round = models.IntegerField(default=2)
 
     class Meta:
-        unique_together = (
-            (
-                "tournament",
-                "game",
-            ),
-        )
+        # Renamed from Tournament_Game: the table keeps its name, so the
+        # previous release still works against it (rollback).
+        db_table = "game_tournament_game"
+        constraints = [
+            models.UniqueConstraint(fields=["tournament", "game"], name="tournament_game_unique"),
+        ]
 
     def __str__(self):
         return f"Game {self.game_id} of tournament {self.tournament_id} (round {self.t_round})"

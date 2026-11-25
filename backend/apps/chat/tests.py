@@ -83,6 +83,8 @@ class ChatConsumerTests(ChatTestCase):
 
         message = await database_sync_to_async(Message.objects.get)()
         self.assertEqual(message.author_id, self.alice.id)
+        # Both: the foreign key, and the text the previous release reads.
+        self.assertEqual(message.friendship_id, self.friendship.id)
         self.assertEqual(message.conversation, self.room)
 
         await alice.disconnect()
@@ -179,6 +181,50 @@ class ChatTwoFactorTests(ChatTestCase):
         alice = await self.connect(token=token_for(self.alice, is_tfa_verified=True))
         self.assertTrue(await alice.receive_nothing(timeout=0.3))
         await alice.disconnect()
+
+
+class ChatHistoryMixedRowsTests(ChatTestCase):
+    """History has rows of both shapes: with the friendship (this release)
+    and with only the uuid as text (written by the previous one)."""
+
+    def test_both_shapes_are_listed_and_others_are_not(self):
+        Message.objects.create(author=self.alice, content="new", friendship=self.friendship)
+        Message.objects.create(author=self.bob, content="old", conversation=self.room)
+        other = Friendship.objects.create(
+            source_user=self.alice, target_user=self.eve, status=Friendship.ACCEPTED
+        )
+        Message.objects.create(
+            author=self.eve, content="elsewhere", friendship=other, conversation=str(other.uuid)
+        )
+        self.client.cookies["access_token"] = token_for(self.alice)
+        response = self.client.get(f"/api/chat/messages/{self.room}/")
+        contents = sorted(m["content"] for m in response.json()["data"]["messages"])
+        self.assertEqual(contents, ["new", "old"])
+
+
+class MessageFriendshipMigrationTests(TransactionTestCase):
+    def test_existing_messages_get_their_friendship(self):
+        from django.db import connection
+        from django.db.migrations.executor import MigrationExecutor
+
+        before = [("chat", "0009_message_conversation_index"), ("friends", "0002_unique_pair")]
+        executor = MigrationExecutor(connection)
+        after = executor.loader.graph.leaf_nodes()
+        executor.migrate(before)
+        old = executor.loader.project_state(before).apps
+        OldUser = old.get_model("auth", "User")
+        OldFriendship = old.get_model("friends", "Friendship")
+        OldMessage = old.get_model("chat", "Message")
+        a, b = OldUser.objects.create(username="ma"), OldUser.objects.create(username="mb")
+        friendship = OldFriendship.objects.create(source_user=a, target_user=b, status="accepted")
+        known = OldMessage.objects.create(author=a, content="x", conversation=str(friendship.uuid))
+        orphan = OldMessage.objects.create(author=a, content="y", conversation="no-such-friendship")
+
+        executor = MigrationExecutor(connection)
+        executor.migrate(after)
+
+        self.assertEqual(Message.objects.get(id=known.id).friendship_id, friendship.id)
+        self.assertIsNone(Message.objects.get(id=orphan.id).friendship_id)
 
 
 class ChatHistoryViewTests(ChatTestCase):

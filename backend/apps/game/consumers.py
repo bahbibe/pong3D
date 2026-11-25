@@ -15,7 +15,7 @@ from .game_manager import (
     GameManager,
     bot_group_name,
 )
-from .models import Game, Tournament, Tournament_Game
+from .models import Game, Tournament, TournamentGame
 from .serializers import TournamentGameSerializer
 
 logger = logging.getLogger(__name__)
@@ -198,7 +198,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_player_round(self):
         t_round = 2
-        games = Tournament_Game.objects.filter(
+        games = TournamentGame.objects.filter(
             (Q(game__player1=self.user) | Q(game__player2=self.user)), tournament=self.tournament
         )
         for game in games:
@@ -244,7 +244,7 @@ class TournamentConsumer(AsyncWebsocketConsumer):
     def create_tournament_games(self):
         self.tournament = Tournament.objects.get(uuid=self.tournament_id)
         tournament.ensure_bracket(self.tournament)
-        return Tournament_Game.objects.filter(tournament=self.tournament)
+        return TournamentGame.objects.filter(tournament=self.tournament)
 
     def pairwise(self, iterable):
         "s -> (s0, s1), (s2, s3), (s4, s5), ..."

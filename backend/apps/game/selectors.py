@@ -3,7 +3,7 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Count, Q
 
-from .models import Game, Tournament, Tournament_Game
+from .models import Game, Tournament, TournamentGame
 
 
 def finished_games(user):
@@ -131,19 +131,21 @@ def leaderboard_page(page, size, viewer=None):
 def open_tournaments():
     """Unfinished tournaments with .spots: empty player slots in the first
     round (t_round=2), counted in the same query as the list."""
-    first_round = Q(tournament_game__t_round=2)
+    first_round = Q(tournament_games__t_round=2)
     return (
         Tournament.objects.filter(finished=False)
         .select_related("owner__profile")
         .annotate(
             spots=Count(
-                "tournament_game", filter=first_round & Q(tournament_game__game__player1=None)
+                "tournament_games", filter=first_round & Q(tournament_games__game__player1=None)
             )
-            + Count("tournament_game", filter=first_round & Q(tournament_game__game__player2=None))
+            + Count(
+                "tournament_games", filter=first_round & Q(tournament_games__game__player2=None)
+            )
         )
         .order_by("id")
     )
 
 
 def tournament_games(tournament):
-    return Tournament_Game.objects.select_related("game").filter(tournament=tournament)
+    return TournamentGame.objects.select_related("game").filter(tournament=tournament)

@@ -15,11 +15,6 @@ CLOSE_FORBIDDEN = 4003
 
 
 @database_sync_to_async
-def can_chat(user, conversation):
-    return get_chat_friendship(user, conversation) is not None
-
-
-@database_sync_to_async
 def canonical_conversation(user, conversation):
     """Friendship uuid in canonical form, or None if the user may not chat."""
     friendship = get_chat_friendship(user, conversation)
@@ -27,9 +22,20 @@ def canonical_conversation(user, conversation):
 
 
 @database_sync_to_async
-def save_message(conversation, user, content):
+def save_message(user, conversation, content):
+    """Store the message if `user` may still chat in `conversation`, else
+    None: the friendship may have been blocked or removed after the socket
+    was opened."""
+    friendship = get_chat_friendship(user, conversation)
+    if friendship is None:
+        return None
     return Message.objects.create(
-        author=user, content=content, conversation=conversation, timestamp=timezone.now()
+        author=user,
+        content=content,
+        friendship=friendship,
+        # Read by the previous release (rollback); see chat migration 0010.
+        conversation=str(friendship.uuid),
+        timestamp=timezone.now(),
     )
 
 
@@ -80,13 +86,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return
 
         user = self.scope["user"]
-        # Re-check on every message: the friendship may have been blocked
-        # or removed after the socket was opened.
-        if not await can_chat(user, self.room_name):
+        message = await save_message(user, self.room_name, content)
+        if message is None:
             await self.close(code=CLOSE_FORBIDDEN)
             return
-
-        message = await save_message(self.room_name, user, content)
 
         # Never forward client JSON: author and timestamp come from the server.
         await self.channel_layer.group_send(

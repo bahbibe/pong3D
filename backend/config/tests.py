@@ -106,13 +106,12 @@ class ModelStrTests(TestCase):
 
     def test_models_without_relations(self):
         from apps.friends.models import Friendship
-        from apps.game.models import Game, Tournament, Tournament_Game, Tournament_Participants
+        from apps.game.models import Game, Tournament, TournamentGame
         from apps.notifications.models import Notification
 
         self.assertEqual(str(Game()), "Game None: None vs None (pending)")
         self.assertIn("Tournament", str(Tournament()))
-        self.assertIn("round 2", str(Tournament_Game()))
-        self.assertIn("tournament None", str(Tournament_Participants()))
+        self.assertIn("round 2", str(TournamentGame()))
         self.assertEqual(str(Friendship()), "None -> None (pending)")
         self.assertEqual(str(Notification(type="game_invite")), "game_invite for user None")
 

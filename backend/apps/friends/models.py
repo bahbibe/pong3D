@@ -36,7 +36,6 @@ class Friendship(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ["source_user", "target_user"]
         constraints = [
             # One row per pair of users, whatever the direction. Without it,
             # A->B and B->A requests sent at the same time make two rows.

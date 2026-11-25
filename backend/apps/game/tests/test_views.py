@@ -147,12 +147,12 @@ class GameStatusTests(TransactionTestCase):
 
 class DeleteUserTests(TransactionTestCase):
     def test_deleting_a_user_keeps_games_and_tournaments(self):
-        from apps.game.models import Tournament, Tournament_Game
+        from apps.game.models import Tournament, TournamentGame
 
         alice, bob = make_user("alice"), make_user("bob")
         game = Game.objects.create(player1=alice, player2=bob, status=Game.FINISHED, winner=alice)
         tournament = Tournament.objects.create(owner=alice)
-        Tournament_Game.objects.create(tournament=tournament, game=game, t_round=1)
+        TournamentGame.objects.create(tournament=tournament, game=game, t_round=1)
 
         alice.delete()  # used to fail: DO_NOTHING foreign keys
 
@@ -164,7 +164,7 @@ class DeleteUserTests(TransactionTestCase):
         self.assertIsNone(tournament.owner_id)
 
         tournament.delete()
-        self.assertFalse(Tournament_Game.objects.exists())
+        self.assertFalse(TournamentGame.objects.exists())
 
 
 class LeaderboardTests(TransactionTestCase):

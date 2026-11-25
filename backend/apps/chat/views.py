@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.decorators import api_view
 
@@ -18,7 +19,10 @@ def get_messages(request, conversation):
             message="Conversation not found", status_code=status.HTTP_404_NOT_FOUND
         )
 
-    messages = Message.objects.filter(conversation=str(friendship.uuid)).select_related("author")
+    # Rows written by the previous release only have the uuid as text.
+    messages = Message.objects.filter(
+        Q(friendship=friendship) | Q(friendship__isnull=True, conversation=str(friendship.uuid))
+    ).select_related("author")
     serialized_messages = MessageSerializer(messages, many=True).data
     return SuccessResponse(
         data={"messages": serialized_messages},

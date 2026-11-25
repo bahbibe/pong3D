@@ -101,8 +101,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = [
             "avatar",
             "is_setup",
-            "total_wins",
-            "total_losses",
             "uuid",
             "auth_method",
             "is_tfa_enabled",

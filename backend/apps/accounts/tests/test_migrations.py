@@ -53,3 +53,23 @@ class UniqueEmailMigrationTests(TransactionTestCase):
             )
         )
         self.assertEqual(emails, {"d1": "dup@example.com", "d2": "", "d3": "solo@example.com"})
+
+
+class ProfileCountersTests(TransactionTestCase):
+    """total_wins/total_losses left the model; the columns stay one more
+    release with a database default, because the previous release still
+    inserts them."""
+
+    def test_columns_have_a_database_default(self):
+        from django.db import connection
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "select column_name, column_default from information_schema.columns "
+                "where table_name = 'api_profile' and column_name in ('total_wins', 'total_losses')"
+            )
+            self.assertEqual(dict(cursor.fetchall()), {"total_wins": "0", "total_losses": "0"})
+
+    def test_new_profiles_are_created_without_them(self):
+        user = User.objects.create(username="counterless")
+        self.assertTrue(Profile.objects.filter(user=user).exists())

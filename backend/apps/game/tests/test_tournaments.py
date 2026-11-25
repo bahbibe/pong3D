@@ -1,7 +1,7 @@
 from unittest import mock
 
 from channels.db import database_sync_to_async
-from django.test import TransactionTestCase
+from django.test import TestCase, TransactionTestCase
 
 from apps.game import game_manager as gm
 
@@ -16,10 +16,10 @@ class TournamentBracketTests(TransactionTestCase):
         self.tournament = Tournament.objects.create(owner=self.players[0])
 
     def entries(self, t_round):
-        from apps.game.models import Tournament_Game
+        from apps.game.models import TournamentGame
 
         return list(
-            Tournament_Game.objects.filter(tournament=self.tournament, t_round=t_round)
+            TournamentGame.objects.filter(tournament=self.tournament, t_round=t_round)
             .select_related("game")
             .order_by("id")
         )
@@ -32,12 +32,12 @@ class TournamentBracketTests(TransactionTestCase):
         self.assertEqual((len(self.entries(2)), len(self.entries(1))), (2, 1))
 
     def test_create_tournament_view_builds_bracket(self):
-        from apps.game.models import Tournament_Game
+        from apps.game.models import TournamentGame
 
         self.client.cookies["access_token"] = token_for(self.players[1])
         response = self.client.post("/api/game/create_tournament/")
         uuid = response.json()["data"]["data"]["uuid"]
-        self.assertEqual(Tournament_Game.objects.filter(tournament__uuid=uuid).count(), 3)
+        self.assertEqual(TournamentGame.objects.filter(tournament__uuid=uuid).count(), 3)
 
     def test_seats_fill_in_order_and_no_double_seat(self):
         from apps.game.tournament import ensure_bracket, take_seat
@@ -128,3 +128,32 @@ class TournamentListTests(TransactionTestCase):
         with CaptureQueriesContext(connection) as big:
             self.client.get("/api/game/get_tournaments/")
         self.assertEqual(len(big), len(small))
+
+
+class TournamentGameRenameTests(TestCase):
+    """Tournament_Game became TournamentGame without touching its table."""
+
+    def test_table_and_content_type(self):
+        from django.contrib.contenttypes.models import ContentType
+
+        from apps.game.models import TournamentGame
+
+        self.assertEqual(TournamentGame._meta.db_table, "game_tournament_game")
+        self.assertEqual(ContentType.objects.get_for_model(TournamentGame).model, "tournamentgame")
+        self.assertFalse(
+            ContentType.objects.filter(app_label="game", model="tournament_game").exists()
+        )
+
+    def test_content_type_move_handles_both_rows(self):
+        import importlib
+
+        from django.apps import apps as global_apps
+        from django.contrib.contenttypes.models import ContentType
+
+        migration = importlib.import_module("apps.game.migrations.0011_tournament_game_rename")
+        ContentType.objects.get_or_create(app_label="game", model="tournamentgame")
+        ContentType.objects.create(app_label="game", model="tournament_game")
+        migration.rename_content_type(global_apps, None)
+        models = set(ContentType.objects.filter(app_label="game").values_list("model", flat=True))
+        self.assertIn("tournamentgame", models)
+        self.assertNotIn("tournament_game", models)

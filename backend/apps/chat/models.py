@@ -10,7 +10,15 @@ class Message(models.Model):
     author = models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(default=timezone.now)
-    # Friendship uuid. Indexed: chat history is loaded by conversation.
+    friendship = models.ForeignKey(
+        "friends.Friendship",
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="messages",
+    )
+    # Friendship uuid as text: what the previous release reads and writes.
+    # Still written (rollback), read only for rows it wrote. Dropped in a
+    # later release, once friendship is filled everywhere.
     conversation = models.CharField(max_length=128, blank=False, null=True, db_index=True)
 
     class Meta:

@@ -220,6 +220,13 @@ the images CI built. On the server itself, `make deploy SHA=<commit>`,
   An older image run against it re-creates the old content type row;
   `docker compose exec backend python manage.py remove_stale_contenttypes`
   removes it, but it does no harm.
+- **Waiting for the next release** (left in place so a rollback to the
+  previous image keeps working; each migration says what comes next):
+  - `api_profile.total_wins` / `total_losses`: no longer in the model, with
+    a database default of 0 (`apps/accounts/migrations/0020_*`). Drop them.
+  - `chat_message.conversation`: the friendship uuid as text, still written
+    and read for rows without `friendship` (`apps/chat/migrations/0010_*`).
+    Fill `friendship` again, make it non-null, then drop `conversation`.
 - One backend replica: each deploy recreates it, so the site is down for a
   few seconds and running games are dropped. No blue/green on purpose (two
   backends cannot share game state).
