@@ -121,6 +121,8 @@ class GameInstance:
 
     async def broadcast_state(self):
         self.game_state["score"] = [self.game.player1_score, self.game.player2_score]
+        # The client places updates on this clock to blend them smoothly.
+        self.game_state["sent_at"] = time.monotonic()
         await self.channel_layer.group_send(
             self.game_id,
             {"type": "game_update_message", "game_state": self.game_state},
@@ -327,25 +329,13 @@ class BotInstance:
             while self.running:
                 if self.reset_pause:
                     self.reset_pause = False
-                    await self.channel_layer.group_send(
-                        self.group_name,
-                        {
-                            "type": "game_update_message",
-                            "game_state": self.game_state,
-                        },
-                    )
+                    await self.broadcast_state()
                     await asyncio.sleep(1)
                 if (
                     self.game.player1_score >= WINNING_SCORE
                     or self.game.player2_score >= WINNING_SCORE
                 ):
-                    await self.channel_layer.group_send(
-                        self.group_name,
-                        {
-                            "type": "game_update_message",
-                            "game_state": self.game_state,
-                        },
-                    )
+                    await self.broadcast_state()
                     await asyncio.sleep(1)
                     await self.send_game_end_notification()
                     return
@@ -353,14 +343,7 @@ class BotInstance:
                     self.apply_paddle_moves()
                     self.update_ball_position()
                     self.move_bot_paddle()
-                    self.game_state["score"] = [self.game.player1_score, self.game.player2_score]
-                    await self.channel_layer.group_send(
-                        self.group_name,
-                        {
-                            "type": "game_update_message",
-                            "game_state": self.game_state,
-                        },
-                    )
+                    await self.broadcast_state()
                 else:
                     await self.channel_layer.group_send(
                         self.group_name,
@@ -375,6 +358,14 @@ class BotInstance:
             self.running = False
             if self.on_finish is not None:
                 self.on_finish(self)
+
+    async def broadcast_state(self):
+        self.game_state["score"] = [self.game.player1_score, self.game.player2_score]
+        # The client places updates on this clock to blend them smoothly.
+        self.game_state["sent_at"] = time.monotonic()
+        await self.channel_layer.group_send(
+            self.group_name, {"type": "game_update_message", "game_state": self.game_state}
+        )
 
     def stop(self):
         self.running = False

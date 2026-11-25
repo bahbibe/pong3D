@@ -155,6 +155,20 @@ class EndOfGameTests(GameTestCase):
         self.assertEqual(sent[-1], "send_game_end")
         self.assertFalse(instance.running)
 
+    async def test_updates_carry_the_send_time_and_the_score(self):
+        for instance in (
+            gm.GameInstance(self.game, mock.AsyncMock()),
+            gm.BotInstance(self.alice, mock.AsyncMock()),
+        ):
+            instance.stop()
+            instance.game.player1_score, instance.game.player2_score = 4, 7
+            await instance.broadcast_state()
+            first = instance.channel_layer.group_send.call_args.args[1]["game_state"]["sent_at"]
+            await instance.broadcast_state()
+            state = instance.channel_layer.group_send.call_args.args[1]["game_state"]
+            self.assertEqual(state["score"], [4, 7])
+            self.assertGreaterEqual(state["sent_at"], first)
+
     async def test_bot_score_changes_the_ai_skill(self):
         bot = gm.BotInstance(self.alice, mock.AsyncMock())
         bot.stop()

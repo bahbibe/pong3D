@@ -1,10 +1,14 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { html } from "../core/html.js";
+import { createInterpolator } from "../core/interpolation.js";
 import { Page } from "../core/page.js";
 import { navigate } from "../core/router.js";
 
 const SCENE_PATH = "/static/scene.glb";
+// How far in the past positions are drawn: three server ticks (60 per
+// second), enough to always have an update on each side of the frame.
+const INTERPOLATION_DELAY_MS = 50;
 const TEXTURE_KEYS = ["map", "lightMap", "bumpMap", "normalMap", "specularMap", "envMap"];
 
 const loadScene = (scene) =>
@@ -60,6 +64,9 @@ class GamePage extends Page {
     this.lastDirection = "none";
     this.scores = [0, 0];
     this.ready = false;
+    // Positions are drawn a little in the past, blended between updates
+    // (see core/interpolation.js): smooth motion despite network jitter.
+    this.motion = createInterpolator({ delay: INTERPOLATION_DELAY_MS });
 
     const path = tournamentId
       ? `/ws/game/${encodeURIComponent(tournamentId)}/${encodeURIComponent(gameId)}`
@@ -111,6 +118,7 @@ class GamePage extends Page {
     this.camera.lookAt(0, 0, 0);
     const frame = () => {
       this.animationFrame = requestAnimationFrame(frame);
+      this.applyMotion();
       this.renderer.render(this.scene, this.camera);
     };
     frame();
@@ -128,16 +136,33 @@ class GamePage extends Page {
     // Updates sent before the scene is loaded are skipped.
     if (data.type !== "game_update_message" || !this.ready) return;
     const game = data.game_state;
-    this.ball.position.x = game.ball_position[0];
-    this.ball.position.z = game.ball_position[1];
-    this.player1.position.x = game.player1;
-    this.player2.position.x = game.player2;
+    // sent_at: the server's clock in seconds (absent from older servers).
+    const sentAt = typeof game.sent_at === "number" ? game.sent_at * 1000 : undefined;
+    this.motion.push(
+      {
+        ballX: game.ball_position[0],
+        ballZ: game.ball_position[1],
+        player1: game.player1,
+        player2: game.player2,
+      },
+      performance.now(),
+      sentAt,
+    );
     if (game.score[0] !== this.scores[0] || game.score[1] !== this.scores[1]) {
       this.scores = [game.score[0], game.score[1]];
       this.updateScore();
     }
     if (game.side === "player2") this.camera.position.z = this.oppositeSideCameraZ;
     this.camera.lookAt(0, 0, 0);
+  }
+
+  applyMotion() {
+    const state = this.motion.sample();
+    if (!state) return;
+    this.ball.position.x = state.ballX;
+    this.ball.position.z = state.ballZ;
+    this.player1.position.x = state.player1;
+    this.player2.position.x = state.player2;
   }
 
   updateScore() {

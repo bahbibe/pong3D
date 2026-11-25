@@ -119,3 +119,74 @@ def test_api_results(core, errors):
         "message": "Network error, please try again.",
         "errors": {},
     }
+
+
+INTERPOLATION_JS = """async () => {
+    const { createInterpolator } = await import('/static/js/core/interpolation.js');
+    const at = (delay = 50) => createInterpolator({ delay, maxExtrapolation: 100, snapDistance: 1 });
+    const out = {};
+
+    let m = at();
+    out.empty = m.sample(1000);
+    m.push({ x: 0 }, 1000);
+    out.single = m.sample(2000);
+
+    // Between two updates: blended at render time = now - delay.
+    m = at();
+    m.push({ x: 0 }, 1000);
+    m.push({ x: 0.5 }, 1020);
+    out.before = m.sample(1040).x;      // render time 990: oldest, not enough history
+    out.middle = m.sample(1060).x;      // render time 1010: halfway
+    out.atNewer = m.sample(1070).x;     // render time 1020: the newer one
+
+    // Past the newest update: continues the motion, at most 100 ms.
+    out.extrapolated = m.sample(1080).x;   // 10 ms ahead at 0.025/ms
+    out.capped = m.sample(5000).x;         // capped at 100 ms ahead
+
+    // A jump bigger than snapDistance does not glide.
+    m = at();
+    m.push({ x: 4.9 }, 1000);
+    m.push({ x: 0 }, 1020);
+    out.snapped = m.sample(1060).x;
+    out.snappedAhead = m.sample(1200).x;
+
+    // Every value is blended on its own.
+    m = at();
+    m.push({ a: 0, b: 10 }, 1000);
+    m.push({ a: 1, b: 10.5 }, 1100);
+    out.fields = m.sample(1100);       // render time 1050
+
+    // With sending times, jittered arrivals land on the sender's clock:
+    // sent every 20 ms, arrived 100-130 ms later. The offset is the fastest
+    // delivery (100 ms), so at 200 the render time is 50 on the sender's clock.
+    m = at();
+    const sent = [0, 20, 40, 60, 80];
+    const arrived = [100, 135, 141, 170, 185];
+    sent.forEach((t, k) => m.push({ x: k * 0.1 }, arrived[k], t));
+    out.senderClock = m.sample(200).x;
+    m.push({ x: 9 }, 190, 30);  // older than the newest: ignored
+    out.ignoredSize = m.size;
+
+    // Old snapshots are dropped.
+    m = createInterpolator({ keep: 1000 });
+    for (let t = 0; t <= 10000; t += 16) m.push({ x: t }, t);
+    out.size = m.size;
+    return out;
+}"""
+
+
+def test_interpolation(core):
+    out = core.evaluate(INTERPOLATION_JS)
+    assert out["empty"] is None
+    assert out["single"] == {"x": 0}
+    assert out["before"] == 0
+    assert out["middle"] == 0.25
+    assert out["atNewer"] == 0.5
+    assert abs(out["extrapolated"] - 0.75) < 1e-9
+    assert abs(out["capped"] - 3.0) < 1e-9
+    assert out["snapped"] == 0
+    assert out["snappedAhead"] == 0
+    assert out["fields"] == {"a": 0.5, "b": 10.25}
+    assert abs(out["senderClock"] - 0.25) < 1e-9
+    assert out["ignoredSize"] == 5
+    assert out["size"] < 70
