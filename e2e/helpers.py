@@ -63,6 +63,14 @@ def tfa_secret(username):
     )
 
 
+def fresh_code(totp, margin=5):
+    """The current code, unless it expires within `margin` seconds: then
+    the next one (the server only accepts the current time step)."""
+    if totp.interval - time.time() % totp.interval < margin:
+        return next_code(totp)
+    return totp.now()
+
+
 def next_code(totp):
     """A code from a time step not used yet (codes work once)."""
     step = totp.timecode(time.time())

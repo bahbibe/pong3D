@@ -6,6 +6,7 @@ from helpers import (
     BASE,
     PASSWORD,
     Sockets,
+    fresh_code,
     nav_click,
     next_code,
     png,
@@ -82,7 +83,7 @@ def test_enable_and_disable_2fa(user_page):
     page.locator("settings-page #twoFaModal.show").wait_for()
 
     totp = pyotp.TOTP(tfa_secret(user.username))
-    page.fill("settings-page #twofa-code", totp.now())
+    page.fill("settings-page #twofa-code", fresh_code(totp))
     # Enter confirms the code; it must not submit the settings form around it.
     page.press("settings-page #twofa-code", "Enter")
     page.locator("settings-page #disable-2fa").wait_for(state="visible")
@@ -101,7 +102,9 @@ def test_login_with_2fa(page, errors):
     user = register()
     assert user.api("POST", "/api/auth/twofa/enable/").json()["success"]
     totp = pyotp.TOTP(tfa_secret(user.username))
-    assert user.api("POST", "/api/auth/twofa/confirm/", json={"code": totp.now()}).json()["success"]
+    assert user.api("POST", "/api/auth/twofa/confirm/", json={"code": fresh_code(totp)}).json()[
+        "success"
+    ]
 
     errors.watch(page)
     page.goto("/login", wait_until="networkidle")
