@@ -219,8 +219,10 @@ before building images.
 
 ## Lint
 
-Ruff (lint and format, settings in `backend/pyproject.toml`) and a few file
-checks run through pre-commit. CI runs the same hooks on every file.
+Ruff for Python (settings in `backend/pyproject.toml`), ESLint and Prettier
+for the frontend (`frontend/eslint.config.js`, `frontend/.prettierrc.json`) and
+a few file checks run through pre-commit. pre-commit installs Node and the JS
+tools itself: there is no package.json. CI runs the same hooks on every file.
 
 ```bash
 uvx pre-commit install           # once: runs the hooks on each commit
