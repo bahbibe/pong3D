@@ -62,7 +62,8 @@ Add `ENV=prod` to act on the prod stack (default `ENV=dev`).
   - `media/avatars/`: uploaded avatars (a named volume in prod). Only the default one is in git.
 - `e2e/`: browser (Playwright) and websocket tests, run against a running stack.
 - `docs/`: server setup (`bootstrap-vps.md`), the subject's module checklist, a Postman collection of the API.
-- `frontend/`: `index.html` and `static/` (served by nginx; three.js is vendored in `static/vendor`).
+- `frontend/`: the single-page app, no framework and no build step (see Frontend below).
+  `index.html` is the shell; `static/` is served by nginx (three.js is vendored in `static/vendor`).
 - `infra/nginx/`: nginx image and config (`common.conf` is shared by `dev.conf` and `prod.conf.template`).
 - `infra/scripts/`: `gen-env.sh`, `backup.sh`, `restore.sh`, `deploy.sh`. `infra/prometheus/`.
 - `infra/ansible/`: server provisioning (Docker, deploy user, ssh, ufw, env files from the vault, backups cron, certificate).
@@ -89,6 +90,78 @@ healthchecks: db and redis, then the `migrate` job, then the backend
   on 127.0.0.1 for `/admin`.
 - Demo accounts: `docker compose exec backend python manage.py create_demo_users`
   (dev only: refuses to run when `DJANGO_ALLOWED_HOSTS` has a public name).
+
+## Frontend
+
+Vanilla JavaScript modules, loaded as they are by the browser: custom
+elements in the light DOM (Bootstrap and `static/css` apply), the History
+API for routing. `frontend/static/js/`:
+
+- `main.js`: entry point. Starts the router; links with `data-link` change
+  the page without a reload (ctrl/middle click still opens a new tab).
+- `core/`: the small framework.
+  - `router.js`: the route table (path, element tag, access, title) and the
+    guards: logged out, 2FA code pending, profile not set up.
+  - `session.js`: the current user, loaded from `/api/auth/me/` once per
+    page load and asked again only when the guard would redirect.
+  - `page.js`: `Component` and `Page`, the base of every element (below).
+  - `html.js`: the `html` template tag and `render()`.
+  - `api.js`: the only `fetch()`. Every call resolves to
+    `{ok, status, data, message, errors}`; `toastOnError(result)` shows a
+    failure. A 401 sends you to `/login`.
+  - `store.js`: observable values: unread notifications, online users.
+  - `sockets.js` (reconnecting WebSocket), `toast.js`, `overlay.js`,
+    `escape.js`, `config.js`.
+- `services/`: what runs while you are logged in: `presence.js` and
+  `notifications.js` (sockets that fill the stores), `game.js` (invite,
+  play again).
+- `components/`: elements used inside pages (nav, notifications menu,
+  search bar, chat contacts and conversation, history rows).
+- `pages/`: one module per page.
+
+**A page** extends `Page` and renders in `mount()`:
+
+```js
+import { toastOnError } from "../core/api.js";
+import { html, render } from "../core/html.js";
+import { Page } from "../core/page.js";
+
+class FriendsPage extends Page {
+  async mount() {
+    this.render(html`<main-nav></main-nav><ul class="friends"></ul>`);
+    const result = await this.api.get("/api/friends/");
+    if (!toastOnError(result)) return;
+    render(this.querySelector(".friends"), html`${result.data.map((f) => html`<li>${f.friend.username}</li>`)}`);
+  }
+}
+customElements.define("friends-page", FriendsPage);
+```
+
+Then import the module in `pages/index.js` and add a route in
+`core/router.js` (`{ path: "/friends", tag: "friends-page", access: "user", title: "Friends" }`).
+URL parameters are `this.params` (`/friend/:uuid` gives `this.params.uuid`),
+the query string is `this.query`.
+
+Rules the code follows:
+
+- **Markup only through `html`.** It escapes every value put in it, so
+  usernames, messages and other server data can never become markup.
+  Nested `html` templates and arrays of them are inserted as they are;
+  `raw()` is for trusted static markup only. `render()` refuses plain
+  strings. No `innerHTML` anywhere else.
+- **Set things up through the base class**: `this.on(target, type, fn)`,
+  `this.api`, `this.socket(path, handlers)`, `this.timeout(fn, ms)`,
+  `this.subscribe(store, fn)`. All of them stop when the element leaves the
+  page: listeners are removed, requests in flight are cancelled (their
+  result is `{aborted: true}`), sockets close, timers clear.
+- **No global state** on `window`: the session and the stores hold it.
+
+There is no bundler: a new module is one more file. The Content-Security-Policy
+(`infra/nginx/common.conf`) only allows scripts from the site itself, the
+pinned Bootstrap bundle and the import map in `index.html` by hash: if you
+change the import map, update its sha256 there. Our JS and CSS are served
+with `Cache-Control: no-cache` (revalidated on every load), so a deploy never
+mixes old and new modules.
 
 ## Prod on a server
 
