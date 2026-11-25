@@ -1,4 +1,4 @@
-import { escapeHTML } from "../escape.js";
+import { escapeHTML } from "./escape.js";
 
 /** Markup that is safe to insert: built by html`` or raw(). */
 export class SafeHTML {

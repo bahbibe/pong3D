@@ -1,5 +1,4 @@
-// Entry point: the old-page bridge, the router and in-app links.
-import "./core/compat.js";
+// Entry point: the router and in-app links.
 import { navigate, router } from "./core/router.js";
 
 window.addEventListener("popstate", () => router());

@@ -100,7 +100,6 @@ export const router = async ({ scroll = false } = {}) => {
 
   const page = document.createElement(route.tag);
   page.route = { params, query: new URLSearchParams(location.search) };
-  page.setAttribute("params", JSON.stringify(params)); // pages still on AbstractPage
   document.getElementById("app").replaceChildren(page);
   document.title = route.title ? `${route.title} · PONG` : "PONG";
   if (scroll) window.scrollTo(0, 0);

@@ -118,10 +118,10 @@ def test_static_cache_headers():
         return response.headers.get("Cache-Control", "")
 
     # Modules are revalidated on every load, so a deploy never mixes versions.
-    assert cache_control("/static/js/router.js") == "no-cache"
+    assert cache_control("/static/js/main.js") == "no-cache"
     assert cache_control("/static/css/index.css") == "no-cache"
     assert "immutable" in cache_control("/static/vendor/three-0.170.0/build/three.module.min.js")
     assert "max-age=86400" in cache_control("/static/scene.glb")
     # The security headers are still there.
-    response = requests.head(BASE + "/static/js/router.js", verify=False, timeout=10)
+    response = requests.head(BASE + "/static/js/main.js", verify=False, timeout=10)
     assert response.headers["X-Content-Type-Options"] == "nosniff"
