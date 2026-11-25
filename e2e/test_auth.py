@@ -83,9 +83,11 @@ def test_enable_and_disable_2fa(user_page):
 
     totp = pyotp.TOTP(tfa_secret(user.username))
     page.fill("settings-page #twofa-code", totp.now())
-    page.click("settings-page #confirm-2fa")
+    # Enter confirms the code; it must not submit the settings form around it.
+    page.press("settings-page #twofa-code", "Enter")
     page.locator("settings-page #disable-2fa").wait_for(state="visible")
     assert len(confirms) == 1
+    assert page.url.endswith("/settings")
 
     code = next_code(totp)
     page.once("dialog", lambda d: d.accept(code))
@@ -164,3 +166,14 @@ def test_intra_failure_shows_a_toast(page, errors):
     page.locator("#toast-wrapper .toast.show", has_text="42 intra is not reachable").wait_for()
     page.locator("#overlay").wait_for(state="hidden")
     errors[:] = [e for e in errors if "/api/auth/intra/" not in e]  # the mocked 503
+
+
+def test_leaving_settings_with_the_2fa_modal_open(user_page):
+    page = user_page
+    page.goto("/settings", wait_until="networkidle")
+    page.click("settings-page #enable-2fa")
+    page.locator("settings-page #twoFaModal.show").wait_for()
+    page.evaluate("async () => (await import('/static/js/core/router.js')).navigate('/home')")
+    page.locator("#app > user-home").wait_for()
+    assert page.locator(".modal-backdrop").count() == 0
+    assert "modal-open" not in (page.locator("body").get_attribute("class") or "")

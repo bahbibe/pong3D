@@ -2,7 +2,7 @@
 
 import secrets
 
-from helpers import befriend, finished_game, force_username, register
+from helpers import BASE, befriend, finished_game, force_username, register
 
 PAYLOAD = "<img src=x id=e2e-injected>"
 
@@ -75,3 +75,39 @@ def test_overlay_hides_when_friends_fail_to_load(user_page, errors):
     page.locator("#overlay").wait_for(state="hidden")
     # The aborted request and the page logging it are the point of this test.
     errors[:] = [e for e in errors if "/api/friends/" not in e and "Failed to fetch" not in e]
+
+
+def test_friend_button_follows_the_relationship(user_page):
+    page, me = user_page, user_page.user
+    stranger, requester = register(), register()
+    # Nothing between us: send a request from the button.
+    page.goto(f"/friend/{stranger.uuid}", wait_until="networkidle")
+    button = page.locator("#add-friend")
+    button.click()
+    page.locator("#add-friend:disabled", has_text="pending").wait_for()
+    sent = me.api("GET", "/api/friends/sent-requests/").json()["data"]
+    assert [f["friend"]["id"] for f in sent] == [stranger.id]
+    # They asked us: accept from the button.
+    assert requester.api("POST", "/api/friends/send/", json={"target_user": me.id}).ok
+    page.goto(f"/friend/{requester.uuid}", wait_until="networkidle")
+    page.locator("#add-friend", has_text="accept").click()
+    page.locator("#add-friend:disabled", has_text="friends").wait_for()
+    assert any(
+        f["friend"]["id"] == requester.id for f in me.api("GET", "/api/friends/").json()["data"]
+    )
+
+
+def test_own_uuid_opens_your_profile(user_page):
+    user_page.goto(f"/friend/{user_page.user.uuid}", wait_until="networkidle")
+    assert user_page.url == BASE + "/profile"
+    user_page.locator("#app > user-profile").wait_for()
+
+
+def test_message_button_opens_chat_in_the_app(user_page):
+    page = user_page
+    other = register()
+    page.goto(f"/friend/{other.uuid}", wait_until="networkidle")
+    page.evaluate("window.__e2e_same_document = true")
+    page.locator("friend-page a.btn[href='/chat']").click()
+    page.wait_for_url("**/chat")
+    assert page.evaluate("window.__e2e_same_document") is True
