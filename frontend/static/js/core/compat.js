@@ -1,7 +1,6 @@
 // TEMPORARY bridge for the pages not moved to core/ yet; removed once the
 // last one is (refactor Phase 3). The old window.* globals read and write
 // the session and the stores, and the old DOM updates follow the stores.
-import { renderNotifications } from "../helpers.js";
 import { session } from "./session.js";
 import { notifications, presence } from "./store.js";
 
@@ -26,11 +25,6 @@ Object.defineProperties(window, {
     configurable: true,
     get: () => [...presence.get()],
   },
-});
-
-// The nav bell (main-nav) follows the notification store.
-notifications.subscribe(() => {
-  if (document.getElementById("notification-wrapper")) renderNotifications();
 });
 
 // Online dots of the profile friends list and the chat header.

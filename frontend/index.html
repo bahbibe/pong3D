@@ -35,7 +35,16 @@
     <div class="custom-loader"></div>
   </div>
   <div id="toast-wrapper" class="position-absolute bottom-0 end-0">
-    <error-toast></error-toast>
+    <div class="position-absolute bottom-0 end-0 p-3" style="z-index: 1000;">
+      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <strong class="me-auto"></strong>
+          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+        </div>
+      </div>
+    </div>
   </div>
   <!--! Chat page -->
   <template id="chat-page">
@@ -897,109 +906,6 @@
       </div>
 
     </section>
-  </template>
-
-
-  <!-- !  components -->
-
-
-  <template id="search-bar">
-    <form class="input-group" id="search">
-      <input class="form-control" type="search" placeholder="Search" aria-label="Search" data-search />
-      <button class="input-group-text  d-lg-flex" aria-label="Search">
-        <i class="fas fa-search" aria-hidden="true"></i>
-      </button>
-    </form>
-  </template>
-
-  <template id="main-nav">
-    <nav class="navbar navbar-expand d-flex justify-content-between">
-      <a href="/home" data-link>
-        <img src="/static/asset/images/transistor-ping-pong.gif" width="60" alt="pong3D home">
-      </a>
-      <search-bar class="d-none d-md-flex"></search-bar>
-
-      <div class="d-flex align-items-center">
-        <div class="dropdown" id="notification-wrapper">
-          <button class="nav-link dropdown-toggle notification-ui_icon me-4" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
-            <i class="fa fa-bell fs-5" aria-hidden="true"></i>
-            <span class="counter" data-count>0</span>
-          </button>
-          <div class="dropdown-menu notification-ui_dd" aria-labelledby="navbarDropdown">
-            <div class="notification-ui_dd-header">
-              <h3 class="text-center">Notification</h3>
-            </div>
-            <div class="notification-ui_dd-content">
-            </div>
-            <div class="notification-ui_dd-footer">
-              <button class="btn btn-success btn-block w-100 py-2" id="notification-btn">Mark all as read</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="dropdown">
-          <div class="user d-flex align-items-center mb-2 rounded-pill secondary-bg px-3 py-2 shadow "
-            style="cursor: pointer;">
-            <img src="/static/asset/images/profile.svg" class="rounded-circle" style="width: 40px; height: 40px;" alt="user profile image"
-              loading="lazy" id="nav-user-img" />
-            <strong class="d-none d-sm-block ms-2" id="nav-username" style="cursor: pointer;">bmakhlou</strong>
-          </div>
-          <ul class="dropdown-content ">
-            <li>
-              <a class="" href="/home" id="home" data-link>
-                <i class="fa-solid fa-house me-1"></i>
-                Home
-              </a>
-            </li>
-            <li>
-              <a href="/profile" id="profile" data-link>
-                <i class="fa-solid fa-user me-1"></i>
-                Profile
-              </a>
-            </li>
-            <li>
-              <a href="/ranking" id="ranking" data-link>
-                <i class="fa-solid fa-ranking-star me-1"></i>
-                Leaderboard
-              </a>
-            </li>
-            <li>
-              <a class="" href="/chat" id="chat" data-link>
-                <i class="fa-regular fa-comment-dots me-1"></i>
-                Chat
-              </a>
-            </li>
-            <li>
-              <a class="" href="/settings" id="settings" data-link>
-                <i class="fa-solid fa-gear me-1"></i>
-                Settings
-              </a>
-            </li>
-            <li>
-              <a class="" href="#" id="logout">
-                <i class="fa-solid fa-arrow-right-from-bracket me-1"></i>
-                Exit
-              </a>
-            </li>
-          </ul>
-        </div>
-
-      </div>
-    </nav>
-  </template>
-
-  <!--! Error Toast -->
-  <template id="error-toast">
-    <div class="position-absolute bottom-0 end-0 p-3" style="z-index: 1000;">
-      <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-          <strong class="me-auto"></strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-        </div>
-      </div>
-    </div>
   </template>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

@@ -1,5 +1,4 @@
 import { escapeHTML as esc } from "../escape.js";
-import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 import { BASE_URL } from "../router.js";
 class SearchPage extends AbstractPage {
@@ -49,28 +48,6 @@ class SearchPage extends AbstractPage {
   }
 }
 
-class SearchBar extends AbstractPage {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    const template = document.getElementById("search-bar");
-    const clone = template.content.cloneNode(true);
-    this.appendChild(clone);
-    this.form = this.querySelector("form#search");
-    this.inputSearch = this.querySelector("[data-search]");
-
-    this.form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const query = this.inputSearch.value.trim();
-      this.inputSearch.value = "";
-      navigateTo(`/search?q=${encodeURIComponent(query)}`);
-    });
-  }
-}
-
-window.customElements.define("search-bar", SearchBar);
 window.customElements.define("search-page", SearchPage);
 
-export { SearchPage, SearchBar };
+export { SearchPage };

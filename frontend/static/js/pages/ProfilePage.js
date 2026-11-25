@@ -1,8 +1,5 @@
 import { escapeHTML as esc } from "../escape.js";
-import { showOverlay, hideOverlay, renderNotifications } from "../helpers.js";
-import { navigateTo } from "../router.js";
-import { session } from "../core/session.js";
-import { markAllRead } from "../services/notifications.js";
+import { showOverlay, hideOverlay } from "../helpers.js";
 import { AbstractPage } from "./AbstarctPage.js";
 import { API } from "../API/API.js";
 import { BASE_URL } from "../router.js";
@@ -220,52 +217,6 @@ class ProfilePage extends AbstractPage {
   }
 }
 
-class mainNav extends AbstractPage {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    const template = document.getElementById("main-nav");
-    const clone = template.content.cloneNode(true);
-    this.appendChild(clone);
-
-    const navUsername = this.querySelector("#nav-username");
-    const navUserImg = this.querySelector("#nav-user-img");
-    this.notification = this.querySelector(".notification-ui_dd-content");
-    this.notificationCounter = this.querySelector("[data-count]");
-    this.logoutBtn = this.querySelector("#logout");
-    const user = window.user;
-    navUsername.textContent = `${user.username}`;
-    navUserImg.src = `${user.profile.avatar}`;
-
-    this.notificationBtn = this.querySelector("#notification-btn");
-    this.notificationBtn.addEventListener("click", () => markAllRead());
-    renderNotifications();
-    this.logoutBtn.addEventListener("click", this.logout);
-  }
-
-  async logout(e) {
-    // The link is href="#": following it fires popstate, and the router
-    // would render the page again while the logout request is running.
-    if (e) e.preventDefault();
-    try {
-      const url = `${BASE_URL}/api/auth/logout/`;
-      const response = await fetch(url, {
-        method: "POST",
-        credentials: "include",
-      });
-      if (response.status === 200) {
-        session.clear();
-        navigateTo("/login");
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
-}
-
 window.customElements.define("user-profile", ProfilePage);
-window.customElements.define("main-nav", mainNav);
 
 export { ProfilePage };

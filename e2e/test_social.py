@@ -87,3 +87,17 @@ def test_mark_all_as_read(user_page):
         page=page,
     )
     assert page.locator("main-nav [data-count]").first.text_content() == "0"
+
+
+def test_open_bell_stays_open_when_a_notification_arrives(user_page):
+    page, me = user_page, user_page.user
+    sockets = Sockets(page)
+    page.goto("/home", wait_until="networkidle")
+    wait_until(lambda: sockets.open("/ws/notifications/"), message="notification socket", page=page)
+    page.locator("main-nav #notification-wrapper .dropdown-toggle").first.click()
+    menu = page.locator("main-nav .notification-ui_dd.show")
+    menu.wait_for()
+    other = register()
+    assert other.api("POST", "/api/friends/send/", json={"target_user": me.id}).ok
+    page.locator("main-nav .notification-list", has_text=other.username).wait_for()
+    assert menu.count() == 1

@@ -1,3 +1,4 @@
+import "../components/main-nav.js";
 import "./landing.js";
 import "./not-found.js";
 export { ChatPage } from "./ChatPage.js";
@@ -10,10 +11,7 @@ export { SearchPage } from "./SearchPage.js";
 export { FriendPage } from "./friendPage.js";
 export { SetupPage } from "./SetupPage.js";
 import "./twofa.js";
-import { ErrorToast } from "../components/ErrorToast.js";
 export { GamePage } from "./GamePage.js";
 export { MatchmakingPage } from "./MatchmakingPage.js";
 export { TourPage } from "./tourPage.js";
 export { JoinPage } from "./JoinPage.js";
-
-window.customElements.define("error-toast", ErrorToast);
