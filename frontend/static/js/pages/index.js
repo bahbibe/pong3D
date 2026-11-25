@@ -11,7 +11,7 @@ import "./search.js";
 import "./friend.js";
 import "./setup.js";
 import "./twofa.js";
-export { GamePage } from "./GamePage.js";
+import "./game.js";
 import "./matchmaking.js";
 import "./tournament-create.js";
 import "./tournament-join.js";

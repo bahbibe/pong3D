@@ -141,3 +141,10 @@
   width: 100%;
   border-radius: 8px;
 }
+
+/* Game page: the 3D canvas covers the window. */
+game-page canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
