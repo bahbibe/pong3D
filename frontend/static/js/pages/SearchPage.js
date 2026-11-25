@@ -14,7 +14,7 @@ class SearchPage extends AbstractPage {
 
     this.container = document.querySelector("#search-container");
 
-    this.SearchedUser = localStorage.getItem("SearchedUser");
+    this.SearchedUser = new URLSearchParams(location.search).get("q");
     this.found = false;
     if (this.SearchedUser) this.renderUser();
   }
@@ -31,7 +31,7 @@ class SearchPage extends AbstractPage {
         users.forEach((user) => {
           this.container.innerHTML += `
           <div class=" secondary-bg box-sh-1 p-2 text-center rounded  mx-auto mx-md-0  me-md-3 mb-3" style="width: 160px; height: 140px;">
-            <a class="font-monospace fw-bold" href='/friend/${esc(user.profile.uuid)}'>
+            <a class="font-monospace fw-bold" href='/friend/${esc(user.profile.uuid)}' data-link>
               <div class="">
                 <img class="img-fluid ratio ratio-1x1 rounded rounded-circle" src="${esc(user.profile.avatar)}" alt="" width="100" height="100" style="width: 100px; height: 100px">
               </div>
@@ -63,9 +63,9 @@ class SearchBar extends AbstractPage {
 
     this.form.addEventListener("submit", (e) => {
       e.preventDefault();
-      localStorage.setItem("SearchedUser", this.inputSearch.value);
+      const query = this.inputSearch.value.trim();
       this.inputSearch.value = "";
-      navigateTo("/search");
+      navigateTo(`/search?q=${encodeURIComponent(query)}`);
     });
   }
 }

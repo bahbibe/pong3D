@@ -1,6 +1,8 @@
 import { escapeHTML as esc } from "../escape.js";
 import { showOverlay, hideOverlay, renderNotifications } from "../helpers.js";
 import { navigateTo } from "../router.js";
+import { session } from "../core/session.js";
+import { markAllRead } from "../services/notifications.js";
 import { AbstractPage } from "./AbstarctPage.js";
 import { API } from "../API/API.js";
 import { BASE_URL } from "../router.js";
@@ -238,26 +240,9 @@ class mainNav extends AbstractPage {
     navUserImg.src = `${user.profile.avatar}`;
 
     this.notificationBtn = this.querySelector("#notification-btn");
-    this.notificationBtn.addEventListener("click", () => {
-      this.notification.innerHTML = `<p class="text-center my-2">No new notifications</p>`;
-      this.notificationCounter.textContent = 0;
-      this.notificationBtn.classList.add("disabled");
-      window.notifications = [];
-      this.markNotificationsAsRead();
-    });
+    this.notificationBtn.addEventListener("click", () => markAllRead());
     renderNotifications();
     this.logoutBtn.addEventListener("click", this.logout);
-  }
-
-  async markNotificationsAsRead() {
-    try {
-      fetch(`${BASE_URL}/api/auth/notifications/mark_as_read/`, {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch (error) {
-      console.error(error);
-    }
   }
 
   async logout(e) {
@@ -271,13 +256,7 @@ class mainNav extends AbstractPage {
         credentials: "include",
       });
       if (response.status === 200) {
-        if (window.socket) {
-          window.socket.close();
-        }
-        if (window.notif_socket) {
-          window.notif_socket.close();
-        }
-        window.user = null;
+        session.clear();
         navigateTo("/login");
       }
     } catch (e) {

@@ -1,4 +1,4 @@
-import { WSS_URL } from "../router.js";
+import { WSS_URL } from "./config.js";
 
 // Close codes sent by the server: the session is gone or not allowed.
 // Reconnecting would only fail again, so stop.

@@ -61,6 +61,8 @@ def test_settings_username_and_avatar(user_page):
     page.fill("settings-page #username", user.username + "y")
     page.click("#settings-form button[type=submit]")
     page.wait_for_url("**/profile")
+    # The profile shows the new name (from the update's answer, no reload).
+    assert page.locator("user-profile #username").text_content() == f"@{user.username}y"
     me = user.api("GET", "/api/auth/me/").json()["data"]["user"]
     assert me["username"] == user.username + "y"
     assert "profile_default" not in me["profile"]["avatar"]

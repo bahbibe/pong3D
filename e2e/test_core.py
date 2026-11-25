@@ -62,6 +62,41 @@ def test_store_subscribe_and_abort(core):
     assert calls == {"seen": [2, 3], "value": 10}
 
 
+def test_component_cleans_up_on_removal(core):
+    result = core.evaluate(
+        """async () => {
+            const { Component } = await import('/static/js/core/page.js');
+            const { createStore } = await import('/static/js/core/store.js');
+            const store = createStore(0);
+            const log = { clicks: 0, timer: false, store: [], fetch: null, closed: false };
+            class TestElement extends Component {
+                mount() {
+                    this.on(document, 'click', () => log.clicks++);
+                    this.timeout(() => { log.timer = true; }, 200);
+                    this.subscribe(store, (v) => log.store.push(v));
+                    this.api.get('/api/game/leaderboard/').then((r) => { log.fetch = r; });
+                    const ws = this.socket('/ws/status/');
+                    ws.addEventListener('close', () => { log.closed = true; });
+                }
+            }
+            customElements.define('e2e-test-element', TestElement);
+            const el = document.createElement('e2e-test-element');
+            document.body.append(el);
+            document.body.click();
+            el.remove();                 // before the request answers
+            document.body.click();
+            store.set(1);
+            await new Promise((r) => setTimeout(r, 600));
+            return log;
+        }"""
+    )
+    assert result["clicks"] == 1
+    assert result["timer"] is False
+    assert result["store"] == [0]
+    assert result["fetch"]["aborted"] is True
+    assert result["closed"] is True
+
+
 def test_api_results(core, errors):
     core.route("**/api/game/get_game/999999999", lambda route: route.abort())
     out = core.evaluate(

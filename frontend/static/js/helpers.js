@@ -1,34 +1,7 @@
-import { navigateTo, BASE_URL } from "./router.js";
-import { escapeHTML as esc } from "./escape.js";
+import { navigate as navigateTo } from "./core/router.js";
+import { markRead } from "./services/notifications.js";
 
-export const hideToast = () => {
-  document.querySelector(`#toast-wrapper .toast`).classList.remove("show");
-  document.querySelector(`#toast-wrapper .toast`).classList.add("hide");
-};
-
-export const showToast = (isError, message, errors) => {
-  const errorsEl = document.querySelector(`#toast-wrapper .toast`);
-  if (isError) {
-    errorsEl.classList.add("text-bg-danger");
-    errorsEl.classList.remove("text-bg-success");
-    document.querySelector(`#toast-wrapper .toast-header .me-auto`).innerHTML = "Error";
-  } else {
-    errorsEl.classList.remove("text-bg-danger");
-    errorsEl.classList.add("text-bg-success");
-    document.querySelector(`#toast-wrapper .toast-header .me-auto`).innerHTML = "Success";
-  }
-  const errorsContentEl = errorsEl.querySelector(".toast-body");
-  if (errors && Object.keys(errors).length > 0) {
-    // Error text can echo user input, so escape it.
-    errorsContentEl.innerHTML = Object.keys(errors)
-      .map((error) => `<p>${esc(error)}: ${esc(errors[error])}</p>`)
-      .join("");
-  } else {
-    errorsContentEl.textContent = message || "Something went wrong!. Please try again later";
-  }
-  errorsEl.classList.add("show");
-  errorsEl.classList.remove("hide");
-};
+export { hideToast, showToast } from "./core/toast.js";
 
 export const showOverlay = () => {
   const showOverlay = document.querySelector("#overlay");
@@ -94,7 +67,7 @@ export const renderNotifications = () => {
   buttonsList.forEach((btn) => {
     btn.addEventListener("click", async () => {
       const uuid = btn.closest(".notification-list")?.dataset.uuid;
-      if (uuid) await markNotificationAsRead(uuid);
+      if (uuid) await markRead(uuid);
       if (btn.dataset.game_id) {
         navigateTo(`/play/${btn.dataset.game_id}`);
         return;
@@ -102,18 +75,4 @@ export const renderNotifications = () => {
       navigateTo(`/friend/${btn.dataset.id}`);
     });
   });
-};
-
-// Mark one notification as read on the server and drop it from the list.
-const markNotificationAsRead = async (uuid) => {
-  window.notifications = (window.notifications || []).filter((n) => n.uuid !== uuid);
-  renderNotifications();
-  try {
-    await fetch(`${BASE_URL}/api/auth/notifications/mark_as_read/${encodeURIComponent(uuid)}/`, {
-      method: "POST",
-      credentials: "include",
-    });
-  } catch (error) {
-    console.error("Could not mark the notification as read:", error);
-  }
 };
