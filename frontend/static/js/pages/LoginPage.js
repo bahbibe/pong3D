@@ -98,14 +98,14 @@ class LoginPage extends AbstractPage {
           hideOverlay();
           if (data.data.user.profile.is_tfa_enabled) navigateTo("/twofa");
           else navigateTo("/home");
-          // FriendsStatus();
         } else {
           showToast(true, data.message, data.errors);
           hideOverlay();
         }
       })
-      .catch((_) => {
+      .catch(() => {
         showToast(true);
+        hideOverlay();
       });
   }
 
@@ -171,12 +171,13 @@ class LoginPage extends AbstractPage {
       });
       const data = await response.json();
       if (data.success) {
-        hideOverlay();
         window.location.replace(data.data.url);
       } else {
-        hideOverlay();
+        showToast(true, data.message);
       }
-    } catch (error) {
+    } catch {
+      showToast(true);
+    } finally {
       hideOverlay();
     }
   }

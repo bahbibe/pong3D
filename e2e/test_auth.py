@@ -133,3 +133,32 @@ def test_logout_closes_the_sockets(user_page):
     )
     me = page.request.get("/api/auth/me/")
     assert me.status == 401
+
+
+def test_login_network_error_shows_a_toast_and_unblocks(page, errors, user):
+    errors.watch(page)
+    page.goto("/login", wait_until="networkidle")
+    page.route("**/api/auth/login/", lambda route: route.abort())
+    page.fill("[data-email]", user.email)
+    page.fill("[data-password]", PASSWORD)
+    page.click("[data-login]")
+    page.locator("#toast-wrapper .toast.show.text-bg-danger").wait_for()
+    page.locator("#overlay").wait_for(state="hidden")
+    errors[:] = [e for e in errors if "/api/auth/login/" not in e]
+
+
+def test_intra_failure_shows_a_toast(page, errors):
+    errors.watch(page)
+    page.goto("/login", wait_until="networkidle")
+    page.route(
+        "**/api/auth/intra/",
+        lambda route: route.fulfill(
+            status=503,
+            content_type="application/json",
+            body='{"success": false, "message": "42 intra is not reachable"}',
+        ),
+    )
+    page.click("#intra")
+    page.locator("#toast-wrapper .toast.show", has_text="42 intra is not reachable").wait_for()
+    page.locator("#overlay").wait_for(state="hidden")
+    errors[:] = [e for e in errors if "/api/auth/intra/" not in e]  # the mocked 503
