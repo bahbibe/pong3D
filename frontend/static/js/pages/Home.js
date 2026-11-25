@@ -1,5 +1,4 @@
 import { escapeHTML as esc } from "../escape.js";
-import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 import { BASE_URL } from "../router.js";
 class Home extends AbstractPage {
@@ -30,11 +29,9 @@ class Home extends AbstractPage {
       if (response.ok) {
         const bestPlayer = this.querySelector("#bestPlayer");
         const users = data.data.users;
-        console.log(users);
 
         for (const [index, user] of users.entries()) {
           if (index < 3) {
-            console.log("index", index);
             bestPlayer.innerHTML += `
               <div class="d-flex p-2 justify-content-between align-items-center glass-effect mb-2">
                   <div class="col-2"><img src="/static/asset/images/rank${index + 1}.png" alt="badge Rank number one" width="30"></div>

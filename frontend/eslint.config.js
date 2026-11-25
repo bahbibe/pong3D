@@ -30,4 +30,6 @@ export default [
       "no-var": "error",
     },
   },
+  // This config file itself runs in Node.
+  { files: ["eslint.config.js"], languageOptions: { globals: globals.node } },
 ];

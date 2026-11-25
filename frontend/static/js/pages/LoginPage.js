@@ -25,7 +25,6 @@ class LoginPage extends AbstractPage {
     this.email = this.querySelector("#email");
 
     this.lengthPassword = this.querySelector(".lengthPassword");
-    const logninBtn = this.querySelector("[data-login]");
     this.loginForm = this.querySelector("#login-form");
     this.registerForm = this.querySelector("#register-form");
     this.intra = this.querySelector("#intra");
@@ -134,7 +133,6 @@ class LoginPage extends AbstractPage {
     const url = `${BASE_URL}/api/auth/register/`;
     this.isValidPassword = PASSWORD_HINT.test(this.password.value);
     if (this.password.value !== this.confirmPassword.value || !this.isValidPassword) {
-      console.log("passwords do not match");
       showToast("register-errors", "passwords do not match or password is not valid");
       this.password.value = "";
       this.confirmPassword.value = "";
@@ -180,7 +178,6 @@ class LoginPage extends AbstractPage {
       }
     } catch (error) {
       hideOverlay();
-      console.log(error);
     }
   }
 

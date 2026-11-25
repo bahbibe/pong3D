@@ -96,7 +96,7 @@ class GamePage extends AbstractPage {
         window.addEventListener("resize", this.onResize);
 
         this.socket.onmessage = (event) => {
-          let obj = JSON.parse(event.data);
+          const obj = JSON.parse(event.data);
 
           if (obj.type === "game over") {
             if (this.params.tournament_id) {
@@ -124,7 +124,7 @@ class GamePage extends AbstractPage {
               this.score2Text = game.score[1];
               this.updateScore();
             }
-            if (game.side == "player2") this.camera.position.z = this.opposit_side_cam_pos;
+            if (game.side === "player2") this.camera.position.z = this.opposit_side_cam_pos;
             this.camera.lookAt(0, 0, 0);
           }
         };
@@ -147,7 +147,7 @@ class GamePage extends AbstractPage {
   }
 
   // Set the camera aspect ratio to match the browser window dimensions
-  updateCameraAspect(camera) {
+  updateCameraAspect() {
     const width = window.innerWidth;
     const height = window.innerHeight;
     this.camera.aspect = width / height;
@@ -241,7 +241,7 @@ class GamePage extends AbstractPage {
   //retrieve list of all cameras
   retrieveListOfCameras(scene) {
     // Get a list of all cameras in the scene
-    let cameraList = [];
+    const cameraList = [];
     scene.traverse((object) => {
       if (object.isCamera) {
         cameraList.push(object);
@@ -251,14 +251,13 @@ class GamePage extends AbstractPage {
       if (object.name === "Cube") this.ball = object;
       if (object.name === "score1") this.player1Score = object;
       if (object.name === "score2") this.player2Score = object;
-      // console.log(player1Score);
     });
     this.updateScore();
 
     //Set the camera to the first value in the list of cameras
     this.camera = cameraList[0];
 
-    this.updateCameraAspect(this.camera);
+    this.updateCameraAspect();
 
     // Start the animation loop after the model and cameras are loaded
     this.animate();

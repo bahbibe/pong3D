@@ -16,8 +16,8 @@ class JoinPage extends AbstractPage {
     this.API.getTournaments().then((res) => {
       this.tournaments = res;
       this.tournaments.data.forEach((element) => {
-        let row = document.createElement("tr");
-        let th = document.createElement("th");
+        const row = document.createElement("tr");
+        const th = document.createElement("th");
         th.scope = "row";
         th.innerText = element.uuid;
         row.appendChild(th);
@@ -25,9 +25,9 @@ class JoinPage extends AbstractPage {
         td.innerText = `${4 - element.spots}/4`;
         row.appendChild(td);
         td = document.createElement("td");
-        let join_button = document.createElement("button");
+        const join_button = document.createElement("button");
         join_button.innerHTML = element.spots ? "Join" : "Check";
-        join_button.onclick = (e) => {
+        join_button.onclick = () => {
           join_tournament(element.uuid);
         };
         join_button.classList += "btn btn-block bg-dark text-white ps-4 pe-4";

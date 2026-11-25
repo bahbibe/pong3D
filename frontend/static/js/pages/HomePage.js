@@ -1,4 +1,3 @@
-import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
 class HomePage extends AbstractPage {

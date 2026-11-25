@@ -21,7 +21,6 @@ class SearchPage extends AbstractPage {
 
   async renderUser() {
     try {
-      console.log(this.SearchedUser);
       const response = await fetch(
         `${BASE_URL}/api/auth/users/?q=${encodeURIComponent(this.SearchedUser)}`,
         { credentials: "include" },
@@ -45,7 +44,7 @@ class SearchPage extends AbstractPage {
         });
       } else this.container.innerHTML = `<p class="fw-bold fs-1">User Not Fount!</p>`;
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 }
@@ -64,7 +63,6 @@ class SearchBar extends AbstractPage {
 
     this.form.addEventListener("submit", (e) => {
       e.preventDefault();
-      console.log("searching");
       // window.SearchedUser = this.inputSearch.value;
       localStorage.setItem("SearchedUser", this.inputSearch.value);
       this.inputSearch.value = "";

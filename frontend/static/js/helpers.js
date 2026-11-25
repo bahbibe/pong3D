@@ -74,7 +74,7 @@ export const renderNotifications = () => {
     const username = notif.querySelector(".notification-list_username");
     const message = notif.querySelector(".notification-list_message");
     const btn = notif.querySelector("button");
-    const isGameInvite = notification.ctx == "game_invite" || notification.type == "game_invite";
+    const isGameInvite = notification.ctx === "game_invite" || notification.type === "game_invite";
 
     // System notifications have no sender.
     const sender = notification.sender || {};

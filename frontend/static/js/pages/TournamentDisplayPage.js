@@ -8,19 +8,14 @@ class TournamentDisplayPage extends AbstractPage {
     this.API = new API();
   }
   connectedCallback() {
-    console.log("connectedCallback");
-
     this.socket = new WebSocket(`${WSS_URL}/ws/tournament/` + this.params.tournament_id);
     const template = document.getElementById("tournament-display-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
-    this.socket.onmessage = (e) => {
-      const res = JSON.parse(e.data);
-      console.log(res);
-
+    // Any message means the bracket changed: reload it.
+    this.socket.onmessage = () => {
       this.API.getTournamentGames(this.params.tournament_id).then((res) => {
         this.games = res;
-        console.log(this.games);
 
         const get_winner = (game) => {
           if (game?.player1_score > game?.player2_score) return 0;
@@ -30,7 +25,7 @@ class TournamentDisplayPage extends AbstractPage {
 
         let game_it = 1;
         this.games.data
-          .filter((game) => game.t_round == 2)
+          .filter((game) => game.t_round === 2)
           .sort((a, b) => a.game.id - b.game.id)
           .forEach((game) => {
             const slots = this.querySelectorAll(`.game${game_it++}`);
@@ -57,16 +52,15 @@ class TournamentDisplayPage extends AbstractPage {
             const score2 = slots[1].querySelector(".score");
             score2.innerHTML = game.game.player2_score ?? "0";
 
-            console.log("winner", get_winner(game.game));
-
             const winner = get_winner(game.game);
-            if (winner == 0) slots[1]?.classList.replace("winner-top", "winner-bottom");
-            if (winner == 1) slots[0]?.classList.replace("winner-top", "winner-bottom");
+            if (winner === 0) slots[1]?.classList.replace("winner-top", "winner-bottom");
+            if (winner === 1) slots[0]?.classList.replace("winner-top", "winner-bottom");
 
             if (
               player1 &&
               player2 &&
-              (player1.username == user.username || player2.username == user.username) &&
+              (player1.username === window.user.username ||
+                player2.username === window.user.username) &&
               game.game.player1_score < 3 &&
               game.game.player2_score < 3
             )
@@ -74,7 +68,7 @@ class TournamentDisplayPage extends AbstractPage {
           });
 
         this.games.data
-          .filter((game) => game.t_round == 1)
+          .filter((game) => game.t_round === 1)
           .forEach((game) => {
             const slots = this.querySelectorAll(`.game${game_it++}`);
 
@@ -101,21 +95,22 @@ class TournamentDisplayPage extends AbstractPage {
             score2.innerHTML = game.game.player2_score ?? "0";
 
             const winner = get_winner(game.game);
-            if (winner == 0) slots[1]?.classList.replace("winner-top", "winner-bottom");
-            if (winner == 1) slots[0]?.classList.replace("winner-top", "winner-bottom");
+            if (winner === 0) slots[1]?.classList.replace("winner-top", "winner-bottom");
+            if (winner === 1) slots[0]?.classList.replace("winner-top", "winner-bottom");
 
             if (
               player1 &&
               player2 &&
-              (player1.username == user.username || player2.username == user.username) &&
+              (player1.username === window.user.username ||
+                player2.username === window.user.username) &&
               game.game.player1_score < 3 &&
               game.game.player2_score < 3
             )
               navigateTo(`/play/${this.params.tournament_id}/${game.game.id}`);
           });
 
-        const lastgame = this.games.data.filter((game) => game.t_round == 1)[0].game;
-        if (lastgame.player1_score != lastgame.player2_score) {
+        const lastgame = this.games.data.filter((game) => game.t_round === 1)[0].game;
+        if (lastgame.player1_score !== lastgame.player2_score) {
           const slots = this.querySelector(`.winner`);
 
           slots.classList.replace("winner-bottom", "winner-top");
@@ -135,13 +130,6 @@ class TournamentDisplayPage extends AbstractPage {
     };
   }
 
-  adoptedCallback() {
-    console.log("Custom element moved to new page.");
-  }
-
-  attributeChangedCallback(name, oldValue, newValue) {
-    console.log(`Attribute ${name} has changed.`);
-  }
   disconnectedCallback() {
     this.socket.close();
   }

@@ -13,7 +13,6 @@ class ChatBox extends HTMLElement {
 
   async getMessages() {
     this.messages = await this.API.getMessages(this.friendship.uuid);
-    console.log(this.messages);
     this.chatContainer = document.createElement("div");
     this.chatContainer.className = "chat-container no-scroll p-2 d-flex flex-column h-100";
     this.chatContainer.appendChild(this.headerElement(this.friendship.friend));
@@ -130,10 +129,7 @@ class ChatBox extends HTMLElement {
     return messageElement;
   }
   async inviteToGame(friend) {
-    const response = await this.API.invite_friend(friend.id);
-    if (response) {
-      console.log("Invitation sent");
-    }
+    await this.API.invite_friend(friend.id);
   }
 
   async receiveMessage() {

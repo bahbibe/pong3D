@@ -1,5 +1,5 @@
 import { escapeHTML as esc } from "../escape.js";
-import { hideToast, showOverlay, hideOverlay, showToast, renderNotifications } from "../helpers.js";
+import { showOverlay, hideOverlay, renderNotifications } from "../helpers.js";
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 import { API } from "../API/API.js";
@@ -15,7 +15,6 @@ class ProfilePage extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
 
-    const ctn = this.querySelector(".profile-content");
     const fullName = this.querySelector("#fullName");
     const username = this.querySelector("#username");
     const userImg = this.querySelector("#user-img");
@@ -52,7 +51,7 @@ class ProfilePage extends AbstractPage {
       if (response.ok) {
         const friends = data.data;
         for (const friend of friends) {
-          let isOnline =
+          const isOnline =
             window.online_users && window.online_users.includes(friend.friend.id.toString());
           this.container.innerHTML += `
               <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;" id="friend-${esc(friend.friend.id)}">
@@ -85,7 +84,7 @@ class ProfilePage extends AbstractPage {
         hideOverlay();
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -121,13 +120,12 @@ class ProfilePage extends AbstractPage {
         btn.addEventListener("click", this.unblockFriend.bind(this));
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
   async unblockFriend(e) {
     try {
-      console.log(e.target.getAttribute("data-unblock"));
       const url = `${BASE_URL}/api/friends/unblock/`;
       const response = await fetch(url, {
         method: "POST",
@@ -139,10 +137,9 @@ class ProfilePage extends AbstractPage {
           user_id: e.target.getAttribute("data-unblock"),
         }),
       });
-      const data = await response.json();
       if (response.ok) this.getBlockedFriends();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
   async getStatGames() {
@@ -202,7 +199,7 @@ class ProfilePage extends AbstractPage {
         }
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 }
@@ -267,7 +264,6 @@ class mainNav extends AbstractPage {
         const friends = data.data;
         this.notificationCounter.textContent = friends.length;
         friends.forEach((element) => {
-          console.log();
           this.notification.innerHTML += `
           <div class="notification">
                         <img src="${esc(element.friend.profile.avatar)}" alt="" />
@@ -281,7 +277,7 @@ class mainNav extends AbstractPage {
         });
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
       });
   }
 
@@ -292,7 +288,7 @@ class mainNav extends AbstractPage {
         credentials: "include",
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -306,7 +302,6 @@ class mainNav extends AbstractPage {
         method: "POST",
         credentials: "include",
       });
-      const data = await response.json();
       if (response.status === 200) {
         if (window.socket) {
           window.socket.close();
@@ -318,7 +313,7 @@ class mainNav extends AbstractPage {
         navigateTo("/login");
       }
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 }

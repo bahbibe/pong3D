@@ -131,7 +131,7 @@ const navigateTo = (url) => {
 };
 
 const getUser = async () => {
-  let response = null;
+  let response;
   try {
     const data = await fetch(`${BASE_URL}/api/auth/me/`, {
       credentials: "include",
@@ -181,7 +181,7 @@ const router = async () => {
   window.path = match.route.path;
 
   // check if the route is protected
-  let isLoggedIn = await getUser();
+  const isLoggedIn = await getUser();
   if (isLoggedIn === "redirected") return;
   if (match.route.isProtected && !isLoggedIn) {
     navigateTo("/login");

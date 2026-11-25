@@ -13,7 +13,6 @@ class MatchmakingPage extends AbstractPage {
     this.message = this.querySelector("#loader-message");
     this.message.innerHTML = "Looking for a match...";
     this.loader = this.querySelector(".loader");
-    this.addEventListener("click", this);
     this.socket = new WebSocket(`${WSS_URL}/ws/matchmaking`);
     this.socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
@@ -24,14 +23,6 @@ class MatchmakingPage extends AbstractPage {
         navigateTo("/play/" + message.game_id);
       }, 2000);
     };
-  }
-
-  handleEvent(event) {
-    this[`on${event.type}`](event);
-  }
-
-  onclick(e) {
-    if (e.target.id === "find_match") console.log("finding match");
   }
 
   disconnectedCallback() {

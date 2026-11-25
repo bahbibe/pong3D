@@ -1,7 +1,5 @@
 import { escapeHTML as esc } from "../escape.js";
 import { AbstractPage } from "./AbstarctPage.js";
-import { showOverlay, hideOverlay } from "../helpers.js";
-import { navigateTo } from "../router.js";
 import { BASE_URL } from "../router.js";
 
 class RankingPage extends AbstractPage {
@@ -23,7 +21,6 @@ class RankingPage extends AbstractPage {
         headers: { "Content-Type": "application/json" },
       });
       const data = await response.json();
-      console.log(data);
       if (response.ok) {
         const ranking = this.querySelector("tbody");
         const users = data.data.users;

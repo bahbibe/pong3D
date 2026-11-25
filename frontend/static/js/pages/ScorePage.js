@@ -19,7 +19,7 @@ class ScorePage extends AbstractPage {
       const player1_score = this.querySelector("#player1_score");
       player1_score.innerHTML = parseInt(urlParams.get("player1_score"));
       const player1_img = document.createElement("img");
-      player1_img.src = user.profile.avatar;
+      player1_img.src = window.user.profile.avatar;
       player1.appendChild(player1_img);
 
       const player2 = this.querySelector(".player2");
@@ -30,7 +30,7 @@ class ScorePage extends AbstractPage {
       player2.appendChild(player2_img);
 
       const invite_to_play_button = this.querySelector("#invite_game");
-      invite_to_play_button.onclick = (e) => {
+      invite_to_play_button.onclick = () => {
         navigateTo("/play/bot");
       };
       return;
@@ -53,7 +53,7 @@ class ScorePage extends AbstractPage {
         player2.appendChild(player2_img);
       }
       const invite_to_play_button = this.querySelector("#invite_game");
-      invite_to_play_button.onclick = (e) => {
+      invite_to_play_button.onclick = () => {
         this.API.play_again(res.game.id);
       };
     });

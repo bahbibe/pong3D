@@ -20,10 +20,10 @@ class TourPage extends AbstractPage {
     this.appendChild(clone);
     this.create_tour = this.querySelector("#create_tour");
     this.join_tour = this.querySelector("#join_tour");
-    this.create_tour.onclick = (e) => {
+    this.create_tour.onclick = () => {
       this.create_tournament();
     };
-    this.join_tour.onclick = (e) => {
+    this.join_tour.onclick = () => {
       navigateTo("/join");
     };
   }

@@ -12,7 +12,6 @@ class FriendPage extends AbstractPage {
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
     this.userId = JSON.parse(this.getAttribute("params"));
-    // console.log("UUID: " , this.userId.uuid);
 
     this.fullName = this.querySelector("#fullName");
     this.username = this.querySelector("#username");
@@ -44,7 +43,7 @@ class FriendPage extends AbstractPage {
     this[`on${e.type}`](e);
   }
 
-  onclick(e) {
+  onclick() {
     if (this.addFriend.getAttribute("data-accept")) {
       this.acceptRequest();
     } else {
@@ -78,7 +77,6 @@ class FriendPage extends AbstractPage {
         this.friend = res.data.user;
         const stats = res.data.stats;
         const games = res.data.history;
-        console.log(games);
 
         this.fullName.textContent = `${this.friend.first_name} ${this.friend.last_name}`;
         this.username.textContent = `@${this.friend.username}`;
@@ -225,7 +223,6 @@ class FriendPage extends AbstractPage {
   }
 
   async blockingFriend() {
-    console.log("start blocking");
     try {
       const response = await fetch(`${BASE_URL}/api/friends/block/`, {
         method: "POST",
@@ -237,7 +234,6 @@ class FriendPage extends AbstractPage {
       });
 
       if (response.ok) {
-        console.log("Blocked");
         navigateTo("/home");
       }
     } catch (error) {

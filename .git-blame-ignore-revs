@@ -7,3 +7,6 @@
 
 # style: trailing whitespace and final newlines
 cd2fe36b50da05ccd5fca6f8098a8646fb5547f8
+
+# style(frontend): Prettier, ESLint and Prettier hooks
+e71a30e7190b0433ec017557bab4fbe0dc978c49

@@ -18,7 +18,7 @@ repos:
       - id: prettier
         name: prettier (frontend)
         language: node
-        entry: prettier --write --ignore-unknown
+        entry: prettier --write --ignore-unknown --log-level warn
         additional_dependencies: ["prettier@3.10.1"]
         files: ^frontend/static/(js|css)/
       - id: eslint
