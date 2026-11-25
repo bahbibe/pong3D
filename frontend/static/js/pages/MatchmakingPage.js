@@ -1,7 +1,6 @@
 import { AbstractPage } from "./AbstarctPage.js";
 import { navigateTo, WSS_URL } from "../router.js";
 
-
 class MatchmakingPage extends AbstractPage {
   constructor() {
     super();
@@ -10,11 +9,11 @@ class MatchmakingPage extends AbstractPage {
     const template = document.getElementById("matchmaking-page");
     const clone = template.content.cloneNode(true);
     this.appendChild(clone);
-    this.find_match_button = this.querySelector("#find_match") ;
-    this.message = this.querySelector("#loader-message") ;
-    this.message.innerHTML = "Looking for a match..." ;
-    this.loader = this.querySelector(".loader") ;
-    this.addEventListener('click', this);
+    this.find_match_button = this.querySelector("#find_match");
+    this.message = this.querySelector("#loader-message");
+    this.message.innerHTML = "Looking for a match...";
+    this.loader = this.querySelector(".loader");
+    this.addEventListener("click", this);
     this.socket = new WebSocket(`${WSS_URL}/ws/matchmaking`);
     this.socket.onmessage = (event) => {
       const message = JSON.parse(event.data);
@@ -28,13 +27,11 @@ class MatchmakingPage extends AbstractPage {
   }
 
   handleEvent(event) {
-    this[`on${event.type}`](event)
+    this[`on${event.type}`](event);
   }
 
   onclick(e) {
-    if (e.target.id === "find_match")
-      console.log("finding match");
-
+    if (e.target.id === "find_match") console.log("finding match");
   }
 
   disconnectedCallback() {
@@ -42,7 +39,6 @@ class MatchmakingPage extends AbstractPage {
     this.socket.close();
   }
 }
-
 
 window.customElements.define("matchmaking-page", MatchmakingPage);
 export { MatchmakingPage };

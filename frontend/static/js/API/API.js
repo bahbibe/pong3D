@@ -41,7 +41,9 @@ class API {
 
   async getTournamentGames(tournamentId) {
     return this.request(
-      "GET", `/api/game/get_tournament_games/${tournamentId}`, "loading tournament games"
+      "GET",
+      `/api/game/get_tournament_games/${tournamentId}`,
+      "loading tournament games",
     );
   }
 
@@ -55,7 +57,11 @@ class API {
 
   // invite_friend and play_again open the new game when it is created.
   async invite_friend(friendId) {
-    const data = await this.request("POST", `/api/game/invite_friend/${friendId}`, "inviting friend");
+    const data = await this.request(
+      "POST",
+      `/api/game/invite_friend/${friendId}`,
+      "inviting friend",
+    );
     if (data?.game) navigateTo(`/play/${data.game.id}`);
   }
 

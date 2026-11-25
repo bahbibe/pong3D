@@ -53,16 +53,14 @@ class ProfilePage extends AbstractPage {
         const friends = data.data;
         for (const friend of friends) {
           let isOnline =
-            window.online_users &&
-            window.online_users.includes(friend.friend.id.toString());
+            window.online_users && window.online_users.includes(friend.friend.id.toString());
           this.container.innerHTML += `
               <div class="row p-1 rounded-1 justify-content-between align-items-center mb-2 glass-effect" style="cursor: pointer;" id="friend-${esc(friend.friend.id)}">
                 <div class="col-3 col-md-4">
                   <div class="d-flex align-items-center">
                     <div class="position-relative">
                       <img src="${esc(friend.friend.profile.avatar)}" class="img-fluid rounded-circle" width="35" style="width: 35px; height: 35px;" alt="user profile image">
-                      <div class="user-status ${isOnline ? "online" : ""
-            }"></div>
+                      <div class="user-status ${isOnline ? "online" : ""}"></div>
                     </div>
                     <div class="ps-2">
                       <a href="friend/${esc(friend.friend.profile.uuid)}"><span class="fw-bold text-capitalize" style="font-size: 14px;">${esc(friend.friend.username)}</span></a>
@@ -195,8 +193,9 @@ class ProfilePage extends AbstractPage {
                     </div>
                   </div>
                   <div class="col-2 my-auto text-center" style="cursor:pointer;">
-                    <span class="result h3" aria-label="${game.is_user_winner ? "WIN" : "LOSE"
-            }">${game.is_user_winner ? "🏆" : "😓"}</span>
+                    <span class="result h3" aria-label="${
+                      game.is_user_winner ? "WIN" : "LOSE"
+                    }">${game.is_user_winner ? "🏆" : "😓"}</span>
                   </div>
               </div>
           `;
@@ -288,13 +287,10 @@ class mainNav extends AbstractPage {
 
   async markNotificationsAsRead() {
     try {
-      fetch(
-        `${BASE_URL}/api/auth/notifications/mark_as_read/`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
+      fetch(`${BASE_URL}/api/auth/notifications/mark_as_read/`, {
+        method: "POST",
+        credentials: "include",
+      });
     } catch (error) {
       console.log(error);
     }

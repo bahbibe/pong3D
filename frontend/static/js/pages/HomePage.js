@@ -1,7 +1,6 @@
 import { navigateTo } from "../router.js";
 import { AbstractPage } from "./AbstarctPage.js";
 
-
 class HomePage extends AbstractPage {
   constructor() {
     super();
@@ -13,7 +12,6 @@ class HomePage extends AbstractPage {
     this.appendChild(clone);
   }
 }
-
 
 class User extends AbstractPage {
   constructor() {
@@ -30,4 +28,4 @@ class User extends AbstractPage {
 window.customElements.define("home-page", HomePage);
 window.customElements.define("user-info", User);
 
-export { HomePage }
+export { HomePage };

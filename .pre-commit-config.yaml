@@ -10,6 +10,24 @@ repos:
         files: ^(backend|e2e)/
       - id: ruff-format
         files: ^(backend|e2e)/
+  # Frontend: pre-commit installs Node and these packages itself (no
+  # package.json). Settings: frontend/eslint.config.js, frontend/.prettierrc.json.
+  # Not updated by Dependabot: bump the versions here by hand.
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier (frontend)
+        language: node
+        entry: prettier --write --ignore-unknown
+        additional_dependencies: ["prettier@3.10.1"]
+        files: ^frontend/static/(js|css)/
+      - id: eslint
+        name: eslint (frontend)
+        language: node
+        entry: eslint --max-warnings 0
+        additional_dependencies: ["eslint@10.15.0", "@eslint/js@10.0.1", "globals@17.14.0"]
+        files: ^frontend/.*\.js$
+        exclude: ^frontend/static/vendor/
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:

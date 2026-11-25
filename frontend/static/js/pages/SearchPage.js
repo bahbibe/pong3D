@@ -24,7 +24,7 @@ class SearchPage extends AbstractPage {
       console.log(this.SearchedUser);
       const response = await fetch(
         `${BASE_URL}/api/auth/users/?q=${encodeURIComponent(this.SearchedUser)}`,
-        { credentials: "include" }
+        { credentials: "include" },
       );
       const data = await response.json();
       const users = data.data;
@@ -43,8 +43,7 @@ class SearchPage extends AbstractPage {
             </div>
           `;
         });
-      } else
-        this.container.innerHTML = `<p class="fw-bold fs-1">User Not Fount!</p>`;
+      } else this.container.innerHTML = `<p class="fw-bold fs-1">User Not Fount!</p>`;
     } catch (error) {
       console.log(error);
     }

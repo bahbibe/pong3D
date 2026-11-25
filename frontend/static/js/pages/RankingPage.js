@@ -21,7 +21,6 @@ class RankingPage extends AbstractPage {
       const response = await fetch(`${BASE_URL}/api/game/leaderboard/`, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
-
       });
       const data = await response.json();
       console.log(data);
@@ -49,12 +48,11 @@ class RankingPage extends AbstractPage {
         });
       }
     } catch (error) {
-    console.error("Error:", error);
+      console.error("Error:", error);
     }
   }
 }
 
-
 window.customElements.define("ranking-page", RankingPage);
 
-export { RankingPage }
+export { RankingPage };

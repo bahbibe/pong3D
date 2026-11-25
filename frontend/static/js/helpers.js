@@ -4,7 +4,7 @@ import { escapeHTML as esc } from "./escape.js";
 export const hideToast = () => {
   document.querySelector(`#toast-wrapper .toast`).classList.remove("show");
   document.querySelector(`#toast-wrapper .toast`).classList.add("hide");
-}
+};
 
 export const showToast = (isError, message, errors) => {
   const errorsEl = document.querySelector(`#toast-wrapper .toast`);
@@ -32,18 +32,17 @@ export const showToast = (isError, message, errors) => {
   //   errorsEl.classList.remove("show");
   //   errorsEl.classList.add("hide");
   // }, 5000);
-}
-
+};
 
 export const showOverlay = () => {
   const showOverlay = document.querySelector("#overlay");
   showOverlay.style.display = "block";
-}
+};
 
 export const hideOverlay = () => {
   const showOverlay = document.querySelector("#overlay");
   setTimeout(() => (showOverlay.style.display = "none"), 100);
-}
+};
 
 export const renderNotifications = () => {
   const notifications = window.notifications || [];
@@ -56,8 +55,8 @@ export const renderNotifications = () => {
   if (notifications.length === 0) {
     notificationsEl.innerHTML = `<p class="text-center my-2">No new notifications</p>`;
     notificationWrapper.querySelector("#notification-btn").classList.add("disabled");
-    return
-  };
+    return;
+  }
   notificationsEl.innerHTML = "";
   notifications.forEach((notification) => {
     const notif = document.createElement("div");
@@ -108,7 +107,7 @@ export const renderNotifications = () => {
       navigateTo(`/friend/${btn.dataset.id}`);
     });
   });
-}
+};
 
 // Mark one notification as read on the server and drop it from the list.
 const markNotificationAsRead = async (uuid) => {

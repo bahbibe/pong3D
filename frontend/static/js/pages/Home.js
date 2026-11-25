@@ -33,8 +33,7 @@ class Home extends AbstractPage {
         console.log(users);
 
         for (const [index, user] of users.entries()) {
-          if (index < 3)
-            {
+          if (index < 3) {
             console.log("index", index);
             bestPlayer.innerHTML += `
               <div class="d-flex p-2 justify-content-between align-items-center glass-effect mb-2">
@@ -53,10 +52,10 @@ class Home extends AbstractPage {
               </div>
           `;
           }
-      }
+        }
       }
     } catch (error) {
-    console.error("Error:", error);
+      console.error("Error:", error);
     }
   }
 }

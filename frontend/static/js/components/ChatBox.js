@@ -15,8 +15,7 @@ class ChatBox extends HTMLElement {
     this.messages = await this.API.getMessages(this.friendship.uuid);
     console.log(this.messages);
     this.chatContainer = document.createElement("div");
-    this.chatContainer.className =
-      "chat-container no-scroll p-2 d-flex flex-column h-100";
+    this.chatContainer.className = "chat-container no-scroll p-2 d-flex flex-column h-100";
     this.chatContainer.appendChild(this.headerElement(this.friendship.friend));
     this.msgBox = document.createElement("div");
     this.msgBox.className = "msg-box no-scroll p-2 flex-grow-1";
@@ -45,8 +44,7 @@ class ChatBox extends HTMLElement {
         this.msgBox.appendChild(this.createMessageElement(item));
         this.msgBox.scrollTop = this.msgBox.scrollHeight;
       });
-      if (this.messages.length === 0)
-        this.msgBox.appendChild(this.emptyElement());
+      if (this.messages.length === 0) this.msgBox.appendChild(this.emptyElement());
     } catch (error) {
       console.error("Error rendering chat list:", error);
       this.msgBox.appendChild(this.emptyElement("Error loading Messages"));
@@ -88,7 +86,10 @@ class ChatBox extends HTMLElement {
   headerElement(friend) {
     const headerElement = document.createElement("div");
     headerElement.className = "msg-head mb-3 p-2 d-flex gap-2";
-    const stat = window.online_users && window.online_users.includes(friend.id.toString()) ? "Online" : "Offline";
+    const stat =
+      window.online_users && window.online_users.includes(friend.id.toString())
+        ? "Online"
+        : "Offline";
     headerElement.innerHTML = `
     <div class="d-flex align-items-center">
       <img src="${esc(friend.profile.avatar)}" class=" d-block img-cover img-fluid rounded-circle h-100" alt="avatar"/>
@@ -105,8 +106,7 @@ class ChatBox extends HTMLElement {
     `;
     headerElement.querySelector("button").addEventListener("click", () => {
       this.inviteToGame(friend);
-    }
-    );
+    });
     return headerElement;
   }
 
@@ -142,9 +142,7 @@ class ChatBox extends HTMLElement {
       if (!message) {
         return;
       }
-      this.querySelector(".msg-box").appendChild(
-        this.createMessageElement(JSON.parse(message))
-      );
+      this.querySelector(".msg-box").appendChild(this.createMessageElement(JSON.parse(message)));
       this.msgBox.scrollTop = this.msgBox.scrollHeight;
       await this.receiveMessage();
     } catch (error) {

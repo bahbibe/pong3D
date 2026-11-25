@@ -30,12 +30,10 @@ class LoginPage extends AbstractPage {
     this.registerForm = this.querySelector("#register-form");
     this.intra = this.querySelector("#intra");
 
-
-    this.loginForm.addEventListener('submit', this);
-    this.registerForm.addEventListener('submit', this);
+    this.loginForm.addEventListener("submit", this);
+    this.registerForm.addEventListener("submit", this);
 
     this.isValidPassword = false;
-
 
     const registerBtn = this.querySelector("#tab-register");
     const loginBtn = this.querySelector("#tab-login");
@@ -45,24 +43,21 @@ class LoginPage extends AbstractPage {
     this.switcher(registerBtn, loginBtn, boxRegister, boxLogin);
     this.switcher(loginBtn, registerBtn, boxLogin, boxRegister);
 
-    this.intra.addEventListener('click', () => this.authenticationLogin());
+    this.intra.addEventListener("click", () => this.authenticationLogin());
 
     this.querySelectorAll("input").forEach((input) => {
-      input.addEventListener('click', (e) => {
-        if (e.target.id === "password" || e.target.id === 'confirm-password')
+      input.addEventListener("click", (e) => {
+        if (e.target.id === "password" || e.target.id === "confirm-password")
           this.lengthPassword.classList.remove("d-none");
-        else
-          this.lengthPassword.classList.add("d-none");
-        });
+        else this.lengthPassword.classList.add("d-none");
+      });
     });
 
-    this.addEventListener('input', this);
-
-
-}
+    this.addEventListener("input", this);
+  }
 
   handleEvent(event) {
-    this[`on${event.type}`](event)
+    this[`on${event.type}`](event);
   }
 
   onsubmit(e) {
@@ -85,33 +80,32 @@ class LoginPage extends AbstractPage {
     this.email = this.querySelector("[data-email]");
     this.password = this.querySelector("[data-password]");
     this.user = {
-      'email': this.email.value,
-      'password': this.password.value,
-    }
-    const url = `${BASE_URL}/api/auth/login/`
+      email: this.email.value,
+      password: this.password.value,
+    };
+    const url = `${BASE_URL}/api/auth/login/`;
     fetch(url, {
       method: "POST",
       headers: {
-        'Accept': 'application/json',
-        'Content-type': 'application/json',
+        Accept: "application/json",
+        "Content-type": "application/json",
       },
       credentials: "include",
       body: JSON.stringify(this.user),
-    }).then(rep => rep.json())
-      .then(data => {
+    })
+      .then((rep) => rep.json())
+      .then((data) => {
         if (data.success) {
           hideOverlay();
-          if (data.data.user.profile.is_tfa_enabled)
-            navigateTo("/twofa");
-          else
-            navigateTo("/home");
+          if (data.data.user.profile.is_tfa_enabled) navigateTo("/twofa");
+          else navigateTo("/home");
           // FriendsStatus();
         } else {
           showToast(true, data.message, data.errors);
           hideOverlay();
         }
       })
-      .catch(_ => {
+      .catch((_) => {
         showToast(true);
       });
   }
@@ -121,7 +115,6 @@ class LoginPage extends AbstractPage {
 
     if (!(event.target.id === "register-form")) return;
 
-
     this.firstName = this.querySelector("#firstName");
     this.lastName = this.querySelector("#lastName");
     this.password = this.querySelector("#password");
@@ -130,15 +123,15 @@ class LoginPage extends AbstractPage {
     this.username = this.querySelector("#username");
 
     this.user = {
-      'first_name': this.firstName.value,
-      'last_name': this.lastName.value,
-      'username': this.username.value,
-      'email': this.email.value,
-      'password': this.password.value,
-      'confirm_password': this.confirmpassword.value,
-    }
+      first_name: this.firstName.value,
+      last_name: this.lastName.value,
+      username: this.username.value,
+      email: this.email.value,
+      password: this.password.value,
+      confirm_password: this.confirmpassword.value,
+    };
 
-    const url = `${BASE_URL}/api/auth/register/`
+    const url = `${BASE_URL}/api/auth/register/`;
     this.isValidPassword = PASSWORD_HINT.test(this.password.value);
     if (this.password.value !== this.confirmPassword.value || !this.isValidPassword) {
       console.log("passwords do not match");
@@ -150,32 +143,31 @@ class LoginPage extends AbstractPage {
     fetch(url, {
       method: "POST",
       headers: {
-        'Accept': 'application/json',
-        'Content-type': 'application/json',
+        Accept: "application/json",
+        "Content-type": "application/json",
       },
       credentials: "include",
       body: JSON.stringify(this.user),
-    }).then(rep => rep.json())
-      .then(data => {
+    })
+      .then((rep) => rep.json())
+      .then((data) => {
         if (data.success) {
           navigateTo("/login");
           showToast(false, data.message);
-        }
-        else
-          showToast(true, data.message, data.errors);
+        } else showToast(true, data.message, data.errors);
       })
-      .catch(_ => showToast(true));
+      .catch((_) => showToast(true));
   }
 
   async authenticationLogin() {
     showOverlay();
-    const url = `${BASE_URL}/api/auth/intra/`
+    const url = `${BASE_URL}/api/auth/intra/`;
     try {
       const response = await fetch(url, {
         method: "GET",
         headers: {
-          'Accept': 'application/json',
-          'Content-type': 'application/json',
+          Accept: "application/json",
+          "Content-type": "application/json",
         },
         credentials: "include",
       });
@@ -190,27 +182,20 @@ class LoginPage extends AbstractPage {
       hideOverlay();
       console.log(error);
     }
-
   }
 
   switcher(btn, btn2, box, box1) {
-    btn.addEventListener(
-      "click", function (e) {
-        e.preventDefault();
-        if (!e.target.classList.contains('activeBtn')) {
-          box.classList.remove("hidden");
-          box1.classList.add("hidden");
-          btn.classList.add("activeBtn");
-          btn2.classList.remove("activeBtn");
-        }
-
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      if (!e.target.classList.contains("activeBtn")) {
+        box.classList.remove("hidden");
+        box1.classList.add("hidden");
+        btn.classList.add("activeBtn");
+        btn2.classList.remove("activeBtn");
       }
-    );
+    });
   }
-
 }
-
-
 
 customElements.define("login-page", LoginPage);
 

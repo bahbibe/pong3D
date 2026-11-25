@@ -1,20 +1,19 @@
-export { HomePage } from "./HomePage.js"
-export { NotFoundPage } from "./NotFoundPage.js"
-export { ChatPage } from "./ChatPage.js"
-export { LoginPage } from "./LoginPage.js"
-export { ProfilePage } from "./ProfilePage.js"
-export { RankingPage } from "./RankingPage.js"
-export { Home } from "./Home.js"
-export { SettingsPage } from "./Settings.js"
-export { SearchPage } from "./SearchPage.js"
-export { FriendPage } from "./friendPage.js"
-export { SetupPage } from "./SetupPage.js"
-export { TwoFaPage } from "./TwoFaPage.js"
-import { ErrorToast } from "../components/ErrorToast.js"
-export { GamePage } from "./GamePage.js"
-export { MatchmakingPage } from "./MatchmakingPage.js"
-export { TourPage } from "./tourPage.js"
-export { JoinPage } from "./JoinPage.js"
-
+export { HomePage } from "./HomePage.js";
+export { NotFoundPage } from "./NotFoundPage.js";
+export { ChatPage } from "./ChatPage.js";
+export { LoginPage } from "./LoginPage.js";
+export { ProfilePage } from "./ProfilePage.js";
+export { RankingPage } from "./RankingPage.js";
+export { Home } from "./Home.js";
+export { SettingsPage } from "./Settings.js";
+export { SearchPage } from "./SearchPage.js";
+export { FriendPage } from "./friendPage.js";
+export { SetupPage } from "./SetupPage.js";
+export { TwoFaPage } from "./TwoFaPage.js";
+import { ErrorToast } from "../components/ErrorToast.js";
+export { GamePage } from "./GamePage.js";
+export { MatchmakingPage } from "./MatchmakingPage.js";
+export { TourPage } from "./tourPage.js";
+export { JoinPage } from "./JoinPage.js";
 
 window.customElements.define("error-toast", ErrorToast);

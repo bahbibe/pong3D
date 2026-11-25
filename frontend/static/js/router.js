@@ -31,9 +31,7 @@ const pathToRegex = (path) =>
 
 const getParams = (match) => {
   const values = match.result.slice(1);
-  const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map(
-    (result) => result[1]
-  );
+  const keys = Array.from(match.route.path.matchAll(/:(\w+)/g)).map((result) => result[1]);
 
   return Object.fromEntries(keys.map((key, i) => [key, values[i]]));
 };
@@ -173,16 +171,13 @@ const router = async () => {
     return {
       route: route,
       result: location.pathname.match(pathToRegex(route.path)),
-      isMatched: location.pathname.match(pathToRegex(route.path))
-        ? true
-        : false,
+      isMatched: location.pathname.match(pathToRegex(route.path)) ? true : false,
     };
   });
   let match = matches.find((match) => match.isMatched);
 
   // Check if the match is undefined (404)
-  if (!match)
-    match = { route: routes[0], isMatched: true, result: [location.pathname] };
+  if (!match) match = { route: routes[0], isMatched: true, result: [location.pathname] };
   window.path = match.route.path;
 
   // check if the route is protected

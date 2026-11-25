@@ -37,7 +37,7 @@ class WebSock {
     } else {
       console.error(
         "WebSocket is not open. ReadyState:",
-        this.socket ? this.socket.readyState : "Socket is null"
+        this.socket ? this.socket.readyState : "Socket is null",
       );
     }
   }

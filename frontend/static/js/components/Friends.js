@@ -27,9 +27,7 @@ class Friends extends HTMLElement {
       clickedFriend.classList.add("active");
       this.activeElement = clickedFriend;
       const friendItem = this.friends.find((item) => {
-        return (
-          item.friend.username === clickedFriend.querySelector("p").textContent
-        );
+        return item.friend.username === clickedFriend.querySelector("p").textContent;
       });
       const chatBox = document.querySelector(".chat-box");
       chatBox.innerHTML = "";

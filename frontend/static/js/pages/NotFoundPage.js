@@ -1,6 +1,6 @@
 class NotFoundPage extends HTMLElement {
   constructor() {
-    super()
+    super();
   }
 
   connectedCallback() {
@@ -12,4 +12,4 @@ class NotFoundPage extends HTMLElement {
 
 window.customElements.define("not-found-page", NotFoundPage);
 
-export { NotFoundPage }
+export { NotFoundPage };

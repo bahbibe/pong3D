@@ -54,16 +54,13 @@ class FriendPage extends AbstractPage {
 
   async getUser() {
     try {
-      const response = await fetch(
-        `${BASE_URL}/api/auth/profile/${this.userId.uuid}/`,
-        {
-          method: "GET",
-          headers: {
-            "content-type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`${BASE_URL}/api/auth/profile/${this.userId.uuid}/`, {
+        method: "GET",
+        headers: {
+          "content-type": "application/json",
+        },
+        credentials: "include",
+      });
 
       const res = await response.json();
       if (!response.ok) {
@@ -102,23 +99,17 @@ class FriendPage extends AbstractPage {
                       }" class="img-fluid rounded-circle d-none d-md-block"
                        style="width: 40px; height: 40px" alt="user profile image">
                       <div class="ps-2">
-                        <span class="fw-bold text-capitalize">${
-                          game.user.username
-                        }</span>
+                        <span class="fw-bold text-capitalize">${game.user.username}</span>
                       </div>
                     </div>
                   </div>
                   <div class="col-2 col-md-2 my-auto text-center">
-                    <span class="result fw-bolder ">${game.user_score}:${
-            game.player_score
-          }</span>
+                    <span class="result fw-bolder ">${game.user_score}:${game.player_score}</span>
                   </div>
                   <div class="col-4 my-auto p-0 text-center">
                     <div class="d-md-flex justify-content-center align-items-center">
                       <div class="pe-2">
-                        <span class="fw-bold text-capitalize">${
-                          game.player.username
-                        }</span>
+                        <span class="fw-bold text-capitalize">${game.player.username}</span>
                       </div>
                       <img src="${
                         game.player.profile.avatar
