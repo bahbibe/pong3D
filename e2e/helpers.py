@@ -250,14 +250,15 @@ def nav_click(page, selector):
 
 def finished_game(winner, loser, winner_score=5, loser_score=2):
     """Store a finished game straight in the database (playing one takes a
-    minute). loser=None: the opponent account was deleted."""
+    minute) and return its id. loser=None: the opponent account was deleted."""
     loser_id = loser.id if loser is not None else "NULL"
-    sql(
+    out = sql(
         "insert into game_game (uuid, player1_id, player2_id, player1_score, player2_score, "
         "status, winner_id, created_at, finished_at) values (gen_random_uuid(), "
         f"{winner.id}, {loser_id}, {winner_score}, {loser_score}, 'finished', {winner.id}, "
-        "now(), now())"
+        "now(), now()) returning id"
     )
+    return int(out.split()[0])
 
 
 def force_username(user, name):

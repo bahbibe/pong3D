@@ -1,8 +1,6 @@
 // Page modules define their custom elements when imported. Routes render
 // them by tag name.
 import "../pages/index.js";
-import "../pages/TournamentDisplayPage.js";
-import "../pages/ScorePage.js";
 import { setAuthHandler } from "./api.js";
 import { session } from "./session.js";
 

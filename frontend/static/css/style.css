@@ -122,3 +122,22 @@
   background-color: var(--darker);
   border-radius: 5px;
 }
+
+/* Score page (was a <style> in its template). */
+.score-board {
+  font-size: xx-large;
+}
+
+.score-board .player {
+  height: 100px;
+  width: 100px;
+  background-color: #624e88;
+  border: #fefefe 1px solid;
+  border-radius: 8px;
+}
+
+.score-board .player > img {
+  height: 100%;
+  width: 100%;
+  border-radius: 8px;
+}
